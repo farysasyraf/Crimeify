@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Notifications\ResetPasswordLink;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 // Mirrors dbo.Users in MyAppDB. CreatedAt is filled in by the column's database default.
@@ -19,10 +21,40 @@ use Illuminate\Support\Str;
 #[Hidden(['Password'])]
 class User extends Authenticatable
 {
+    use Notifiable;
+
     /**
      * How recently a user must have opened a page to count as online in the users log.
      */
     public const OnlineMinutes = 5;
+
+    /**
+     * Emails go to the user's address, with their name.
+     *
+     * @return array<string, string>
+     */
+    public function routeNotificationForMail(): array
+    {
+        return [$this->Email => $this->Name];
+    }
+
+    /**
+     * The address "Forgot password?" sends a link to, and the account the link is for: the user's email.
+     */
+    public function getEmailForPasswordReset(): string
+    {
+        return $this->Email;
+    }
+
+    /**
+     * The email with the link to choose a new password, in the app's words.
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordLink($token));
+    }
 
     /**
      * What a username can be, once in lowercase: 3 to 30 letters, numbers, dots, dashes and underscores, starting

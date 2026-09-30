@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureUserCanOpenRoute;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RecordLastSeen;
 use App\Http\Middleware\SetPublicLocale;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -42,8 +43,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserCanOpenRoute::class);
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserIsAdmin::class);
 
-        // When each user last opened a page, for the users log on the Users page.
-        $middleware->web(append: RecordLastSeen::class);
+        // A login made before the account's password changed, like elsewhere after "Forgot password?", ends then
+        // (AuthenticateSession). Then when each user last opened a page, for the users log on the Users page.
+        $middleware->web(append: [AuthenticateSession::class, RecordLastSeen::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

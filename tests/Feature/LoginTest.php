@@ -201,19 +201,33 @@ class LoginTest extends TestCase
     {
         User::create(['Name' => 'Existing Demo', 'Email' => 'demo@myapp.local']);
 
-        $this->seed(LoginUserSeeder::class);
+        $seeder = new LoginUserSeeder;
+        $seeder->run();
 
         $this->assertDatabaseHas('Users', ['Email' => 'demo@myapp.local', 'Name' => 'Existing Demo', 'Password' => null]);
         $this->assertDatabaseCount('Users', 2);
 
-        $this->post('/login', ['login' => 'admin@myapp.local', 'password' => 'secret'])->assertRedirect('/dashboard');
+        // A random password of its own, not one anyone could guess, and only the new account gets one.
+        $password = $seeder->passwords['admin@myapp.local'];
+        $this->assertSame(['admin@myapp.local'], array_keys($seeder->passwords));
+        $this->assertMatchesRegularExpression('/^[A-Za-z0-9]{16}$/', $password);
+        $this->assertNotSame('secret', $password);
+
+        $this->post('/login', ['login' => 'admin@myapp.local', 'password' => 'secret'])->assertSessionHasErrors('login');
+        $this->post('/login', ['login' => 'admin@myapp.local', 'password' => $password])->assertRedirect('/dashboard');
         $this->assertAuthenticatedAs(User::firstWhere('Email', 'admin@myapp.local'));
 
         // Each gets a username from their email, to log in with too.
         $this->assertSame(['demo', 'admin'], User::orderBy('Id')->pluck('Username')->all());
         $this->post('/logout');
-        $this->post('/login', ['login' => 'admin', 'password' => 'secret'])->assertRedirect('/dashboard');
+        $this->post('/login', ['login' => 'admin', 'password' => $password])->assertRedirect('/dashboard');
         $this->assertAuthenticatedAs(User::firstWhere('Username', 'admin'));
+
+        // Seeded again, it shows the passwords made this time: none.
+        $this->artisan('db:seed', ['--class' => LoginUserSeeder::class])
+            ->expectsOutputToContain('admin@myapp.local already exists, left unchanged.')
+            ->doesntExpectOutputToContain('password:')
+            ->assertSuccessful();
     }
 
     public function test_passwords_are_never_stored_in_plain_text(): void

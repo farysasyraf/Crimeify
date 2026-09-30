@@ -36,6 +36,7 @@
         @error('password')
             <span class="field-error" role="alert">{{ $message }}</span>
         @enderror
+        <a class="auth-forgot" href="{{ route('password.request') }}">Forgot password?</a>
     </div>
 
     <div class="form-actions">

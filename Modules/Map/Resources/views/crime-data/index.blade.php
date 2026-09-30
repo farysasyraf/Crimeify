@@ -14,7 +14,10 @@
 @php
     $categories = config('map.crime.categories');
     $name = fn ($figure) => CrimeData::typeLabel($figure->Category, $figure->Type)." in {$figure->District}, {$figure->State}, {$figure->Year}";
-    $countErrors = collect($errors->getMessages())->filter(fn ($messages, $field) => $field === 'crimes' || str_starts_with($field, 'crimes.'))->flatten();
+    // The Add a figure form and the list's counts both send "crimes": what came back is the Add form's when it says
+    // it was sent (form=add), and the list's otherwise.
+    $adding = old('form') === 'add';
+    $countErrors = $adding ? collect() : collect($errors->getMessages())->filter(fn ($messages, $field) => $field === 'crimes' || str_starts_with($field, 'crimes.'))->flatten();
 @endphp
 
 <div class="page-head">
@@ -71,6 +74,7 @@
 
     <form method="post" action="{{ page_url('crime-data/store') }}" class="card form crime-tool" data-confirm="Are you sure you want to add this figure?" data-confirm-kind="save">
         @csrf
+        <input type="hidden" name="form" value="add" />
         <h2>Add a figure</h2>
         <div class="crime-tool-fields">
             <div class="field">
@@ -114,10 +118,12 @@
             </div>
             <div class="field">
                 <label for="add-crimes">Crimes</label>
-                <input type="number" id="add-crimes" name="crimes" value="{{ old('crimes') }}" min="0" max="1000000" step="1" required @class(['is-invalid' => $errors->has('crimes')]) />
-                @error('crimes')
-                    <span class="field-error">{{ $message }}</span>
-                @enderror
+                <input type="number" id="add-crimes" name="crimes" value="{{ $adding ? old('crimes') : '' }}" min="0" max="1000000" step="1" required @class(['is-invalid' => $adding && $errors->has('crimes')]) />
+                @if ($adding)
+                    @error('crimes')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                @endif
             </div>
         </div>
         <div class="form-actions">

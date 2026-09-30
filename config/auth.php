@@ -92,10 +92,12 @@ return [
     |
     */
 
+    // "Forgot password?" (PasswordResetController): each emailed link works once, for 60 minutes, and the same
+    // account can be sent a new one once a minute. The links are kept hashed in dbo.PasswordResetTokens.
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'PasswordResetTokens'),
             'expire' => 60,
             'throttle' => 60,
         ],

@@ -380,7 +380,13 @@ class CrimeDataPageTest extends TestCase
         $this->put('/crime-data/update', ['rows' => 3, 'crimes' => [$murder->Id => '5'], 'original' => [$murder->Id => '2']])
             ->assertSessionHasErrors(['crimes' => 'Not every count reached the server: the list sent more than it takes at once. Show fewer figures per page, or change fewer at a time, and save again.']);
         $this->assertSame(2, $this->crimes('Johor', 'Batu Pahat', 'assault', 'murder'));
-        $this->get('/crime-data')->assertSee('Not every count reached the server');
+
+        // The page says so above the list. (In a test, checking the session's errors uses them up, so send it again.)
+        // Add a figure also has a field called crimes: it stays empty, and isn't marked wrong.
+        $this->put('/crime-data/update', ['rows' => 3, 'crimes' => [$murder->Id => '5'], 'original' => [$murder->Id => '2']]);
+        $this->get('/crime-data')->assertOk()
+            ->assertSeeInOrder(['<strong>Nothing was saved.</strong>', 'Not every count reached the server'], false)
+            ->assertSee('<input type="number" id="add-crimes" name="crimes" value="" min="0" max="1000000" step="1" required class="" />', false);
 
         // Only the changed count, as the page's script sends it, saves.
         $this->put('/crime-data/update', ['rows' => 1, 'crimes' => [$murder->Id => '5'], 'original' => [$murder->Id => '2']])->assertSessionHasNoErrors();

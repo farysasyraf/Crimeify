@@ -181,6 +181,10 @@ code {
 .auth-card h1 { margin-bottom: .25rem; }
 .auth-card > .muted { margin: 0 0 20px; color: var(--accent-soft); }
 .auth-public { max-width: 400px; margin: 16px auto 0; color: var(--muted); text-align: center; }
+/* "Forgot password?" under the login's password, and the way back from its pages. */
+.auth-forgot { display: inline-block; margin-top: 8px; font-size: .875rem; }
+.auth-back { margin: 16px 0 0; text-align: center; font-size: .875rem; }
+.auth-sent { margin-bottom: 16px; line-height: 1.5; }
 .btn-block { width: 100%; }
 
 /* The login page's backdrop (login-backdrop.js): the video filling the window behind everything, darkened toward

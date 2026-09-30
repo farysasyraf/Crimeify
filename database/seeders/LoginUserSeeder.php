@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class LoginUserSeeder extends Seeder
 {
@@ -18,13 +19,15 @@ class LoginUserSeeder extends Seeder
     ];
 
     /**
-     * Password given to each account this seeder creates.
+     * The password each account created this time was given, by email: shown once, then kept only as a hash.
+     *
+     * @var array<string, string>
      */
-    public const DefaultPassword = 'secret';
+    public array $passwords = [];
 
     /**
-     * Create each account with the default password.
-     * An account whose email already exists is left unchanged.
+     * Create each account with a password of its own, random and hard to guess, and show it once, to write down or
+     * change on My profile. An account whose email already exists is left unchanged.
      */
     public function run(): void
     {
@@ -35,10 +38,17 @@ class LoginUserSeeder extends Seeder
                 continue;
             }
 
-            // The username comes from the email (User::freeUsername): admin, demo.
-            $user = User::create(['Name' => $name, 'Email' => $email, 'Password' => self::DefaultPassword]);
+            // Letters and numbers only, so it's easy to type in once.
+            $password = $this->passwords[$email] = Str::password(16, symbols: false);
 
-            $this->command?->info("{$email}  username: {$user->Username}  password: ".self::DefaultPassword);
+            // The username comes from the email (User::freeUsername): admin, demo.
+            $user = User::create(['Name' => $name, 'Email' => $email, 'Password' => $password]);
+
+            $this->command?->info("{$email}  username: {$user->Username}  password: {$password}");
+        }
+
+        if ($this->passwords !== []) {
+            $this->command?->warn('These passwords are shown only now. Write them down, or change them on My profile after logging in.');
         }
     }
 }
