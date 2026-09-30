@@ -1,0 +1,17 @@
+police-stations.csv: the police stations the Map page lists under the map, to start from
+
+One row per police district in police-districts.csv: the police station its pin is on, with the region (ISO 3166-2
+code) and police district it's listed under, its name, and its address and phone number where OpenStreetMap has them.
+Where the pin is only on a town centre (26 districts), the station is the district's headquarters under its usual
+name, "Ibu Pejabat Polis Daerah …", without an address or phone number. Nothing is filled in that the source doesn't
+give: 22 stations have an address and 18 a phone number, as OpenStreetMap had them in September 2026, written as it
+writes them. Check them before relying on them.
+
+"php artisan map:import-stations" adds these to dbo.PoliceStations for each police district that has no station
+there yet. After that, administrators keep them up to date on the Police stations page (Dev Module), which never
+writes to this file.
+
+Source:    OpenStreetMap (osm_place gives each station's OpenStreetMap object), looked up in September 2026 through
+           the Overpass API
+Licence:   Open Data Commons Open Database License 1.0 (ODbL), https://opendatacommons.org/licenses/odbl/1-0/
+Credit:    © OpenStreetMap contributors (https://www.openstreetmap.org/copyright), shown on the map

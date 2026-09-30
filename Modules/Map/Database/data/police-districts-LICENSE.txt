@@ -1,0 +1,18 @@
+police-districts.csv: where each police district's pin goes on the Map page
+
+One row per police district in the crime data from data.gov.my, under its current name (see 'renamed' in
+Modules/Map/Config/config.php), with the region it's shown in: Labuan's district counts under Sabah and
+Putrajaya's under Kuala Lumpur in the crime data, but their pins are in Labuan (MY-15) and Putrajaya (MY-16).
+
+located_at says what the point is:
+  district police HQ  the district's police headquarters (Ibu Pejabat Polis Daerah), 113 districts
+  police station      a police station in the district's main town, where the HQ isn't on the map, 16 districts
+  town centre         the centre of the district's main town, where neither is on the map, 26 districts
+
+Source:    OpenStreetMap (osm_place gives each point's OpenStreetMap object), looked up in September 2026
+           through the Overpass API and Nominatim. Every point was checked to fall inside its region on the
+           Map page's boundary map.
+Licence:   Open Data Commons Open Database License 1.0 (ODbL), https://opendatacommons.org/licenses/odbl/1-0/
+Credit:    © OpenStreetMap contributors (https://www.openstreetmap.org/copyright), shown on the map
+
+To move a pin, change its latitude and longitude here and run "php artisan map:import-crime" again.

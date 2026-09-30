@@ -1,0 +1,330 @@
+<?php
+
+use Nwidart\Modules\Activators\FileActivator;
+use Nwidart\Modules\Providers\ConsoleServiceProvider;
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Module Namespace
+    |--------------------------------------------------------------------------
+    |
+    | Default module namespace.
+    |
+    */
+    'namespace' => 'Modules',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vapor Maintenance Mode
+    |--------------------------------------------------------------------------
+    |
+    | Indicates if the application is running on Laravel Vapor.
+    | When enabled, cached services path will be set to a writable location.
+    |
+    */
+    'vapor_maintenance_mode' => env('VAPOR_MAINTENANCE_MODE', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Module Stubs
+    |--------------------------------------------------------------------------
+    |
+    | Default module stubs.
+    |
+    */
+    'stubs' => [
+        'enabled' => false,
+        'path' => base_path('vendor/nwidart/laravel-modules/src/Commands/stubs'),
+        // Laid out as in AMV (amv4local's Modules/*): Routes/, Resources/views/, Config/. No per-module Vite or npm
+        // files, since this app serves its CSS and JavaScript straight from public/.
+        'files' => [
+            'routes/web' => 'Routes/web.php',
+            'routes/api' => 'Routes/api.php',
+            'views/index' => 'Resources/views/index.blade.php',
+            'views/master' => 'Resources/views/layouts/master.blade.php',
+            'scaffold/config' => 'Config/config.php',
+            'composer' => 'composer.json',
+        ],
+        'replacements' => [
+            /**
+             * Define custom replacements for each section.
+             * You can now specify a class name that extends
+             * \Nwidart\Modules\Support\ReplacementKeyCommand for dynamic values.
+             *
+             * Example:
+             *
+             * 'composer' => [
+             *      // Map the UPPERCASE token to your command class
+             *      'CUSTOM_KEY' => \App\Modules\Support\Replacements\CustomKey::class,
+             *      // You can still list built-in tokens by their names
+             *      'LOWER_NAME',
+             *      'STUDLY_NAME',
+             *      // ...
+             * ],
+             *
+             * The command class must extend ReplacementKeyCommand and implement handle(): string
+             * to return the replacement text.
+             *
+             * Note: Keys should be in UPPERCASE.
+             */
+            'routes/web' => ['LOWER_NAME', 'STUDLY_NAME', 'PLURAL_LOWER_NAME', 'KEBAB_NAME', 'MODULE_NAMESPACE', 'CONTROLLER_NAMESPACE'],
+            'routes/api' => ['LOWER_NAME', 'STUDLY_NAME', 'PLURAL_LOWER_NAME', 'KEBAB_NAME', 'MODULE_NAMESPACE', 'CONTROLLER_NAMESPACE'],
+            'vite' => ['LOWER_NAME', 'STUDLY_NAME', 'KEBAB_NAME'],
+            'json' => ['LOWER_NAME', 'STUDLY_NAME', 'KEBAB_NAME', 'MODULE_NAMESPACE', 'PROVIDER_NAMESPACE'],
+            'views/index' => ['LOWER_NAME'],
+            'views/master' => ['LOWER_NAME', 'STUDLY_NAME', 'KEBAB_NAME'],
+            'scaffold/config' => ['STUDLY_NAME'],
+            'composer' => [
+                'LOWER_NAME',
+                'STUDLY_NAME',
+                'VENDOR',
+                'AUTHOR_NAME',
+                'AUTHOR_EMAIL',
+                'MODULE_NAMESPACE',
+                'PROVIDER_NAMESPACE',
+                'APP_FOLDER_NAME',
+            ],
+        ],
+        'gitkeep' => true,
+    ],
+    'paths' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Modules path
+        |--------------------------------------------------------------------------
+        |
+        | This path is used to save the generated module.
+        | This path will also be added automatically to the list of scanned folders.
+        |
+        */
+        'modules' => base_path('Modules'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Modules assets path
+        |--------------------------------------------------------------------------
+        |
+        | Here you may update the modules' assets path.
+        |
+        */
+        'assets' => public_path('modules'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | The migrations' path
+        |--------------------------------------------------------------------------
+        |
+        | Where you run the 'module:publish-migration' command, where do you publish the
+        | the migration files?
+        |
+        */
+        'migration' => base_path('database/migrations'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | The app path
+        |--------------------------------------------------------------------------
+        |
+        | app folder name
+        | for example can change it to 'src' or 'App'
+        */
+        // Empty, as in AMV: Modules\Setup\Http\Controllers lives in Modules/Setup/Http/Controllers.
+        'app_folder' => '',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generator path
+        |--------------------------------------------------------------------------
+        | Customise the paths where the folders will be generated.
+        | Setting the generate key to false will not generate that folder
+        */
+        // The folders AMV's modules use (nwidart/laravel-modules v8's layout), so a module made here with
+        // "php artisan module:make Name" looks like Modules/Setup in amv4local.
+        'generator' => [
+            'actions' => ['path' => 'Actions', 'generate' => false],
+            'casts' => ['path' => 'Casts', 'generate' => false],
+            'channels' => ['path' => 'Broadcasting', 'generate' => false],
+            'class' => ['path' => 'Classes', 'generate' => false],
+            'command' => ['path' => 'Console', 'generate' => true],
+            'command_replacements' => ['path' => 'Console/Replacements', 'generate' => false],
+            'component-class' => ['path' => 'View/Components', 'generate' => false],
+            'emails' => ['path' => 'Emails', 'generate' => false],
+            'event' => ['path' => 'Events', 'generate' => false],
+            'enums' => ['path' => 'Enums', 'generate' => false],
+            'exceptions' => ['path' => 'Exceptions', 'generate' => false],
+            'jobs' => ['path' => 'Jobs', 'generate' => false],
+            'helpers' => ['path' => 'Helpers', 'generate' => false],
+            'interfaces' => ['path' => 'Interfaces', 'generate' => false],
+            'listener' => ['path' => 'Listeners', 'generate' => false],
+            'model' => ['path' => 'Entities', 'generate' => true],
+            'notifications' => ['path' => 'Notifications', 'generate' => false],
+            'observer' => ['path' => 'Observers', 'generate' => false],
+            'policies' => ['path' => 'Policies', 'generate' => false],
+            'provider' => ['path' => 'Providers', 'generate' => true],
+            'repository' => ['path' => 'Repositories', 'generate' => false],
+            'resource' => ['path' => 'Transformers', 'generate' => false],
+            'route-provider' => ['path' => 'Providers', 'generate' => true],
+            'rules' => ['path' => 'Rules', 'generate' => false],
+            'services' => ['path' => 'Services', 'generate' => false],
+            'scopes' => ['path' => 'Entities/Scopes', 'generate' => false],
+            'traits' => ['path' => 'Traits', 'generate' => false],
+
+            // Http/
+            'controller' => ['path' => 'Http/Controllers', 'generate' => true],
+            'filter' => ['path' => 'Http/Middleware', 'generate' => true],
+            'request' => ['path' => 'Http/Requests', 'generate' => true],
+
+            // Config/
+            'config' => ['path' => 'Config', 'generate' => true],
+
+            // Database/
+            'factory' => ['path' => 'Database/factories', 'generate' => true],
+            'migration' => ['path' => 'Database/Migrations', 'generate' => true],
+            'seeder' => ['path' => 'Database/Seeders', 'generate' => true],
+
+            // Resources/
+            'lang' => ['path' => 'Resources/lang', 'generate' => true],
+            'assets' => ['path' => 'Resources/assets', 'generate' => false],
+            'component-view' => ['path' => 'Resources/views/components', 'generate' => false],
+            'views' => ['path' => 'Resources/views', 'generate' => true],
+            'inertia' => ['path' => 'Resources/js/Pages', 'generate' => false],
+            'inertia-components' => ['path' => 'Resources/js/Components', 'generate' => false],
+
+            // Routes/
+            'routes' => ['path' => 'Routes', 'generate' => true],
+
+            // Tests/
+            'test-feature' => ['path' => 'Tests/Feature', 'generate' => true],
+            'test-unit' => ['path' => 'Tests/Unit', 'generate' => true],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Discover of Modules
+    |--------------------------------------------------------------------------
+    |
+    | Here you configure auto discover of module
+    | This is useful for simplify module providers.
+    |
+    */
+    'auto-discover' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Migrations
+        |--------------------------------------------------------------------------
+        |
+        | This option for register migration automatically.
+        |
+        */
+        'migrations' => true,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Translations
+        |--------------------------------------------------------------------------
+        |
+        | This option for register lang file automatically.
+        |
+        */
+        'translations' => false,
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Package commands
+    |--------------------------------------------------------------------------
+    |
+    | Here you can define which commands will be visible and used in your
+    | application. You can add your own commands to merge section.
+    |
+    */
+    'commands' => ConsoleServiceProvider::defaultCommands()
+        ->merge([
+            // New commands go here
+        ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scan Path
+    |--------------------------------------------------------------------------
+    |
+    | Here you define which folder will be scanned. By default will scan vendor
+    | directory. This is useful if you host the package in packagist website.
+    |
+    */
+    'scan' => [
+        'enabled' => false,
+        'paths' => [
+            base_path('vendor/*/*'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Composer File Template
+    |--------------------------------------------------------------------------
+    |
+    | Here is the config for the composer.json file, generated by this package
+    |
+    */
+    'composer' => [
+        'vendor' => env('MODULE_VENDOR', 'nwidart'),
+        'author' => [
+            'name' => env('MODULE_AUTHOR_NAME', 'Nicolas Widart'),
+            'email' => env('MODULE_AUTHOR_EMAIL', 'n.widart@gmail.com'),
+        ],
+        'composer-output' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Choose what laravel-modules will register as custom namespaces.
+    | Setting one to false will require you to register that part
+    | in your own Service Provider class.
+    |--------------------------------------------------------------------------
+    */
+    'register' => [
+        'translations' => true,
+        /**
+         * load files on boot or register method
+         */
+        'files' => 'register',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Activators
+    |--------------------------------------------------------------------------
+    |
+    | You can define new types of activators here, file, database, etc. The only
+    | required parameter is 'class'.
+    | The file activator will store the activation status in storage/installed_modules
+    */
+    'activators' => [
+        'file' => [
+            'class' => FileActivator::class,
+            'statuses-file' => base_path('modules_statuses.json'),
+        ],
+    ],
+
+    'activator' => 'file',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inertia
+    |--------------------------------------------------------------------------
+    |
+    | Default Inertia frontend framework used by make commands when no
+    | framework flag (--vue, --react, --svelte) is provided.
+    |
+    | Supported: "vue", "react", "svelte"
+    |
+    */
+    'inertia' => [
+        'frontend' => 'vue',
+    ],
+];

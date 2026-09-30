@@ -1,0 +1,140 @@
+{{-- In the app for logged-in users, and at /public/map for everyone, in the public pages' layout. --}}
+@extends($public ? 'layouts.public' : 'layouts.app')
+
+@section('title', 'Map')
+
+@push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet/leaflet.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.Default.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('modules/map/map.css') }}" />
+@endpush
+
+{{-- On a phone, "Find a police station" asks with SweetAlert2 whether to open a station in Google Maps or Waze. The
+     app's layout has it already; the public pages' doesn't. --}}
+@if ($public)
+    @push('head')
+        <script src="{{ versioned_asset('js/vendor/sweetalert2.all.min.js') }}" defer></script>
+    @endpush
+@endif
+
+{{-- Malaysia's states and federal territories on a Leaflet map (map.js), with a panel above it with the year and
+     the chosen region's figures, and beside it a list of the regions that picks one the same way, so every region
+     can be chosen without a mouse. Each police district has a pin whose popup gives its crime figures for the
+     year chosen in the panel. Under the map, a state's police stations, with a chosen one's address and phone. --}}
+@section('content')
+<div class="page-head">
+    <div>
+        <h1>Crime Visualization Map</h1>
+        <p class="muted">
+            Malaysia's 13 states and 3 federal territories, with a pin for each police district. Click a pin for the
+            district's crime figures, or a state for its totals. Numbered circles group nearby pins; click one to zoom in.
+        </p>
+    </div>
+</div>
+
+<div class="state-map-layout">
+    <div class="state-map-main">
+        {{-- The year, then the chosen region's figures, above the map. --}}
+        <section class="card state-panel" aria-labelledby="state-panel-heading">
+            @if (! $crimeUrl)
+                <p class="crime-note">
+                    Crime figures appear once the <code>map/crime</code> route is added on the Routes page, with controller
+                    <code>MapController</code> and function <code>crime</code>.
+                </p>
+            @elseif (! $years)
+                {{-- How to load them is for the app's administrators, not the public. --}}
+                <p class="crime-note">
+                    There are no crime figures yet.@unless ($public) Load them from data.gov.my with <code>php artisan map:import-crime</code>.@endunless
+                </p>
+            @else
+                <div class="crime-year">
+                    <label for="crime-year">Crime figures for</label>
+                    <select id="crime-year" data-crime-year>
+                        @foreach (array_reverse($years) as $year)
+                            <option value="{{ $year }}" @selected($loop->first)>{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            <div class="state-details" aria-live="polite" data-state-details>
+                <h2 id="state-panel-heading">Malaysia</h2>
+                <p class="muted">Choose a state on the map or from the list.</p>
+            </div>
+            <button type="button" class="btn btn-sm" data-show-all hidden>Show all of Malaysia</button>
+        </section>
+
+        <div class="card state-map-card">
+            <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
+                @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
+                role="region" aria-label="Map of Malaysia's states and police districts">
+                <noscript><p class="state-map-note">The map needs JavaScript turned on.</p></noscript>
+            </div>
+            <p class="state-map-note" data-map-status hidden></p>
+        </div>
+    </div>
+
+    {{-- Every region as a button beside the map: choosing one picks it on the map too. --}}
+    <aside class="card state-picker" aria-label="States and federal territories">
+        @foreach (['States' => $states, 'Federal territories' => $territories] as $heading => $regions)
+            <div class="state-picker-group">
+                <h2 class="state-list-heading">{{ $heading }}</h2>
+                <ul class="state-list">
+                    @foreach ($regions as $region)
+                        <li>
+                            <button type="button" class="state-choice" data-state="{{ $region['code'] }}" data-name="{{ $region['name'] }}" data-kind="{{ $region['territory'] ? 'Federal territory' : 'State' }}" aria-pressed="false">{{ $region['name'] }}</button>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endforeach
+    </aside>
+
+    {{-- Under the map, after the list beside it, so on a phone, where they're one under the other, the list comes
+         first: a state, then one of its police stations, for the station's address and phone number
+         (station-finder.js). The stations come with the page, so choosing one doesn't wait on the server. --}}
+    <section class="card station-finder" aria-labelledby="station-finder-heading">
+        <h2 id="station-finder-heading">Find a police station</h2>
+        <p class="muted station-finder-intro">Choose a state, then one of its police stations, for its address and phone number.</p>
+        @if ($stations === [])
+            <p class="station-note">
+                No police stations are listed yet.@unless ($public) Add them on the Police stations page, or load one for each police district with <code>php artisan map:import-stations</code>.@endunless
+            </p>
+        @else
+            <script type="application/json" data-station-list>@json($stations)</script>
+            <div class="station-finder-fields">
+                <div class="field">
+                    <label for="station-state">State</label>
+                    <select id="station-state" data-station-state data-placeholder="Choose a state">
+                        <option value=""></option>
+                        @foreach (['States' => $states, 'Federal territories' => $territories] as $heading => $regions)
+                            <optgroup label="{{ $heading }}">
+                                @foreach ($regions as $region)
+                                    @isset($stations[$region['code']])
+                                        <option value="{{ $region['code'] }}">{{ $region['name'] }}</option>
+                                    @endisset
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="station-choice">Police station</label>
+                    <select id="station-choice" data-station-choice data-placeholder="Choose a police station" disabled aria-describedby="station-hint">
+                        <option value=""></option>
+                    </select>
+                    <span class="field-hint" id="station-hint" data-station-hint>Choose a state first.</span>
+                </div>
+            </div>
+            <div class="station-details" data-station-details aria-live="polite" hidden></div>
+            <noscript><p class="state-map-note">Finding a police station needs JavaScript turned on.</p></noscript>
+        @endif
+    </section>
+</div>
+
+<script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
+<script src="{{ versioned_asset('vendor/leaflet-markercluster/leaflet.markercluster.js') }}" defer></script>
+<script src="{{ versioned_asset('modules/map/map.js') }}" defer></script>
+<script src="{{ versioned_asset('modules/map/station-finder.js') }}" defer></script>
+@endsection

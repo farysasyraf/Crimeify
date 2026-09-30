@@ -1,0 +1,97 @@
+/* Dashboard: dark, rounded cards in the style of the sidebar and the Map page's popups, the same in both themes.
+   The colours are toned down from full saturation so they don't glow on the dark cards, and every text colour
+   keeps at least 4.5:1 contrast with them. Up is more crime, in red; down is less, in green. */
+.dash {
+    --dash-bg: #232529;
+    --dash-text: #eef2f6;
+    --dash-soft: #b4bec8;
+    --dash-accent: #3aaaf2;
+    --dash-rule: rgba(255, 255, 255, .08);
+    --dash-up: #ff8f8a;
+    --dash-down: #7fd8a4;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;
+}
+.dash-card {
+    min-width: 0; padding: 18px 20px 20px; border-radius: 20px;
+    background: var(--dash-bg); color: var(--dash-text); box-shadow: 0 14px 36px rgba(16, 24, 40, .14);
+}
+.dash-trend, .dash-cards { grid-column: span 2; }
+
+.dash-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.dash-card-head h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.dash-link { color: var(--dash-accent); font-size: .875rem; font-weight: 600; }
+.dash-link:focus-visible { outline: 2px solid var(--dash-accent); outline-offset: 2px; border-radius: 4px; }
+.dash-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--dash-soft); font-size: .8125rem; }
+.dash-legend li { display: flex; align-items: center; gap: 6px; }
+.dash-swatch { flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--swatch); }
+
+/* Chart.js fills its box, so the box sets the size. */
+.dash-chart { position: relative; height: 280px; }
+
+/* Crime by type: the ring with the total in its middle, then each slice's share and count. */
+.dash-types-body { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; }
+.dash-donut { position: relative; flex: 1 1 200px; height: 210px; }
+.dash-donut-centre {
+    position: absolute; inset: 0; display: grid; place-content: center; margin: 0; padding: 0 22%;
+    text-align: center; pointer-events: none;
+}
+.dash-donut-centre strong { color: var(--dash-accent); font-size: 1.5rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.dash-donut-centre span { color: var(--dash-soft); font-size: .8125rem; line-height: 1.3; }
+.dash-slices { flex: 1 1 240px; margin: 0; padding: 0; list-style: none; font-size: .875rem; }
+.dash-slices li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 1px solid var(--dash-rule); }
+.dash-slices li:first-child { border-top: 0; }
+.dash-slice-label { flex: 1; min-width: 0; }
+.dash-slice-share { color: var(--dash-soft); font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.dash-badge {
+    min-width: 52px; padding: 2px 8px; border-radius: 999px; text-align: center;
+    background: color-mix(in srgb, var(--swatch) 24%, transparent); font-size: .75rem; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+
+/* The six cards of figures, each with its colour: the year's count, every year's as small bars with the chosen
+   year's the brightest, and how it compares with the year before. */
+.dash-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.dash-figure { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; }
+.dash-figure-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.dash-figure-head h3 { margin: 0; color: var(--dash-soft); font-size: .875rem; font-weight: 500; }
+.dash-figure-icon { color: var(--tone); font-size: 22px; }
+.dash-figure-value { margin: 0 0 4px; font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.dash-figure-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; }
+.dash-bars { display: flex; align-items: flex-end; gap: 3px; flex: 1; max-width: 130px; height: 34px; }
+.dash-bars span { flex: 1; height: var(--bar); border-radius: 2px; background: var(--tone); opacity: .55; }
+.dash-bars span.chosen { opacity: 1; }
+.dash-change { font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.dash-up { color: var(--dash-up); }
+.dash-down { color: var(--dash-down); }
+.dash-same { color: var(--dash-soft); }
+.tone-blue { --tone: #3aaaf2; }
+.tone-coral { --tone: #ff8a80; }
+.tone-green { --tone: #7fd8a4; }
+.tone-pink { --tone: #f48fb1; }
+.tone-amber { --tone: #f5b041; }
+.tone-violet { --tone: #b39ddb; }
+
+/* The year the figures are for. With JavaScript, choosing one shows it, so the button goes. */
+.dash-year { display: flex; align-items: center; gap: 8px; }
+.dash-year label { color: var(--muted); font-size: .875rem; font-weight: 500; }
+.dash-year select { width: auto; min-width: 104px; }
+/* As a Select2 box, the same size as the list it stands for. */
+.dash-year .select2-container { width: 112px !important; }
+.js .dash-year [data-year-submit] { display: none; }
+
+.dash-credit { margin: 16px 0 0; color: var(--muted); font-size: .8125rem; }
+/* Under a chart, what its figures leave out or put together, like a year by state's Labuan in Sabah. */
+.dash-note { margin: 10px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.45; }
+
+/* Narrower screens: each card across the page, the cards of figures three to a row, then two, then one. */
+@media (max-width: 1100px) {
+    .dash { grid-template-columns: minmax(0, 1fr); }
+    .dash-trend, .dash-cards { grid-column: auto; }
+    .dash-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+    .dash-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .dash-chart { height: 240px; }
+}
+@media (max-width: 440px) {
+    .dash-cards { grid-template-columns: minmax(0, 1fr); }
+}

@@ -1,0 +1,156 @@
+state,district,region,latitude,longitude,located_at,osm_place
+Johor,"Batu Pahat",MY-01,1.85748,102.93981,"district police HQ",way/908597864
+Johor,"Iskandar Puteri",MY-01,1.45253,103.62314,"district police HQ",way/745726077
+Johor,"Johor Bahru Selatan",MY-01,1.45820,103.76491,"town centre",node/254237831
+Johor,"Johor Bahru Utara",MY-01,1.54054,103.65884,"district police HQ",way/1217366847
+Johor,Kluang,MY-01,2.02948,103.31684,"police station",way/750691987
+Johor,"Kota Tinggi",MY-01,1.73367,103.90070,"town centre",node/254073396
+Johor,Kulaijaya,MY-01,1.64491,103.60734,"district police HQ",way/886390485
+Johor,Ledang,MY-01,2.26746,102.53884,"district police HQ",way/949041301
+Johor,Mersing,MY-01,2.42985,103.83549,"town centre",node/2888656516
+Johor,Muar,MY-01,2.04250,102.56589,"town centre",node/254072813
+Johor,Pontian,MY-01,1.48603,103.40545,"district police HQ",way/951371655
+Johor,Segamat,MY-01,2.50708,102.81543,"police station",way/584344702
+Johor,"Seri Alam",MY-01,1.51337,103.87255,"district police HQ",way/921909689
+Kedah,Baling,MY-02,5.67536,100.91506,"police station",way/816380183
+Kedah,"Bandar Baharu",MY-02,5.19830,100.60914,"district police HQ",way/1057999597
+Kedah,"Kota Setar",MY-02,6.12067,100.37135,"district police HQ",way/286170281
+Kedah,"Kuala Muda",MY-02,5.66779,100.50446,"district police HQ",way/371921166
+Kedah,"Kubang Pasu",MY-02,6.27466,100.42096,"police station",way/335057086
+Kedah,Kulim,MY-02,5.35585,100.53800,"district police HQ",way/627917775
+Kedah,Langkawi,MY-02,6.32647,99.84856,"district police HQ",node/1883550659
+Kedah,"Padang Terap",MY-02,6.25515,100.60710,"town centre",node/254074476
+Kedah,Pendang,MY-02,5.98618,100.47291,"district police HQ",way/392498510
+Kedah,Sik,MY-02,5.83766,100.74721,"district police HQ",node/12352332197
+Kedah,Yan,MY-02,5.79338,100.37046,"district police HQ",relation/13492111
+Kelantan,Bachok,MY-03,6.05388,102.39669,"police station",way/969207522
+Kelantan,"Gua Musang",MY-03,4.86449,101.95396,"district police HQ",node/4835349308
+Kelantan,Jeli,MY-03,5.69840,101.84192,"district police HQ",way/1473327892
+Kelantan,"Kota Bharu",MY-03,6.15691,102.28813,"district police HQ",way/965482907
+Kelantan,"Kuala Krai",MY-03,5.53116,102.19937,"town centre",node/254072948
+Kelantan,Machang,MY-03,5.77983,102.21699,"district police HQ",way/1043755731
+Kelantan,"Pasir Mas",MY-03,6.02250,102.11874,"district police HQ",way/884998722
+Kelantan,"Pasir Puteh",MY-03,5.83664,102.40320,"district police HQ",way/884998734
+Kelantan,"Tanah Merah",MY-03,5.80978,102.14841,"town centre",node/369488884
+Kelantan,Tumpat,MY-03,6.19932,102.16936,"district police HQ",node/5147918027
+Melaka,"Alor Gajah",MY-04,2.38165,102.20892,"police station",way/968106300
+Melaka,Jasin,MY-04,2.29539,102.41220,"district police HQ",node/6122162995
+Melaka,"Melaka Tengah",MY-04,2.19431,102.25094,"district police HQ",way/548119343
+"Negeri Sembilan",Jelebu,MY-05,2.93681,102.06949,"police station",way/608837476
+"Negeri Sembilan",Jempol,MY-05,2.89741,102.40699,"district police HQ",way/713099962
+"Negeri Sembilan","Kuala Pilah",MY-05,2.73740,102.22218,"district police HQ",way/572161327
+"Negeri Sembilan",Nilai,MY-05,2.82984,101.78897,"district police HQ",way/1080236587
+"Negeri Sembilan","Port Dickson",MY-05,2.52490,101.79403,"district police HQ",way/494672781
+"Negeri Sembilan",Rembau,MY-05,2.60122,102.06838,"district police HQ",way/965304077
+"Negeri Sembilan",Seremban,MY-05,2.68544,101.91928,"district police HQ",way/505614898
+"Negeri Sembilan",Tampin,MY-05,2.46934,102.23130,"police station",node/7802951225
+Pahang,Bentong,MY-06,3.52562,101.90966,"district police HQ",way/1214975284
+Pahang,Bera,MY-06,3.26804,102.45584,"district police HQ",way/877346907
+Pahang,"Cameron Highlands",MY-06,4.49421,101.38997,"district police HQ",way/498641409
+Pahang,Jerantut,MY-06,3.93666,102.37196,"town centre",node/254072923
+Pahang,"Kuala Lipis",MY-06,4.17816,102.05341,"district police HQ",way/1042605949
+Pahang,Kuantan,MY-06,3.80439,103.32473,"district police HQ",way/397386178
+Pahang,Maran,MY-06,3.58226,102.77474,"town centre",node/254074213
+Pahang,Pekan,MY-06,3.51198,103.39364,"district police HQ",node/1855395256
+Pahang,Raub,MY-06,3.78904,101.85744,"district police HQ",way/1042593071
+Pahang,Rompin,MY-06,2.80581,103.48850,"town centre",node/254074401
+Pahang,Temerloh,MY-06,3.45007,102.41769,"district police HQ",node/2555708421
+Perak,"Batu Gajah",MY-08,4.47611,101.03687,"police station",way/312950615
+Perak,Gerik,MY-08,5.42623,101.12679,"district police HQ",node/2962198428
+Perak,"Hilir Perak",MY-08,4.01628,101.04492,"district police HQ",way/555857798
+Perak,Ipoh,MY-08,4.59493,101.07509,"district police HQ",way/300886385
+Perak,Kampar,MY-08,4.30760,101.15324,"district police HQ",way/1381201292
+Perak,Kerian,MY-08,5.00495,100.54382,"district police HQ",way/422587893
+Perak,"Kuala Kangsar",MY-08,4.77313,100.94022,"district police HQ",way/514883914
+Perak,Manjung,MY-08,4.19734,100.66215,"district police HQ",way/261252703
+Perak,"Pengkalan Hulu",MY-08,5.70576,100.99945,"town centre",node/254074381
+Perak,"Perak Tengah",MY-08,4.36758,100.95785,"district police HQ",way/542987946
+Perak,Selama,MY-08,5.21627,100.68988,"district police HQ",way/645554206
+Perak,"Sungai Siput",MY-08,4.81737,101.07447,"district police HQ",way/543853994
+Perak,Taiping,MY-08,4.85631,100.74059,"district police HQ",way/451846480
+Perak,"Tanjong Malim",MY-08,3.68329,101.52140,"police station",way/562623115
+Perak,Tapah,MY-08,4.19581,101.26060,"district police HQ",way/540403749
+Perlis,Arau,MY-09,6.43078,100.27008,"district police HQ",way/1518112378
+Perlis,Kangar,MY-09,6.44241,100.20287,"district police HQ",way/1271641881
+Perlis,"Padang Besar",MY-09,6.66054,100.32234,"district police HQ",way/1414550666
+"Pulau Pinang","Barat Daya",MY-07,5.34158,100.22335,"district police HQ",way/1306922126
+"Pulau Pinang","Seberang Perai Selatan",MY-07,5.19647,100.49126,"district police HQ",way/818452665
+"Pulau Pinang","Seberang Perai Tengah",MY-07,5.37312,100.44220,"district police HQ",way/867152718
+"Pulau Pinang","Seberang Perai Utara",MY-07,5.51460,100.44093,"district police HQ",way/488381469
+"Pulau Pinang","Timur Laut",MY-07,5.41089,100.32214,"district police HQ",way/940369928
+Sabah,Beaufort,MY-12,5.35150,115.73928,"district police HQ",node/11703218789
+Sabah,Beluran,MY-12,5.89652,117.55569,"district police HQ",way/534883174
+Sabah,Keningau,MY-12,5.33702,116.15763,"district police HQ",way/1086039382
+Sabah,"Kota Belud",MY-12,6.35698,116.42800,"district police HQ",node/9024417957
+Sabah,"Kota Kinabalu",MY-12,5.97167,116.07239,"district police HQ",node/2113348313
+Sabah,"Kota Kinabatangan",MY-12,5.58899,117.84665,"town centre",node/3244687861
+Sabah,"Kota Marudu",MY-12,6.49917,116.76788,"district police HQ",node/12997234184
+Sabah,Kudat,MY-12,6.88109,116.84937,"police station",node/13354463447
+Sabah,Kunak,MY-12,4.68620,118.25254,"district police HQ",node/7848627170
+Sabah,"Lahad Datu",MY-12,5.02157,118.32755,"town centre",node/1081974263
+Sabah,Papar,MY-12,5.73492,115.93007,"district police HQ",node/2466526032
+Sabah,Penampang,MY-12,5.90651,116.08907,"town centre",node/369497945
+Sabah,Ranau,MY-12,5.95260,116.66162,"district police HQ",way/566438751
+Sabah,Sandakan,MY-12,5.85963,118.11520,"district police HQ",way/667120129
+Sabah,Semporna,MY-12,4.47907,118.61188,"town centre",node/1081971908
+Sabah,Sipitang,MY-12,5.07348,115.55085,"district police HQ",way/1292198533
+Sabah,Tawau,MY-12,4.24750,117.88081,"district police HQ",way/1287100805
+Sabah,Tenom,MY-12,5.12216,115.94817,"district police HQ",node/9957564866
+Sabah,Tuaran,MY-12,6.17954,116.23541,"district police HQ",node/2452956112
+Sabah,"W.P. Labuan",MY-15,5.27671,115.24712,"district police HQ",way/1307657531
+Sarawak,Bau,MY-13,1.42176,110.15419,"district police HQ",node/11508039246
+Sarawak,Belaga,MY-13,2.70622,113.78163,"town centre",node/3181277799
+Sarawak,Betong,MY-13,1.40467,111.53819,"district police HQ",way/1548495078
+Sarawak,Bintulu,MY-13,3.19758,113.06301,"district police HQ",node/4223306470
+Sarawak,Dalat,MY-13,2.74115,111.93877,"town centre",node/2463527258
+Sarawak,Julau,MY-13,2.02407,111.91755,"town centre",node/2442181504
+Sarawak,Kanowit,MY-13,2.10057,112.14835,"district police HQ",way/258088473
+Sarawak,Kapit,MY-13,2.01689,112.94240,"district police HQ",node/12956305321
+Sarawak,"Kota Samarahan",MY-13,1.46046,110.49103,"district police HQ",way/326270388
+Sarawak,Kuching,MY-13,1.53391,110.35825,"district police HQ",way/272228006
+Sarawak,Lawas,MY-13,4.85556,115.40666,"police station",node/11990103228
+Sarawak,Limbang,MY-13,4.77029,115.00839,"district police HQ",node/3156043466
+Sarawak,"Lubok Antu",MY-13,1.03989,111.83571,"district police HQ",node/13055760513
+Sarawak,Lundu,MY-13,1.67161,109.85363,"town centre",node/2280503199
+Sarawak,Marudi,MY-13,4.18117,114.32643,"police station",node/11989673210
+Sarawak,"Matu Daro",MY-13,2.51242,111.43047,"police station",node/12981721241
+Sarawak,Meradong,MY-13,2.16611,111.63320,"district police HQ",relation/17685688
+Sarawak,Miri,MY-13,4.40289,113.99969,"district police HQ",way/397915644
+Sarawak,Mukah,MY-13,2.89981,112.09172,"district police HQ",way/1428771570
+Sarawak,Padawan,MY-13,1.35441,110.40745,"district police HQ",way/217839066
+Sarawak,Saratok,MY-13,1.74078,111.33743,"town centre",node/2442094699
+Sarawak,Sarikei,MY-13,2.12948,111.52306,"town centre",node/2436437136
+Sarawak,Serian,MY-13,1.17303,110.56746,"district police HQ",way/996261247
+Sarawak,Sibu,MY-13,2.31395,111.83407,"district police HQ",way/972802881
+Sarawak,Simunjan,MY-13,1.38626,110.76842,"district police HQ",way/1225104746
+Sarawak,Song,MY-13,2.00690,112.54933,"town centre",node/2442172567
+Sarawak,"Sri Aman",MY-13,1.23486,111.46123,"district police HQ",way/1509006889
+Sarawak,Tatau,MY-13,2.87778,112.85230,"town centre",node/2463525016
+Selangor,"Ampang Jaya",MY-10,3.14918,101.75636,"district police HQ",way/415413449
+Selangor,Gombak,MY-10,3.25281,101.64145,"district police HQ",way/895507412
+Selangor,"Hulu Selangor",MY-10,3.56248,101.66035,"district police HQ",node/4840269072
+Selangor,Kajang,MY-10,2.99401,101.78831,"district police HQ",way/1117844372
+Selangor,"Klang Selatan",MY-10,3.04301,101.44730,"district police HQ",way/925779800
+Selangor,"Klang Utara",MY-10,3.09682,101.37725,"police station",way/1164811186
+Selangor,"Kuala Langat",MY-10,2.80485,101.49362,"district police HQ",way/290678153
+Selangor,"Kuala Selangor",MY-10,3.32126,101.26551,"district police HQ",way/903295801
+Selangor,"Petaling Jaya",MY-10,3.09880,101.64234,"district police HQ",relation/17066099
+Selangor,"Sabak Bernam",MY-10,3.76368,100.98433,"police station",way/793227512
+Selangor,Sepang,MY-10,2.80521,101.74059,"district police HQ",way/793426766
+Selangor,Serdang,MY-10,3.03842,101.65103,"district police HQ",way/565754610
+Selangor,"Shah Alam",MY-10,3.08587,101.52064,"district police HQ",way/1125185240
+Selangor,"Subang Jaya",MY-10,3.04543,101.58952,"district police HQ",way/220084658
+Selangor,"Sungai Buloh",MY-10,3.19392,101.56788,"district police HQ",way/823321554
+Terengganu,Besut,MY-11,5.79521,102.56506,"district police HQ",way/968541872
+Terengganu,Dungun,MY-11,4.74319,103.41554,"district police HQ",way/625263435
+Terengganu,"Hulu Terengganu",MY-11,5.07430,103.01720,"town centre",node/254072971
+Terengganu,Kemaman,MY-11,4.21931,103.42252,"town centre",node/254074007
+Terengganu,"Kuala Terengganu",MY-11,5.32965,103.13833,"town centre",node/369488213
+Terengganu,Marang,MY-11,5.21526,103.20078,"district police HQ",way/599293596
+Terengganu,Setiu,MY-11,5.53538,102.73386,"district police HQ",way/964762515
+"W.P. Kuala Lumpur",Brickfields,MY-14,3.13530,101.68430,"district police HQ",way/478060326
+"W.P. Kuala Lumpur",Cheras,MY-14,3.12666,101.72709,"district police HQ",way/516568218
+"W.P. Kuala Lumpur","Dang Wangi",MY-14,3.15613,101.69774,"district police HQ",way/926973137
+"W.P. Kuala Lumpur",Sentul,MY-14,3.17388,101.69165,"district police HQ",way/896953862
+"W.P. Kuala Lumpur","W.P. Putrajaya",MY-16,2.93090,101.67545,"district police HQ",way/500210408
+"W.P. Kuala Lumpur","Wangsa Maju",MY-14,3.13055,101.71634,"district police HQ",way/914995860

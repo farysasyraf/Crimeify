@@ -1,0 +1,26 @@
+crime-by-state.csv: crime by state and type, for years data.gov.my has no police district figures for yet
+
+Each state's (the police contingent's) crimes of each type in 2022, 2023 and 2024: murder, rape, robbery and causing
+injury (violent crime), and break-in, lorry and van theft, motorcar theft, motorcycle theft and other theft (property
+crime). "php artisan map:import-state-crime", and "php artisan map:import-crime" after it loads data.gov.my's file,
+add them to dbo.CrimeStats for the years data.gov.my's police district figures don't cover, 2024 so far, with
+Malaysia's added up from them. Years data.gov.my has come from data.gov.my, by police district.
+
+Source:    Royal Malaysia Police (Polis Diraja Malaysia), "Crime Index" tables A to D: crime index by contingent,
+           by contingent and category, and violent and property crime by contingent and type of crime, Malaysia,
+           2022-2024. From the file "Crime Index.xlsx".
+
+As the tables have them:
+  - Sabah includes W.P. Labuan, and W.P. Kuala Lumpur includes W.P. Putrajaya, as in data.gov.my's figures.
+  - Robbery is one figure, where data.gov.my has four kinds (by a gang or not, armed or not).
+  - "House break-in & theft" is break-in, and "Other thefts" other theft.
+  - A dash is none.
+
+Checked when this file was made:
+  - Every state's types add up to its violent and property crime in table B, and those to its crime index in table A.
+  - The 2022 and 2023 figures are the same as data.gov.my's for every state and type (robbery's four kinds added up).
+  - In table D's 2024 rows, the three vehicle theft columns hold motorcar, motorcycle and lorry theft, in that order,
+    rather than the headings' lorry, motorcar and motorcycle: read as headed, every state's lorry theft would rise
+    several times over and its motorcycle theft fall by nine tenths from 2023. This file has them under their types,
+    for example Johor's lorry theft 108, motorcar 526 and motorcycle 1,380 (2023: 69, 415 and 1,290).
+  - The tables' own total cells for 2024 are formulas pointing at the wrong rows, so the totals were added up instead.

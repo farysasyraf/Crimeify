@@ -1,0 +1,156 @@
+region,district,name,address,phone,osm_place
+MY-01,"Batu Pahat","Ibu Pejabat Polis Daerah Batu Pahat",,"07 4363300",way/908597864
+MY-01,"Iskandar Puteri","Ibu Pejabat Polis Daerah Iskandar Puteri",,,way/745726077
+MY-01,"Johor Bahru Selatan","Ibu Pejabat Polis Daerah Johor Bahru Selatan",,,
+MY-01,"Johor Bahru Utara","Ibu Pejabat Polis Daerah Johor Bahru Utara",,,way/1217366847
+MY-01,Kluang,"Balai Polis Kluang",,,way/750691987
+MY-01,"Kota Tinggi","Ibu Pejabat Polis Daerah Kota Tinggi",,,
+MY-01,Kulaijaya,"Ibu Pejabat Polis Daerah Kulai",,,way/886390485
+MY-01,Ledang,"Ibu Pejabat Polis Daerah Tangkak","Jalan Payamas, 84900 Tangkak, Johor",,way/949041301
+MY-01,Mersing,"Ibu Pejabat Polis Daerah Mersing",,,
+MY-01,Muar,"Ibu Pejabat Polis Daerah Muar",,,
+MY-01,Pontian,"Ibu Pejabat Polis Daerah Pontian",,,way/951371655
+MY-01,Segamat,"Balai Polis Segamat",,,way/584344702
+MY-01,"Seri Alam","Ibu Pejabat Polis Daerah Seri Alam",,,way/921909689
+MY-02,Baling,"Balai Polis Baling",,,way/816380183
+MY-02,"Bandar Baharu","Ibu Pejabat Polis Daerah Bandar Baharu",,,way/1057999597
+MY-02,"Kota Setar","Ibu Pejabat Polis Daerah Kota Setar",,,way/286170281
+MY-02,"Kuala Muda","Ibu Pejabat Polis Daerah Kuala Muda",,,way/371921166
+MY-02,"Kubang Pasu","Balai Polis Jitra",,,way/335057086
+MY-02,Kulim,"Ibu Pejabat Polis Daerah Kulim","Jalan Sultan Abdul Hamid, 09000 Kulim, Kedah",,way/627917775
+MY-02,Langkawi,"IPD Langkawi",,,node/1883550659
+MY-02,"Padang Terap","Ibu Pejabat Polis Daerah Padang Terap",,,
+MY-02,Pendang,"Ibu Pejabat Polis Daerah Pendang",,,way/392498510
+MY-02,Sik,"Ibu Pejabat Polis Daerah Sik",,,node/12352332197
+MY-02,Yan,"Ibu Pejabat Polis Daerah Yan",,,relation/13492111
+MY-03,Bachok,"Balai Polis Bachok",,,way/969207522
+MY-03,"Gua Musang","IPD Gua Musang",,,node/4835349308
+MY-03,Jeli,"Ibu Pejabat Polis Daerah Jeli",,,way/1473327892
+MY-03,"Kota Bharu","Ibu Pejabat Polis Daerah Kota Bharu",,,way/965482907
+MY-03,"Kuala Krai","Ibu Pejabat Polis Daerah Kuala Krai",,,
+MY-03,Machang,"Ibu Pejabat Polis Daerah Machang","Jalan Kota Bharu – Gua Musang, 18500, Kelantan",,way/1043755731
+MY-03,"Pasir Mas","Ibu Pejabat Polis Daerah Pasir Mas",,,way/884998722
+MY-03,"Pasir Puteh","Ibu Pejabat Polis Daerah Pasir Puteh",,,way/884998734
+MY-03,"Tanah Merah","Ibu Pejabat Polis Daerah Tanah Merah",,,
+MY-03,Tumpat,"Ibu Pejabat Polis Daerah Tumpat",,,node/5147918027
+MY-04,"Alor Gajah","Balai Polis Trafik Alor Gajah",,+606-5563222,way/968106300
+MY-04,Jasin,"Ibu Pejabat Polis Daerah Jasin",,+606-5292221,node/6122162995
+MY-04,"Melaka Tengah","Ibu Pejabat Daerah Melaka Tengah",,,way/548119343
+MY-05,Jelebu,"Balai Polis Kuala Klawang",,,way/608837476
+MY-05,Jempol,"Ibu Pejabat Polis Daerah (IPD) Jempol",,,way/713099962
+MY-05,"Kuala Pilah","Ibu Pejabat Polis Daerah Kuala Pilah",,,way/572161327
+MY-05,Nilai,"Ibu Pejabat Polis Daerah Nilai",,,way/1080236587
+MY-05,"Port Dickson","Ibu Pejabat Polis Daerah Port Dickson",,"+60 6 647 22 22",way/494672781
+MY-05,Rembau,"Ibu Pejabat Polis Daerah Rembau",,,way/965304077
+MY-05,Seremban,"IPD Seremban",,,way/505614898
+MY-05,Tampin,"Balai Polis Tampin",,,node/7802951225
+MY-06,Bentong,"Ibu Pejabat Polis Daerah Bentong",,,way/1214975284
+MY-06,Bera,"Ibu Pejabat Polis Daerah Bera",,,way/877346907
+MY-06,"Cameron Highlands","IPD Cameron Highlands",,,way/498641409
+MY-06,Jerantut,"Ibu Pejabat Polis Daerah Jerantut",,,
+MY-06,"Kuala Lipis","Ibu Pejabat Polis Daerah Lipis",,,way/1042605949
+MY-06,Kuantan,"Ibu Pejabat Polis (IPD) Kuantan",,,way/397386178
+MY-06,Maran,"Ibu Pejabat Polis Daerah Maran",,,
+MY-06,Pekan,"IPD Pekan",,,node/1855395256
+MY-06,Raub,"Ibu Pejabat Polis Daerah Raub",,,way/1042593071
+MY-06,Rompin,"Ibu Pejabat Polis Daerah Rompin",,,
+MY-06,Temerloh,"Ibupejabat Polis Daerah Temerloh","Jalan Ahmad Shah, 28000 Temerloh, Pahang",,node/2555708421
+MY-08,"Batu Gajah","Balai Polis Batu Gajah",,,way/312950615
+MY-08,Gerik,"Police IPD Gerik",,,node/2962198428
+MY-08,"Hilir Perak","IPD Hilir Perak","Jalan Sungai Manik, 36000 Teluk Intan, Perak",,way/555857798
+MY-08,Ipoh,"Ibu Pejabat Polis Daerah Ipoh",,"+60 5 2451500",way/300886385
+MY-08,Kampar,"Ibu Pejabat Polis Daerah Kampar",,,way/1381201292
+MY-08,Kerian,"Ibu Pejabat Polis Daerah Kerian",,,way/422587893
+MY-08,"Kuala Kangsar","IPD Kuala Kangsar",,,way/514883914
+MY-08,Manjung,"IPD Manjung",,,way/261252703
+MY-08,"Pengkalan Hulu","Ibu Pejabat Polis Daerah Pengkalan Hulu",,,
+MY-08,"Perak Tengah","IPD Perak Tengah",,,way/542987946
+MY-08,Selama,"Ibu Pejabat Polis Daerah Selama",,,way/645554206
+MY-08,"Sungai Siput","Ibu Pejabat Polis Daerah Sungai Siput","Jalan Kuala Kangsar, 31100 Sungai Siput, Perak",,way/543853994
+MY-08,Taiping,"Ibu Pejabat Polis Daerah Taiping",,,way/451846480
+MY-08,"Tanjong Malim","Balai Polis Tanjung Malim","Jalan Ketoyong, 35900 Tanjung Malim, Perak",05-4596222,way/562623115
+MY-08,Tapah,"Tapah District Police Station",,,way/540403749
+MY-09,Arau,"Ibu Pejabat Polis Daerah Arau",,,way/1518112378
+MY-09,Kangar,"IPD Kangar","Persiaran Jubli Emas, 01000, Perlis",049082222,way/1271641881
+MY-09,"Padang Besar","Padang Besar District Police HQ",,,way/1414550666
+MY-07,"Barat Daya","Ibu Pejabat Polis Daerah Barat Daya",,,way/1306922126
+MY-07,"Seberang Perai Selatan","IPD Seberang Perai Selatan",,,way/818452665
+MY-07,"Seberang Perai Tengah","Ibu Pejabat Daerah Seberang Perai Tengah",,,way/867152718
+MY-07,"Seberang Perai Utara","Ibu Pejabat Polis Daerah Seberang Perai Utara",,,way/488381469
+MY-07,"Timur Laut","Ibu Pejabat Polis Daerah Timur Laut",,,way/940369928
+MY-12,Beaufort,"Ibu Pejabat Daerah Beaufort",,,node/11703218789
+MY-12,Beluran,"Balai Polis Daerah Beluran","Jalan Bukit Beluran, Beluran, Sabah",,way/534883174
+MY-12,Keningau,"Ibu Pejabat Polis Daerah Keningau",,,way/1086039382
+MY-12,"Kota Belud","Ibu Pejabat Polis (IPD) Kota Belud",,,node/9024417957
+MY-12,"Kota Kinabalu","Ibu Pejabat Polis Daerah Kota Kinabalu",,,node/2113348313
+MY-12,"Kota Kinabatangan","Ibu Pejabat Polis Daerah Kota Kinabatangan",,,
+MY-12,"Kota Marudu","Ibu Pejabat Polis Daerah Kota Marudu",,,node/12997234184
+MY-12,Kudat,"Balai Polis Kudat",,,node/13354463447
+MY-12,Kunak,"Ibu Pejabat Polis Daerah (IPD) Kunak",,,node/7848627170
+MY-12,"Lahad Datu","Ibu Pejabat Polis Daerah Lahad Datu",,,
+MY-12,Papar,"Balai Polis Daerah Papar",,,node/2466526032
+MY-12,Penampang,"Ibu Pejabat Polis Daerah Penampang",,,
+MY-12,Ranau,"Ibu Pejabat Polis Daerah Ranau",,,way/566438751
+MY-12,Sandakan,"Ibu Pejabat Polis Daerah Sandakan",,,way/667120129
+MY-12,Semporna,"Ibu Pejabat Polis Daerah Semporna",,,
+MY-12,Sipitang,"Ibu Pejabat Polis Daerah Sipitang",,,way/1292198533
+MY-12,Tawau,"Ibu Pejabat Polis Daerah Tawau",,,way/1287100805
+MY-12,Tenom,"Ibu Pejabat Polis Daerah Tenom",,,node/9957564866
+MY-12,Tuaran,"Ibu Pejabat Polis Daerah Tuaran",,,node/2452956112
+MY-15,"W.P. Labuan","Ibu Pejabat Polis Daerah Labuan",,,way/1307657531
+MY-13,Bau,"Ibu Pejabat Polis Daerah Bau","Jalan Sebuku, 94000 Bau, Sarawak",,node/11508039246
+MY-13,Belaga,"Ibu Pejabat Polis Daerah Belaga",,,
+MY-13,Betong,"Ibu Pejabat Polis Daerah Betong",,,way/1548495078
+MY-13,Bintulu,"IPD Bintulu","JALAN TUN HUSSEIN ONN, 97000, Sarawak",086331121,node/4223306470
+MY-13,Dalat,"Ibu Pejabat Polis Daerah Dalat",,,
+MY-13,Julau,"Ibu Pejabat Polis Daerah Julau",,,
+MY-13,Kanowit,"IPD Kanowit",,,way/258088473
+MY-13,Kapit,"Ibu Pejabat Polis Daerah Kapit",,,node/12956305321
+MY-13,"Kota Samarahan","Ibu Pejabat Polis Daerah Kota Samarahan",,,way/326270388
+MY-13,Kuching,"Kuching District Police HQ",,,way/272228006
+MY-13,Lawas,"Balai Polis Lawas",,,node/11990103228
+MY-13,Limbang,"Ibu Pejabat Polis Daerah Limbang",,,node/3156043466
+MY-13,"Lubok Antu","Ibu Pejabat Polis Daerah Lubok Antu",,,node/13055760513
+MY-13,Lundu,"Ibu Pejabat Polis Daerah Lundu",,,
+MY-13,Marudi,"Balai polis marudi",,,node/11989673210
+MY-13,"Matu Daro","Balai Polis Daro",,,node/12981721241
+MY-13,Meradong,"Ibu Pejabat Polis Daerah Meradong",,,relation/17685688
+MY-13,Miri,"Ibu Pejabat Polis Daerah Miri","Jalan Miri-Pujut, 98000 Miri, Sarawak","085-432 533",way/397915644
+MY-13,Mukah,"Bahagian Pencegahan Jenayah dan Keselamatan Komuniti IPD Mukah",,,way/1428771570
+MY-13,Padawan,"IPD Siburan",,,way/217839066
+MY-13,Saratok,"Ibu Pejabat Polis Daerah Saratok",,,
+MY-13,Sarikei,"Ibu Pejabat Polis Daerah Sarikei",,,
+MY-13,Serian,"Ibu Pejabat Polis Daerah Serian",,,way/996261247
+MY-13,Sibu,"Ibu Pejabat Polis Daerah Sibu",,,way/972802881
+MY-13,Simunjan,"Ibu Pejabat Polis Daerah Simunjan",,,way/1225104746
+MY-13,Song,"Ibu Pejabat Polis Daerah Song",,,
+MY-13,"Sri Aman","Ibu Pejabat Polis Daerah Sri Aman",,,way/1509006889
+MY-13,Tatau,"Ibu Pejabat Polis Daerah Tatau",,,
+MY-10,"Ampang Jaya","IPD Ampang Jaya",,,way/415413449
+MY-10,Gombak,"Ibu Pejabat Polis Daerah Gombak",,,way/895507412
+MY-10,"Hulu Selangor","Ibu Pejabat Polis Daerah Hulu Selangor","Jalan Kubu, Kuala Kubu Bharu, Selangor",,node/4840269072
+MY-10,Kajang,"IPD Kajang","Jalan Semenyih, Kajang, Selangor","+603-8911 4222",way/1117844372
+MY-10,"Klang Selatan","Ibu Pejabat Polis Daerah Klang Selatan",,0333762222,way/925779800
+MY-10,"Klang Utara","Balai Polis Sungai Kapar (IPD Daerah Klang Utara)",,,way/1164811186
+MY-10,"Kuala Langat","Ibu Pejabat Polis Daerah Kuala Langat","Jalan Sultan Alam Shah, 42700, Selangor","03-3187 2222",way/290678153
+MY-10,"Kuala Selangor","Ibu Pejabat Polis Daerah Kuala Selangor",,,way/903295801
+MY-10,"Petaling Jaya","Ibu Pejabat Polis Daerah Petaling Jaya",,,relation/17066099
+MY-10,"Sabak Bernam","Balai Polis Sabak Bernam","Jalan Menteri, 45400 Sabak Bernam, Selangor","+603 3216 2222",way/793227512
+MY-10,Sepang,"Ibu Pejabat Polis Daerah Sepang",,"+603 8777 4484",way/793426766
+MY-10,Serdang,"Ibu Pejabat Polis Daerah Serdang",,,way/565754610
+MY-10,"Shah Alam","Ibu Pejabat Polis Daerah Shah Alam","Persiaran Kayangan, 40100 Shah Alam, Selangor","+603 5520 2222",way/1125185240
+MY-10,"Subang Jaya","Ibu Pejabat Polis Daerah (IPD) Subang Jaya",,,way/220084658
+MY-10,"Sungai Buloh","Ibu Pejabat Polis Daerah Sungai Buloh",,"+603 6156 1222",way/823321554
+MY-11,Besut,"Ibu Pejabat Polis Daerah Besut",,,way/968541872
+MY-11,Dungun,"Ibu Pejabat Polis Daerah Dungun",,,way/625263435
+MY-11,"Hulu Terengganu","Ibu Pejabat Polis Daerah Hulu Terengganu",,,
+MY-11,Kemaman,"Ibu Pejabat Polis Daerah Kemaman",,,
+MY-11,"Kuala Terengganu","Ibu Pejabat Polis Daerah Kuala Terengganu",,,
+MY-11,Marang,"IPD Marang",,,way/599293596
+MY-11,Setiu,"Ibu Pejabat Polis Daerah Setiu",,,way/964762515
+MY-14,Brickfields,"Ibu Pejabat Polis Daerah Brickfields","1 Jalan Selangor, Kuala Lumpur",,way/478060326
+MY-14,Cheras,"Ibu Pejabat Polis Daerah Cheras","Jalan Cheras, 55100 Kuala Lumpur",,way/516568218
+MY-14,"Dang Wangi","Ibu Pejabat Polis Daerah Dang Wangi","Jalan Dang Wangi, 50100 Kuala Lumpur",,way/926973137
+MY-14,Sentul,"Ibu Pejabat Polis Daerah Sentul","Jalan Sultan Azlan Shah, 51200 Kuala Lumpur",+60340482222,way/896953862
+MY-16,"W.P. Putrajaya","IPD Putrajaya",,,way/500210408
+MY-14,"Wangsa Maju","Ibu Pejabat Polis Daerah Wangsa Maju","Jalan Pudu, 55100 Kuala Lumpur",03-92850222,way/914995860

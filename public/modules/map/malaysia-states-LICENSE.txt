@@ -1,0 +1,13 @@
+malaysia-states.geojson: the boundaries of Malaysia's 13 states and 3 federal territories
+
+Source:    geoBoundaries (www.geoboundaries.org), gbOpen, Malaysia ADM1, simplified version
+           built 12 December 2023, from OpenStreetMap data (source data updated 19 January 2023)
+           https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM1/geoBoundaries-MYS-ADM1_simplified.geojson
+Licence:   Open Data Commons Open Database License 1.0 (ODbL)
+           https://opendatacommons.org/licenses/odbl/1-0/
+Credit:    © OpenStreetMap contributors (https://www.openstreetmap.org/copyright), shown on the map
+
+Changes:   coordinates rounded to 4 decimal places (about 11 m), points that became repeats removed,
+           and each region's properties cut down to its ISO 3166-2 code (shapeISO) and name (shapeName).
+
+Under the ODbL, this file stays under the ODbL if it's shared outside the app.

@@ -1,0 +1,219 @@
+/* Map page: the year and the chosen region's details above the map on the left, the list of regions on the right,
+   and "Find a police station" under the map. The list spans both rows; the second row is flexible, so when the list
+   is the taller, the room it needs goes under the finder rather than between the map and the finder. */
+.state-map-layout {
+    display: grid; grid-template-columns: minmax(0, 1fr) 240px; grid-template-rows: auto 1fr;
+    grid-template-areas: "main picker" "finder picker"; gap: 16px 20px; align-items: start;
+}
+.state-map-main { grid-area: main; display: grid; gap: 16px; min-width: 0; }
+.state-picker { grid-area: picker; }
+.station-finder { grid-area: finder; min-width: 0; }
+.state-map-card { overflow: hidden; }
+/* isolation keeps Leaflet's layers (z-index 400 to 1000) inside the map, under the sidebar drawer (40) and its
+   backdrop (30), rather than on top of them. */
+.state-map { height: min(72vh, 680px); min-height: 420px; background: #d8e4ee; font: inherit; isolation: isolate; }
+.state-map-note { margin: 0; padding: 12px 16px; color: var(--muted); }
+
+/* The panel above the map: the chosen region's name and figures on the left, the year on the right, and under it
+   the button back to all of Malaysia. */
+.state-panel {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "details year" "details all";
+    align-items: start; gap: 12px 24px; padding: 18px 20px;
+}
+.state-panel .crime-year, .state-panel .crime-note { grid-area: year; margin: 0; }
+.state-panel .crime-year { width: 180px; }
+.state-panel .crime-note { max-width: 320px; }
+.state-panel [data-show-all] { grid-area: all; justify-self: end; align-self: end; }
+.state-details { grid-area: details; min-width: 0; }
+.state-details h2 { margin: 0 0 2px; font-size: 1.15rem; }
+.state-details p { margin: 0 0 12px; }
+.state-details > :last-child { margin-bottom: 0; }
+
+/* Under the map, "Find a police station": the state and station lists side by side, then the chosen station's
+   name, police district, address and phone number. */
+.station-finder { padding: 18px 20px; }
+.station-finder h2 { margin: 0 0 2px; font-size: 1.15rem; }
+.station-finder-intro { margin: 0 0 14px; }
+.station-finder-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.station-finder-fields .field { margin-bottom: 0; }
+.station-note { margin: 0; padding: 10px 12px; border: 1px dashed rgba(255, 255, 255, .14); border-radius: 12px; color: var(--muted); font-size: .875rem; }
+.station-note code { overflow-wrap: anywhere; }
+.station-details { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.station-details h3 { margin: 0 0 2px; color: var(--primary); font-size: 1.05rem; }
+.station-place { margin: 0 0 12px; font-size: .875rem; }
+.station-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 0; }
+.station-facts dt { margin-bottom: 4px; color: var(--muted); font-size: .875rem; }
+.station-facts dd { margin: 0; overflow-wrap: anywhere; }
+.station-facts a { font-weight: 600; }
+/* The address as a link to the station on the map, after a pin, with where it opens under it. */
+.station-map-link { display: inline-flex; align-items: flex-start; gap: 4px; }
+.station-map-link .material-icon { flex: none; margin-top: 1px; font-size: 18px; }
+.station-map-hint { display: block; margin-top: 2px; font-size: .8125rem; }
+
+/* On a phone, which app opens the station (station-finder.js): the confirm box's charcoal panel with Google Maps and
+   Waze as bright blue buttons, one under the other, and Cancel under them. */
+.swal2-actions.swal-apps { flex-direction: column; align-items: stretch; width: 100%; max-width: 260px; }
+.btn.swal-app, .btn.swal-app-cancel { width: 100%; padding: 11px 24px; border: 0; border-radius: var(--radius-sm); font-weight: 700; }
+.btn.swal-app { background: var(--primary); color: var(--primary-text); }
+.btn.swal-app:hover { background: var(--primary-hover); }
+.btn.swal-app-cancel { background: var(--raised); color: var(--text); }
+.btn.swal-app:focus-visible, .btn.swal-app-cancel:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* The regions beside the map, the states and then the federal territories, each under its heading in the soft
+   blue; the chosen one a bright blue pill, as in the menu. */
+.state-picker { display: grid; gap: 14px; padding: 16px 10px; }
+.state-picker-group { display: grid; gap: 4px; }
+.state-list-heading {
+    margin: 0 0 2px 12px; color: var(--accent-soft);
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.state-list { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.state-choice {
+    display: block; width: 100%; padding: 7px 12px; border: 0; border-radius: 10px;
+    background: none; color: var(--text); font: inherit; font-size: .875rem; text-align: left; cursor: pointer;
+}
+.state-choice:hover { background: var(--raised); }
+.state-choice[aria-pressed="true"] { background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.state-choice:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+
+/* Leaflet's tooltips, buttons and credits as small charcoal panels, in the app's font. */
+.state-map .leaflet-tooltip {
+    padding: 4px 10px; border: 0; border-radius: 8px;
+    background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+}
+.state-map .leaflet-tooltip-top::before { border-top-color: var(--surface); }
+.state-map .leaflet-tooltip-bottom::before { border-bottom-color: var(--surface); }
+.state-map .leaflet-tooltip-left::before { border-left-color: var(--surface); }
+.state-map .leaflet-tooltip-right::before { border-right-color: var(--surface); }
+.state-map .leaflet-bar { border: 0; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 16px rgba(0, 0, 0, .35); }
+.state-map .leaflet-bar a, .state-map .leaflet-bar a:hover {
+    background-color: var(--surface); color: var(--text); border-bottom-color: rgba(255, 255, 255, .1);
+}
+.state-map .leaflet-bar a:hover, .state-map .leaflet-bar a:focus { background-color: var(--raised); }
+.state-map .leaflet-bar a.leaflet-disabled { background-color: var(--surface); color: #6b727d; }
+.state-map .leaflet-control-attribution { background: rgba(35, 37, 41, .88); color: var(--muted); border-top-left-radius: 8px; }
+.state-map .leaflet-control-attribution a { color: var(--accent-soft); }
+
+/* The year the crime figures are for, and why there are none. */
+.crime-year { margin-bottom: 16px; }
+.crime-year label { display: block; margin-bottom: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
+.crime-note { margin: 0 0 16px; padding: 10px 12px; border: 1px dashed rgba(255, 255, 255, .14); border-radius: 12px; color: var(--muted); font-size: .875rem; }
+.crime-note code { overflow-wrap: anywhere; }
+
+/* Each category's total, side by side, with how it compares with the year before: more crime in red, less in green. */
+.crime-totals { display: flex; flex-wrap: wrap; gap: 8px 40px; margin: 0 0 12px; }
+.crime-totals dt { color: var(--muted); font-size: .875rem; }
+.crime-totals dd { margin: 0; }
+.crime-totals strong { font-size: 1.15rem; margin-right: 2px; }
+.crime-change { font-size: .8rem; color: var(--muted); }
+.crime-up { color: var(--danger); }
+.crime-down { color: var(--success-text); }
+.state-details .crime-hint { font-size: .875rem; }
+
+/* A police district's popup: a dark, rounded card in either theme, with a bright blue title and totals and
+   softer blue for what's secondary. The blues, red and green are toned down from full saturation so they
+   don't glow on the dark background, and every text colour keeps at least 4.5:1 contrast with it. */
+.crime-popup-shell {
+    --popup-bg: #232529;
+    --popup-text: #eef2f6;
+    --popup-soft: #b4bec8;
+    --popup-accent: #3aaaf2;
+    --popup-accent-soft: #62a9dc;
+    --popup-rule: rgba(255, 255, 255, .08);
+    --popup-up: #ff8f8a;
+    --popup-down: #7fd8a4;
+}
+.crime-popup-shell .leaflet-popup-content-wrapper {
+    background: var(--popup-bg); color: var(--popup-text);
+    border-radius: 20px; box-shadow: 0 14px 36px rgba(0, 0, 0, .4);
+}
+.crime-popup-shell .leaflet-popup-tip { background: var(--popup-bg); box-shadow: none; }
+.crime-popup-shell .leaflet-popup-content { margin: 20px 22px 18px; }
+.state-map .crime-popup-shell a.leaflet-popup-close-button {
+    top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 50%;
+    color: var(--popup-soft); font: 20px/28px system-ui, sans-serif;
+}
+.state-map .crime-popup-shell a.leaflet-popup-close-button:hover { color: var(--popup-text); background: rgba(255, 255, 255, .08); }
+.state-map .crime-popup-shell a.leaflet-popup-close-button:focus-visible { outline: 2px solid var(--popup-accent); outline-offset: 1px; }
+
+/* As tall as the map leaves room for, then it scrolls: more on a wide screen and when enlarged. */
+.crime-popup {
+    max-height: min(500px, 55vh); overflow-y: auto; color: var(--popup-text); font-size: .8125rem;
+    scrollbar-color: #4a5058 transparent;
+}
+.map-dialog .crime-popup { max-height: min(560px, calc(100dvh - 200px)); }
+@media (max-width: 900px) {
+    .crime-popup { max-height: calc(60vh - 90px); }
+}
+.crime-popup h3 {
+    margin: 0 28px 2px 0; color: var(--popup-accent);
+    font-size: 1.25rem; font-weight: 700; line-height: 1.25; letter-spacing: -.01em;
+}
+.crime-popup .crime-popup-place { margin: 0 0 8px; color: var(--popup-accent-soft); font-size: .875rem; }
+
+/* How a total compares with the year before, as a rounded tag tinted with its colour. */
+.crime-popup .crime-change {
+    display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px;
+    background: rgba(255, 255, 255, .06); color: var(--popup-soft); font-size: .75rem; font-weight: 500;
+}
+.crime-popup .crime-up { background: rgba(255, 143, 138, .12); color: var(--popup-up); }
+.crime-popup .crime-down { background: rgba(127, 216, 164, .12); color: var(--popup-down); }
+
+.crime-types { width: 100%; margin-top: 10px; border-collapse: collapse; }
+.crime-types caption { padding: 0 0 6px; text-align: left; }
+.crime-types-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .9375rem; font-weight: 600; }
+.crime-types-heading strong { color: var(--popup-accent); font-size: 1.125rem; font-weight: 700; }
+.crime-types th, .crime-types td { padding: 3px 0; border-top: 1px solid var(--popup-rule); font-weight: 400; }
+.crime-types th { color: var(--popup-soft); text-align: left; }
+.crime-types td { color: var(--popup-text); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* The enlarge button, styled like Leaflet's zoom buttons above it. */
+.map-enlarge button {
+    display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0;
+    background: var(--surface); color: var(--text); cursor: pointer;
+}
+.map-enlarge button:hover { background: var(--raised); }
+.map-enlarge button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.map-enlarge .material-icon { font-size: 20px; }
+
+/* The enlarged map: a modal dialog filling the window but a margin, 16px on a phone up to 48px on a wide screen,
+   over the page dimmed like the sidebar's backdrop. The page behind doesn't scroll meanwhile. */
+.map-dialog {
+    --margin: clamp(16px, 3.5vw, 48px);
+    width: calc(100vw - 2 * var(--margin)); max-width: none;
+    height: calc(100vh - 2 * var(--margin)); height: calc(100dvh - 2 * var(--margin)); max-height: none;
+    padding: 0; border: 0; border-radius: var(--radius); overflow: hidden;
+    background: #d8e4ee; box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+}
+.map-dialog::backdrop { background: rgba(8, 12, 24, .65); }
+.map-dialog .state-map { height: 100%; min-height: 0; }
+html:has(.map-dialog[open]) { overflow: hidden; }
+
+/* Groups of pins in the app's bright blue, with dark numbers as on its buttons: the plugin's green, yellow and
+   orange would read as how much crime there is, when they only say how many pins. */
+.state-map .marker-cluster { background-color: rgba(58, 170, 242, .35); }
+.state-map .marker-cluster div { background-color: rgba(58, 170, 242, .95); color: var(--primary-text); font-weight: 700; }
+
+/* The list goes under the map once the two no longer fit side by side, its regions as rounded buttons in rows,
+   and "Find a police station" under the list. */
+@media (max-width: 900px) {
+    .state-map-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "main" "picker" "finder"; }
+    .state-map { height: 60vh; min-height: 340px; }
+    .state-picker { gap: 12px; padding: 16px 18px; }
+    .state-picker-group { gap: 8px; }
+    .state-list-heading { margin-left: 0; }
+    .state-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .state-choice { width: auto; padding: 6px 13px; border-radius: 999px; background: var(--raised); white-space: nowrap; }
+    .state-choice:hover { background: var(--raised-hover); }
+}
+
+/* On a phone, the panel's year goes above the region's details, and the button under them. */
+@media (max-width: 600px) {
+    .state-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: "year" "details" "all"; padding: 16px; }
+    .state-panel .crime-year { width: 100%; }
+    .state-panel [data-show-all] { justify-self: start; }
+    .state-picker { padding: 14px; }
+    .station-finder { padding: 16px; }
+    .station-finder-fields, .station-facts { grid-template-columns: minmax(0, 1fr); }
+    .station-finder-fields .field + .field { margin-top: 14px; }
+}

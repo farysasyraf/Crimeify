@@ -1,0 +1,379 @@
+state,category,type,year,crimes
+Johor,assault,murder,2022,30
+Johor,assault,rape,2022,147
+Johor,assault,robbery,2022,463
+Johor,assault,causing_injury,2022,333
+Johor,property,break_in,2022,767
+Johor,property,theft_vehicle_lorry,2022,73
+Johor,property,theft_vehicle_motorcar,2022,429
+Johor,property,theft_vehicle_motorcycle,2022,1179
+Johor,property,theft_other,2022,1041
+Kedah,assault,murder,2022,15
+Kedah,assault,rape,2022,159
+Kedah,assault,robbery,2022,417
+Kedah,assault,causing_injury,2022,302
+Kedah,property,break_in,2022,1130
+Kedah,property,theft_vehicle_lorry,2022,30
+Kedah,property,theft_vehicle_motorcar,2022,172
+Kedah,property,theft_vehicle_motorcycle,2022,1066
+Kedah,property,theft_other,2022,1360
+Kelantan,assault,murder,2022,6
+Kelantan,assault,rape,2022,98
+Kelantan,assault,robbery,2022,129
+Kelantan,assault,causing_injury,2022,215
+Kelantan,property,break_in,2022,472
+Kelantan,property,theft_vehicle_lorry,2022,18
+Kelantan,property,theft_vehicle_motorcar,2022,122
+Kelantan,property,theft_vehicle_motorcycle,2022,601
+Kelantan,property,theft_other,2022,545
+Melaka,assault,murder,2022,5
+Melaka,assault,rape,2022,59
+Melaka,assault,robbery,2022,75
+Melaka,assault,causing_injury,2022,125
+Melaka,property,break_in,2022,375
+Melaka,property,theft_vehicle_lorry,2022,8
+Melaka,property,theft_vehicle_motorcar,2022,26
+Melaka,property,theft_vehicle_motorcycle,2022,220
+Melaka,property,theft_other,2022,404
+"Negeri Sembilan",assault,murder,2022,9
+"Negeri Sembilan",assault,rape,2022,65
+"Negeri Sembilan",assault,robbery,2022,153
+"Negeri Sembilan",assault,causing_injury,2022,153
+"Negeri Sembilan",property,break_in,2022,382
+"Negeri Sembilan",property,theft_vehicle_lorry,2022,10
+"Negeri Sembilan",property,theft_vehicle_motorcar,2022,81
+"Negeri Sembilan",property,theft_vehicle_motorcycle,2022,337
+"Negeri Sembilan",property,theft_other,2022,594
+Pahang,assault,murder,2022,11
+Pahang,assault,rape,2022,118
+Pahang,assault,robbery,2022,74
+Pahang,assault,causing_injury,2022,192
+Pahang,property,break_in,2022,423
+Pahang,property,theft_vehicle_lorry,2022,17
+Pahang,property,theft_vehicle_motorcar,2022,89
+Pahang,property,theft_vehicle_motorcycle,2022,312
+Pahang,property,theft_other,2022,648
+Perak,assault,murder,2022,27
+Perak,assault,rape,2022,100
+Perak,assault,robbery,2022,320
+Perak,assault,causing_injury,2022,323
+Perak,property,break_in,2022,724
+Perak,property,theft_vehicle_lorry,2022,37
+Perak,property,theft_vehicle_motorcar,2022,196
+Perak,property,theft_vehicle_motorcycle,2022,609
+Perak,property,theft_other,2022,924
+Perlis,assault,murder,2022,0
+Perlis,assault,rape,2022,31
+Perlis,assault,robbery,2022,18
+Perlis,assault,causing_injury,2022,33
+Perlis,property,break_in,2022,101
+Perlis,property,theft_vehicle_lorry,2022,2
+Perlis,property,theft_vehicle_motorcar,2022,8
+Perlis,property,theft_vehicle_motorcycle,2022,53
+Perlis,property,theft_other,2022,156
+"Pulau Pinang",assault,murder,2022,10
+"Pulau Pinang",assault,rape,2022,124
+"Pulau Pinang",assault,robbery,2022,408
+"Pulau Pinang",assault,causing_injury,2022,405
+"Pulau Pinang",property,break_in,2022,627
+"Pulau Pinang",property,theft_vehicle_lorry,2022,33
+"Pulau Pinang",property,theft_vehicle_motorcar,2022,142
+"Pulau Pinang",property,theft_vehicle_motorcycle,2022,697
+"Pulau Pinang",property,theft_other,2022,1017
+Sabah,assault,murder,2022,24
+Sabah,assault,rape,2022,197
+Sabah,assault,robbery,2022,126
+Sabah,assault,causing_injury,2022,169
+Sabah,property,break_in,2022,1297
+Sabah,property,theft_vehicle_lorry,2022,41
+Sabah,property,theft_vehicle_motorcar,2022,105
+Sabah,property,theft_vehicle_motorcycle,2022,377
+Sabah,property,theft_other,2022,1765
+Sarawak,assault,murder,2022,22
+Sarawak,assault,rape,2022,119
+Sarawak,assault,robbery,2022,141
+Sarawak,assault,causing_injury,2022,306
+Sarawak,property,break_in,2022,891
+Sarawak,property,theft_vehicle_lorry,2022,21
+Sarawak,property,theft_vehicle_motorcar,2022,278
+Sarawak,property,theft_vehicle_motorcycle,2022,688
+Sarawak,property,theft_other,2022,1421
+Selangor,assault,murder,2022,60
+Selangor,assault,rape,2022,354
+Selangor,assault,robbery,2022,1565
+Selangor,assault,causing_injury,2022,841
+Selangor,property,break_in,2022,2415
+Selangor,property,theft_vehicle_lorry,2022,334
+Selangor,property,theft_vehicle_motorcar,2022,1051
+Selangor,property,theft_vehicle_motorcycle,2022,2869
+Selangor,property,theft_other,2022,3536
+Terengganu,assault,murder,2022,4
+Terengganu,assault,rape,2022,66
+Terengganu,assault,robbery,2022,51
+Terengganu,assault,causing_injury,2022,102
+Terengganu,property,break_in,2022,439
+Terengganu,property,theft_vehicle_lorry,2022,10
+Terengganu,property,theft_vehicle_motorcar,2022,38
+Terengganu,property,theft_vehicle_motorcycle,2022,222
+Terengganu,property,theft_other,2022,545
+"W.P. Kuala Lumpur",assault,murder,2022,17
+"W.P. Kuala Lumpur",assault,rape,2022,75
+"W.P. Kuala Lumpur",assault,robbery,2022,649
+"W.P. Kuala Lumpur",assault,causing_injury,2022,308
+"W.P. Kuala Lumpur",property,break_in,2022,542
+"W.P. Kuala Lumpur",property,theft_vehicle_lorry,2022,84
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcar,2022,534
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcycle,2022,1227
+"W.P. Kuala Lumpur",property,theft_other,2022,1478
+Johor,assault,murder,2023,31
+Johor,assault,rape,2023,194
+Johor,assault,robbery,2023,637
+Johor,assault,causing_injury,2023,366
+Johor,property,break_in,2023,993
+Johor,property,theft_vehicle_lorry,2023,69
+Johor,property,theft_vehicle_motorcar,2023,415
+Johor,property,theft_vehicle_motorcycle,2023,1290
+Johor,property,theft_other,2023,1335
+Kedah,assault,murder,2023,19
+Kedah,assault,rape,2023,184
+Kedah,assault,robbery,2023,257
+Kedah,assault,causing_injury,2023,260
+Kedah,property,break_in,2023,1353
+Kedah,property,theft_vehicle_lorry,2023,40
+Kedah,property,theft_vehicle_motorcar,2023,198
+Kedah,property,theft_vehicle_motorcycle,2023,961
+Kedah,property,theft_other,2023,1295
+Kelantan,assault,murder,2023,9
+Kelantan,assault,rape,2023,130
+Kelantan,assault,robbery,2023,104
+Kelantan,assault,causing_injury,2023,147
+Kelantan,property,break_in,2023,443
+Kelantan,property,theft_vehicle_lorry,2023,9
+Kelantan,property,theft_vehicle_motorcar,2023,128
+Kelantan,property,theft_vehicle_motorcycle,2023,539
+Kelantan,property,theft_other,2023,485
+Melaka,assault,murder,2023,13
+Melaka,assault,rape,2023,76
+Melaka,assault,robbery,2023,113
+Melaka,assault,causing_injury,2023,108
+Melaka,property,break_in,2023,428
+Melaka,property,theft_vehicle_lorry,2023,7
+Melaka,property,theft_vehicle_motorcar,2023,53
+Melaka,property,theft_vehicle_motorcycle,2023,230
+Melaka,property,theft_other,2023,429
+"Negeri Sembilan",assault,murder,2023,8
+"Negeri Sembilan",assault,rape,2023,63
+"Negeri Sembilan",assault,robbery,2023,194
+"Negeri Sembilan",assault,causing_injury,2023,152
+"Negeri Sembilan",property,break_in,2023,398
+"Negeri Sembilan",property,theft_vehicle_lorry,2023,27
+"Negeri Sembilan",property,theft_vehicle_motorcar,2023,79
+"Negeri Sembilan",property,theft_vehicle_motorcycle,2023,331
+"Negeri Sembilan",property,theft_other,2023,643
+Pahang,assault,murder,2023,5
+Pahang,assault,rape,2023,119
+Pahang,assault,robbery,2023,117
+Pahang,assault,causing_injury,2023,168
+Pahang,property,break_in,2023,387
+Pahang,property,theft_vehicle_lorry,2023,24
+Pahang,property,theft_vehicle_motorcar,2023,99
+Pahang,property,theft_vehicle_motorcycle,2023,386
+Pahang,property,theft_other,2023,570
+Perak,assault,murder,2023,30
+Perak,assault,rape,2023,114
+Perak,assault,robbery,2023,374
+Perak,assault,causing_injury,2023,334
+Perak,property,break_in,2023,835
+Perak,property,theft_vehicle_lorry,2023,27
+Perak,property,theft_vehicle_motorcar,2023,194
+Perak,property,theft_vehicle_motorcycle,2023,594
+Perak,property,theft_other,2023,1070
+Perlis,assault,murder,2023,3
+Perlis,assault,rape,2023,28
+Perlis,assault,robbery,2023,20
+Perlis,assault,causing_injury,2023,24
+Perlis,property,break_in,2023,94
+Perlis,property,theft_vehicle_lorry,2023,0
+Perlis,property,theft_vehicle_motorcar,2023,4
+Perlis,property,theft_vehicle_motorcycle,2023,51
+Perlis,property,theft_other,2023,115
+"Pulau Pinang",assault,murder,2023,12
+"Pulau Pinang",assault,rape,2023,98
+"Pulau Pinang",assault,robbery,2023,377
+"Pulau Pinang",assault,causing_injury,2023,333
+"Pulau Pinang",property,break_in,2023,745
+"Pulau Pinang",property,theft_vehicle_lorry,2023,31
+"Pulau Pinang",property,theft_vehicle_motorcar,2023,153
+"Pulau Pinang",property,theft_vehicle_motorcycle,2023,674
+"Pulau Pinang",property,theft_other,2023,1181
+Sabah,assault,murder,2023,26
+Sabah,assault,rape,2023,225
+Sabah,assault,robbery,2023,107
+Sabah,assault,causing_injury,2023,176
+Sabah,property,break_in,2023,1370
+Sabah,property,theft_vehicle_lorry,2023,35
+Sabah,property,theft_vehicle_motorcar,2023,103
+Sabah,property,theft_vehicle_motorcycle,2023,376
+Sabah,property,theft_other,2023,1699
+Sarawak,assault,murder,2023,13
+Sarawak,assault,rape,2023,121
+Sarawak,assault,robbery,2023,173
+Sarawak,assault,causing_injury,2023,251
+Sarawak,property,break_in,2023,960
+Sarawak,property,theft_vehicle_lorry,2023,56
+Sarawak,property,theft_vehicle_motorcar,2023,259
+Sarawak,property,theft_vehicle_motorcycle,2023,822
+Sarawak,property,theft_other,2023,1390
+Selangor,assault,murder,2023,67
+Selangor,assault,rape,2023,375
+Selangor,assault,robbery,2023,1560
+Selangor,assault,causing_injury,2023,951
+Selangor,property,break_in,2023,2713
+Selangor,property,theft_vehicle_lorry,2023,350
+Selangor,property,theft_vehicle_motorcar,2023,1032
+Selangor,property,theft_vehicle_motorcycle,2023,2898
+Selangor,property,theft_other,2023,3793
+Terengganu,assault,murder,2023,6
+Terengganu,assault,rape,2023,86
+Terengganu,assault,robbery,2023,44
+Terengganu,assault,causing_injury,2023,111
+Terengganu,property,break_in,2023,385
+Terengganu,property,theft_vehicle_lorry,2023,10
+Terengganu,property,theft_vehicle_motorcar,2023,26
+Terengganu,property,theft_vehicle_motorcycle,2023,233
+Terengganu,property,theft_other,2023,469
+"W.P. Kuala Lumpur",assault,murder,2023,16
+"W.P. Kuala Lumpur",assault,rape,2023,101
+"W.P. Kuala Lumpur",assault,robbery,2023,511
+"W.P. Kuala Lumpur",assault,causing_injury,2023,312
+"W.P. Kuala Lumpur",property,break_in,2023,453
+"W.P. Kuala Lumpur",property,theft_vehicle_lorry,2023,79
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcar,2023,502
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcycle,2023,1203
+"W.P. Kuala Lumpur",property,theft_other,2023,1363
+Johor,assault,murder,2024,32
+Johor,assault,rape,2024,236
+Johor,assault,robbery,2024,444
+Johor,assault,causing_injury,2024,456
+Johor,property,break_in,2024,695
+Johor,property,theft_vehicle_lorry,2024,108
+Johor,property,theft_vehicle_motorcar,2024,526
+Johor,property,theft_vehicle_motorcycle,2024,1380
+Johor,property,theft_other,2024,1483
+Kedah,assault,murder,2024,14
+Kedah,assault,rape,2024,142
+Kedah,assault,robbery,2024,242
+Kedah,assault,causing_injury,2024,268
+Kedah,property,break_in,2024,1051
+Kedah,property,theft_vehicle_lorry,2024,38
+Kedah,property,theft_vehicle_motorcar,2024,166
+Kedah,property,theft_vehicle_motorcycle,2024,847
+Kedah,property,theft_other,2024,1308
+Kelantan,assault,murder,2024,4
+Kelantan,assault,rape,2024,157
+Kelantan,assault,robbery,2024,105
+Kelantan,assault,causing_injury,2024,157
+Kelantan,property,break_in,2024,728
+Kelantan,property,theft_vehicle_lorry,2024,12
+Kelantan,property,theft_vehicle_motorcar,2024,68
+Kelantan,property,theft_vehicle_motorcycle,2024,333
+Kelantan,property,theft_other,2024,732
+Melaka,assault,murder,2024,2
+Melaka,assault,rape,2024,79
+Melaka,assault,robbery,2024,99
+Melaka,assault,causing_injury,2024,145
+Melaka,property,break_in,2024,428
+Melaka,property,theft_vehicle_lorry,2024,15
+Melaka,property,theft_vehicle_motorcar,2024,70
+Melaka,property,theft_vehicle_motorcycle,2024,212
+Melaka,property,theft_other,2024,642
+"Negeri Sembilan",assault,murder,2024,11
+"Negeri Sembilan",assault,rape,2024,65
+"Negeri Sembilan",assault,robbery,2024,189
+"Negeri Sembilan",assault,causing_injury,2024,163
+"Negeri Sembilan",property,break_in,2024,422
+"Negeri Sembilan",property,theft_vehicle_lorry,2024,19
+"Negeri Sembilan",property,theft_vehicle_motorcar,2024,105
+"Negeri Sembilan",property,theft_vehicle_motorcycle,2024,267
+"Negeri Sembilan",property,theft_other,2024,879
+Pahang,assault,murder,2024,11
+Pahang,assault,rape,2024,112
+Pahang,assault,robbery,2024,88
+Pahang,assault,causing_injury,2024,177
+Pahang,property,break_in,2024,426
+Pahang,property,theft_vehicle_lorry,2024,28
+Pahang,property,theft_vehicle_motorcar,2024,107
+Pahang,property,theft_vehicle_motorcycle,2024,302
+Pahang,property,theft_other,2024,771
+Perak,assault,murder,2024,30
+Perak,assault,rape,2024,150
+Perak,assault,robbery,2024,392
+Perak,assault,causing_injury,2024,488
+Perak,property,break_in,2024,1368
+Perak,property,theft_vehicle_lorry,2024,49
+Perak,property,theft_vehicle_motorcar,2024,287
+Perak,property,theft_vehicle_motorcycle,2024,668
+Perak,property,theft_other,2024,2530
+Perlis,assault,murder,2024,1
+Perlis,assault,rape,2024,31
+Perlis,assault,robbery,2024,15
+Perlis,assault,causing_injury,2024,26
+Perlis,property,break_in,2024,104
+Perlis,property,theft_vehicle_lorry,2024,0
+Perlis,property,theft_vehicle_motorcar,2024,2
+Perlis,property,theft_vehicle_motorcycle,2024,42
+Perlis,property,theft_other,2024,224
+"Pulau Pinang",assault,murder,2024,9
+"Pulau Pinang",assault,rape,2024,104
+"Pulau Pinang",assault,robbery,2024,305
+"Pulau Pinang",assault,causing_injury,2024,446
+"Pulau Pinang",property,break_in,2024,647
+"Pulau Pinang",property,theft_vehicle_lorry,2024,43
+"Pulau Pinang",property,theft_vehicle_motorcar,2024,159
+"Pulau Pinang",property,theft_vehicle_motorcycle,2024,774
+"Pulau Pinang",property,theft_other,2024,1363
+Sabah,assault,murder,2024,22
+Sabah,assault,rape,2024,283
+Sabah,assault,robbery,2024,145
+Sabah,assault,causing_injury,2024,239
+Sabah,property,break_in,2024,1252
+Sabah,property,theft_vehicle_lorry,2024,57
+Sabah,property,theft_vehicle_motorcar,2024,81
+Sabah,property,theft_vehicle_motorcycle,2024,451
+Sabah,property,theft_other,2024,1739
+Sarawak,assault,murder,2024,26
+Sarawak,assault,rape,2024,145
+Sarawak,assault,robbery,2024,155
+Sarawak,assault,causing_injury,2024,286
+Sarawak,property,break_in,2024,1089
+Sarawak,property,theft_vehicle_lorry,2024,37
+Sarawak,property,theft_vehicle_motorcar,2024,232
+Sarawak,property,theft_vehicle_motorcycle,2024,862
+Sarawak,property,theft_other,2024,2122
+Selangor,assault,murder,2024,56
+Selangor,assault,rape,2024,372
+Selangor,assault,robbery,2024,1251
+Selangor,assault,causing_injury,2024,1008
+Selangor,property,break_in,2024,1978
+Selangor,property,theft_vehicle_lorry,2024,308
+Selangor,property,theft_vehicle_motorcar,2024,1000
+Selangor,property,theft_vehicle_motorcycle,2024,2578
+Selangor,property,theft_other,2024,3359
+Terengganu,assault,murder,2024,0
+Terengganu,assault,rape,2024,90
+Terengganu,assault,robbery,2024,47
+Terengganu,assault,causing_injury,2024,137
+Terengganu,property,break_in,2024,391
+Terengganu,property,theft_vehicle_lorry,2024,5
+Terengganu,property,theft_vehicle_motorcar,2024,23
+Terengganu,property,theft_vehicle_motorcycle,2024,175
+Terengganu,property,theft_other,2024,741
+"W.P. Kuala Lumpur",assault,murder,2024,18
+"W.P. Kuala Lumpur",assault,rape,2024,108
+"W.P. Kuala Lumpur",assault,robbery,2024,797
+"W.P. Kuala Lumpur",assault,causing_injury,2024,487
+"W.P. Kuala Lumpur",property,break_in,2024,755
+"W.P. Kuala Lumpur",property,theft_vehicle_lorry,2024,69
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcar,2024,475
+"W.P. Kuala Lumpur",property,theft_vehicle_motorcycle,2024,1218
+"W.P. Kuala Lumpur",property,theft_other,2024,3763

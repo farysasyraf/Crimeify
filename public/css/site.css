@@ -1,0 +1,678 @@
+/* The whole app is dark, in the style of the sidebar and the Map page's crime popups, whatever the system's theme:
+   charcoal panels with rounded corners on a near-black page, off-white text, soft grey and soft blue for what's
+   secondary, and bright blue for what can be clicked. The colours are toned down from full saturation so they
+   don't glow on the dark background, every text colour keeps at least 4.5:1 contrast with what it sits on, and
+   form fields' edges keep 3:1. Up is red and down is green where figures compare, as more crime is worse. */
+:root {
+    color-scheme: dark;
+    --bg: #16171a;
+    --surface: #232529;
+    /* Buttons on a panel, and a panel's hover. */
+    --raised: #2c2f34;
+    --raised-hover: #353940;
+    /* Form fields sit lower than the panel they're on. */
+    --field: #1b1d20;
+    --field-border: #6b727d;
+    --text: #eef2f6;
+    --muted: #b4bec8;
+    --accent-soft: #62a9dc;
+    --border: #34373d;
+    --primary: #3aaaf2;
+    --primary-hover: #5cbaf5;
+    /* Text on the bright blue: white on it would be only 2.6:1. */
+    --primary-text: #0d1b26;
+    --danger: #ff8f8a;
+    --danger-hover: #ffa9a5;
+    --danger-text: #2b0f0e;
+    --success-bg: rgba(127, 216, 164, .14);
+    --success-text: #7fd8a4;
+    /* A green button, like the confirmation box's Yes, with dark text: white on the mint would be only 1.7:1. */
+    --success: #7fd8a4;
+    --success-hover: #9be4ba;
+    --success-dark: #0f2a1c;
+    --error-bg: rgba(255, 143, 138, .13);
+    --error-text: #ffb3ae;
+    --row-hover: rgba(255, 255, 255, .04);
+    --nav-active-bg: rgba(58, 170, 242, .15);
+    --focus: rgba(58, 170, 242, .6);
+    --mark-bg: rgba(245, 176, 65, .38);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --shadow: 0 14px 36px rgba(0, 0, 0, .28);
+
+    /* Left menu: a dark, rounded panel, a little lighter at the top. */
+    --side-bg-top: #292b30;
+    --side-bg-bottom: #1f2124;
+    --side-text: #eef2f6;
+    --side-muted: #b4bec8;
+    --side-hover: rgba(255, 255, 255, .06);
+    --side-current: rgba(255, 255, 255, .08);
+    --side-accent: #3aaaf2;
+    --side-accent-soft: #62a9dc;
+    --side-accent-text: #0d1b26;
+    --side-divider: rgba(255, 255, 255, .14);
+    --side-width: 250px;
+    --side-narrow-width: 96px;
+    --side-gap: 16px;
+}
+
+/* Material Icons Round, as AMV's menu uses, served from this app (Apache License 2.0, see fonts/material-icons-LICENSE.txt). */
+@font-face {
+    font-family: "Material Icons Round";
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url("../fonts/material-icons-round.woff2") format("woff2");
+}
+.material-icon {
+    display: inline-block; font-family: "Material Icons Round"; font-weight: normal; font-style: normal;
+    font-size: 24px; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap;
+    direction: ltr; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scrollbar-color: #3d4148 var(--bg); }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+::selection { background: rgba(58, 170, 242, .35); }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 .25rem; letter-spacing: -.01em; }
+
+code {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: .9em;
+    background: rgba(255, 255, 255, .07);
+    padding: .1em .4em;
+    border-radius: 6px;
+}
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.muted { color: var(--muted); }
+.nowrap { white-space: nowrap; }
+/* Something marked hidden stays hidden, even when its class sets a display, like .btn does. */
+[hidden] { display: none !important; }
+.visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Top bar: on the page itself, with a faint line under it. */
+.topbar { background: transparent; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+/* The login page's logo and name, in the menu's bright blue. */
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; color: var(--primary); }
+.brand img { border-radius: 8px; }
+.brand:hover { text-decoration: none; }
+.topbar-user { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.topbar-user form { margin: 0; }
+.topbar-name { color: var(--muted); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Public pages (layouts/public.blade.php): the logo, the pages as pills and Log in along the top, which stays in
+   view while scrolling, then the page as wide as the screen allows without the menu. */
+.public-topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(22, 23, 26, .92); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.public-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; max-width: 1320px; margin: 0 auto; padding: 12px 24px; }
+.public-nav { display: flex; gap: 6px; }
+.public-link {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--radius-sm);
+    color: var(--text); font-weight: 500;
+}
+.public-link:hover { background: var(--row-hover); text-decoration: none; }
+.public-link .material-icon { font-size: 20px; color: var(--primary); }
+/* The page you're on is a bright blue pill, as in the app's menu. */
+.public-link.active { background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.public-link.active .material-icon { color: inherit; }
+.public-link:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.public-account { margin-left: auto; }
+.public-main { flex: 1; width: 100%; max-width: 1320px; margin: 0 auto; padding: 28px 24px 40px; }
+.public-footer { border-top: 1px solid rgba(255, 255, 255, .06); color: var(--muted); font-size: .85rem; }
+.public-footer .public-bar { display: block; padding-top: 16px; padding-bottom: 24px; }
+@media (max-width: 640px) {
+    .public-bar { padding: 10px 16px; }
+    /* The pages share the width under the logo. */
+    .public-nav { order: 3; width: 100%; }
+    .public-link { flex: 1; justify-content: center; }
+    .public-main { padding: 20px 16px 32px; }
+}
+
+/* Login page */
+.guest-main { flex: 1; padding-top: 48px; padding-bottom: 40px; }
+.auth-card { margin: 0 auto; max-width: 400px; }
+.auth-card h1 { margin-bottom: .25rem; }
+.auth-card > .muted { margin: 0 0 20px; color: var(--accent-soft); }
+.auth-public { max-width: 400px; margin: 16px auto 0; color: var(--muted); text-align: center; }
+.btn-block { width: 100%; }
+
+/* The login page's backdrop (login-backdrop.js): the video filling the window behind everything, darkened toward
+   the bottom so the form and its text keep their contrast over the neon, with the top bar, the form and the line
+   under it as frosted panels over it. The pause button sits in the bottom right corner. */
+.login-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+.login-backdrop-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.login-backdrop::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10, 12, 16, .5) 0%, rgba(10, 12, 16, .62) 55%, rgba(10, 12, 16, .8) 100%);
+}
+.has-backdrop .topbar, .has-backdrop .guest-main { position: relative; z-index: 1; }
+.has-backdrop .topbar { background: rgba(22, 23, 26, .6); backdrop-filter: blur(8px); }
+.has-backdrop .auth-card { background: rgba(35, 37, 41, .88); backdrop-filter: blur(12px); }
+.has-backdrop .auth-public { padding: 10px 16px; border-radius: var(--radius-sm); background: rgba(22, 23, 26, .78); backdrop-filter: blur(8px); }
+.login-backdrop-toggle {
+    position: fixed; right: 16px; bottom: 16px; z-index: 2; display: grid; place-items: center;
+    width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%;
+    background: rgba(35, 37, 41, .85); color: var(--text); box-shadow: var(--shadow); cursor: pointer;
+}
+.login-backdrop-toggle:hover { background: var(--raised-hover); }
+.login-backdrop-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+/* App shell: the menu floats on the left as a rounded panel, as in AMV; the page sits beside it */
+.app-shell { flex: 1; display: flex; min-height: 100vh; }
+.app-main {
+    flex: 1; min-width: 0; display: flex; flex-direction: column;
+    margin-left: calc(var(--side-width) + var(--side-gap) * 1.5); transition: margin-left .2s ease;
+}
+.app-topbar { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 28px; }
+.app-topbar .topbar-user { margin-left: auto; }
+.main { flex: 1; width: 100%; max-width: 1140px; padding: 28px 28px 40px; }
+.footer { color: var(--muted); font-size: .85rem; padding: 16px 28px 24px; border-top: 1px solid rgba(255, 255, 255, .06); }
+.app-topbar .menu-toggle, .app-topbar .menu-narrow-toggle, .menu-backdrop { display: none; }
+/* Both of the top bar's menu buttons are the same ≡, as in AMV; which one shows depends on the screen's width. */
+.app-topbar :is(.menu-toggle, .menu-narrow-toggle) { padding: 6px; color: var(--muted); }
+
+/* Left menu, laid out like AMV's sidebar */
+.sidebar {
+    position: fixed; z-index: 40; top: var(--side-gap); bottom: var(--side-gap); left: var(--side-gap);
+    width: var(--side-width); display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto;
+    border-radius: 20px; background: linear-gradient(195deg, var(--side-bg-top), var(--side-bg-bottom));
+    box-shadow: 0 14px 36px rgba(16, 24, 40, .18);
+    color: var(--side-text); font-size: .875rem; scrollbar-color: #4a5058 transparent;
+    transition: width .2s ease, transform .2s ease, visibility .2s, box-shadow .2s ease;
+}
+.side-header { position: relative; flex: none; }
+.side-brand {
+    display: flex; align-items: center; gap: 12px; height: 78px; padding: 0 32px;
+    color: var(--side-accent); font-size: 1.15rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+}
+.side-brand:hover { text-decoration: none; }
+.side-brand img { flex: none; border-radius: 8px; }
+.side-close {
+    display: none; position: absolute; top: 10px; right: 10px; place-items: center; width: 32px; height: 32px;
+    border: 0; border-radius: 8px; background: none; color: var(--side-muted); cursor: pointer;
+}
+.side-close:hover { background: var(--side-hover); color: var(--side-text); }
+.side-divider {
+    flex: none; height: 1px; margin: 0 0 8px; border: 0; opacity: 1;
+    background: linear-gradient(to right, transparent, var(--side-divider), transparent);
+}
+.side-profile { margin-bottom: 8px; }
+.side-nav { padding-bottom: 16px; }
+.side-section {
+    margin: 16px 0 6px; padding-left: 32px; color: var(--side-accent-soft); white-space: nowrap;
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.side-empty { margin: 0; padding: 8px 32px; color: var(--side-muted); }
+.side-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.side-row { display: flex; align-items: center; margin: 1.5px 16px; border-radius: 12px; }
+.side-row:hover { background: var(--side-hover); }
+.side-link {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    border: 0; border-radius: 12px; background: none; color: var(--side-text);
+    font: inherit; text-align: left; cursor: pointer;
+}
+.side-link:hover { text-decoration: none; }
+/* Long module names wrap rather than being cut off. */
+.side-text { flex: 1; min-width: 0; overflow-wrap: anywhere; transition: opacity .2s ease; }
+.side-icon { flex: none; width: 29px; text-align: center; }
+/* Links under a group get a slightly smaller icon, so the levels still read apart. */
+.side-level-2 .side-icon, .side-level-3 .side-icon { font-size: 20px; }
+.side-avatar {
+    flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(58, 170, 242, .16); color: var(--side-accent); font-size: .75rem; font-weight: 700;
+}
+img.side-avatar { object-fit: cover; }
+/* Sub-links are indented and muted, as in AMV */
+.side-level-2 .side-link, .side-level-3 .side-link { color: var(--side-muted); }
+.side-level-2 .side-link { padding-left: 32px; }
+.side-level-3 .side-link { padding-left: 48px; }
+.side-toggle {
+    flex: none; display: grid; place-items: center; width: 36px; height: 36px; margin-right: 4px;
+    border: 0; border-radius: 10px; background: none; color: var(--side-muted); cursor: pointer;
+}
+.chevron { flex: none; margin-left: auto; color: var(--side-muted); transition: transform .2s ease, opacity .2s ease; }
+[aria-expanded="true"] > .chevron { transform: rotate(180deg); color: var(--side-text); }
+/* The group holding the current page, and a level 1 link that is the current page, get a faint bar and a blue
+   icon; the current page under a group is a bright blue pill, like the button of the popups' style. */
+.side-row:has(> [data-active-branch]), .side-level-1 > li > .side-row:has(> .side-link.active) { background: var(--side-current); }
+.side-row > [data-active-branch] .side-icon, .side-level-1 > li > .side-row > .side-link.active .side-icon { color: var(--side-accent); }
+.side-level-2 .side-link.active, .side-level-3 .side-link.active {
+    background: var(--side-accent); color: var(--side-accent-text); font-weight: 600;
+    box-shadow: 0 6px 14px -4px rgba(0, 0, 0, .45);
+}
+/* A link that only leads to the current page, because a link under it is that page, stays plain. */
+.side-list li:has(li .side-link.active) > .side-row > .side-link.active { background: none; box-shadow: none; color: var(--side-text); font-weight: inherit; }
+.side-link:focus-visible, .side-toggle:focus-visible, .side-brand:focus-visible, .side-close:focus-visible {
+    outline: 2px solid var(--side-accent); outline-offset: 1px;
+}
+
+/* Wide screens: the top bar's toggle narrows the menu to its icons and short labels, as in AMV;
+   pointing at the narrow menu, or tabbing into it, opens it over the page. */
+@media (min-width: 1200px) {
+    .js .app-topbar .menu-narrow-toggle { display: inline-flex; }
+    .menu-narrow .app-main { margin-left: calc(var(--side-narrow-width) + var(--side-gap) * 1.5); }
+    .menu-narrow .sidebar:not(:hover, :focus-within) { width: var(--side-narrow-width); }
+    .menu-narrow .sidebar:is(:hover, :focus-within) { box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+    .menu-narrow .sidebar:not(:hover, :focus-within) :is(.side-text, .side-section, .chevron) { opacity: 0; }
+    .menu-narrow .sidebar:not(:hover, :focus-within) .side-text { white-space: nowrap; }
+    .menu-narrow .sidebar:not(:hover, :focus-within) .side-toggle { display: none; }
+    .menu-narrow .sidebar:not(:hover, :focus-within) :is(.side-level-2, .side-level-3) .side-link { padding-left: 16px; }
+    .menu-narrow .sidebar:not(:hover, :focus-within) .side-brand { padding-left: 32px; }
+}
+
+/* Page header: the title, then what the page is for in soft blue, as the popups' title and subtitle. */
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.page-head p { margin: 0; }
+.page-head .muted { color: var(--accent-soft); }
+.search { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.back { display: inline-block; margin-bottom: 12px; font-size: .9rem; }
+
+/* Buttons: rounded and filled. The main one is the bright blue, like the current page in the menu; a delete one
+   is coral. Both have dark text, which reads better on them than white. */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 16px; border-radius: var(--radius-sm); border: 1px solid transparent;
+    background: var(--raised); color: var(--text); font: inherit; font-weight: 500;
+    cursor: pointer; line-height: 1.2; white-space: nowrap;
+}
+.btn:hover { background: var(--raised-hover); text-decoration: none; }
+.btn:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.btn-sm { padding: 6px 12px; font-size: .875rem; border-radius: 10px; }
+.btn-primary { background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-danger { background: var(--danger); color: var(--danger-text); font-weight: 600; }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-success { background: var(--success); color: var(--success-dark); font-weight: 600; }
+.btn-success:hover { background: var(--success-hover); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-ghost:hover { background: var(--row-hover); color: var(--text); }
+.btn-danger-ghost { background: rgba(255, 143, 138, .1); color: var(--danger); }
+.btn-danger-ghost:hover { background: rgba(255, 143, 138, .18); }
+/* A quiet button with an edge, like Edit on the profile boxes. */
+.btn-outline { background: transparent; border-color: var(--field-border); color: var(--text); }
+.btn-outline:hover { background: var(--row-hover); }
+.btn .material-icon { font-size: 18px; }
+/* Shown only without JavaScript, like the Upload button that choosing a photo does the work of. */
+.js .no-js-only { display: none; }
+
+/* Cards and tables: a charcoal panel with rounded corners, as the popups and the menu. */
+.card { background: var(--surface); border: 1px solid rgba(255, 255, 255, .04); border-radius: var(--radius); box-shadow: var(--shadow); }
+/* A table wider than the screen scrolls inside its card. Positioned, so hidden labels in it (like the
+   "Actions" heading) are clipped with it instead of stretching the whole page sideways on phones. */
+.table-wrap { position: relative; overflow-x: auto; }
+
+/* A list refreshing in place (live-table.js): dimmed while its new rows load, and not clicked again meanwhile. */
+[data-live-region] { transition: opacity .15s ease; }
+[data-live-region][aria-busy="true"] { opacity: .55; pointer-events: none; }
+
+/* A list's pages (layouts/_pager): which rows these are, Previous, the page numbers as DataTables has them, the
+   current one the bright blue as the menu's current page, and Next. */
+.pager { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pager .is-disabled { opacity: .45; pointer-events: none; }
+.pager-page, .pager-current { min-width: 34px; font-variant-numeric: tabular-nums; }
+.pager-current { background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.pager-current:hover { background: var(--primary); }
+.pager-gap { color: var(--muted); }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, .07); vertical-align: middle; }
+/* Column headings in the soft blue, as the menu's MODULES heading. */
+.table th { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent-soft); font-weight: 700; }
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover { background: var(--row-hover); }
+.table .num { width: 64px; font-variant-numeric: tabular-nums; }
+.table .actions { text-align: right; white-space: nowrap; }
+.table .actions .btn + .btn { margin-left: 6px; }
+
+/* Rounded tags tinted with their colour, as the popups' up and down tags. */
+.badge {
+    display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600;
+    background: var(--success-bg); color: var(--success-text); white-space: nowrap;
+}
+.badge-role { background: var(--nav-active-bg); color: var(--primary); }
+.badges { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* The users log under the users list: a heading, then who is online, a mint dot, and who isn't, a grey one. */
+.users-log { margin-top: 24px; }
+.users-log-head { padding: 20px 16px 8px; }
+.users-log-head h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.users-log-head p { margin: 0; font-size: .9rem; }
+.users-log-email { display: block; font-size: .85rem; }
+.status { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.status-online { color: var(--success-text); font-weight: 600; }
+.status-online .status-dot { box-shadow: 0 0 0 3px rgba(127, 216, 164, .2); }
+.status-offline { color: var(--muted); }
+
+.empty { text-align: center; padding: 48px 16px; border: 1px dashed rgba(255, 255, 255, .14); border-radius: var(--radius); color: var(--muted); }
+.empty p { margin: 0 0 12px; }
+
+/* Forms */
+.form { max-width: 520px; padding: 24px; margin-top: 16px; }
+.form > p:first-child { margin-top: 0; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-weight: 600; margin-bottom: 6px; }
+fieldset.field { border: 0; padding: 0; margin-inline: 0; min-width: 0; }
+fieldset.field legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+.field .check { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; margin-bottom: 6px; cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 3px 0 0; flex: none; accent-color: var(--primary); }
+.check input:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.check-group { margin: 2px 0 0 24px; }
+/* Role boxes only apply to "Only users with these roles", so dim them while "Everyone" is chosen. */
+.visibility:has(input:is([name=visible_to], [name=open_to])[value=everyone]:checked) .check-group { opacity: .45; pointer-events: none; }
+.check input:disabled, .check input:disabled + span { cursor: not-allowed; opacity: .5; }
+/* Each "Put it under" list only shows when its level is chosen. Browsers without :has show both. */
+.level-picker .check-group { margin-bottom: 10px; }
+.level-picker .check-group label { font-weight: 500; font-size: .875rem; margin-bottom: 4px; }
+.level-picker:not(:has(input[name=level][value="2"]:checked)) .parent-for-2,
+.level-picker:not(:has(input[name=level][value="3"]:checked)) .parent-for-3 { display: none; }
+/* The Address box only applies to "Other address…" in the Link list. Browsers without :has always show it. */
+.link-other { margin: 10px 0 0 24px; }
+.field .link-other label { font-weight: 500; font-size: .875rem; margin-bottom: 4px; }
+.link-picker:not(:has(option[value=other]:checked)) .link-other { display: none; }
+.text-danger { color: var(--danger); }
+/* Fields sit a shade lower than their panel, with an edge that's easy to see. */
+input[type=text], input[type=email], input[type=tel], input[type=password], input[type=search], input[type=number], input:not([type]), select {
+    width: 100%; padding: 9px 12px; font: inherit; color: var(--text);
+    background: var(--field); border: 1px solid var(--field-border); border-radius: 10px;
+}
+input::placeholder { color: #8c95a1; }
+input[type=file] { color: var(--muted); font: inherit; }
+input[type=file]::file-selector-button {
+    margin-right: 10px; padding: 7px 14px; border: 0; border-radius: 10px;
+    background: var(--raised); color: var(--text); font: inherit; font-weight: 500; cursor: pointer;
+}
+input[type=file]::file-selector-button:hover { background: var(--raised-hover); }
+.field input[type=number] { max-width: 140px; }
+.search input { width: 260px; }
+.is-invalid { border-color: var(--danger) !important; }
+.field-hint { display: block; color: var(--muted); font-size: .875rem; margin-top: 4px; }
+.field-error { display: block; color: var(--danger); font-size: .875rem; margin-top: 4px; }
+.form-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Whether a username is free, under its field as it's typed (username-check.js): green with a tick if it is, red
+   with a cross if it isn't, muted while checking. */
+.username-status { display: block; margin-top: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
+.username-status.is-available { color: var(--success-text); }
+.username-status.is-taken { color: var(--danger); }
+.username-status.is-available::before { content: "✓ " / ""; }
+.username-status.is-taken::before { content: "✕ " / ""; }
+
+/* Lists as Select2 boxes (select2-init.js), in the app's look: the box like a field, and the list that opens like
+   the popups, a charcoal panel with its choices rounded, the chosen one a bright blue pill as in the menu, and
+   group headings in the soft blue. */
+.select2-container--default .select2-selection--single {
+    height: 42px; background: var(--field); border: 1px solid var(--field-border); border-radius: 10px;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding: 0 40px 0 12px; color: var(--text); line-height: 40px;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder { color: #8c95a1; }
+.select2-container--default .select2-selection--single .select2-selection__arrow { top: 0; right: 8px; width: 20px; height: 40px; }
+.select2-container--default .select2-selection--single .select2-selection__arrow b { border-top-color: var(--muted); }
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b { border-bottom-color: var(--muted); }
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    height: 40px; margin-right: 24px; padding: 0 4px; color: var(--muted); font-size: 1.15rem; font-weight: 400; line-height: 38px;
+}
+.select2-container--default .select2-selection--single .select2-selection__clear:hover { color: var(--text); }
+/* Open, the box keeps its rounded corners; the list opens a little below or above it. */
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--single,
+.select2-container--default.select2-container--open.select2-container--above .select2-selection--single { border-radius: 10px; }
+.select2-container--default.select2-container--open .select2-selection--single { border-color: var(--primary); }
+.select2-container .select2-selection:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+select.is-invalid + .select2-container .select2-selection { border-color: var(--danger); }
+.select2-container--default.select2-container--disabled .select2-selection--single { background: var(--field); opacity: .5; cursor: not-allowed; }
+
+.select2-dropdown {
+    overflow: hidden; background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow);
+}
+.select2-container--open .select2-dropdown--below { margin-top: 4px; border-top: 1px solid var(--border); border-radius: var(--radius-sm); }
+.select2-container--open .select2-dropdown--above { margin-top: -4px; border-bottom: 1px solid var(--border); border-radius: var(--radius-sm); }
+.select2-search--dropdown { padding: 8px; }
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    padding: 7px 10px; background: var(--field); color: var(--text); font: inherit;
+    border: 1px solid var(--field-border); border-radius: 8px;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus-visible { outline: 3px solid var(--focus); outline-offset: 0; }
+.select2-container--default .select2-results > .select2-results__options { max-height: 280px; padding: 0 6px 6px; scrollbar-color: #4a5058 transparent; }
+.select2-results__option { padding: 7px 10px; border-radius: 8px; }
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable { background: var(--nav-active-bg); color: var(--text); }
+.select2-container--default .select2-results__option--selected { background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.select2-container--default .select2-results__option--selected.select2-results__option--highlighted { background: var(--primary-hover); color: var(--primary-text); }
+.select2-container--default .select2-results__option--disabled { color: #6b727d; }
+.select2-container--default .select2-results__group {
+    padding: 10px 10px 4px; color: var(--accent-soft);
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.select2-results__message { color: var(--muted); }
+/* Lists that let you pick several: each choice a tinted blue pill, as the badges. */
+.select2-container--default .select2-selection--multiple {
+    min-height: 42px; background: var(--field); border: 1px solid var(--field-border); border-radius: 10px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--nav-active-bg); border: 0; border-radius: 999px; color: var(--primary); font-weight: 600;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove { border-right: 0; color: var(--primary); }
+
+.details { display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; margin: 16px 0 24px; }
+.details dt { color: var(--muted); }
+.details dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Alerts: tinted with their colour, like the badges. */
+.alert { padding: 12px 16px; border-radius: 14px; margin-bottom: 20px; }
+.alert-success { background: var(--success-bg); color: var(--success-text); }
+.alert-error { background: var(--error-bg); color: var(--error-text); }
+.alert-warning { background: rgba(245, 176, 65, .14); color: #f5c26b; }
+/* A warning to read before acting, as AMV's alert-warning-custom: a rounded box with a warning icon, then a bold
+   heading and small text. In the app's amber on its dark panels, rather than AMV's pale yellow for a white page. */
+.alert-warning-custom {
+    display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; padding: .6rem 1rem;
+    border: 1px solid rgba(245, 176, 65, .28); border-radius: 25px;
+    background: rgba(245, 176, 65, .12); color: #f5c26b; font-size: .875rem; line-height: 1.5;
+}
+.alert-warning-custom .alert-icon { flex: none; margin-top: 1px; font-size: 18px; }
+.alert-warning-custom strong, .alert-warning-custom .alert-link { color: #ffd89a; }
+.alert-info { background: var(--nav-active-bg); color: #8cc8f0; }
+/* A notification from the server (layouts/_flash) shows as a toast instead (toast.js), unless SweetAlert2 didn't load. */
+.js .flash:not(.flash-shown) { display: none; }
+.alert-error ul { margin: 0; padding-left: 18px; }
+.alert-error .sub-links { margin-top: 6px; }
+
+/* Menu tree on the Manage menu page */
+.tree-label { display: inline-flex; align-items: center; gap: 6px; }
+.tree-icon { font-size: 20px; color: var(--muted); }
+/* Icon on the menu link form, previewed on the sidebar's dark panel. */
+.icon-input { display: flex; align-items: center; gap: 10px; }
+.icon-input input { flex: 1; }
+.icon-preview {
+    flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 8px;
+    background: linear-gradient(195deg, var(--side-bg-top), var(--side-bg-bottom)); color: var(--side-text);
+}
+.tree-level-2 { padding-left: 18px; }
+.tree-level-3 { padding-left: 36px; }
+.tree-mark { color: var(--muted); }
+.alert-detail { font-size: .85rem; margin-top: 6px; opacity: .85; }
+.badge-danger { background: var(--error-bg); color: var(--error-text); }
+
+/* Routes page: the add/edit form on the left, saved routes grouped by menu link on the right */
+.route-manager { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; }
+.route-form { max-width: none; margin-top: 0; position: sticky; top: 20px; }
+.route-form h2 { font-size: 1.1rem; margin: 0 0 16px; }
+.method-options { display: flex; flex-wrap: wrap; gap: 0 20px; }
+/* Save on its own sits on the right; when editing, Delete takes the left, as in AMV. */
+.route-form-actions { justify-content: flex-end; }
+.route-form-actions.is-editing { justify-content: space-between; }
+
+.routes-panel { padding: 20px; }
+.routes-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.routes-toolbar .search { flex: 1; min-width: 0; }
+.routes-toolbar .search input { flex: 1; width: auto; min-width: 0; }
+.routes-empty { margin: 0 0 12px; color: var(--muted); }
+
+.route-tree { list-style: none; margin: 0; padding: 0; }
+.route-tree .route-tree { margin-left: 22px; }
+.route-group > summary, .route-group-label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; }
+.route-group > summary { list-style: none; cursor: pointer; color: var(--primary); font-weight: 500; }
+.route-group > summary::-webkit-details-marker { display: none; }
+.route-group > summary:hover { background: var(--row-hover); }
+.route-group > summary:focus-visible, .route-main:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.route-group[open] > summary .route-toggle-plus { display: none; }
+.route-toggle { flex: none; }
+/* Links with no routes under them have nothing to open; indent them to line up with the ones that do. */
+.route-group-label { padding-left: 30px; color: var(--muted); }
+.route-group-none > summary { color: var(--muted); }
+.route-group-none > .field-hint { margin: 0 0 6px 30px; }
+
+.route-list { list-style: none; margin: 2px 0 8px 15px; padding: 0 0 0 8px; border-left: 1px solid var(--border); }
+.route-row { display: flex; align-items: center; gap: 8px; padding: 2px 4px 2px 8px; border-radius: 10px; }
+.route-row:hover { background: var(--row-hover); }
+.route-row.is-highlighted { background: var(--nav-active-bg); }
+.route-main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; padding: 5px 0; color: var(--text); border-radius: 4px; }
+.route-main:hover { text-decoration: none; }
+.route-main:hover .route-address { text-decoration: underline; }
+.route-address { background: none; padding: 0; overflow-wrap: anywhere; }
+.route-handler { color: var(--muted); font-size: .85rem; overflow-wrap: anywhere; }
+.route-row > .btn { flex: none; }
+/* Which roles alone can open a route. */
+.route-roles { display: inline-flex; align-items: center; gap: 3px; }
+.route-roles .material-icon { font-size: 14px; }
+.routes-panel mark { background: var(--mark-bg); color: inherit; border-radius: 3px; padding: 0 1px; }
+.method {
+    display: inline-block; min-width: 42px; padding: 1px 6px; border-radius: 4px; text-align: center;
+    font: 600 .7rem/1.5 Consolas, "Cascadia Mono", monospace; letter-spacing: .03em;
+}
+.method-get { background: var(--success-bg); color: var(--success-text); }
+.method-post { background: var(--nav-active-bg); color: var(--primary); }
+.method-put { background: rgba(245, 176, 65, .15); color: #f5b041; }
+.method-delete { background: var(--error-bg); color: var(--error-text); }
+.method-any { background: var(--row-hover); color: var(--muted); box-shadow: inset 0 0 0 1px var(--border); }
+
+/* The "Please confirm" box (SweetAlert2, from confirm.js): a charcoal panel over the page dimmed as the menu's
+   backdrop, with AMV's buttons, a red No and a green Yes, in the app's toned-down coral and mint. */
+.swal2-container.swal2-backdrop-show { background: rgba(8, 12, 24, .65); }
+.swal2-popup.swal-panel { background: var(--surface); color: var(--text); border-radius: var(--radius); box-shadow: var(--shadow); }
+.swal-panel .swal2-title { color: var(--text); }
+.swal-panel .swal2-html-container { color: var(--muted); }
+.swal-actions { gap: 10px; }
+.btn.swal-yes, .btn.swal-no {
+    padding: 10px 24px; border: 0; border-radius: var(--radius-sm);
+    font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+.btn.swal-yes { background: var(--success); color: var(--success-dark); }
+.btn.swal-no { background: var(--danger); color: var(--danger-text); }
+.btn.swal-yes:hover, .btn.swal-no:hover { filter: brightness(1.08); }
+.btn.swal-yes:focus-visible, .btn.swal-no:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Toasts (toast.js), at the top right as AMV's: a raised charcoal panel with a 2px edge and a soft glow in the
+   status's colour, the same colour counting down along the bottom. */
+.swal-toast-success { --toast-colour: #7fd8a4; --toast-glow: rgba(127, 216, 164, .3); }
+.swal-toast-error { --toast-colour: #ff8f8a; --toast-glow: rgba(255, 143, 138, .3); }
+.swal-toast-warning { --toast-colour: #f5b041; --toast-glow: rgba(245, 176, 65, .3); }
+.swal-toast-info { --toast-colour: #3aaaf2; --toast-glow: rgba(58, 170, 242, .3); }
+.swal2-popup.swal-toast {
+    max-width: min(420px, calc(100vw - 32px)); background: var(--raised); color: var(--text);
+    border: 2px solid var(--toast-colour); border-radius: var(--radius-sm);
+    box-shadow: 0 0 .825em var(--toast-glow), var(--shadow);
+}
+.swal-toast .swal2-title { color: var(--text); font-size: .95rem; font-weight: 500; line-height: 1.4; }
+.swal-toast .swal2-timer-progress-bar { background: var(--toast-colour); opacity: .7; }
+.swal-toast .swal2-close { color: var(--muted); font-size: 1.4rem; }
+.swal-toast .swal2-close:hover { color: var(--text); }
+.swal-toast .swal2-close:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; box-shadow: none; }
+
+/* My profile and Edit user: a panel with the round photo and its buttons on top, then, under a line, a box with an
+   edge for each group of details, its labels muted above their values, and Edit on the right. */
+.profile { max-width: 880px; margin-top: 16px; }
+.profile-photo { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 32px; padding: 32px; }
+.profile-avatar { flex: none; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background: var(--raised); }
+.profile-initials { display: grid; place-items: center; background: rgba(58, 170, 242, .16); color: var(--primary); font-size: 2.6rem; font-weight: 700; }
+.profile-photo-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.profile-photo-buttons form { display: flex; gap: 8px; }
+.profile-photo-hint { margin: 12px 0 0; font-size: .9rem; line-height: 1.5; }
+/* The file box is hidden behind the Upload new photo button, which opens it, and shows its focus ring instead. */
+.js .photo-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.photo-pick { position: relative; }
+.photo-pick:focus-within { outline: 3px solid var(--focus); outline-offset: 1px; }
+.profile-boxes { display: grid; gap: 20px; padding: 32px; border-top: 1px solid var(--border); }
+.profile-box { padding: 20px 24px 24px; border: 1px solid var(--border); border-radius: 16px; scroll-margin-top: 16px; }
+.profile-box-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; margin-bottom: 16px; }
+.profile-box h2 { margin: 0; font-size: 1.1rem; }
+.profile-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px 32px; margin: 0; }
+.profile-facts dt { margin-bottom: 6px; color: var(--muted); font-size: .9rem; }
+.profile-facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.profile-facts .muted { font-weight: 400; }
+.profile-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 20px; }
+.profile-narrow { max-width: 360px; }
+.profile-note { margin: 0; }
+.profile-box .badges + .field-hint, .profile-note + .field-hint { margin-top: 12px; }
+/* The chosen photo in the "Please confirm" box, round as it will show. */
+.swal2-image.swal-photo { border-radius: 50%; object-fit: cover; }
+
+@media (max-width: 600px) {
+    .profile-photo, .profile-boxes { padding: 20px 16px; }
+    .profile-box { padding: 16px; }
+    .profile-avatar { width: 96px; height: 96px; }
+}
+
+/* The two columns get too narrow beside the menu, so stack them: form first, then the routes. */
+@media (max-width: 1080px) {
+    .route-manager { grid-template-columns: minmax(0, 1fr); }
+    .route-form { position: static; }
+}
+
+/* Below 1200px, as in AMV, the menu slides in from the left when "Menu" is tapped, and × or the dimmed page closes it.
+   Without JavaScript (no .js class) it sits above the page instead. */
+@media (max-width: 1199.98px) {
+    .app-main { margin-left: 0; }
+    .js .app-topbar .menu-toggle { display: inline-flex; }
+    .js .sidebar { width: min(var(--side-width), calc(100vw - 2 * var(--side-gap))); transform: translateX(calc(-100% - 2 * var(--side-gap))); visibility: hidden; }
+    .js .side-close { display: grid; }
+    .js.menu-open .sidebar { transform: none; visibility: visible; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+    .js.menu-open .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(8, 12, 24, .5); }
+    .js.menu-open body { overflow: hidden; }
+    html:not(.js) .app-shell { flex-direction: column; }
+    html:not(.js) .sidebar { position: static; width: auto; margin: var(--side-gap) var(--side-gap) 0; }
+}
+
+@media (max-width: 760px) {
+    .app-topbar { padding: 0 16px; height: 56px; }
+    .main { padding: 20px 16px 32px; }
+    .footer { padding: 14px 16px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar, .app-main, .chevron, .side-text { transition: none !important; }
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 1.35rem; }
+    .guest-main { padding-top: 24px; }
+    .search, .search input { width: 100%; }
+    .search input { flex: 1; }
+    .routes-panel { padding: 16px 12px; }
+    .route-row { flex-wrap: wrap; }
+    .table th, .table td { padding: 10px 12px; }
+    .form { padding: 18px; }
+}

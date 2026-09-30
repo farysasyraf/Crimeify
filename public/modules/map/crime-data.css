@@ -1,0 +1,56 @@
+/* Crime data page: the upload and add forms side by side, then the filters and the list of figures, then the update
+   log, paged the same way. */
+.btn-icon { font-size: 18px; margin-right: 6px; vertical-align: -4px; }
+
+/* A note, not a problem: in the app's blue. */
+.crime-note { background: var(--nav-active-bg); color: var(--text); }
+
+.crime-tools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 20px; margin-bottom: 20px; align-items: start; }
+.crime-tool { max-width: none; margin-top: 0; }
+.crime-tool h2, .crime-list h2, .crime-edits h2 { margin: 0 0 10px; font-size: 1.05rem; }
+.crime-tool .field-hint { margin: 0 0 16px; }
+.crime-tool-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.crime-tool-fields .field input[type=number] { max-width: none; }
+
+.crime-list, .crime-edits { padding: 20px; margin-bottom: 20px; }
+.crime-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 16px; }
+.crime-filters label { display: block; margin-bottom: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
+.crime-filters select { width: auto; min-width: 150px; max-width: 240px; }
+/* As Select2 boxes, a width that fits a state or district name. */
+.crime-filters .select2-container { width: 200px !important; }
+.crime-filter-actions { display: flex; gap: 8px; }
+/* With JavaScript, choosing shows the figures, so Show goes; Clear stays. */
+.js .crime-filters [data-filter-submit] { display: none; }
+.crime-empty { margin: 8px 0; }
+
+.crime-table td { vertical-align: middle; }
+.crime-category { display: block; color: var(--muted); font-size: .8rem; }
+/* In the table, so it outranks the app's full-width number boxes. */
+.crime-table .crime-count { width: 110px; padding: 6px 10px; text-align: right; font-variant-numeric: tabular-nums; }
+/* A count changed but not saved yet. */
+.crime-table .crime-count.is-changed { border-color: var(--primary); background: var(--nav-active-bg); font-weight: 600; }
+
+.crime-list-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.crime-save { display: flex; align-items: center; gap: 12px; }
+/* The update log has only its pages under it, on the right as under the figures. */
+.crime-edits-foot { justify-content: flex-end; }
+
+/* The upload's check: how many figures it changes, adds and deletes. */
+.crime-summary { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 20px; padding: 0; list-style: none; }
+.crime-summary li { padding: 10px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.crime-summary strong { font-size: 1.2rem; margin-right: 4px; }
+.crime-badge-changed { background: var(--nav-active-bg); color: var(--primary); }
+.crime-badge-added { background: var(--success-bg); color: var(--success-text); }
+.crime-badge-deleted { background: var(--error-bg); color: var(--error-text); }
+.crime-review { margin-bottom: 16px; }
+.crime-review-actions { gap: 12px; }
+
+@media (max-width: 900px) {
+    .crime-tools { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+    .crime-tool-fields { grid-template-columns: minmax(0, 1fr); }
+    .crime-filters > div:not(.crime-filter-actions) { flex: 1 1 100%; }
+    .crime-filters select { max-width: none; width: 100%; }
+    .crime-filters .select2-container { width: 100% !important; }
+}

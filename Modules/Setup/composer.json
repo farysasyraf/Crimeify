@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/setup",
+    "description": "Users, roles, the navigation menu and the routes added on the Routes page.",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Setup\\": "",
+            "Modules\\Setup\\Database\\Factories\\": "Database/factories/",
+            "Modules\\Setup\\Database\\Seeders\\": "Database/Seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Setup\\Tests\\": "Tests/"
+        }
+    }
+}

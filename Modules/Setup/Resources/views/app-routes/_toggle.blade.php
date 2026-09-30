@@ -1,0 +1,1 @@
+<svg class="route-toggle" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="route-toggle-plus" d="M8 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
