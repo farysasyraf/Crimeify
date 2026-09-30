@@ -39,7 +39,7 @@
 
     // Google Maps or Waze, in the app's charcoal box, the apps as its bright blue buttons, one under the other.
     const chooseApp = (station) => Swal.fire({
-        title: 'Open in',
+        title: t('Open in'),
         text: station.name,
         theme: 'dark',
         showDenyButton: true,
@@ -47,7 +47,7 @@
         buttonsStyling: false,
         confirmButtonText: 'Google Maps',
         denyButtonText: 'Waze',
-        cancelButtonText: 'Cancel',
+        cancelButtonText: t('Cancel'),
         customClass: { popup: 'swal-panel', actions: 'swal-actions swal-apps', confirmButton: 'btn swal-app', denyButton: 'btn swal-app', cancelButton: 'btn swal-app-cancel' },
     }).then((result) => {
         // In the same tab, which lets the phone hand the address to the app.
@@ -67,7 +67,7 @@
         link.href = station.maps;
         link.target = '_blank';
         link.rel = 'noopener';
-        link.title = onPhone ? 'Open in Google Maps or Waze' : 'Open in Google Maps, in a new tab';
+        link.title = t(onPhone ? 'Open in Google Maps or Waze' : 'Open in Google Maps, in a new tab');
 
         link.addEventListener('click', (event) => {
             if (onPhone && typeof Swal !== 'undefined') {
@@ -96,16 +96,16 @@
             row.append(element('dt', label), value);
             facts.append(row);
         };
-        const missing = () => element('span', 'Not added yet', 'muted');
+        const missing = () => element('span', t('Not added yet'), 'muted');
 
         const address = element('dd');
         if (station.address) {
             address.append(mapLink(station, station.address));
         } else {
-            address.append(missing(), element('br'), mapLink(station, 'Search for it on the map'));
+            address.append(missing(), element('br'), mapLink(station, t('Search for it on the map')));
         }
-        address.append(element('span', onPhone ? 'Opens Google Maps or Waze' : 'Opens Google Maps', 'station-map-hint muted'));
-        fact('Address', address);
+        address.append(element('span', t(onPhone ? 'Opens Google Maps or Waze' : 'Opens Google Maps'), 'station-map-hint muted'));
+        fact(t('Address'), address);
 
         const phone = element('dd');
         if (station.phone && station.call) {
@@ -115,11 +115,11 @@
         } else {
             phone.append(station.phone ? element('span', station.phone) : missing());
         }
-        fact('Phone', phone);
+        fact(t('Phone'), phone);
 
         details.append(
             element('h3', station.name),
-            element('p', `${station.district} police district · ${stateName()}`, 'muted station-place'),
+            element('p', t(':district police district · :state', { district: station.district, state: stateName() }), 'muted station-place'),
             facts,
         );
     };
@@ -136,8 +136,8 @@
 
         stationChoice.disabled = inState.length === 0;
         hint.textContent = inState.length === 0
-            ? 'Choose a state first.'
-            : `${inState.length} police ${inState.length === 1 ? 'station' : 'stations'} in ${stateName()}.`;
+            ? t('Choose a state first.')
+            : tn(inState.length, ':count police station in :state.', ':count police stations in :state.', { state: stateName() });
         redraw(stationChoice);
         showStation();
     };

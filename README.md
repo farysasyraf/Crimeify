@@ -120,6 +120,11 @@ Anyone can see the dashboard and the map without logging in, at **`/public/dashb
 - **Always public:** the routes are in the Dashboard and Map modules' `Routes/web.php`, not on the Routes page, which adds its routes behind the login. So the Routes page can't make them private or remove them, and the app's own pages still need a login.
 - **Rate limit:** each visitor can load the public pages 120 times a minute, far more than looking around needs, so no one can flood the database with requests.
 
+**Bahasa Melayu or English:** the public pages have a **BM | EN** switch at the top, with the Malaysian flag beside BM and the UK's beside EN.
+- **Choosing:** each side is a link to the same page with `?lang=ms` or `?lang=en`, so it works without JavaScript and a link can be shared in either language. A cookie (`locale`) keeps the choice for a year, so the dashboard, the map and the map's figures stay in it. Without a choice they're in English. The page's `lang` changes too, for screen readers. `app/Http/Middleware/SetPublicLocale.php` (`public-locale`) does this, on the public routes only: the app itself is in English, whatever the public pages were left in.
+- **The Malay text** is in `lang/ms.json`, English to Bahasa Melayu, using the police's own terms like *jenayah kekerasan* and *jenayah harta benda*. The views use `__('…')`; the pages' scripts use `t('…')` and `tn(count, 'one', 'many')`, from `resources/views/layouts/_translations.blade.php`, with the same file. Select2's own words, like "No results found", come from it too. To change a word, edit it there; a test checks that every text the public pages translate has Bahasa Melayu, with the same `:placeholders`.
+- **Not translated:** names from the data, like police stations and districts, and credits' proper names, like OpenStreetMap's.
+
 ## Modules
 
 The code is split into modules, as in AMV (amv4local), with [nwidart/laravel-modules](https://laravelmodules.com). The package is configured in `config/modules.php` to lay modules out in AMV's folders, and `modules_statuses.json` switches each module on or off.

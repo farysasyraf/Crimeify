@@ -3,6 +3,7 @@
 namespace Modules\Map\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\SetPublicLocale;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,7 +52,10 @@ class MapController extends Controller
             'stations' => $this->stations(),
             // The pins' figures come from MapController@crime: in the app, as "map/crime" added on the Routes page;
             // on the public map, from its own address in Routes/web.php.
-            'crimeUrl' => $public ? route('public.map.crime') : (Route::has('map/crime') ? route('map/crime') : null),
+            // On the public map, in the page's language, even where cookies aren't kept.
+            'crimeUrl' => $public
+                ? route('public.map.crime', app()->getLocale() === SetPublicLocale::defaultLocale() ? [] : ['lang' => app()->getLocale()])
+                : (Route::has('map/crime') ? route('map/crime') : null),
         ]);
     }
 
@@ -120,9 +124,10 @@ class MapController extends Controller
             'byState' => $byState,
             // For a year by state: the regions counted under another's, like Labuan (MY-15) under Sabah (MY-12).
             'countedUnder' => (object) ($byState ? StateCrime::countedUnder() : []),
-            'categories' => config('map.crime.categories'),
-            'types' => config('map.crime.types'),
-            'credit' => $byState ? 'Crime by state: '.config('map.by_state.source') : config('map.crime.credit'),
+            // In the page's language (SetPublicLocale on the public map).
+            'categories' => array_map(fn (string $label) => __($label), config('map.crime.categories')),
+            'types' => array_map(fn (array $labels) => array_map(fn (string $label) => __($label), $labels), config('map.crime.types')),
+            'credit' => $byState ? __('Crime by state: :source', ['source' => __(config('map.by_state.source'))]) : __(config('map.crime.credit')),
             'about' => $byState ? null : config('map.crime.about'),
             'national' => isset($country[$year]) ? [
                 'totals' => $this->totals($country[$year]),

@@ -12,8 +12,8 @@ use Modules\Map\Http\Controllers\MapController;
 
 // The public map, for everyone without logging in, and the crime figures it shows. They're here rather than on the
 // Routes page, which adds its routes behind the login, so they're always public. Each visitor can load them 120
-// times a minute, far more than looking around needs.
-Route::middleware('throttle:120,1')->group(function () {
+// times a minute, far more than looking around needs. They come in Bahasa Melayu or English (SetPublicLocale).
+Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
     Route::get('/public/map', [MapController::class, 'publicIndex'])->name('public.map');
     Route::get('/public/map/crime', [MapController::class, 'crime'])->name('public.map.crime');
 });

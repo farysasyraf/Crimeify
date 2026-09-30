@@ -168,9 +168,9 @@ class StateCrimeTest extends TestCase
         $this->importBoth();
 
         $page = $this->get('/public/dashboard')->assertOk()
-            ->assertSee("Crime in Malaysia in 2024, from the Royal Malaysia Police's figures for each state.", false)
+            ->assertSee("Crime in Malaysia in 2024, from the Royal Malaysia Police's figures for each state.")
             ->assertSee("2024's figures are by state, so Labuan's are in Sabah's and Putrajaya's are in Kuala Lumpur's.")
-            ->assertSee("2024's figures by state give robbery as one type, where earlier years have its four kinds.", false)
+            ->assertSee("2024's figures by state give robbery as one type, where earlier years have its four kinds.")
             ->assertSee('For 2024, crime by state: Royal Malaysia Police (PDRM), crime index.');
 
         preg_match('~<script type="application/json" id="dashboard-data">(.*?)</script>~s', $page->getContent(), $data);
@@ -191,7 +191,7 @@ class StateCrimeTest extends TestCase
 
         // 2023 is by police district, as before, with the credit for 2024 still there for the chart over the years.
         $this->get('/public/dashboard?year=2023')
-            ->assertSee("from the Royal Malaysia Police's figures for each police district.", false)
+            ->assertSee("from the Royal Malaysia Police's figures for each police district.")
             ->assertDontSee('figures are by state')
             ->assertSee('For 2024, crime by state: Royal Malaysia Police (PDRM), crime index.');
     }

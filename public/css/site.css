@@ -138,7 +138,32 @@ code {
 .public-link.active { background: var(--primary); color: var(--primary-text); font-weight: 600; }
 .public-link.active .material-icon { color: inherit; }
 .public-link:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.public-account { margin-left: auto; }
+.public-account { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+
+/* Bahasa Melayu or English (layouts/_language-switch): an outlined pill, the chosen half filled in the bright blue
+   with dark text, sliding across when the other is chosen, between the Malaysian flag and the UK's. */
+.lang-switch { display: flex; align-items: center; gap: 8px; }
+.lang-flag { flex: none; width: 26px; height: 13px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .25); }
+.lang-toggle {
+    position: relative; display: grid; grid-template-columns: 1fr 1fr;
+    border: 2px solid var(--primary); border-radius: 999px; isolation: isolate;
+}
+.lang-thumb {
+    position: absolute; inset: 0 50% 0 0; z-index: -1; border-radius: 999px;
+    background: var(--primary); transition: transform .2s ease;
+}
+.lang-toggle[data-chosen="en"] .lang-thumb { transform: translateX(100%); }
+.lang-option {
+    min-width: 44px; padding: 4px 12px; border-radius: 999px; text-align: center;
+    color: var(--primary); font-size: .8125rem; font-weight: 700; letter-spacing: .03em; transition: color .2s ease;
+}
+.lang-option:hover { text-decoration: none; background: var(--row-hover); }
+.lang-option[aria-current="true"] { color: var(--primary-text); background: none; }
+.lang-option:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .lang-thumb, .lang-option { transition: none; }
+}
+
 .public-main { flex: 1; width: 100%; max-width: 1320px; margin: 0 auto; padding: 28px 24px 40px; }
 .public-footer { border-top: 1px solid rgba(255, 255, 255, .06); color: var(--muted); font-size: .85rem; }
 .public-footer .public-bar { display: block; padding-top: 16px; padding-bottom: 24px; }

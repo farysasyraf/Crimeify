@@ -4,6 +4,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Middleware\EnsureUserCanOpenRoute;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RecordLastSeen;
+use App\Http\Middleware\SetPublicLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -29,9 +30,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // A route saved on the Routes page for only some roles gets route-roles.
         // The Routes page is only for ADMIN, set in the code with admin, as it decides who can open everything else.
+        // The public dashboard and map get public-locale, for Bahasa Melayu or English.
         $middleware->alias([
             'route-roles' => EnsureUserCanOpenRoute::class,
             'admin' => EnsureUserIsAdmin::class,
+            'public-locale' => SetPublicLocale::class,
         ]);
 
         // Both run before the record in the address is looked up, so someone without the role gets "Not allowed"

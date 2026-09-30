@@ -97,7 +97,7 @@
         data: {
             labels: regions.map((region) => region.short),
             datasets: [{
-                label: 'All crime',
+                label: t('All crime'),
                 data: regions.map((region) => region.total),
                 backgroundColor: fading('#f0628f', '#f7a35c'),
                 hoverBackgroundColor: fading('#f58aab', '#f9b97f'),
@@ -118,7 +118,7 @@
                     displayColors: false,
                     callbacks: {
                         title: ([item]) => regions[item.dataIndex].name,
-                        label: (item) => `All crime: ${count.format(item.parsed.y)}`,
+                        label: (item) => `${t('All crime')}: ${count.format(item.parsed.y)}`,
                         afterLabel: (item) => Object.entries(regions[item.dataIndex].totals)
                             .map(([category, crimes]) => `${figures.categories[category]}: ${count.format(crimes)}`),
                     },
@@ -134,7 +134,7 @@
 
     const showCentre = (slice) => {
         centreCount.textContent = slice ? `${slice.share.toFixed(1)}%` : count.format(types.total);
-        centreLabel.textContent = slice ? slice.label : 'crimes';
+        centreLabel.textContent = slice ? slice.label : t('crimes');
     };
 
     new Chart(document.getElementById('types-chart'), {
@@ -157,7 +157,7 @@
             onHover: (event, elements) => showCentre(elements.length ? types.slices[elements[0].index] : null),
             plugins: {
                 tooltip: {
-                    callbacks: { label: (item) => ` ${count.format(item.parsed)} crimes` },
+                    callbacks: { label: (item) => ` ${t(':count crimes', { count: count.format(item.parsed) })}` },
                 },
             },
         },

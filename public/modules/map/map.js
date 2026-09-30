@@ -27,7 +27,7 @@
     };
 
     if (typeof L === 'undefined') {
-        showStatus("The map couldn't load. Reload the page to try again.");
+        showStatus(t("The map couldn't load. Reload the page to try again."));
         return;
     }
 
@@ -91,21 +91,21 @@
             return null;
         }
 
-        const since = `${count.format(before)} in ${crime.previousYear}`;
+        const year = crime.previousYear;
 
         if (now === before) {
-            return element('span', `Same as in ${crime.previousYear}`, 'crime-change');
+            return element('span', t('Same as in :year', { year }), 'crime-change');
         }
         if (before === 0) {
-            return element('span', `Up from 0 in ${crime.previousYear}`, 'crime-change crime-up');
+            return element('span', t('Up from 0 in :year', { year }), 'crime-change crime-up');
         }
 
         const percent = Math.round((Math.abs(now - before) / before) * 100);
-        const size = percent === 0 ? 'under 1%' : `${percent}%`;
+        const since = { size: percent === 0 ? t('under 1%') : `${percent}%`, count: count.format(before), year };
 
         return now > before
-            ? element('span', `Up ${size} from ${since}`, 'crime-change crime-up')
-            : element('span', `Down ${size} from ${since}`, 'crime-change crime-down');
+            ? element('span', t('Up :size from :count in :year', since), 'crime-change crime-up')
+            : element('span', t('Down :size from :count in :year', since), 'crime-change crime-down');
     };
 
     // Each category's total for a place, with how it compares with the year before.
@@ -136,7 +136,7 @@
 
         content.append(
             element('h3', district.name),
-            element('p', `Police district in ${region} · ${crime.year}`, 'crime-popup-place'),
+            element('p', t('Police district in :region · :year', { region, year: crime.year }), 'crime-popup-place'),
         );
 
         for (const [category, types] of Object.entries(crime.types)) {
@@ -176,7 +176,7 @@
         details.append(heading);
 
         if (!crime) {
-            details.append(element('p', button ? `${button.dataset.kind} · ${code}` : 'Choose a state on the map or from the list.', 'muted'));
+            details.append(element('p', button ? `${button.dataset.kind} · ${code}` : t('Choose a state on the map or from the list.'), 'muted'));
             return;
         }
 
@@ -184,8 +184,8 @@
 
         // A hint for a region too, so the panel keeps its height and the map under it doesn't jump when one is chosen.
         const hint = crime.byState
-            ? `${crime.year}'s figures are by state, so there are no police district pins. Choose an earlier year for them.`
-            : (button ? 'Click a pin for one of its police districts.' : 'Click a pin for a police district, or choose a state.');
+            ? t(":year's figures are by state, so there are no police district pins. Choose an earlier year for them.", { year: crime.year })
+            : t(button ? 'Click a pin for one of its police districts.' : 'Click a pin for a police district, or choose a state.');
 
         if (!place) {
             // By state, Labuan's figures are in Sabah's and Putrajaya's in Kuala Lumpur's. The same lines as with
@@ -194,8 +194,8 @@
             details.append(
                 element('p', button ? `${button.dataset.kind} · ${crime.year}` : String(crime.year), 'muted'),
                 element('p', under
-                    ? `Counted in ${under.dataset.name}'s figures for ${crime.year}. Choose ${under.dataset.name} for them.`
-                    : `No crime figures for ${crime.year}.`, 'crime-missing'),
+                    ? t("Counted in :under's figures for :year. Choose :under for them.", { under: under.dataset.name, year: crime.year })
+                    : t('No crime figures for :year.', { year: crime.year }), 'crime-missing'),
                 element('p', hint, 'muted crime-hint'),
             );
             return;
@@ -205,12 +205,13 @@
         // counted in it.
         const covers = () => {
             if (!button) {
-                return `${crime.byState ? 'All states' : 'All police districts'} · ${crime.year}`;
+                return t(crime.byState ? 'All states · :year' : 'All police districts · :year', { year: crime.year });
             }
             if (crime.byState) {
-                return [button.dataset.kind, crime.year, ...(place.includes?.length ? [`with ${place.includes.join(' and ')}`] : [])].join(' · ');
+                const includes = place.includes?.length ? [t('with :regions', { regions: place.includes.join(` ${t('and')} `) })] : [];
+                return [button.dataset.kind, crime.year, ...includes].join(' · ');
             }
-            return `${button.dataset.kind} · ${place.districts} police ${place.districts === 1 ? 'district' : 'districts'} · ${crime.year}`;
+            return [button.dataset.kind, tn(place.districts, ':count police district', ':count police districts'), crime.year].join(' · ');
         };
 
         details.append(element('p', covers(), 'muted'), totals(place), element('p', hint, 'muted crime-hint'));
@@ -268,7 +269,7 @@
     let toggle;
 
     const labelToggle = (enlarged) => {
-        const text = enlarged ? 'Make the map smaller' : 'Enlarge the map';
+        const text = t(enlarged ? 'Make the map smaller' : 'Enlarge the map');
         toggle.setAttribute('aria-label', text);
         toggle.title = text;
         toggle.firstChild.textContent = enlarged ? 'close_fullscreen' : 'open_in_full';
@@ -360,10 +361,10 @@
                         click: () => select(code),
                     });
                 },
-                attribution: 'Boundaries: <a href="https://www.geoboundaries.org">geoBoundaries</a>',
+                attribution: `${t('Boundaries')}: <a href="https://www.geoboundaries.org">geoBoundaries</a>`,
             }).addTo(map);
         })
-        .catch(() => showStatus("The states' boundaries couldn't load. Reload the page to try again."));
+        .catch(() => showStatus(t("The states' boundaries couldn't load. Reload the page to try again.")));
 
     for (const [code, button] of choices) {
         button.addEventListener('click', () => select(code === selected ? null : code, { zoom: true }));
@@ -399,7 +400,7 @@
 
         const markers = figures.districts.map((district) => {
             const key = `${district.region}|${district.name}`;
-            const marker = L.marker([district.lat, district.lng], { title: district.name, alt: `${district.name} police district` });
+            const marker = L.marker([district.lat, district.lng], { title: district.name, alt: t(':name police district', { name: district.name }) });
 
             // The map moves the popup clear of the zoom and enlarge buttons on the left.
             marker.bindPopup(() => popup(district), {
@@ -464,7 +465,7 @@
             .then(show)
             .catch((problem) => {
                 if (problem.name !== 'AbortError') {
-                    showStatus("The crime figures couldn't load. Choose the year again, or reload the page.", 'crime');
+                    showStatus(t("The crime figures couldn't load. Choose the year again, or reload the page."), 'crime');
                 }
             });
     };

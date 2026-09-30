@@ -61,7 +61,7 @@ class DashboardController extends Controller
             'cards' => $this->cards($national, $years, $year, $previousYear),
             'charts' => [
                 'year' => $year,
-                'categories' => config('map.crime.categories'),
+                'categories' => array_map(fn (string $label) => __($label), config('map.crime.categories')),
                 'trend' => $this->trend($national, $years),
                 'regions' => $byState ? $this->stateRegions($year) : $this->regions($year),
                 'types' => $this->types($national[$year] ?? []),
@@ -152,7 +152,7 @@ class DashboardController extends Controller
             }
 
             return [
-                'label' => $card['label'],
+                'label' => __($card['label']),
                 'icon' => $card['icon'],
                 'tone' => $card['tone'],
                 'value' => $history[$year],
@@ -194,7 +194,7 @@ class DashboardController extends Controller
 
         foreach (config('map.crime.categories') as $category => $label) {
             $series[] = [
-                'label' => $label,
+                'label' => __($label),
                 'colour' => config("dashboard.colours.categories.{$category}"),
                 'counts' => array_map(fn (int $year) => $this->count($national[$year] ?? [], ["{$category}.all"]), $years),
             ];
@@ -289,7 +289,9 @@ class DashboardController extends Controller
 
                 return [
                     'code' => $code,
-                    'name' => config("map.states.{$code}.name", $code).($with->isEmpty() ? '' : ' (with '.$with->implode(' and ').')'),
+                    'name' => $with->isEmpty()
+                        ? config("map.states.{$code}.name", $code)
+                        : __(':region (with :others)', ['region' => config("map.states.{$code}.name", $code), 'others' => $with->implode(' '.__('and').' ')]),
                     'short' => config("dashboard.abbreviations.{$code}", $code),
                     'totals' => $byCategory,
                     'total' => array_sum($byCategory),
@@ -313,7 +315,7 @@ class DashboardController extends Controller
         $types = [];
         foreach (array_keys(config('map.crime.categories')) as $category) {
             foreach (array_diff_key($figures[$category] ?? [], ['all' => true]) as $type => $count) {
-                $types[] = ['label' => CrimeData::typeLabel($category, $type), 'count' => $count];
+                $types[] = ['label' => __(CrimeData::typeLabel($category, $type)), 'count' => $count];
             }
         }
 
@@ -322,7 +324,7 @@ class DashboardController extends Controller
         $slices = $types->take($shown)->all();
 
         if ($types->count() > $shown) {
-            $slices[] = ['label' => 'All other types', 'count' => $types->skip($shown)->sum('count')];
+            $slices[] = ['label' => __('All other types'), 'count' => $types->skip($shown)->sum('count')];
         }
 
         $total = $types->sum('count');

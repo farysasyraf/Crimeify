@@ -1,7 +1,7 @@
 {{-- In the app for logged-in users, and at /public/map for everyone, in the public pages' layout. --}}
 @extends($public ? 'layouts.public' : 'layouts.app')
 
-@section('title', 'Map')
+@section('title', __('Map'))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet/leaflet.css') }}" />
@@ -25,10 +25,9 @@
 @section('content')
 <div class="page-head">
     <div>
-        <h1>Crime Visualization Map</h1>
+        <h1>{{ __('Crime Visualization Map') }}</h1>
         <p class="muted">
-            Malaysia's 13 states and 3 federal territories, with a pin for each police district. Click a pin for the
-            district's crime figures, or a state for its totals. Numbered circles group nearby pins; click one to zoom in.
+            {{ __("Malaysia's 13 states and 3 federal territories, with a pin for each police district. Click a pin for the district's crime figures, or a state for its totals. Numbered circles group nearby pins; click one to zoom in.") }}
         </p>
     </div>
 </div>
@@ -45,11 +44,11 @@
             @elseif (! $years)
                 {{-- How to load them is for the app's administrators, not the public. --}}
                 <p class="crime-note">
-                    There are no crime figures yet.@unless ($public) Load them from data.gov.my with <code>php artisan map:import-crime</code>.@endunless
+                    {{ __('There are no crime figures yet.') }}@unless ($public) Load them from data.gov.my with <code>php artisan map:import-crime</code>.@endunless
                 </p>
             @else
                 <div class="crime-year">
-                    <label for="crime-year">Crime figures for</label>
+                    <label for="crime-year">{{ __('Crime figures for') }}</label>
                     <select id="crime-year" data-crime-year>
                         @foreach (array_reverse($years) as $year)
                             <option value="{{ $year }}" @selected($loop->first)>{{ $year }}</option>
@@ -60,30 +59,30 @@
 
             <div class="state-details" aria-live="polite" data-state-details>
                 <h2 id="state-panel-heading">Malaysia</h2>
-                <p class="muted">Choose a state on the map or from the list.</p>
+                <p class="muted">{{ __('Choose a state on the map or from the list.') }}</p>
             </div>
-            <button type="button" class="btn btn-sm" data-show-all hidden>Show all of Malaysia</button>
+            <button type="button" class="btn btn-sm" data-show-all hidden>{{ __('Show all of Malaysia') }}</button>
         </section>
 
         <div class="card state-map-card">
             <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
                 @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
-                role="region" aria-label="Map of Malaysia's states and police districts">
-                <noscript><p class="state-map-note">The map needs JavaScript turned on.</p></noscript>
+                role="region" aria-label="{{ __("Map of Malaysia's states and police districts") }}">
+                <noscript><p class="state-map-note">{{ __('The map needs JavaScript turned on.') }}</p></noscript>
             </div>
             <p class="state-map-note" data-map-status hidden></p>
         </div>
     </div>
 
     {{-- Every region as a button beside the map: choosing one picks it on the map too. --}}
-    <aside class="card state-picker" aria-label="States and federal territories">
+    <aside class="card state-picker" aria-label="{{ __('States and federal territories') }}">
         @foreach (['States' => $states, 'Federal territories' => $territories] as $heading => $regions)
             <div class="state-picker-group">
-                <h2 class="state-list-heading">{{ $heading }}</h2>
+                <h2 class="state-list-heading">{{ __($heading) }}</h2>
                 <ul class="state-list">
                     @foreach ($regions as $region)
                         <li>
-                            <button type="button" class="state-choice" data-state="{{ $region['code'] }}" data-name="{{ $region['name'] }}" data-kind="{{ $region['territory'] ? 'Federal territory' : 'State' }}" aria-pressed="false">{{ $region['name'] }}</button>
+                            <button type="button" class="state-choice" data-state="{{ $region['code'] }}" data-name="{{ $region['name'] }}" data-kind="{{ $region['territory'] ? __('Federal territory') : __('State') }}" aria-pressed="false">{{ $region['name'] }}</button>
                         </li>
                     @endforeach
                 </ul>
@@ -95,21 +94,21 @@
          first: a state, then one of its police stations, for the station's address and phone number
          (station-finder.js). The stations come with the page, so choosing one doesn't wait on the server. --}}
     <section class="card station-finder" aria-labelledby="station-finder-heading">
-        <h2 id="station-finder-heading">Find a police station</h2>
-        <p class="muted station-finder-intro">Choose a state, then one of its police stations, for its address and phone number.</p>
+        <h2 id="station-finder-heading">{{ __('Find a police station') }}</h2>
+        <p class="muted station-finder-intro">{{ __('Choose a state, then one of its police stations, for its address and phone number.') }}</p>
         @if ($stations === [])
             <p class="station-note">
-                No police stations are listed yet.@unless ($public) Add them on the Police stations page, or load one for each police district with <code>php artisan map:import-stations</code>.@endunless
+                {{ __('No police stations are listed yet.') }}@unless ($public) Add them on the Police stations page, or load one for each police district with <code>php artisan map:import-stations</code>.@endunless
             </p>
         @else
             <script type="application/json" data-station-list>@json($stations)</script>
             <div class="station-finder-fields">
                 <div class="field">
-                    <label for="station-state">State</label>
-                    <select id="station-state" data-station-state data-placeholder="Choose a state">
+                    <label for="station-state">{{ __('State') }}</label>
+                    <select id="station-state" data-station-state data-placeholder="{{ __('Choose a state') }}">
                         <option value=""></option>
                         @foreach (['States' => $states, 'Federal territories' => $territories] as $heading => $regions)
-                            <optgroup label="{{ $heading }}">
+                            <optgroup label="{{ __($heading) }}">
                                 @foreach ($regions as $region)
                                     @isset($stations[$region['code']])
                                         <option value="{{ $region['code'] }}">{{ $region['name'] }}</option>
@@ -120,15 +119,15 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label for="station-choice">Police station</label>
-                    <select id="station-choice" data-station-choice data-placeholder="Choose a police station" disabled aria-describedby="station-hint">
+                    <label for="station-choice">{{ __('Police station') }}</label>
+                    <select id="station-choice" data-station-choice data-placeholder="{{ __('Choose a police station') }}" disabled aria-describedby="station-hint">
                         <option value=""></option>
                     </select>
-                    <span class="field-hint" id="station-hint" data-station-hint>Choose a state first.</span>
+                    <span class="field-hint" id="station-hint" data-station-hint>{{ __('Choose a state first.') }}</span>
                 </div>
             </div>
             <div class="station-details" data-station-details aria-live="polite" hidden></div>
-            <noscript><p class="state-map-note">Finding a police station needs JavaScript turned on.</p></noscript>
+            <noscript><p class="state-map-note">{{ __('Finding a police station needs JavaScript turned on.') }}</p></noscript>
         @endif
     </section>
 </div>

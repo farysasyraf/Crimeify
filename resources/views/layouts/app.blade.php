@@ -22,6 +22,8 @@
             // Private windows or blocked storage: the menu starts wide.
         }
     </script>
+    {{-- t() for the pages' scripts, which the public pages share; the app is in English. --}}
+    @include('layouts._translations')
 </head>
 <body>
     <div class="app-shell">

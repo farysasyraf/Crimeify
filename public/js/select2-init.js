@@ -12,11 +12,20 @@
 
     const $ = jQuery;
 
+    // Select2's own words, like "No results found", in the page's language (layouts/_translations).
+    const t = window.t ?? ((text) => text);
+    const language = {
+        noResults: () => t('No results found'),
+        searching: () => t('Searching…'),
+        removeAllItems: () => t('Remove all items'),
+    };
+
     const enhance = (select) => {
         const placeholder = select.dataset.placeholder;
 
         $(select).select2({
             width: '100%',
+            language,
             ...(placeholder === undefined ? {} : { placeholder, allowClear: !select.required }),
         });
 

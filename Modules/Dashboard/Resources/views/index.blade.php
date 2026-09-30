@@ -1,7 +1,7 @@
 {{-- In the app for logged-in users, and at /public/dashboard for everyone, in the public pages' layout. --}}
 @extends($public ? 'layouts.public' : 'layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', __('Dashboard'))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('modules/dashboard/dashboard.css') }}" />
@@ -13,31 +13,33 @@
 @section('content')
 <div class="page-head">
     <div>
-        <h1>Dashboard</h1>
+        <h1>{{ __('Dashboard') }}</h1>
         <p class="muted">
             @if ($years)
-                Crime in Malaysia in {{ $year }}, from the Royal Malaysia Police's figures for each {{ $byState ? 'state' : 'police district' }}.
+                {{ $byState
+                    ? __("Crime in Malaysia in :year, from the Royal Malaysia Police's figures for each state.", ['year' => $year])
+                    : __("Crime in Malaysia in :year, from the Royal Malaysia Police's figures for each police district.", ['year' => $year]) }}
             @else
-                Crime in Malaysia, from the Royal Malaysia Police's figures for each police district.
+                {{ __("Crime in Malaysia, from the Royal Malaysia Police's figures for each police district.") }}
             @endif
         </p>
     </div>
     @if ($years)
         <form method="get" action="{{ $pageUrl }}" class="dash-year" data-year-form>
-            <label for="dash-year">Year</label>
+            <label for="dash-year">{{ __('Year') }}</label>
             <select id="dash-year" name="year">
                 @foreach (array_reverse($years) as $each)
                     <option value="{{ $each }}" @selected($each === $year)>{{ $each }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-sm" data-year-submit>Show</button>
+            <button type="submit" class="btn btn-sm" data-year-submit>{{ __('Show') }}</button>
         </form>
     @endif
 </div>
 
 @if (! $years)
     <div class="empty">
-        <p>There are no crime figures yet.</p>
+        <p>{{ __('There are no crime figures yet.') }}</p>
         {{-- How to load them is for the app's administrators, not the public. --}}
         @unless ($public)
             <p>Load them from data.gov.my with <code>php artisan map:import-crime</code>.</p>
@@ -48,17 +50,18 @@
         $number = fn (?int $value) => number_format($value ?? 0);
         // How a card's count compares with the year before, in words, e.g. "Down 7% from 1,324 in 2022".
         $sinceText = fn (array $card) => match (true) {
-            $card['change']['direction'] === 'same' => 'Same as in '.$previousYear,
-            $card['change']['percent'] === null => 'Up from 0 in '.$previousYear,
-            default => ($card['change']['direction'] === 'up' ? 'Up ' : 'Down ').$card['change']['percent'].'% from '
-                .$number($card['previous']).' in '.$previousYear,
+            $card['change']['direction'] === 'same' => __('Same as in :year', ['year' => $previousYear]),
+            $card['change']['percent'] === null => __('Up from 0 in :year', ['year' => $previousYear]),
+            default => __($card['change']['direction'] === 'up' ? 'Up :size from :count in :year' : 'Down :size from :count in :year', [
+                'size' => $card['change']['percent'].'%', 'count' => $number($card['previous']), 'year' => $previousYear,
+            ]),
         };
     @endphp
 
     <div class="dash">
         <section class="dash-card dash-trend" aria-labelledby="trend-heading">
             <header class="dash-card-head">
-                <h2 id="trend-heading">Crime over the years</h2>
+                <h2 id="trend-heading">{{ __('Crime over the years') }}</h2>
                 <ul class="dash-legend">
                     @foreach ($charts['trend']['series'] as $series)
                         <li><span class="dash-swatch" style="--swatch: {{ $series['colour'] }}"></span>{{ $series['label'] }}</li>
@@ -67,9 +70,9 @@
             </header>
             <div class="dash-chart"><canvas id="trend-chart" aria-hidden="true"></canvas></div>
             <table class="visually-hidden">
-                <caption>Crime in Malaysia each year</caption>
+                <caption>{{ __('Crime in Malaysia each year') }}</caption>
                 <thead>
-                    <tr><th scope="col">Year</th>@foreach ($charts['trend']['series'] as $series)<th scope="col">{{ $series['label'] }}</th>@endforeach</tr>
+                    <tr><th scope="col">{{ __('Year') }}</th>@foreach ($charts['trend']['series'] as $series)<th scope="col">{{ $series['label'] }}</th>@endforeach</tr>
                 </thead>
                 <tbody>
                     @foreach ($charts['trend']['years'] as $index => $each)
@@ -81,19 +84,19 @@
 
         <section class="dash-card dash-regions" aria-labelledby="regions-heading">
             <header class="dash-card-head">
-                <h2 id="regions-heading">Crime by state, {{ $year }}</h2>
+                <h2 id="regions-heading">{{ __('Crime by state, :year', ['year' => $year]) }}</h2>
                 @if ($mapUrl)
-                    <a class="dash-link" href="{{ $mapUrl }}">Open the map</a>
+                    <a class="dash-link" href="{{ $mapUrl }}">{{ __('Open the map') }}</a>
                 @endif
             </header>
             <div class="dash-chart"><canvas id="regions-chart" aria-hidden="true"></canvas></div>
             @if ($byState && $countedIn)
-                <p class="dash-note">{{ "{$year}'s figures are by state, so ".collect($countedIn)->map(fn ($under, $region) => "{$region}'s are in {$under}'s")->join(', ', ' and ').'.' }}</p>
+                <p class="dash-note">{{ __(":year's figures are by state, so :list.", ['year' => $year, 'list' => collect($countedIn)->map(fn ($under, $region) => __(":region's are in :under's", ['region' => $region, 'under' => $under]))->join(', ', ' '.__('and').' ')]) }}</p>
             @endif
             <table class="visually-hidden">
-                <caption>Crime by state in {{ $year }}, most first</caption>
+                <caption>{{ __('Crime by state in :year, most first', ['year' => $year]) }}</caption>
                 <thead>
-                    <tr><th scope="col">State</th>@foreach (config('map.crime.categories') as $label)<th scope="col">{{ $label }}</th>@endforeach<th scope="col">All crime</th></tr>
+                    <tr><th scope="col">{{ __('State') }}</th>@foreach (config('map.crime.categories') as $label)<th scope="col">{{ __($label) }}</th>@endforeach<th scope="col">{{ __('All crime') }}</th></tr>
                 </thead>
                 <tbody>
                     @foreach ($charts['regions'] as $region)
@@ -105,14 +108,14 @@
 
         <section class="dash-card dash-types" aria-labelledby="types-heading">
             <header class="dash-card-head">
-                <h2 id="types-heading">Crime by type, {{ $year }}</h2>
+                <h2 id="types-heading">{{ __('Crime by type, :year', ['year' => $year]) }}</h2>
             </header>
             <div class="dash-types-body">
                 <div class="dash-donut">
                     <canvas id="types-chart" aria-hidden="true"></canvas>
                     <p class="dash-donut-centre" aria-hidden="true">
                         <strong data-donut-count>{{ $number($charts['types']['total']) }}</strong>
-                        <span data-donut-label>crimes</span>
+                        <span data-donut-label>{{ __('crimes') }}</span>
                     </p>
                 </div>
                 <ul class="dash-slices">
@@ -127,11 +130,11 @@
                 </ul>
             </div>
             @if ($byState)
-                <p class="dash-note">{{ $year }}'s figures by state give robbery as one type, where earlier years have its four kinds.</p>
+                <p class="dash-note">{{ __(":year's figures by state give robbery as one type, where earlier years have its four kinds.", ['year' => $year]) }}</p>
             @endif
         </section>
 
-        <section class="dash-cards" aria-label="Crime in {{ $year }}{{ $previousYear ? ", compared with {$previousYear}" : '' }}">
+        <section class="dash-cards" aria-label="{{ $previousYear ? __('Crime in :year, compared with :previous', ['year' => $year, 'previous' => $previousYear]) : __('Crime in :year', ['year' => $year]) }}">
             @foreach ($cards as $card)
                 @php $highest = max(1, ...array_values($card['history'])); @endphp
                 <article class="dash-card dash-figure tone-{{ $card['tone'] }}">
@@ -141,14 +144,14 @@
                     </header>
                     <p class="dash-figure-value">{{ $number($card['value']) }}</p>
                     <div class="dash-figure-foot">
-                        <span class="dash-bars" aria-hidden="true" title="{{ array_key_first($card['history']) }} to {{ array_key_last($card['history']) }}">
+                        <span class="dash-bars" aria-hidden="true" title="{{ __(':from to :to', ['from' => array_key_first($card['history']), 'to' => array_key_last($card['history'])]) }}">
                             @foreach ($card['history'] as $each => $count)
                                 <span @class(['chosen' => $each === $year]) style="--bar: {{ max(6, round($count / $highest * 100)) }}%"></span>
                             @endforeach
                         </span>
                         @if ($card['change'])
                             <span class="dash-change dash-{{ $card['change']['direction'] }}" title="{{ $sinceText($card) }}">
-                                <span aria-hidden="true">{{ ['up' => '▲', 'down' => '▼', 'same' => '='][$card['change']['direction']] }} {{ $card['change']['percent'] ?? '' }}{{ $card['change']['percent'] === null ? 'new' : '%' }}</span>
+                                <span aria-hidden="true">{{ ['up' => '▲', 'down' => '▼', 'same' => '='][$card['change']['direction']] }} {{ $card['change']['percent'] ?? '' }}{{ $card['change']['percent'] === null ? __('new') : '%' }}</span>
                                 <span class="visually-hidden">{{ $sinceText($card) }}</span>
                             </span>
                         @endif
@@ -159,11 +162,11 @@
     </div>
 
     <p class="dash-credit">
-        {{ $credit }}, from <a href="{{ $about }}">data.gov.my</a>.
+        {{ __($credit) }}, {{ __('from') }} <a href="{{ $about }}">data.gov.my</a>.
         @if ($stateYears)
-            For {{ implode(' and ', $stateYears) }}, crime by state: {{ $stateSource }}.
+            {{ __('For :years, crime by state: :source.', ['years' => implode(' '.__('and').' ', $stateYears), 'source' => __($stateSource)]) }}
         @endif
-        Up is more crime and down is less.
+        {{ __('Up is more crime and down is less.') }}
     </p>
 
     <script type="application/json" id="dashboard-data">@json($charts)</script>
