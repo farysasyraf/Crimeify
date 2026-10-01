@@ -48,7 +48,9 @@
     </div>
 @endif
 
-<form method="post" action="{{ page_url('police-stations/upload') }}" enctype="multipart/form-data" class="card form station-upload">
+{{-- Checked step by step in a dialog that shows each as it goes (upload-progress.js), then its review page. --}}
+<form method="post" action="{{ page_url('police-stations/upload') }}" enctype="multipart/form-data" class="card form station-upload"
+    data-upload-progress data-row="police station" data-rows="police stations" data-saved="the saved police stations">
     @csrf
     <h2>Upload an Excel file</h2>
     <div class="alert alert-warning-custom" id="upload-warning">

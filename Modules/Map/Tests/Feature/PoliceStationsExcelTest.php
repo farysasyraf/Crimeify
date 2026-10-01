@@ -70,6 +70,14 @@ class PoliceStationsExcelTest extends TestCase
         return $this->from('/police-stations')->post('/police-stations/upload', ['file' => $this->excelFile($rows)]);
     }
 
+    /**
+     * Upload a file, and open the review page its check ends on.
+     */
+    private function review(array $rows): TestResponse
+    {
+        return $this->from('/police-stations')->followingRedirects()->post('/police-stations/upload', ['file' => $this->excelFile($rows)]);
+    }
+
     private function token(TestResponse $review): string
     {
         preg_match('~police-stations/apply/([0-9a-f-]{36})~', $review->getContent(), $token);
@@ -83,7 +91,8 @@ class PoliceStationsExcelTest extends TestCase
         $this->get('/police-stations')->assertOk()
             ->assertSee('<a class="btn btn-success" href="'.url('/police-stations/download').'"><span class="material-icon btn-icon" aria-hidden="true">download</span>Download Excel</a>', false)
             ->assertSeeInOrder([
-                '<form method="post" action="'.url('/police-stations/upload').'" enctype="multipart/form-data" class="card form station-upload">',
+                '<form method="post" action="'.url('/police-stations/upload').'" enctype="multipart/form-data" class="card form station-upload"',
+                'data-upload-progress data-row="police station" data-rows="police stations" data-saved="the saved police stations">',
                 '<h2>Upload an Excel file</h2>',
                 'A station missing from the file is deleted, so upload the whole file, not part of it.',
                 '<button type="submit" class="btn btn-primary">Check the file</button>',
@@ -97,8 +106,50 @@ class PoliceStationsExcelTest extends TestCase
 
         $this->get('/police-stations/download')->assertForbidden();
         $this->post('/police-stations/upload', ['file' => $this->excelFile(array_values($this->everyStation()))])->assertForbidden();
+        $this->post("/police-stations/compare/{$token}", [], ['Accept' => 'application/json'])->assertForbidden();
+        $this->get("/police-stations/review/{$token}")->assertForbidden();
         $this->post("/police-stations/apply/{$token}")->assertForbidden();
         $this->delete("/police-stations/cancel/{$token}")->assertForbidden();
+    }
+
+    public function test_with_javascript_an_upload_is_checked_step_by_step(): void
+    {
+        $this->signIn();
+        $json = ['Accept' => 'application/json'];
+        $this->get('/police-stations')->assertSee('<script src="'.versioned_asset('js/upload-progress.js').'" defer></script>', false);
+
+        // First the file is read and its stations kept: nothing to review or apply yet. A new station's phone number,
+        // which Excel kept as a number, gets its first 0 back.
+        $rows = $this->everyStation();
+        $rows['IPD Muar'][5] = '06-952 1222';
+        $rows[] = ['', 'Johor', 'Kluang', 'IPD Kluang', '', 77711222];
+        $compare = $this->post('/police-stations/upload', ['file' => $this->excelFile(array_values($rows))], $json)->assertOk()->assertJsonPath('rows', 4)->json('next');
+        $upload = basename($compare);
+        $this->assertSame(url("/police-stations/compare/{$upload}"), $compare);
+        $this->get("/police-stations/review/{$upload}")->assertNotFound();
+        $this->post("/police-stations/apply/{$upload}")->assertNotFound();
+
+        // Then compared with the saved stations, once: the review is next, with what reading the file put right.
+        $this->post($compare, [], $json)->assertOk()->assertExactJson(['changes' => 2, 'next' => url("/police-stations/review/{$upload}")]);
+        $this->post($compare, [], $json)->assertNotFound();
+        $this->get("/police-stations/review/{$upload}")->assertOk()
+            ->assertSee('stations.xlsx has 4 police stations.')
+            ->assertSee('Excel kept the phone number in row 5 as a number, which drops its first 0.')
+            ->assertSee('<dt>Phone</dt><dd>077711222</dd>', false);
+        $this->post("/police-stations/apply/{$upload}")
+            ->assertSessionHas('message', 'Updated the police stations from stations.xlsx: 1 changed, 1 added, 0 deleted.');
+
+        // A file with problems is turned down at its first step, with them listed.
+        $this->post('/police-stations/upload', ['file' => $this->excelFile([['', 'Johore', 'Kluang', 'IPD Kluang', '', '']])], $json)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.file', ['Row 2 has state "Johore": it should be one of the names on the Read me sheet, like Johor or Kuala Lumpur.']);
+
+        // The same stations change nothing, and the list says so.
+        $same = $this->post('/police-stations/upload', ['file' => $this->excelFile(array_values($this->everyStation()))], $json)->json('next');
+        $this->post($same, [], $json)->assertOk()
+            ->assertExactJson(['changes' => 0, 'next' => url('/police-stations')])
+            ->assertSessionHas('message', 'stations.xlsx has the same police stations as the page already has, so there\'s nothing to change.');
+        $this->assertSame([], Storage::disk('local')->files('station-uploads'));
     }
 
     public function test_download_gives_every_station_as_an_excel_file(): void
@@ -144,7 +195,7 @@ class PoliceStationsExcelTest extends TestCase
         // A new station; its phone typed in Excel as a number, which drops the first 0.
         $rows[] = ['', 'selangor', 'Shah Alam', 'IPD Shah Alam', 'Persiaran Kayangan, 40100 Shah Alam', 355202222];
 
-        $review = $this->upload(array_values($rows))->assertOk()
+        $review = $this->review(array_values($rows))->assertOk()
             ->assertSee('<h1>Check the upload</h1>', false)
             ->assertSee('stations.xlsx has 3 police stations. Applying it makes the changes below.')
             ->assertSeeInOrder(['<strong>2</strong> changed', '<strong>1</strong> added', '<strong>1</strong> deleted'], false)
@@ -246,7 +297,7 @@ class PoliceStationsExcelTest extends TestCase
         $rows = $this->everyStation();
         $rows['IPD Muar'][5] = '06-952 1222';
 
-        $review = $this->upload(array_values($rows))->assertOk();
+        $review = $this->review(array_values($rows))->assertOk();
 
         // Someone saves the station on the page before the upload is applied.
         $this->muar->update(['Phone' => '06-951 0000']);
@@ -255,7 +306,7 @@ class PoliceStationsExcelTest extends TestCase
             ->assertSessionHasErrors(['file' => 'The police stations changed after stations.xlsx was checked, so nothing was changed. Upload it again to see what it would change now.']);
         $this->assertSame('06-951 0000', $this->muar->fresh()->Phone);
 
-        $review = $this->upload(array_values($rows))->assertOk();
+        $review = $this->review(array_values($rows))->assertOk();
         $this->delete('/police-stations/cancel/'.$this->token($review))
             ->assertRedirect('/police-stations')
             ->assertSessionHas('message', 'Cancelled: nothing in stations.xlsx was applied.');
@@ -271,7 +322,7 @@ class PoliceStationsExcelTest extends TestCase
         $rows = $this->everyStation();
         [$rows['IPD Batu Pahat'][3], $rows['IPD Muar'][3]] = ['IPD Muar', 'IPD Batu Pahat'];
 
-        $review = $this->upload(array_values($rows))->assertOk()->assertSeeInOrder(['<strong>2</strong> changed'], false);
+        $review = $this->review(array_values($rows))->assertOk()->assertSeeInOrder(['<strong>2</strong> changed'], false);
         $this->post('/police-stations/apply/'.$this->token($review))->assertSessionHasNoErrors();
 
         $this->assertSame(['IPD Muar', 'IPD Batu Pahat'], [$this->batuPahat->fresh()->Name, $this->muar->fresh()->Name]);

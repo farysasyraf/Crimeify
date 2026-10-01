@@ -97,5 +97,7 @@
     <script src="{{ versioned_asset('js/select2-init.js') }}" defer></script>
     {{-- Lists that refresh in place when a filter or page is chosen, rather than the whole page. --}}
     <script src="{{ versioned_asset('js/live-table.js') }}" defer></script>
+    {{-- An uploaded Excel file's check, shown step by step as it goes (forms marked data-upload-progress). --}}
+    <script src="{{ versioned_asset('js/upload-progress.js') }}" defer></script>
 </body>
 </html>

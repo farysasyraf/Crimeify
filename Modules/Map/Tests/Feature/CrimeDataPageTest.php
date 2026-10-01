@@ -126,9 +126,9 @@ class CrimeDataPageTest extends TestCase
         $user = $this->signIn(admin: false);
         $token = '0b1f6f3e-8a4c-4d0e-9d7a-2f1c3b5a6e70';
         foreach ([
-            'get' => ['/crime-data', '/crime-data/download', "/crime-data/delete/{$figure}", '/crime-data/delete/999'],
+            'get' => ['/crime-data', '/crime-data/download', "/crime-data/delete/{$figure}", '/crime-data/delete/999', "/crime-data/review/{$token}"],
             'put' => ['/crime-data/update'],
-            'post' => ['/crime-data/store', '/crime-data/upload', "/crime-data/apply/{$token}"],
+            'post' => ['/crime-data/store', '/crime-data/upload', "/crime-data/compare/{$token}", "/crime-data/apply/{$token}"],
             'delete' => ["/crime-data/destroy/{$figure}", '/crime-data/destroy/999', "/crime-data/cancel/{$token}"],
         ] as $method => $addresses) {
             foreach ($addresses as $address) {
@@ -466,7 +466,11 @@ class CrimeDataPageTest extends TestCase
         unset($row);
         $rows[] = ['Johor', 'Kluang', 'property', 'theft_other', 2023, 8];
 
-        $page = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows, name: 'edited.xlsx')])->assertOk();
+        // Checked, it opens its review page, at an address of its own, so reloading it doesn't send the file again.
+        $review = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows, name: 'edited.xlsx')])->headers->get('Location');
+        $this->assertMatchesRegularExpression('~^'.preg_quote(url('/crime-data/review'), '~').'/[0-9a-f-]{36}$~', $review);
+        $page = $this->get($review)->assertOk();
+        $this->get($review)->assertOk();
 
         $page->assertSee('<title>Check the upload · '.config('app.name').'</title>', false)
             ->assertSee('edited.xlsx has 8 figures.')
@@ -484,9 +488,10 @@ class CrimeDataPageTest extends TestCase
         $this->assertStringContainsString('action="'.url("/crime-data/cancel/{$match[1]}").'"', $page->getContent());
         $token = $match[1];
 
-        // Only the user who uploaded it can apply it.
+        // Only the user who uploaded it can see or apply it.
         $other = User::create(['Name' => 'Other Admin', 'Email' => 'other@example.com']);
         $other->roles()->attach(Role::firstWhere('Name', 'ADMIN')->Id);
+        $this->actingAs($other)->get($review)->assertNotFound();
         $this->actingAs($other)->post("/crime-data/apply/{$token}")->assertNotFound();
         $this->actingAs($user);
 
@@ -505,6 +510,49 @@ class CrimeDataPageTest extends TestCase
 
         // Applied once only.
         $this->post("/crime-data/apply/{$token}")->assertNotFound();
+    }
+
+    public function test_with_javascript_an_upload_is_checked_step_by_step(): void
+    {
+        Storage::fake('local');
+        $this->signIn();
+        $this->importFigures();
+        $json = ['Accept' => 'application/json'];
+
+        // The page checks the file in steps it shows as they go (upload-progress.js).
+        $this->get('/crime-data')->assertOk()
+            ->assertSee('data-upload-progress data-row="figure" data-rows="figures" data-saved="the saved figures"', false)
+            ->assertSee('<script src="'.versioned_asset('js/upload-progress.js').'" defer></script>', false);
+
+        // First the file is read and its figures kept: nothing to review or apply yet.
+        $rows = array_map(fn (array $row) => $row[1] === 'Batu Pahat' && $row[3] === 'murder' && $row[4] === 2023 ? [...array_slice($row, 0, 5), 6] : $row, $this->everyFigure());
+        $compare = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)], $json)->assertOk()->assertJsonPath('rows', 8)->json('next');
+        $upload = basename($compare);
+        $this->assertSame(url("/crime-data/compare/{$upload}"), $compare);
+        $this->get("/crime-data/review/{$upload}")->assertNotFound();
+        $this->post("/crime-data/apply/{$upload}")->assertNotFound();
+
+        // Then compared with the saved figures, once: the review is next.
+        $this->post($compare, [], $json)->assertOk()->assertExactJson(['changes' => 1, 'next' => url("/crime-data/review/{$upload}")]);
+        $this->post($compare, [], $json)->assertNotFound();
+        $this->get("/crime-data/review/{$upload}")->assertOk()
+            ->assertSee('crime.xlsx has 8 figures.')
+            ->assertSeeInOrder(['Changed', 'Batu Pahat', 'Murder', '2', '6']);
+
+        // A file with problems is turned down at its first step, with them listed.
+        $this->post('/crime-data/upload', ['file' => $this->excelFile([['Johor', 'Kluang', 'assault', 'murder', 2023, -1]])], $json)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.file', ['Row 2 has crimes "-1": it should be a whole number, 0 or more.']);
+
+        // The same figures change nothing, and the list says so.
+        $same = $this->post('/crime-data/upload', ['file' => $this->excelFile($this->everyFigure(), name: 'same.xlsx')], $json)->json('next');
+        $this->post($same, [], $json)->assertOk()
+            ->assertExactJson(['changes' => 0, 'next' => url('/crime-data')])
+            ->assertSessionHas('message', 'same.xlsx has the same figures as the page already has, so there\'s nothing to change.');
+
+        // Only the reviewed upload waits, and nothing has changed yet.
+        $this->assertSame(["crime-uploads/{$upload}.json"], Storage::disk('local')->files('crime-uploads'));
+        $this->assertSame(2, $this->crimes('Johor', 'Batu Pahat', 'assault', 'murder'));
     }
 
     public function test_an_upload_is_checked_before_anything_changes(): void
@@ -551,15 +599,105 @@ class CrimeDataPageTest extends TestCase
         $this->assertSame(2, $this->crimes('Johor', 'Batu Pahat', 'assault', 'murder'));
     }
 
-    public function test_an_upload_warns_about_what_the_map_cant_show_and_can_be_cancelled(): void
+    public function test_a_misspelled_name_is_turned_down_with_what_it_was_most_like(): void
     {
         Storage::fake('local');
         $this->signIn();
         $this->importFigures();
 
-        $rows = [...$this->everyFigure(), ['Johor', 'Batu Pahatt', 'assault', 'murder', 2023, 3], ['Johor', 'Kluang', 'assault', 'kidnap', 2023, 2]];
-        $page = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertOk()
-            ->assertSee('No map pin for Batu Pahatt (Johor).')
+        // As the Add a figure form, the file can only use names already here: a misspelling would otherwise delete the
+        // figure it meant and add one the map can't show. The check stops at reading the file, before its review.
+        $rows = [
+            ['Johor', 'Batu Pahat', 'assault', 'causing_injuries', 2023, 10],
+            ['Johore', 'Kluang', 'assault', 'murder', 2023, 1],
+            ['Johor', 'Batu Pahatt', 'property', 'break_in', 2023, 25],
+            ['Johor', 'Kluang', 'property', 'Break in', 2023, 5],
+            ['Johor', 'Kluang', 'assault', 'kidnap', 2023, 2],
+            ['Johor', 'Pagoh', 'assault', 'murder', 2023, 1],
+            ['Atlantis', 'Kluang', 'assault', 'murder', 2023, 1],
+        ];
+        $problems = [
+            'Row 2 has type "causing_injuries": did you mean causing_injury (Causing injury)?',
+            'Row 3 has state "Johore": did you mean Johor?',
+            'Row 4 has police district "Batu Pahatt": did you mean Batu Pahat?',
+            'Row 5 has type "Break in": did you mean break_in (Break-in)?',
+            'Row 6 has type "kidnap", which is new here: the map\'s popups and the dashboard can\'t show it until it\'s named in Modules/Map/Config/config.php.',
+            'Row 7 has police district "Pagoh", which is new in Johor: the map can\'t show it until its pin is added to Modules/Map/Database/data/police-districts.csv.',
+            'Row 8 has state "Atlantis", which isn\'t a state here: use one like Johor or Selangor, as in a file downloaded from this page.',
+        ];
+        $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertSessionHasErrors('file');
+        $this->assertSame($problems, session('errors')->get('file'));
+        // The same in the dialog that shows the check as it goes, which can't go on with a misspelled state.
+        $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)], ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.file', $problems)
+            ->assertJsonMissingPath('newNames');
+        $this->assertSame([], Storage::disk('local')->files('crime-uploads'));
+
+        // Letter case doesn't matter: a new figure is saved spelled as the names here are.
+        $rows = [...$this->everyFigure(), ['johor', 'KLUANG', 'Property', 'Theft_Other', 2023, 4]];
+        $review = $this->followingRedirects()->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertOk()
+            ->assertSeeInOrder(['<strong>0</strong> changed', '<strong>1</strong> added', '<strong>0</strong> deleted'], false);
+        preg_match('~/crime-data/apply/([0-9a-f-]{36})~', $review->getContent(), $match);
+        $this->post("/crime-data/apply/{$match[1]}")->assertSessionHasNoErrors();
+        $this->assertSame(4, $this->crimes('Johor', 'Kluang', 'property', 'theft_other'));
+    }
+
+    public function test_the_dialog_can_proceed_with_names_that_are_new_here(): void
+    {
+        Storage::fake('local');
+        $this->signIn();
+        $this->importFigures();
+        $json = ['Accept' => 'application/json'];
+
+        // Only names that are new here, which may be meant: the dialog can offer Proceed with Review.
+        $rows = [...$this->everyFigure(), ['Johor', 'Pagoh', 'assault', 'murder', 2023, 3], ['Johor', 'Kluang', 'assault', 'kidnap', 2023, 2]];
+        $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)], $json)
+            ->assertUnprocessable()
+            ->assertJsonPath('newNames', true)
+            ->assertJsonPath('errors.file', [
+                'Row 10 has police district "Pagoh", which is new in Johor: the map can\'t show it until its pin is added to Modules/Map/Database/data/police-districts.csv.',
+                'Row 11 has type "kidnap", which is new here: the map\'s popups and the dashboard can\'t show it until it\'s named in Modules/Map/Config/config.php.',
+            ]);
+        $this->assertSame([], Storage::disk('local')->files('crime-uploads'));
+
+        // Proceeding checks the file again, taking them as they are: its review says what the map leaves out.
+        $compare = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows), 'new_names' => '1'], $json)->assertOk()->assertJsonPath('rows', 10)->json('next');
+        $this->post($compare, [], $json)->assertOk()->assertJsonPath('changes', 2);
+        $this->get('/crime-data/review/'.basename($compare))->assertOk()
+            ->assertSeeInOrder(['<strong>0</strong> changed', '<strong>2</strong> added', '<strong>0</strong> deleted'], false)
+            ->assertSee('No map pin for Pagoh (Johor).')
+            ->assertSee('No name for the crime types assault/kidnap');
+
+        // Not when the file has other problems too: there'd be nothing to review them in. That includes a row with a
+        // new name that's in the file twice.
+        $this->post('/crime-data/upload', ['file' => $this->excelFile([...$rows, ['Johor', 'Kluang', 'assault', 'murder', 2022, -1]])], $json)
+            ->assertUnprocessable()
+            ->assertJsonMissingPath('newNames');
+        $this->post('/crime-data/upload', ['file' => $this->excelFile([...$rows, ['Johor', 'Pagoh', 'assault', 'murder', 2023, 4]])], $json)
+            ->assertUnprocessable()
+            ->assertJsonMissingPath('newNames')
+            ->assertJsonPath('errors.file.2', 'Row 12 has police district "Pagoh", which is new in Johor: the map can\'t show it until its pin is added to Modules/Map/Database/data/police-districts.csv.')
+            ->assertJsonPath('errors.file.3', 'Row 12 repeats Pagoh, Johor: Murder in 2023. Each should be in the file once.');
+        // And a state is never new, so one that isn't here is misspelled, even proceeding.
+        $this->post('/crime-data/upload', ['file' => $this->excelFile([...$this->everyFigure(), ['Johore', 'Kluang', 'assault', 'murder', 2022, 1]]), 'new_names' => '1'], $json)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.file', ['Row 10 has state "Johore": did you mean Johor?']);
+    }
+
+    public function test_an_upload_warns_about_what_the_map_cant_show_and_can_be_cancelled(): void
+    {
+        Storage::fake('local');
+        $this->signIn();
+        $this->importFigures();
+        // Figures here already that the map can't show: a police district without a pin, and a crime type without a name.
+        CrimeStat::create(['State' => 'Johor', 'District' => 'Pagoh', 'Category' => 'assault', 'Type' => 'murder', 'Year' => 2022, 'Crimes' => 1]);
+        CrimeStat::create(['State' => 'Johor', 'District' => 'Kluang', 'Category' => 'assault', 'Type' => 'kidnap', 'Year' => 2022, 'Crimes' => 1]);
+
+        // A file can add to them, and the review says what the map leaves out.
+        $rows = [...$this->everyFigure(), ['Johor', 'Pagoh', 'assault', 'murder', 2023, 3], ['Johor', 'Kluang', 'assault', 'kidnap', 2023, 2]];
+        $page = $this->followingRedirects()->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertOk()
+            ->assertSee('No map pin for Pagoh (Johor).')
             ->assertSee('No name for the crime types assault/kidnap');
 
         preg_match('~/crime-data/cancel/([0-9a-f-]{36})~', $page->getContent(), $match);
@@ -570,7 +708,7 @@ class CrimeDataPageTest extends TestCase
             ->assertSessionHas('message', 'Cancelled: nothing in crime.xlsx was applied.');
 
         $this->assertCount(0, Storage::disk('local')->files('crime-uploads'));
-        $this->assertNull($this->crimes('Johor', 'Batu Pahatt', 'assault', 'murder'));
+        $this->assertNull($this->crimes('Johor', 'Pagoh', 'assault', 'murder', 2023));
     }
 
     public function test_an_upload_is_not_applied_if_the_figures_changed_after_it_was_checked(): void
@@ -581,7 +719,7 @@ class CrimeDataPageTest extends TestCase
         $murder = $this->figure('Batu Pahat', 'murder');
 
         $rows = array_map(fn (array $row) => $row[1] === 'Batu Pahat' && $row[3] === 'murder' && $row[4] === 2023 ? [...array_slice($row, 0, 5), 6] : $row, $this->everyFigure());
-        $page = $this->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertOk();
+        $page = $this->followingRedirects()->post('/crime-data/upload', ['file' => $this->excelFile($rows)])->assertOk();
         preg_match('~/crime-data/apply/([0-9a-f-]{36})~', $page->getContent(), $match);
 
         // Someone saves another count for it on the page meanwhile.

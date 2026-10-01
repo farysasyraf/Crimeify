@@ -52,7 +52,9 @@
 @enderror
 
 <div class="crime-tools">
-    <form method="post" action="{{ page_url('crime-data/upload') }}" enctype="multipart/form-data" class="card form crime-tool">
+    {{-- Checked step by step in a dialog that shows each as it goes (upload-progress.js), then its review page. --}}
+    <form method="post" action="{{ page_url('crime-data/upload') }}" enctype="multipart/form-data" class="card form crime-tool"
+        data-upload-progress data-row="figure" data-rows="figures" data-saved="the saved figures">
         @csrf
         <h2>Upload an Excel file</h2>
         <div class="alert alert-warning-custom" id="upload-warning">

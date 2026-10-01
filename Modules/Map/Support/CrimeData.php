@@ -299,19 +299,25 @@ class CrimeData
     }
 
     /**
-     * Read an uploaded Excel file's figures, keyed as key() keys them, or say what's wrong with it.
+     * Read an uploaded Excel file's figures, keyed as key() keys them, or say what's wrong with it. A police district
+     * or crime type that's new here is most likely misspelled, so it's a problem too, unless $newNames says to take
+     * new ones as they are, as the progress dialog's Proceed with Review does. newNamesOnly says whether those are
+     * the only problems, so taking them as they are would get the file through.
      *
-     * @return array{figures: array<string, array{state: string, district: string, category: string, type: string, year: int, crimes: int}>, problems: list<string>}
+     * @return array{figures: array<string, array{state: string, district: string, category: string, type: string, year: int, crimes: int}>, problems: list<string>, newNamesOnly: bool}
      */
-    public function readExcel(string $path): array
+    public function readExcel(string $path, bool $newNames = false): array
     {
         $figures = [];
         $problems = [];
         $more = 0;
-        $note = function (string $problem) use (&$problems, &$more) {
+        $otherProblems = false;
+        $note = function (string $problem, bool $newName = false) use (&$problems, &$more, &$otherProblems) {
+            $otherProblems = $otherProblems || ! $newName;
             count($problems) < self::MaxProblems ? $problems[] = $problem : $more++;
         };
 
+        $known = $this->knownNames();
         $reader = new Reader;
 
         try {
@@ -330,13 +336,13 @@ class CrimeData
                     if ($header === null) {
                         $header = array_map(fn ($cell) => mb_strtolower((string) $cell), array_slice($cells, 0, count(self::Columns)));
                         if ($header !== self::Columns) {
-                            return ['figures' => [], 'problems' => ['The first sheet\'s first row should be the headings '.implode(', ', self::Columns).', as in a file downloaded from this page.']];
+                            return ['figures' => [], 'problems' => ['The first sheet\'s first row should be the headings '.implode(', ', self::Columns).', as in a file downloaded from this page.'], 'newNamesOnly' => false];
                         }
 
                         continue;
                     }
 
-                    $figure = $this->readRow(array_slice(array_pad($cells, count(self::Columns), null), 0, count(self::Columns)), $number, $note);
+                    $figure = $this->readRow(array_slice(array_pad($cells, count(self::Columns), null), 0, count(self::Columns)), $number, $note, $known, $newNames);
 
                     if ($figure === null) {
                         continue;
@@ -356,28 +362,82 @@ class CrimeData
                 break;
             }
         } catch (Throwable) {
-            return ['figures' => [], 'problems' => ['That file couldn\'t be read as an Excel workbook. Save it from Excel as .xlsx and try again.']];
+            return ['figures' => [], 'problems' => ['That file couldn\'t be read as an Excel workbook. Save it from Excel as .xlsx and try again.'], 'newNamesOnly' => false];
         } finally {
             $reader->close();
         }
 
         if ($problems === [] && $figures === []) {
-            $problems[] = 'The file has no figures in it, only headings.';
+            $note('The file has no figures in it, only headings.');
         }
         if ($more > 0) {
             $problems[] = "And {$more} more like these.";
         }
 
-        return ['figures' => $figures, 'problems' => $problems];
+        return ['figures' => $figures, 'problems' => $problems, 'newNamesOnly' => $problems !== [] && ! $otherProblems];
     }
 
     /**
-     * One row of an uploaded file as a figure, or null after noting what's wrong with it.
+     * The names a file's rows may use, as the Add a figure form allows: states and police districts with a map pin or
+     * already in the figures, and crime types named in the Map module's config (the Read me sheet's) or already in the
+     * figures. A misspelled one is turned down, rather than delete the figure it meant and add one the map can't show.
+     *
+     * @return array{states: array<string, string>, districts: array<string, array<string, string>>, types: array<string, array<string, string>>}
+     *         each by its spelling in lowercase, to its spelling here; districts by state, types by category
+     */
+    private function knownNames(): array
+    {
+        $known = ['states' => [], 'districts' => [], 'types' => []];
+
+        $places = PoliceDistrict::query()->get(['State', 'Name'])->map(fn (PoliceDistrict $pin) => [$pin->State, $pin->Name])
+            ->concat(self::editable()->select('State', 'District')->distinct()->get()->map(fn (CrimeStat $figure) => [$figure->State, $figure->District]));
+        foreach ($places as [$state, $district]) {
+            $known['states'][mb_strtolower($state)] = $state;
+            $known['districts'][mb_strtolower($state)][mb_strtolower($district)] = $district;
+        }
+
+        $types = collect(config('map.crime.types'))->flatMap(fn (array $labels, string $category) => array_map(fn (string $type) => [$category, $type], array_keys($labels)))
+            ->concat(self::editable()->select('Category', 'Type')->distinct()->get()->map(fn (CrimeStat $figure) => [$figure->Category, $figure->Type]));
+        foreach ($types as [$category, $type]) {
+            $known['types'][$category][mb_strtolower($type)] = $type;
+        }
+
+        return $known;
+    }
+
+    /**
+     * Of the names here, the one a name typed wrong is most like, if it's close enough to be what was meant: a letter
+     * or so out for a short name, a few for a long one, like causing_injuries for causing_injury.
+     *
+     * @param  array<string, string>  $names  by how they may be typed, in lowercase
+     */
+    private static function closest(string $typed, array $names): ?string
+    {
+        $typed = mb_strtolower($typed);
+        $closest = null;
+        $nearest = max(1, intdiv(mb_strlen($typed), 4)) + 1;
+
+        foreach ($names as $spelling => $name) {
+            $distance = levenshtein($typed, (string) $spelling);
+            if ($distance < $nearest) {
+                [$closest, $nearest] = [$name, $distance];
+            }
+        }
+
+        return $closest;
+    }
+
+    /**
+     * One row of an uploaded file as a figure, or null after noting what's wrong with it. Its names come back spelled
+     * as they are here, whatever the letter case they were typed in. A police district or crime type that's new here
+     * is checked last, so a row noted for one has nothing else wrong with it, and is noted without leaving the row out.
      *
      * @param  list<mixed>  $cells
+     * @param  array<string, array<string, mixed>>  $known  the names it may use, from knownNames()
+     * @param  bool  $newNames  whether to take a new police district or crime type as it is
      * @return array{state: string, district: string, category: string, type: string, year: int, crimes: int}|null
      */
-    private function readRow(array $cells, int $number, callable $note): ?array
+    private function readRow(array $cells, int $number, callable $note, array $known, bool $newNames = false): ?array
     {
         // A cell as text for a message; a date or other value Excel made is named by its kind.
         $shown = fn ($cell) => is_scalar($cell) || $cell === null ? (string) $cell : get_debug_type($cell);
@@ -395,27 +455,63 @@ class CrimeData
         $type = mb_strtolower($shown($cells[3]));
         $year = $wholeNumber($cells[4]);
         $crimes = $wholeNumber($cells[5]);
+        $districts = $known['districts'][mb_strtolower($state)] ?? [];
+        $types = $known['types'][$category] ?? [];
+        // A name that isn't one here: the one it's most like, or what to do instead.
+        $unknown = fn (string $what, string $typed, ?string $meant, string $otherwise) => "has {$what} \"{$typed}\"".($meant !== null ? ": did you mean {$meant}?" : ", which {$otherwise}");
+        // The crime type a wrong one is most like, found by its name too, so "Motorcycle theft" finds
+        // theft_vehicle_motorcycle.
+        $meantType = function () use ($type, $types, $category) {
+            $meant = self::closest($type, $types + array_flip(array_map('mb_strtolower', config("map.crime.types.{$category}", []))));
+
+            return $meant === null ? null : "{$meant} (".self::typeLabel($category, $meant).')';
+        };
 
         $problem = match (true) {
             $state === '' || $district === '' => 'needs a state and a police district',
-            mb_strtolower($state) === 'malaysia' || mb_strtolower($district) === 'all' => 'is a total: totals are added up from the districts, so leave them out',
-            mb_strlen($state) > 50 || mb_strlen($district) > 80 => 'has a state or district name that\'s too long',
+            mb_strtolower($state) === 'malaysia' || mb_strtolower($district) === 'all' || $type === 'all' => 'is a total: totals are added up from the districts, so leave them out',
+            // Malaysia's states don't change, so one that isn't here is misspelled.
+            ! isset($known['states'][mb_strtolower($state)]) => $unknown('state', $state, self::closest($state, $known['states']),
+                'isn\'t a state here: use one like Johor or Selangor, as in a file downloaded from this page'),
+            mb_strlen($district) > 80 => 'has a police district name longer than 80 characters',
             ! array_key_exists($category, config('map.crime.categories')) => 'has category "'.$shown($cells[2]).'": it should be '.implode(' or ', array_keys(config('map.crime.categories'))),
-            ! preg_match('/^[a-z][a-z_]{0,39}$/', $type) || $type === 'all' => 'has type "'.$shown($cells[3]).'": it should be one like murder or break_in, from the Read me sheet',
+            // A crime type is kept as its code, so even a new one must look like one.
+            ! isset($types[$type]) && ! preg_match('/^[a-z][a-z_]{0,39}$/', $type) => $unknown('type', $shown($cells[3]), $meantType(),
+                'isn\'t a crime type: use a code from the Read me sheet, like murder or break_in'),
             $year === null || $year < 1900 || $year > 2100 => 'has year "'.$shown($cells[4]).'": it should be a year like 2023',
             // A year by state only would have its states' totals added up again from the file's few rows.
             in_array($year, $this->stateOnlyYears ??= StateCrime::stateOnlyYears(), true) => "has year {$year}, whose figures are by state only, from the police's crime index: leave its rows out",
             $crimes === null || $crimes > 1000000 => 'has crimes "'.$shown($cells[5]).'": it should be a whole number, 0 or more',
             default => null,
         };
+        $state = $known['states'][mb_strtolower($state)] ?? $state;
+
+        // Then a police district or crime type that's new here, unless new ones are taken as they are.
+        $newName = match (true) {
+            $problem !== null || $newNames => null,
+            ! isset($districts[mb_strtolower($district)]) => $unknown('police district', $district, self::closest($district, $districts),
+                "is new in {$state}: the map can't show it until its pin is added to Modules/Map/".config('map.crime.districts')),
+            ! isset($types[$type]) => $unknown('type', $shown($cells[3]), $meantType(),
+                'is new here: the map\'s popups and the dashboard can\'t show it until it\'s named in Modules/Map/Config/config.php'),
+            default => null,
+        };
 
         if ($problem !== null) {
-            $note("Row {$number} {$problem}.");
+            $note("Row {$number} {$problem}".(str_ends_with($problem, '?') ? '' : '.'));
 
             return null;
         }
 
-        return ['state' => $state, 'district' => $district, 'category' => $category, 'type' => $type, 'year' => $year, 'crimes' => $crimes];
+        // A new name is noted, but its row is still read, to be checked as the others are, like for being in the file
+        // twice: so a file whose only problems are new names has nothing else wrong, taking them as they are.
+        if ($newName !== null) {
+            $note("Row {$number} {$newName}".(str_ends_with($newName, '?') ? '' : '.'), true);
+        }
+
+        return [
+            'state' => $state, 'district' => $districts[mb_strtolower($district)] ?? $district,
+            'category' => $category, 'type' => $types[$type] ?? $type, 'year' => $year, 'crimes' => $crimes,
+        ];
     }
 
     /**

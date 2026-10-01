@@ -4,6 +4,7 @@ namespace Modules\Map\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -54,9 +55,11 @@ class PoliceStationController extends Controller
     }
 
     /**
-     * Check an uploaded Excel file and show what it would change, without changing anything yet.
+     * Check an uploaded Excel file, without changing anything yet. With JavaScript, the page checks it in steps it shows
+     * as they go (upload-progress.js): this reads the file and keeps its stations, then compare() compares them.
+     * Without, this does both, then shows what the file would change on its review page.
      */
-    public function upload(Request $request): View|RedirectResponse
+    public function upload(Request $request): JsonResponse|RedirectResponse
     {
         $request->validate([
             'file' => ['required', 'file', 'extensions:xlsx', 'max:5120'],
@@ -72,24 +75,68 @@ class PoliceStationController extends Controller
             throw ValidationException::withMessages(['file' => $read['problems']]);
         }
 
-        $changes = $this->stations->compare($read['stations']);
         $name = $request->file('file')->getClientOriginalName();
 
-        if ($changes === []) {
-            return redirect(page_url('police-stations'))
-                ->with(['message' => "{$name} has the same police stations as the page already has, so there's nothing to change.", 'status' => 'info']);
+        if ($request->expectsJson()) {
+            $upload = $this->keepUpload($request, ['file' => $name, 'stations' => $read['stations'], 'warnings' => $read['warnings']]);
+
+            return response()->json(['rows' => count($read['stations']), 'next' => page_url('police-stations/compare', ['upload' => $upload])]);
         }
 
-        // The changes wait on the server, for this user only, until they're applied or cancelled.
-        $token = $this->keepUpload($request, ['file' => $name, 'changes' => $changes]);
+        return redirect($this->checked($request, $name, $read['stations'], $read['warnings'])['next']);
+    }
+
+    /**
+     * The next step of a check shown as it goes: compare the stations upload() kept with the saved ones.
+     */
+    public function compare(Request $request, string $upload): JsonResponse
+    {
+        $pending = $this->pendingUpload($request, $upload, 'stations');
+
+        return response()->json($this->checked($request, $pending['file'], $pending['stations'], $pending['warnings'], $upload));
+    }
+
+    /**
+     * What an uploaded file would change, to apply or cancel.
+     */
+    public function review(Request $request, string $upload): View
+    {
+        $pending = $this->pendingUpload($request, $upload, 'changes');
 
         return view('map::police-stations.review', [
-            'token' => $token,
-            'file' => $name,
-            'changes' => collect($changes),
-            'warnings' => $read['warnings'],
-            'stationCount' => count($read['stations']),
+            'token' => $upload,
+            'file' => $pending['file'],
+            'changes' => collect($pending['changes']),
+            'warnings' => $pending['warnings'],
+            'stationCount' => $pending['rows'],
         ]);
+    }
+
+    /**
+     * Compare a file's stations with the saved ones. Its changes wait on the server, for this user only, until they're
+     * applied or cancelled, and show on its review page next; with none, the list says there's nothing to change.
+     *
+     * @param  list<array<string, mixed>>  $stations
+     * @param  list<string>  $warnings  what reading the file put right, like phone numbers' first 0
+     * @return array{changes: int, next: string} how many changes, and the page to show next
+     */
+    private function checked(Request $request, string $file, array $stations, array $warnings, ?string $upload = null): array
+    {
+        $changes = $this->stations->compare($stations);
+
+        if ($changes === []) {
+            if ($upload !== null) {
+                $this->forgetUpload($upload);
+            }
+            session()->flash('message', "{$file} has the same police stations as the page already has, so there's nothing to change.");
+            session()->flash('status', 'info');
+
+            return ['changes' => 0, 'next' => page_url('police-stations')];
+        }
+
+        $upload = $this->keepUpload($request, ['file' => $file, 'rows' => count($stations), 'changes' => $changes, 'warnings' => $warnings], $upload);
+
+        return ['changes' => count($changes), 'next' => page_url('police-stations/review', ['upload' => $upload])];
     }
 
     /**
@@ -97,7 +144,7 @@ class PoliceStationController extends Controller
      */
     public function apply(Request $request, string $upload): RedirectResponse
     {
-        $pending = $this->pendingUpload($request, $upload);
+        $pending = $this->pendingUpload($request, $upload, 'changes');
         $changedSince = "The police stations changed after {$pending['file']} was checked, so nothing was changed. Upload it again to see what it would change now.";
 
         if (! $this->stations->stillApplies($pending['changes'])) {

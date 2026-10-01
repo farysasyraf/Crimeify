@@ -3,6 +3,7 @@
 namespace Modules\Map\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -235,9 +236,11 @@ class CrimeDataController extends Controller
     }
 
     /**
-     * Check an uploaded Excel file and show what it would change, without changing anything yet.
+     * Check an uploaded Excel file, without changing anything yet. With JavaScript, the page checks it in steps it shows
+     * as they go (upload-progress.js): this reads the file and keeps its figures, then compare() compares them. Without,
+     * this does both, then shows what the file would change on its review page.
      */
-    public function upload(Request $request): View|RedirectResponse
+    public function upload(Request $request): JsonResponse|RedirectResponse
     {
         $request->validate([
             'file' => ['required', 'file', 'extensions:xlsx', 'max:10240'],
@@ -247,29 +250,83 @@ class CrimeDataController extends Controller
             'file.max' => 'The file is larger than 10 MB, much more than the figures need. Check it\'s the right file.',
         ]);
 
-        $read = $this->crimeData->readExcel($request->file('file')->getRealPath());
+        // With new_names, a police district or crime type that's new here is taken as it is (Proceed with Review).
+        $read = $this->crimeData->readExcel($request->file('file')->getRealPath(), $request->boolean('new_names'));
 
         if ($read['problems'] !== []) {
-            throw ValidationException::withMessages(['file' => $read['problems']]);
+            $failed = ValidationException::withMessages(['file' => $read['problems']]);
+
+            // Only names that are new here, which the dialog can offer to proceed with, as they may be meant.
+            if ($request->expectsJson() && $read['newNamesOnly']) {
+                return response()->json(['message' => $failed->getMessage(), 'errors' => $failed->errors(), 'newNames' => true], 422);
+            }
+
+            throw $failed;
         }
 
-        $compared = $this->crimeData->compare($read['figures']);
         $name = $request->file('file')->getClientOriginalName();
 
-        if ($compared['changes'] === []) {
-            return redirect(page_url('crime-data'))->with(['message' => "{$name} has the same figures as the page already has, so there's nothing to change.", 'status' => 'info']);
+        if ($request->expectsJson()) {
+            $upload = $this->keepUpload($request, ['file' => $name, 'figures' => $read['figures']]);
+
+            return response()->json(['rows' => count($read['figures']), 'next' => page_url('crime-data/compare', ['upload' => $upload])]);
         }
 
-        // The changes wait on the server, for this user only, until they're applied or cancelled.
-        $token = $this->keepUpload($request, ['file' => $name, 'changes' => $compared['changes'], 'warnings' => $compared['warnings']]);
+        return redirect($this->checked($request, $name, $read['figures'])['next']);
+    }
+
+    /**
+     * The next step of a check shown as it goes: compare the figures upload() kept with the saved ones.
+     */
+    public function compare(Request $request, string $upload): JsonResponse
+    {
+        $pending = $this->pendingUpload($request, $upload, 'figures');
+
+        return response()->json($this->checked($request, $pending['file'], $pending['figures'], $upload));
+    }
+
+    /**
+     * What an uploaded file would change, to apply or cancel.
+     */
+    public function review(Request $request, string $upload): View
+    {
+        $pending = $this->pendingUpload($request, $upload, 'changes');
 
         return view('map::crime-data.review', [
-            'token' => $token,
-            'file' => $name,
-            'changes' => collect($compared['changes']),
-            'warnings' => $compared['warnings'],
-            'figureCount' => count($read['figures']),
+            'token' => $upload,
+            'file' => $pending['file'],
+            'changes' => collect($pending['changes']),
+            'warnings' => $pending['warnings'],
+            'figureCount' => $pending['rows'],
         ]);
+    }
+
+    /**
+     * Compare a file's figures with the saved ones. Its changes wait on the server, for this user only, until they're
+     * applied or cancelled, and show on its review page next; with none, the list says there's nothing to change.
+     *
+     * @param  array<string, array<string, mixed>>  $figures
+     * @return array{changes: int, next: string} how many changes, and the page to show next
+     */
+    private function checked(Request $request, string $file, array $figures, ?string $upload = null): array
+    {
+        $compared = $this->crimeData->compare($figures);
+
+        if ($compared['changes'] === []) {
+            if ($upload !== null) {
+                $this->forgetUpload($upload);
+            }
+            session()->flash('message', "{$file} has the same figures as the page already has, so there's nothing to change.");
+            session()->flash('status', 'info');
+
+            return ['changes' => 0, 'next' => page_url('crime-data')];
+        }
+
+        $upload = $this->keepUpload($request, [
+            'file' => $file, 'rows' => count($figures), 'changes' => $compared['changes'], 'warnings' => $compared['warnings'],
+        ], $upload);
+
+        return ['changes' => count($compared['changes']), 'next' => page_url('crime-data/review', ['upload' => $upload])];
     }
 
     /**
@@ -277,7 +334,7 @@ class CrimeDataController extends Controller
      */
     public function apply(Request $request, string $upload): RedirectResponse
     {
-        $pending = $this->pendingUpload($request, $upload);
+        $pending = $this->pendingUpload($request, $upload, 'changes');
 
         if (! $this->crimeData->stillApplies($pending['changes'])) {
             $this->forgetUpload($upload);

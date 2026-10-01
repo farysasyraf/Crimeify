@@ -70,9 +70,11 @@ class RouteAccessTest extends TestCase
             'GET /crime-data' => 'Map\CrimeDataController@index',
             'POST /crime-data/apply/{upload}' => 'Map\CrimeDataController@apply',
             'DELETE /crime-data/cancel/{upload}' => 'Map\CrimeDataController@cancel',
+            'POST /crime-data/compare/{upload}' => 'Map\CrimeDataController@compare',
             'GET /crime-data/delete/{crimeStat}' => 'Map\CrimeDataController@delete',
             'DELETE /crime-data/destroy/{crimeStat}' => 'Map\CrimeDataController@destroy',
             'GET /crime-data/download' => 'Map\CrimeDataController@download',
+            'GET /crime-data/review/{upload}' => 'Map\CrimeDataController@review',
             'POST /crime-data/store' => 'Map\CrimeDataController@store',
             'PUT /crime-data/update' => 'Map\CrimeDataController@update',
             'POST /crime-data/upload' => 'Map\CrimeDataController@upload',
@@ -87,11 +89,13 @@ class RouteAccessTest extends TestCase
             'GET /police-stations' => 'Map\PoliceStationController@index',
             'POST /police-stations/apply/{upload}' => 'Map\PoliceStationController@apply',
             'DELETE /police-stations/cancel/{upload}' => 'Map\PoliceStationController@cancel',
+            'POST /police-stations/compare/{upload}' => 'Map\PoliceStationController@compare',
             'GET /police-stations/create' => 'Map\PoliceStationController@create',
             'GET /police-stations/delete/{station}' => 'Map\PoliceStationController@delete',
             'DELETE /police-stations/destroy/{station}' => 'Map\PoliceStationController@destroy',
             'GET /police-stations/download' => 'Map\PoliceStationController@download',
             'GET /police-stations/edit/{station}' => 'Map\PoliceStationController@edit',
+            'GET /police-stations/review/{upload}' => 'Map\PoliceStationController@review',
             'POST /police-stations/store' => 'Map\PoliceStationController@store',
             'PUT /police-stations/update/{station}' => 'Map\PoliceStationController@update',
             'POST /police-stations/upload' => 'Map\PoliceStationController@upload',
@@ -302,7 +306,7 @@ class RouteAccessTest extends TestCase
     public function test_crime_data_and_its_actions_are_for_admin(): void
     {
         $routes = AppRoute::with('roles')->where('Path', 'like', 'crime-data%')->get();
-        $this->assertCount(9, $routes);
+        $this->assertCount(11, $routes);
         $this->assertTrue($routes->every(fn (AppRoute $route) => $route->roles->pluck('Name')->all() === ['ADMIN']));
 
         // Not ADMIN: neither the page, its download, nor its forms.
