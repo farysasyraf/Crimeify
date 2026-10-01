@@ -48,7 +48,8 @@
         </div>
     </header>
 
-    <main class="public-main">
+    {{-- main-class: main-full for a page that fills the window between the bar and the footer, like the map. --}}
+    <main class="public-main @yield('main-class')">
         @yield('content')
     </main>
 

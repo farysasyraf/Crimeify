@@ -77,15 +77,26 @@ class MapPageTest extends TestCase
 
         $page->assertSee('id="state-map" data-boundaries="'.versioned_asset('modules/map/malaysia-states.geojson').'"', false);
 
-        // Above the map, the panel with the chosen region's details; beside it, every region in the list by its
-        // official name, states first, then federal territories.
+        // The map fills the page, with cards over it, as in the Crimeify mockup: the search at the top; and down the
+        // left, the panel with the chosen region's details, every region by its official name, states first, then
+        // federal territories, and "Find a police station", all before the map and its many pins.
+        $page->assertSee('<main class="main main-full">', false);
         $page->assertSeeInOrder([
+            '<div class="page-head visually-hidden">', '<h1>Crime Visualization Map</h1>', '</div>',
+            '<div class="map-stage">',
+            '<form class="map-search" role="search" data-map-search data-map-cover="top" hidden>',
+            '<label for="map-search" class="visually-hidden">Search the map</label>',
+            '<input type="search" id="map-search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="map-search-results"',
+            'placeholder="Search a state, police district or station"',
+            '<button type="submit" class="map-search-go" aria-label="Search">',
+            '<ul class="map-search-results" id="map-search-results" role="listbox" aria-label="Search the map" hidden></ul>',
+            '</form>',
+            '<div class="map-side" data-map-cover="left">',
             '<section class="card state-panel" aria-labelledby="state-panel-heading">',
             '<h2 id="state-panel-heading">Malaysia</h2>',
             'Choose a state on the map or from the list.',
             'data-show-all hidden',
             '</section>',
-            'id="state-map"',
             '<aside class="card state-picker" aria-label="States and federal territories">',
             '<h2 class="state-list-heading">States</h2>',
             'data-state="MY-01" data-name="Johor" data-kind="State"',
@@ -97,6 +108,10 @@ class MapPageTest extends TestCase
             'data-state="MY-15" data-name="Labuan"',
             'data-state="MY-16" data-name="Putrajaya"',
             '</aside>',
+            '<section class="card station-finder" aria-labelledby="station-finder-heading">',
+            '</section>',
+            '</div>',
+            'id="state-map"',
         ], false);
         $this->assertSame(16, substr_count($page->getContent(), 'class="state-choice"'));
     }

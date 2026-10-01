@@ -1,47 +1,88 @@
-/* Map page: the year and the chosen region's details above the map on the left, the list of regions on the right,
-   and "Find a police station" under the map. The list spans both rows; the second row is flexible, so when the list
-   is the taller, the room it needs goes under the finder rather than between the map and the finder. */
-.state-map-layout {
-    display: grid; grid-template-columns: minmax(0, 1fr) 240px; grid-template-rows: auto 1fr;
-    grid-template-areas: "main picker" "finder picker"; gap: 16px 20px; align-items: start;
-}
-.state-map-main { grid-area: main; display: grid; gap: 16px; min-width: 0; }
-.state-picker { grid-area: picker; }
-.station-finder { grid-area: finder; min-width: 0; }
-.state-map-card { overflow: hidden; }
-/* isolation keeps Leaflet's layers (z-index 400 to 1000) inside the map, under the sidebar drawer (40) and its
-   backdrop (30), rather than on top of them. */
-.state-map { height: min(72vh, 680px); min-height: 420px; background: #d8e4ee; font: inherit; isolation: isolate; }
+/* Map page: the map fills the page between the bar and the footer (main-full), with cards over it, as in the Crimeify
+   mockup: the search at the top in the middle; down the left, the panel with the year and the chosen region's
+   figures, the regions, and "Find a police station"; and the zoom and enlarge buttons at the bottom right. The right
+   is left to the map, so Malaysia still fits it at a useful zoom. The column scrolls if it's taller than the window,
+   and the map frames Malaysia, a region or a popup in what the cards leave clear (map.js). Below 1000px wide, the
+   cards go under the map instead, and only the search stays on it. */
+.map-stage { position: relative; flex: 1; min-height: 560px; }
+/* isolation keeps Leaflet's layers (z-index 400 to 1000) inside the map, under the cards over it, the sidebar drawer
+   (40) and its backdrop (30), rather than on top of them. */
+.state-map { position: absolute; inset: 0; background: #d8e4ee; font: inherit; isolation: isolate; }
+/* In the app, a card with round corners beside the menu; on the public pages, edge to edge. */
+.main .state-map { border-radius: var(--radius); }
 .state-map-note { margin: 0; padding: 12px 16px; color: var(--muted); }
-
-/* The panel above the map: the chosen region's name and figures on the left, the year on the right, and under it
-   the button back to all of Malaysia. */
-.state-panel {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "details year" "details all";
-    align-items: start; gap: 12px 24px; padding: 18px 20px;
+/* A problem loading part of the map, over the bottom of it. */
+.map-stage > [data-map-status] {
+    position: absolute; z-index: 2; bottom: 48px; left: 50%; transform: translateX(-50%); width: max-content;
+    max-width: min(480px, calc(100% - 32px)); border-radius: var(--radius-sm); background: var(--surface); box-shadow: var(--shadow);
 }
+
+/* The column down the left, under the search, its cards a little see-through, so the map shows at their edges. If
+   they're taller than the window, it scrolls as a whole; where they don't reach, the map can be dragged. */
+.map-side {
+    position: absolute; z-index: 1; top: 84px; bottom: 16px; left: 16px; width: 340px;
+    display: flex; flex-direction: column; gap: 12px;
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; pointer-events: none;
+}
+.map-side > .card {
+    flex: none; pointer-events: auto;
+    background: rgba(35, 37, 41, .95); box-shadow: 0 14px 36px rgba(0, 0, 0, .35); backdrop-filter: blur(6px);
+}
+
+/* The search, at the top in the middle, as in the mockup: a pill with a pin, the box and a round search button, with
+   its matches under it. */
+.map-search {
+    position: absolute; z-index: 3; top: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 4px; width: min(480px, calc(100% - 32px)); padding: 4px 4px 4px 14px;
+    border-radius: 999px; background: rgba(35, 37, 41, .96); box-shadow: 0 10px 28px rgba(0, 0, 0, .35); backdrop-filter: blur(6px);
+}
+.map-search:focus-within { box-shadow: 0 0 0 3px var(--focus), 0 10px 28px rgba(0, 0, 0, .35); }
+.map-search-pin { flex: none; color: var(--primary); font-size: 22px; }
+.map-search input {
+    flex: 1; min-width: 0; height: 40px; padding: 0 6px; border: 0; outline: none; background: none;
+    color: var(--text); font: inherit; font-size: 1rem; -webkit-appearance: none; appearance: none;
+}
+.map-search input::placeholder { color: var(--muted); }
+.map-search-go {
+    flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
+    background: var(--primary); color: var(--primary-text); cursor: pointer;
+}
+.map-search-go:hover { background: var(--primary-hover); }
+.map-search-go:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.map-search-results, .map-search-none {
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0; margin: 0;
+    border-radius: 16px; background: var(--surface); box-shadow: var(--shadow);
+}
+.map-search-results { max-height: min(360px, 60vh); padding: 6px; overflow-y: auto; list-style: none; }
+.map-search-results li { display: grid; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+.map-search-results li:hover, .map-search-results li[aria-selected="true"] { background: var(--raised); }
+.map-search-name { font-weight: 600; overflow-wrap: anywhere; }
+.map-search-kind { color: var(--muted); font-size: .8125rem; }
+.map-search-none { padding: 10px 16px; color: var(--muted); font-size: .9rem; }
+.map-search-none:empty { display: none; }
+
+/* The panel: the year, then the chosen region's name and figures, and the button back to all of Malaysia. */
+.state-panel { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "year" "details" "all"; gap: 12px; padding: 16px 18px; }
 .state-panel .crime-year, .state-panel .crime-note { grid-area: year; margin: 0; }
-.state-panel .crime-year { width: 180px; }
-.state-panel .crime-note { max-width: 320px; }
-.state-panel [data-show-all] { grid-area: all; justify-self: end; align-self: end; }
+.state-panel [data-show-all] { grid-area: all; justify-self: start; }
 .state-details { grid-area: details; min-width: 0; }
 .state-details h2 { margin: 0 0 2px; font-size: 1.15rem; }
 .state-details p { margin: 0 0 12px; }
 .state-details > :last-child { margin-bottom: 0; }
 
-/* Under the map, "Find a police station": the state and station lists side by side, then the chosen station's
-   name, police district, address and phone number. */
-.station-finder { padding: 18px 20px; }
+/* "Find a police station": the state and station lists, then the chosen station's name, police district, address
+   and phone number. */
+.station-finder { padding: 16px 18px; }
 .station-finder h2 { margin: 0 0 2px; font-size: 1.15rem; }
 .station-finder-intro { margin: 0 0 14px; }
-.station-finder-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.station-finder-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .station-finder-fields .field { margin-bottom: 0; }
 .station-note { margin: 0; padding: 10px 12px; border: 1px dashed rgba(255, 255, 255, .14); border-radius: 12px; color: var(--muted); font-size: .875rem; }
 .station-note code { overflow-wrap: anywhere; }
 .station-details { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, .08); }
 .station-details h3 { margin: 0 0 2px; color: var(--primary); font-size: 1.05rem; }
 .station-place { margin: 0 0 12px; font-size: .875rem; }
-.station-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 0; }
+.station-facts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 24px; margin: 0; }
 .station-facts dt { margin-bottom: 4px; color: var(--muted); font-size: .875rem; }
 .station-facts dd { margin: 0; overflow-wrap: anywhere; }
 .station-facts a { font-weight: 600; }
@@ -59,20 +100,20 @@
 .btn.swal-app-cancel { background: var(--raised); color: var(--text); }
 .btn.swal-app:focus-visible, .btn.swal-app-cancel:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-/* The regions beside the map, the states and then the federal territories, each under its heading in the soft
-   blue; the chosen one a bright blue pill, as in the menu. */
-.state-picker { display: grid; gap: 14px; padding: 16px 10px; }
-.state-picker-group { display: grid; gap: 4px; }
+/* The regions, the states and then the federal territories, each under its heading in the soft blue, as rounded
+   buttons in rows; the chosen one in the bright blue, as in the menu. */
+.state-picker { display: grid; gap: 12px; padding: 16px 18px; }
+.state-picker-group { display: grid; gap: 8px; }
 .state-list-heading {
-    margin: 0 0 2px 12px; color: var(--accent-soft);
+    margin: 0; color: var(--accent-soft);
     font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
 }
-.state-list { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.state-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .state-choice {
-    display: block; width: 100%; padding: 7px 12px; border: 0; border-radius: 10px;
-    background: none; color: var(--text); font: inherit; font-size: .875rem; text-align: left; cursor: pointer;
+    padding: 6px 13px; border: 0; border-radius: 999px; background: var(--raised);
+    color: var(--text); font: inherit; font-size: .875rem; white-space: nowrap; cursor: pointer;
 }
-.state-choice:hover { background: var(--raised); }
+.state-choice:hover { background: var(--raised-hover); }
 .state-choice[aria-pressed="true"] { background: var(--primary); color: var(--primary-text); font-weight: 600; }
 .state-choice:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 
@@ -142,8 +183,8 @@
     scrollbar-color: #4a5058 transparent;
 }
 .map-dialog .crime-popup { max-height: min(560px, calc(100dvh - 200px)); }
-@media (max-width: 900px) {
-    .crime-popup { max-height: calc(60vh - 90px); }
+@media (max-width: 999.98px) {
+    .crime-popup { max-height: calc(62vh - 110px); }
 }
 .crime-popup h3 {
     margin: 0 28px 2px 0; color: var(--popup-accent);
@@ -167,7 +208,7 @@
 .crime-types th { color: var(--popup-soft); text-align: left; }
 .crime-types td { color: var(--popup-text); text-align: right; font-variant-numeric: tabular-nums; }
 
-/* The enlarge button, styled like Leaflet's zoom buttons above it. */
+/* The enlarge button, over Leaflet's zoom buttons at the bottom right, and styled like them. */
 .map-enlarge button {
     display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0;
     background: var(--surface); color: var(--text); cursor: pointer;
@@ -186,7 +227,7 @@
     background: #d8e4ee; box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
 }
 .map-dialog::backdrop { background: rgba(8, 12, 24, .65); }
-.map-dialog .state-map { height: 100%; min-height: 0; }
+.map-dialog .state-map { position: absolute; inset: 0; height: auto; min-height: 0; border-radius: 0; }
 html:has(.map-dialog[open]) { overflow: hidden; }
 
 /* Groups of pins in the app's bright blue, with dark numbers as on its buttons: the plugin's green, yellow and
@@ -194,20 +235,34 @@ html:has(.map-dialog[open]) { overflow: hidden; }
 .state-map .marker-cluster { background-color: rgba(58, 170, 242, .35); }
 .state-map .marker-cluster div { background-color: rgba(58, 170, 242, .95); color: var(--primary-text); font-weight: 700; }
 
-/* The list goes under the map once the two no longer fit side by side, its regions as rounded buttons in rows,
-   and "Find a police station" under the list. */
-@media (max-width: 900px) {
-    .state-map-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "main" "picker" "finder"; }
-    .state-map { height: 60vh; min-height: 340px; }
-    .state-picker { gap: 12px; padding: 16px 18px; }
-    .state-picker-group { gap: 8px; }
-    .state-list-heading { margin-left: 0; }
-    .state-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .state-choice { width: auto; padding: 6px 13px; border-radius: 999px; background: var(--raised); white-space: nowrap; }
-    .state-choice:hover { background: var(--raised-hover); }
+/* Too narrow for cards beside a map that's still worth seeing: the map first, nearly as tall as the window, with the
+   search on it, then the cards under it, the panel, the regions and "Find a police station"; the panel's details and
+   year side by side again, and the finder's lists. */
+@media (max-width: 999.98px) {
+    .map-stage { display: flex; flex-direction: column; gap: 16px; min-height: 0; padding-bottom: 16px; }
+    .state-map { position: relative; inset: auto; order: 1; height: 62vh; height: 62dvh; min-height: 360px; }
+    .map-stage > [data-map-status] { position: static; order: 2; width: auto; max-width: none; margin: 0 16px; transform: none; }
+    .map-side { display: contents; }
+    .map-side > .card {
+        position: static; margin: 0 16px;
+        background: var(--surface); box-shadow: var(--shadow); backdrop-filter: none;
+    }
+    .state-panel { order: 3; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "details year" "details all"; gap: 12px 24px; padding: 18px 20px; }
+    .state-panel .crime-year { width: 180px; }
+    .state-panel .crime-note { max-width: 320px; }
+    .state-panel [data-show-all] { justify-self: end; align-self: end; }
+    .state-picker { order: 4; }
+    .station-finder { order: 5; padding: 18px 20px; }
+    .station-finder-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+    .station-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .map-search { top: 12px; width: calc(100% - 24px); }
+    /* In the app, the page's own margin is the cards'. */
+    .main .map-stage { padding-bottom: 0; }
+    .main .map-side > .card, .main .map-stage > [data-map-status] { margin: 0; }
 }
 
-/* On a phone, the panel's year goes above the region's details, and the button under them. */
+/* On a phone, the panel's year goes above the region's details, and the button under them; the finder's lists and
+   the station's details one under the other. */
 @media (max-width: 600px) {
     .state-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: "year" "details" "all"; padding: 16px; }
     .state-panel .crime-year { width: 100%; }
@@ -215,5 +270,5 @@ html:has(.map-dialog[open]) { overflow: hidden; }
     .state-picker { padding: 14px; }
     .station-finder { padding: 16px; }
     .station-finder-fields, .station-facts { grid-template-columns: minmax(0, 1fr); }
-    .station-finder-fields .field + .field { margin-top: 14px; }
+    .station-finder-fields { gap: 14px; }
 }

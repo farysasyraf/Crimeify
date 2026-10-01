@@ -95,6 +95,13 @@
     "Enlarge the map": "Besarkan peta",
     "Boundaries": "Sempadan",
 
+    "Search the map": "Cari di peta",
+    "Search a state, police district or station": "Cari negeri, daerah polis atau balai polis",
+    "Search": "Cari",
+    "Police district in :region": "Daerah polis di :region",
+    "Police station in :district, :region": "Balai polis di :district, :region",
+    "No matches for “:text”": "Tiada padanan untuk “:text”",
+
     "Find a police station": "Cari balai polis",
     "Choose a state, then one of its police stations, for its address and phone number.": "Pilih negeri, kemudian salah satu balai polisnya, untuk alamat dan nombor telefonnya.",
     "No police stations are listed yet.": "Belum ada balai polis yang disenaraikan.",

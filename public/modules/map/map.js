@@ -36,6 +36,12 @@
     const yearChoice = document.querySelector('[data-crime-year]');
     const choices = new Map([...document.querySelectorAll('[data-state]')].map((button) => [button.dataset.state, button]));
 
+    // The search over the map works with this script, so it shows once the script runs (set up further down).
+    const search = document.querySelector('[data-map-search]');
+    if (search) {
+        search.hidden = false;
+    }
+
     // The app's blues: regions lightly shaded in the soft blue, and the one selected filled with the bright blue the
     // list and the menu mark the current choice with, outlined darker so it stands out on the street map.
     const style = {
@@ -52,16 +58,43 @@
         minZoom: 4,
         // Whole zoom levels only: in between, the street map's tiles are stretched and show thin seams.
         zoomSnap: 1,
-        maxBounds: malaysia.pad(0.6),
+        // Near Malaysia, but with room enough to frame it beside the cards over the map.
+        maxBounds: malaysia.pad(1.5),
         maxBoundsViscosity: 0.8,
+        // At the bottom right instead (below), clear of the cards over the map.
+        zoomControl: false,
     });
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    map.fitBounds(malaysia);
+    // What the cards over the map cover, as padding to fit Malaysia, a region or a popup into the rest of it: the
+    // search at the top and the column down the left (data-map-cover), each as far as it reaches in. Under the map, on
+    // a narrow screen, or with the map enlarged, they cover none of it, but the search, which stays on it.
+    const covers = [...document.querySelectorAll('[data-map-cover]')];
+    const uncovered = () => {
+        const clear = { top: 16, right: 16, bottom: 16, left: 16 };
+
+        if (!container.closest('dialog')) {
+            const box = container.getBoundingClientRect();
+            for (const cover of covers) {
+                const rect = cover.getBoundingClientRect();
+                if (getComputedStyle(cover).position !== 'absolute' || rect.width === 0) {
+                    continue;
+                }
+                const side = cover.dataset.mapCover;
+                const reach = { top: rect.bottom - box.top, left: rect.right - box.left, right: box.right - rect.left }[side];
+                clear[side] = Math.max(clear[side], reach + 16);
+            }
+        }
+
+        return { paddingTopLeft: [clear.left, clear.top], paddingBottomRight: [clear.right, clear.bottom] };
+    };
+
+    map.fitBounds(malaysia, uncovered());
 
     // The sidebar narrowing, or the window resizing, changes the map's size; Leaflet has to be told.
     new ResizeObserver(() => map.invalidateSize()).observe(container);
@@ -245,19 +278,19 @@
             layer.setStyle(style.selected).bringToFront();
             choices.get(code)?.setAttribute('aria-pressed', 'true');
             if (zoom) {
-                map.flyToBounds(layer.getBounds(), { padding: [24, 24], maxZoom: 9, duration: 0.6 });
+                map.flyToBounds(layer.getBounds(), { ...uncovered(), maxZoom: 9, duration: 0.6 });
             }
         } else if (zoom) {
-            map.flyToBounds(malaysia, { duration: 0.6 });
+            map.flyToBounds(malaysia, { ...uncovered(), duration: 0.6 });
         }
 
         showAll.hidden = !layer;
         describe(layer ? code : null);
     };
 
-    // The enlarge button, under the zoom buttons: the map moves into a modal dialog that fills most of the window
-    // over the dimmed page, keeping its view, pins and popup, and moves back when made small again with the
-    // button, Escape or a click on the dimmed page.
+    // The enlarge button, over the zoom buttons: the map moves into a modal dialog that fills most of the window over
+    // the dimmed page, without the cards over it, keeping its view, pins and popup, and moves back when made small
+    // again with the button, Escape or a click on the dimmed page.
     const dialog = document.createElement('dialog');
     dialog.className = 'map-dialog';
     dialog.setAttribute('aria-label', container.getAttribute('aria-label'));
@@ -302,7 +335,8 @@
         map.invalidateSize();
     });
 
-    const control = L.control({ position: 'topleft' });
+    // Added after the zoom buttons, so over them: Leaflet stacks a bottom corner's controls upwards.
+    const control = L.control({ position: 'bottomright' });
     control.onAdd = () => {
         const bar = L.DomUtil.create('div', 'leaflet-bar map-enlarge');
         toggle = L.DomUtil.create('button', '', bar);
@@ -372,6 +406,204 @@
 
     showAll.addEventListener('click', () => select(null, { zoom: true }));
 
+    // The police districts' pins once they load, by "region|name", and how to open one, which needs them (below).
+    const pinsByKey = new Map();
+    let openPin = () => false;
+
+    // A pin's popup opens clear of the cards over the map, wherever they are by then.
+    const padded = (marker) => {
+        const clear = uncovered();
+        Object.assign(marker.getPopup().options, { autoPanPaddingTopLeft: clear.paddingTopLeft, autoPanPaddingBottomRight: clear.paddingBottomRight });
+        return marker;
+    };
+
+    // The map to a police district's pin, clear of the cards, without opening it. False if there's no such pin.
+    const goToPin = (key) => {
+        const marker = pinsByKey.get(key);
+        if (!marker) {
+            return false;
+        }
+        const at = marker.getLatLng();
+        map.flyToBounds(L.latLngBounds(at, at), { ...uncovered(), maxZoom: 11, duration: 0.6 });
+        return true;
+    };
+
+    // The search over the map, as in the Crimeify mockup: a state, police district or police station by name, or
+    // "name, state" to narrow it to a state, like "Nilai, Negeri Sembilan". A state is chosen as from the list; a
+    // police district's pin opens with its figures; a police station shows in "Find a police station", and the map
+    // goes to its police district's pin. It searches the page's own lists, so it needs no server. As a combobox, the
+    // arrow keys go through the matches, Enter picks one and Escape closes them.
+    const stationList = document.querySelector('[data-station-list]');
+    const stations = stationList
+        ? Object.entries(JSON.parse(stationList.textContent)).flatMap(([region, list]) => list.map((station) => ({ ...station, region })))
+        : [];
+    const regionName = (code) => choices.get(code)?.dataset.name ?? code;
+    const plain = (text) => text.toLocaleLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+
+    // Everything to search, with what each is and where: the regions, the police districts once their pins load, and
+    // the police stations.
+    const places = () => [
+        ...[...choices.values()].map((button) => ({ kind: 'state', name: button.dataset.name, region: button.dataset.state, about: button.dataset.kind })),
+        ...(crime?.districts ?? []).map((district) => ({
+            kind: 'district', name: district.name, region: district.region, about: t('Police district in :region', { region: regionName(district.region) }),
+        })),
+        ...stations.map((station) => ({
+            kind: 'station', name: station.name, region: station.region, station,
+            about: t('Police station in :district, :region', { district: station.district, region: regionName(station.region) }),
+        })),
+    ];
+
+    // The best matches first, at most eight: a name that starts with what's typed, then one with a word that does,
+    // then one with it anywhere; regions before police districts before stations.
+    const find = (query) => {
+        const [name, where = ''] = query.split(',').map(plain);
+        if (!name) {
+            return [];
+        }
+        const kinds = ['state', 'district', 'station'];
+
+        return places()
+            .filter((place) => !where || plain(regionName(place.region)).includes(where))
+            .map((place) => {
+                const text = plain(place.name);
+                return { place, rank: [text.startsWith(name), text.includes(` ${name}`), text.includes(name)].indexOf(true) };
+            })
+            .filter(({ rank }) => rank >= 0)
+            .sort((a, b) => a.rank - b.rank || kinds.indexOf(a.place.kind) - kinds.indexOf(b.place.kind) || a.place.name.localeCompare(b.place.name))
+            .slice(0, 8)
+            .map(({ place }) => place);
+    };
+
+    // A police station chosen in "Find a police station", as if picked from its lists, which are Select2 boxes.
+    const showStation = (station) => {
+        const stateChoice = document.querySelector('[data-station-state]');
+        const stationChoice = document.querySelector('[data-station-choice]');
+        if (!stateChoice || !stationChoice) {
+            return;
+        }
+
+        for (const [list, value] of [[stateChoice, station.region], [stationChoice, String(station.id)]]) {
+            list.value = value;
+            list.dispatchEvent(new Event('change', { bubbles: true }));
+            window.jQuery?.fn.select2 && window.jQuery(list).trigger('change.select2');
+        }
+
+        // Brought into view, with the station's details: at the foot of the column over the map, or under the map on
+        // a narrow screen.
+        stationChoice.closest('.station-finder')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    const go = (place) => {
+        if (place.kind === 'state') {
+            select(place.region, { zoom: true });
+        } else if (place.kind === 'district') {
+            select(place.region);
+            openPin(`${place.region}|${place.name}`);
+        } else {
+            showStation(place.station);
+            // To its police district's pin, or without one, its state.
+            if (goToPin(`${place.region}|${place.station.district}`)) {
+                select(place.region);
+            } else {
+                select(place.region, { zoom: true });
+            }
+        }
+    };
+
+    if (search) {
+        const input = search.querySelector('input');
+        const list = search.querySelector('[role="listbox"]');
+        const none = search.querySelector('[data-map-search-none]');
+        let found = [];
+        let active = -1;
+
+        const mark = (index) => {
+            active = index;
+            [...list.children].forEach((option, at) => option.setAttribute('aria-selected', String(at === index)));
+            if (list.children[index]) {
+                input.setAttribute('aria-activedescendant', list.children[index].id);
+                list.children[index].scrollIntoView({ block: 'nearest' });
+            } else {
+                input.removeAttribute('aria-activedescendant');
+            }
+        };
+
+        const close = () => {
+            list.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+            mark(-1);
+        };
+
+        const pick = (place) => {
+            input.value = place.kind === 'state' ? place.name : `${place.name}, ${regionName(place.region)}`;
+            none.textContent = '';
+            close();
+            go(place);
+        };
+
+        const suggest = () => {
+            found = find(input.value);
+            list.replaceChildren(...found.map((place, index) => {
+                const option = element('li');
+                option.id = `map-search-option-${index}`;
+                option.setAttribute('role', 'option');
+                option.append(element('span', place.name, 'map-search-name'), element('span', place.about, 'map-search-kind'));
+                option.addEventListener('click', () => pick(place));
+                return option;
+            }));
+            list.hidden = found.length === 0;
+            input.setAttribute('aria-expanded', String(found.length > 0));
+            none.textContent = found.length > 0 ? '' : t('No matches for “:text”', { text: input.value.trim() });
+            mark(-1);
+        };
+
+        input.addEventListener('input', () => {
+            if (input.value.trim()) {
+                suggest();
+            } else {
+                none.textContent = '';
+                close();
+            }
+        });
+
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                if (list.hidden && input.value.trim()) {
+                    suggest();
+                }
+                if (found.length > 0) {
+                    event.preventDefault();
+                    const step = event.key === 'ArrowDown' ? 1 : -1;
+                    mark(active < 0 ? (step > 0 ? 0 : found.length - 1) : (active + step + found.length) % found.length);
+                }
+            } else if (event.key === 'Escape' && !list.hidden) {
+                event.preventDefault();
+                close();
+            }
+        });
+
+        // Picking with the mouse mustn't take the focus from the box first, which would close the list; leaving the
+        // search does close it.
+        list.addEventListener('pointerdown', (event) => event.preventDefault());
+        input.addEventListener('blur', (event) => {
+            if (!search.contains(event.relatedTarget)) {
+                none.textContent = '';
+                close();
+            }
+        });
+
+        search.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (list.hidden && input.value.trim()) {
+                suggest();
+            }
+            const place = found[active] ?? found[0];
+            if (place) {
+                pick(place);
+            }
+        });
+    }
+
     if (!container.dataset.crime) {
         return;
     }
@@ -383,6 +615,17 @@
         : L.layerGroup();
     pins.addTo(map);
 
+    // A police district's pin opened, as the search does: zoomed in until it's out of its group, if it's in one.
+    openPin = (key) => {
+        const marker = pinsByKey.get(key);
+        if (!marker) {
+            return false;
+        }
+        const reveal = () => padded(marker).openPopup();
+        pins.zoomToShowLayer ? pins.zoomToShowLayer(marker, reveal) : reveal();
+        return true;
+    };
+
     let open = null;
     let request = null;
     // The credit on the map for the figures shown.
@@ -393,6 +636,7 @@
         const reopen = open;
         crime = figures;
         pins.clearLayers();
+        pinsByKey.clear();
 
         if (status.dataset.part === 'crime') {
             status.hidden = true;
@@ -402,12 +646,11 @@
             const key = `${district.region}|${district.name}`;
             const marker = L.marker([district.lat, district.lng], { title: district.name, alt: t(':name police district', { name: district.name }) });
 
-            // The map moves the popup clear of the zoom and enlarge buttons on the left.
+            // Before Leaflet opens the popup, clicked or with Enter, so it opens clear of the cards over the map.
+            marker.on('click keypress', () => padded(marker));
             marker.bindPopup(() => popup(district), {
                 maxWidth: 300,
                 minWidth: 240,
-                autoPanPaddingTopLeft: [56, 16],
-                autoPanPaddingBottomRight: [16, 16],
                 className: 'crime-popup-shell',
             });
             marker.on({
@@ -415,6 +658,7 @@
                 popupclose: () => { if (open === key) open = null; },
             });
             marker.key = key;
+            pinsByKey.set(key, marker);
             return marker;
         });
 
@@ -424,9 +668,8 @@
             markers.forEach((marker) => pins.addLayer(marker));
         }
 
-        const again = markers.find((marker) => marker.key === reopen);
-        if (again) {
-            pins.zoomToShowLayer ? pins.zoomToShowLayer(again, () => again.openPopup()) : again.openPopup();
+        if (reopen) {
+            openPin(reopen);
         }
 
         // The figures' source: data.gov.my's, linked, or for a year by state, the police's crime index.

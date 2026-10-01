@@ -216,6 +216,11 @@ code {
 .app-topbar { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 28px; }
 .app-topbar .topbar-user { margin-left: auto; }
 .main { flex: 1; width: 100%; max-width: 1140px; padding: 28px 28px 40px; }
+/* A page that fills the window between the bar and the footer, like the map (main-class main-full): no width limit,
+   and in the app only a margin like the menu's, beside it; on the public pages none at all. */
+.main.main-full, .public-main.main-full { display: flex; flex-direction: column; max-width: none; }
+.main.main-full { padding: 0 var(--side-gap) var(--side-gap) calc(var(--side-gap) / 2); }
+.public-main.main-full { padding: 0; }
 .footer { color: var(--muted); font-size: .85rem; padding: 16px 28px 24px; border-top: 1px solid rgba(255, 255, 255, .06); }
 .app-topbar .menu-toggle, .app-topbar .menu-narrow-toggle, .menu-backdrop { display: none; }
 /* Both of the top bar's menu buttons are the same ≡, as in AMV; which one shows depends on the screen's width. */
@@ -729,6 +734,7 @@ select.is-invalid + .select2-container .select2-selection { border-color: var(--
    Without JavaScript (no .js class) it sits above the page instead. */
 @media (max-width: 1199.98px) {
     .app-main { margin-left: 0; }
+    .main.main-full { padding-left: var(--side-gap); }
     .js .app-topbar .menu-toggle { display: inline-flex; }
     .js .sidebar { width: min(var(--side-width), calc(100vw - 2 * var(--side-gap))); transform: translateX(calc(-100% - 2 * var(--side-gap))); visibility: hidden; }
     .js .side-close { display: grid; }

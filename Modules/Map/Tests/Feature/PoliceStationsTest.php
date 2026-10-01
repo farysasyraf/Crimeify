@@ -220,7 +220,7 @@ class PoliceStationsTest extends TestCase
         $this->artisan('map:import-stations')->expectsOutput('Every police district already has a station. Nothing was added.')->assertSuccessful();
     }
 
-    public function test_under_the_map_a_state_lists_its_police_stations_with_their_address_and_phone(): void
+    public function test_over_the_map_a_state_lists_its_police_stations_with_their_address_and_phone(): void
     {
         $this->station();
         $this->station(['District' => 'Muar', 'Name' => 'Ibu Pejabat Polis Daerah Muar', 'Address' => null, 'Phone' => null]);
@@ -230,8 +230,9 @@ class PoliceStationsTest extends TestCase
         $page = $this->get('/public/map')->assertOk();
 
         $page->assertSeeInOrder([
-            // Under the map and after the list of regions beside it, so on a phone the list comes first.
-            'id="state-map"',
+            // Down the left over the map, under the panel and the regions; on a narrow screen, under the map (map.css).
+            '<div class="map-side" data-map-cover="left">',
+            '<section class="card state-panel" aria-labelledby="state-panel-heading">',
             '<aside class="card state-picker" aria-label="States and federal territories">', '</aside>',
             '<section class="card station-finder" aria-labelledby="station-finder-heading">',
             '<h2 id="station-finder-heading">Find a police station</h2>',
@@ -243,6 +244,7 @@ class PoliceStationsTest extends TestCase
             '<select id="station-choice" data-station-choice data-placeholder="Choose a police station" disabled aria-describedby="station-hint">',
             'Choose a state first.',
             '<div class="station-details" data-station-details aria-live="polite" hidden></div>',
+            'id="state-map"',
             '<script src="'.versioned_asset('modules/map/station-finder.js').'" defer></script>',
         ], false)->assertDontSee('<option value="MY-02">Kedah</option>', false);
         $this->assertFileExists(public_path('modules/map/station-finder.js'));
