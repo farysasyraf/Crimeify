@@ -5,8 +5,6 @@ namespace Modules\Map\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -14,6 +12,7 @@ use Modules\Map\Entities\CrimeDataEdit;
 use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Support\CrimeData;
+use Modules\Map\Support\KeepsPendingUploads;
 use Modules\Map\Support\StateCrime;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -21,6 +20,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 // delete from, one at a time or by downloading them as an Excel file and uploading it back.
 class CrimeDataController extends Controller
 {
+    use KeepsPendingUploads;
+
     /**
      * Figures listed per page: 10 at first, or as chosen from the list, as DataTables' pageLength and
      * lengthMenu: [[10, 50, 100, -1], [10, 50, 100, "All"]]. -1 is all of them.
@@ -260,14 +261,7 @@ class CrimeDataController extends Controller
         }
 
         // The changes wait on the server, for this user only, until they're applied or cancelled.
-        $this->forgetOldUploads();
-        $token = (string) Str::uuid();
-        Storage::disk('local')->put(self::Uploads."/{$token}.json", json_encode([
-            'user' => $request->user()->Id,
-            'file' => $name,
-            'changes' => $compared['changes'],
-            'warnings' => $compared['warnings'],
-        ], JSON_THROW_ON_ERROR));
+        $token = $this->keepUpload($request, ['file' => $name, 'changes' => $compared['changes'], 'warnings' => $compared['warnings']]);
 
         return view('map::crime-data.review', [
             'token' => $token,
@@ -286,7 +280,7 @@ class CrimeDataController extends Controller
         $pending = $this->pendingUpload($request, $upload);
 
         if (! $this->crimeData->stillApplies($pending['changes'])) {
-            Storage::disk('local')->delete(self::Uploads."/{$upload}.json");
+            $this->forgetUpload($upload);
 
             return redirect(page_url('crime-data'))->withErrors([
                 'file' => "The figures changed after {$pending['file']} was checked, so nothing was changed. Upload it again to see what it would change now.",
@@ -294,7 +288,7 @@ class CrimeDataController extends Controller
         }
 
         $this->crimeData->apply($pending['changes'], $request->user(), 'upload');
-        Storage::disk('local')->delete(self::Uploads."/{$upload}.json");
+        $this->forgetUpload($upload);
 
         $counts = collect($pending['changes'])->countBy('action');
 
@@ -307,39 +301,9 @@ class CrimeDataController extends Controller
     public function cancel(Request $request, string $upload): RedirectResponse
     {
         $pending = $this->pendingUpload($request, $upload);
-        Storage::disk('local')->delete(self::Uploads."/{$upload}.json");
+        $this->forgetUpload($upload);
 
         return redirect(page_url('crime-data'))->with(['message' => "Cancelled: nothing in {$pending['file']} was applied.", 'status' => 'info']);
-    }
-
-    /**
-     * An uploaded file's waiting changes. Only the user who uploaded it can apply or cancel them.
-     *
-     * @return array{user: int, file: string, changes: list<array<string, mixed>>, warnings: list<string>}
-     */
-    private function pendingUpload(Request $request, string $upload): array
-    {
-        $path = self::Uploads."/{$upload}.json";
-        abort_unless(Str::isUuid($upload) && Storage::disk('local')->exists($path), 404, 'That upload has already been applied or cancelled.');
-
-        $pending = json_decode(Storage::disk('local')->get($path), true, flags: JSON_THROW_ON_ERROR);
-        abort_unless($pending['user'] === $request->user()->Id, 404);
-
-        return $pending;
-    }
-
-    /**
-     * Uploads checked but never applied or cancelled, from over a day ago, are forgotten.
-     */
-    private function forgetOldUploads(): void
-    {
-        $disk = Storage::disk('local');
-
-        foreach ($disk->files(self::Uploads) as $file) {
-            if ($disk->lastModified($file) < now()->subDay()->getTimestamp()) {
-                $disk->delete($file);
-            }
-        }
     }
 
     /**

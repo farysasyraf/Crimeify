@@ -15,6 +15,37 @@ use Illuminate\Database\Eloquent\Model;
 class PoliceStation extends Model
 {
     /**
+     * The details the Police stations page edits, in the order it shows them.
+     */
+    public const Details = ['Region', 'District', 'Name', 'Address', 'Phone'];
+
+    /**
+     * Its details, as a change keeps them before and after, and as they're compared: the region's code, like MY-01,
+     * and the address with its line breaks as \n.
+     *
+     * @return array{Region: string, District: string, Name: string, Address: ?string, Phone: ?string}
+     */
+    public function details(): array
+    {
+        return [
+            'Region' => $this->Region,
+            'District' => $this->District,
+            'Name' => $this->Name,
+            'Address' => self::lineBreaks($this->Address),
+            'Phone' => $this->Phone,
+        ];
+    }
+
+    /**
+     * Line breaks as \n however they were typed: a form's textarea sends \r\n, and Excel gives back \n. So an address
+     * saved from the form doesn't look changed when its file comes back.
+     */
+    public static function lineBreaks(?string $value): ?string
+    {
+        return $value === null ? null : str_replace(["\r\n", "\r"], "\n", $value);
+    }
+
+    /**
      * The name of the state or federal territory it's listed under, like Johor.
      */
     public function regionName(): string

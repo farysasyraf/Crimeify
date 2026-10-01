@@ -1,5 +1,16 @@
-/* Police stations page: the filters above the list of stations, each with its police district under its name, then its pages. */
-.station-list { padding: 18px 20px; }
+/* Police stations page: Download Excel and Add police station side by side, the upload form with its file and button
+   on one line, then the filters above the list of stations, each with its police district under its name, then its
+   pages, then the update log, which is paged the same way. */
+.station-head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.station-upload { max-width: none; margin: 0 0 20px; padding: 18px 20px; }
+.station-upload h2 { margin: 0 0 10px; font-size: 1.05rem; }
+.station-upload-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; }
+.station-upload-row .field { flex: 1 1 280px; margin-bottom: 0; }
+
+.station-list, .station-edits { padding: 18px 20px; margin-bottom: 20px; }
+.station-edits h2 { margin: 0 0 10px; font-size: 1.05rem; }
+/* The log's rows per page shows them straight away (police-stations.js), so its Show is only for no JavaScript. */
+.js .station-edits [data-filter-submit] { display: none; }
 .station-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 16px; }
 .station-filters label:not(.check) { display: block; margin-bottom: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
 .station-filters .select2-container { width: 200px !important; }
@@ -7,13 +18,25 @@
 .station-filters .check { display: flex; align-items: center; gap: 8px; min-height: 42px; margin: 0; cursor: pointer; }
 .station-filters .check input { margin: 0; }
 .station-filter-actions { display: flex; gap: 8px; }
-.station-district { display: block; font-size: .8125rem; }
+.station-district, .station-source { display: block; font-size: .8125rem; }
+.station-edit-action { display: block; margin-bottom: 4px; font-weight: 600; }
+/* An upload's review, and the update log: what changes in each station, a field a line, before → after. */
+.station-review-fields { display: grid; gap: 4px; margin: 0; }
+.station-review-fields div { display: flex; flex-wrap: wrap; gap: 0 8px; }
+.station-review-fields dt { min-width: 110px; color: var(--muted); font-size: .875rem; }
+/* An address's line breaks show, so an address only put over two lines doesn't look unchanged. */
+.station-review-fields dd { margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
+/* In the log, who and which station keep room beside long before → after lines, so a short name stays on one line;
+   and the change keeps room for its lines on a phone, where the table scrolls sideways instead. */
+.station-log td:nth-child(2) { min-width: 130px; }
+.station-log td:nth-child(3) { min-width: 200px; }
+.station-log td:nth-child(4) { min-width: 300px; }
 .station-list-foot { display: flex; justify-content: flex-end; margin-top: 16px; }
 .station-count { margin: 0 0 8px; font-size: .875rem; }
 .station-empty { margin: 8px 0; }
 
 @media (max-width: 600px) {
-    .station-list { padding: 14px; }
+    .station-list, .station-edits { padding: 14px; }
     .station-filters > div:not(.station-filter-actions) { flex: 1 1 100%; }
     .station-filters .select2-container, .station-filters input[type=search] { width: 100% !important; }
 }

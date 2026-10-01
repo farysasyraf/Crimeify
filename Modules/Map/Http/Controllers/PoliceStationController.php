@@ -8,15 +8,23 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
+use Modules\Map\Entities\PoliceStationEdit;
+use Modules\Map\Support\KeepsPendingUploads;
+use Modules\Map\Support\PoliceStations;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 // The Police stations page (Dev Module), where administrators keep the stations the Map page lists under the map up
-// to date: each one's name, the state and police district it's listed under, and its address and phone number.
-// Its routes are on the Routes page, for ADMIN to start with.
+// to date: each one's name, the state and police district it's listed under, and its address and phone number, one
+// at a time or, as on the Crime data page, by downloading them as an Excel file and uploading it back. As there,
+// every change is logged with who made it. Its routes are on the Routes page, for ADMIN to start with.
 class PoliceStationController extends Controller
 {
+    use KeepsPendingUploads;
+
     /**
      * Stations listed per page, as on the Crime data page: 10 at first, or as chosen from the list, as DataTables'
      * pageLength and lengthMenu: [[10, 50, 100, -1], [10, 50, 100, "All"]]. -1 is all of them.
@@ -26,8 +34,106 @@ class PoliceStationController extends Controller
     private const LengthMenu = [10 => '10', 50 => '50', 100 => '100', -1 => 'All'];
 
     /**
+     * Where an uploaded file's changes wait, on the "local" disk, until they're applied or cancelled.
+     */
+    private const Uploads = 'station-uploads';
+
+    public function __construct(private PoliceStations $stations) {}
+
+    /**
+     * Every station, as an Excel file to change and upload back.
+     */
+    public function download(): BinaryFileResponse
+    {
+        $path = tempnam(sys_get_temp_dir(), 'stations').'.xlsx';
+        $this->stations->writeExcel($path);
+
+        return response()->download($path, 'police-stations-'.now()->format('Y-m-d').'.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend();
+    }
+
+    /**
+     * Check an uploaded Excel file and show what it would change, without changing anything yet.
+     */
+    public function upload(Request $request): View|RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'extensions:xlsx', 'max:5120'],
+        ], [
+            'file.required' => 'Choose an Excel file to upload.',
+            'file.extensions' => 'Upload an Excel workbook (.xlsx), like the one Download Excel gives.',
+            'file.max' => 'The file is larger than 5 MB, much more than the police stations need. Check it\'s the right file.',
+        ]);
+
+        $read = $this->stations->readExcel($request->file('file')->getRealPath());
+
+        if ($read['problems'] !== []) {
+            throw ValidationException::withMessages(['file' => $read['problems']]);
+        }
+
+        $changes = $this->stations->compare($read['stations']);
+        $name = $request->file('file')->getClientOriginalName();
+
+        if ($changes === []) {
+            return redirect(page_url('police-stations'))
+                ->with(['message' => "{$name} has the same police stations as the page already has, so there's nothing to change.", 'status' => 'info']);
+        }
+
+        // The changes wait on the server, for this user only, until they're applied or cancelled.
+        $token = $this->keepUpload($request, ['file' => $name, 'changes' => $changes]);
+
+        return view('map::police-stations.review', [
+            'token' => $token,
+            'file' => $name,
+            'changes' => collect($changes),
+            'warnings' => $read['warnings'],
+            'stationCount' => count($read['stations']),
+        ]);
+    }
+
+    /**
+     * Make an uploaded file's changes, as long as the stations haven't changed since it was checked.
+     */
+    public function apply(Request $request, string $upload): RedirectResponse
+    {
+        $pending = $this->pendingUpload($request, $upload);
+        $changedSince = "The police stations changed after {$pending['file']} was checked, so nothing was changed. Upload it again to see what it would change now.";
+
+        if (! $this->stations->stillApplies($pending['changes'])) {
+            $this->forgetUpload($upload);
+
+            return redirect(page_url('police-stations'))->withErrors(['file' => $changedSince]);
+        }
+
+        try {
+            $this->stations->apply($pending['changes'], $request->user(), 'upload');
+        } catch (UniqueConstraintViolationException) {
+            // Someone added a station with one of the file's names in between.
+            $this->forgetUpload($upload);
+
+            return redirect(page_url('police-stations'))->withErrors(['file' => $changedSince]);
+        }
+
+        $this->forgetUpload($upload);
+        $counts = collect($pending['changes'])->countBy('action');
+
+        return redirect(page_url('police-stations'))->with('message', "Updated the police stations from {$pending['file']}: "
+            .collect(['changed' => 'changed', 'added' => 'added', 'deleted' => 'deleted'])
+                ->map(fn ($word, $action) => ($counts[$action] ?? 0).' '.$word)->implode(', ').'.');
+    }
+
+    public function cancel(Request $request, string $upload): RedirectResponse
+    {
+        $pending = $this->pendingUpload($request, $upload);
+        $this->forgetUpload($upload);
+
+        return redirect(page_url('police-stations'))->with(['message' => "Cancelled: nothing in {$pending['file']} was applied.", 'status' => 'info']);
+    }
+
+    /**
      * Every station, by state and then name, a page at a time, narrowed by state, a search, or to those without an
-     * address or phone number yet, which are the ones to fill in.
+     * address or phone number yet, which are the ones to fill in; and the log of changes, a page at a time too.
      */
     public function index(Request $request): View
     {
@@ -53,6 +159,16 @@ class PoliceStationController extends Controller
             ->paginate($length === -1 ? max(1, (clone $chosen)->reorder()->count()) : $length)
             ->withQueryString();
 
+        // The update log, newest first, paged as on the Crime data page: like the stations but on its own,
+        // ?edits_length= and ?edits_page=, so paging one list leaves the other where it was. Its page links lead back
+        // down to it.
+        $editsLength = array_key_exists($request->integer('edits_length'), self::LengthMenu) ? $request->integer('edits_length') : self::PageLength;
+        $edits = PoliceStationEdit::query()
+            ->orderByDesc('Id')
+            ->paginate($editsLength === -1 ? max(1, PoliceStationEdit::count()) : $editsLength, pageName: 'edits_page')
+            ->withQueryString()
+            ->fragment('edits-heading');
+
         return view('map::police-stations.index', [
             'stations' => $stations,
             'length' => $length,
@@ -62,6 +178,8 @@ class PoliceStationController extends Controller
             'total' => PoliceStation::count(),
             'withoutAddress' => PoliceStation::whereNull('Address')->count(),
             'withoutPhone' => PoliceStation::whereNull('Phone')->count(),
+            'edits' => $edits,
+            'editsLength' => $editsLength,
         ]);
     }
 
@@ -79,12 +197,12 @@ class PoliceStationController extends Controller
         $input = $this->validated($request);
 
         try {
-            $station = PoliceStation::create($input);
+            $this->stations->apply([['action' => 'added', 'id' => null, 'old' => null, 'new' => $input]], $request->user(), 'page');
         } catch (UniqueConstraintViolationException) {
             return $this->duplicateName($input);
         }
 
-        return redirect(page_url('police-stations'))->with('message', "Added {$station->Name}.");
+        return redirect(page_url('police-stations'))->with('message', "Added {$input['Name']}.");
     }
 
     public function edit(PoliceStation $station): View
@@ -95,14 +213,20 @@ class PoliceStationController extends Controller
     public function update(Request $request, PoliceStation $station): RedirectResponse
     {
         $input = $this->validated($request, $station);
+        $old = $station->details();
+
+        // As on the Crime data page, saving what's already there changes nothing, and so logs nothing.
+        if ($input === $old) {
+            return redirect(page_url('police-stations'))->with(['message' => "Nothing to save: no detail of {$station->Name} was changed.", 'status' => 'info']);
+        }
 
         try {
-            $station->update($input);
+            $this->stations->apply([['action' => 'changed', 'id' => $station->Id, 'old' => $old, 'new' => $input]], $request->user(), 'page');
         } catch (UniqueConstraintViolationException) {
             return $this->duplicateName($input);
         }
 
-        return redirect(page_url('police-stations'))->with('message', "Saved changes to {$station->Name}.");
+        return redirect(page_url('police-stations'))->with('message', "Saved changes to {$input['Name']}.");
     }
 
     public function delete(PoliceStation $station): View
@@ -110,9 +234,9 @@ class PoliceStationController extends Controller
         return view('map::police-stations.delete', compact('station'));
     }
 
-    public function destroy(PoliceStation $station): RedirectResponse
+    public function destroy(Request $request, PoliceStation $station): RedirectResponse
     {
-        $station->delete();
+        $this->stations->apply([['action' => 'deleted', 'id' => $station->Id, 'old' => $station->details(), 'new' => null]], $request->user(), 'page');
 
         return redirect(page_url('police-stations'))->with('message', "Deleted {$station->Name}.");
     }
@@ -140,7 +264,8 @@ class PoliceStationController extends Controller
     }
 
     /**
-     * Validate the form and map it onto the PoliceStations columns. A blank address or phone number is saved as none.
+     * Validate the form and map it onto the PoliceStations columns. A blank address or phone number is saved as none,
+     * and the address's line breaks as \n, not the \r\n a textarea sends, as the Excel file has them.
      *
      * @return array{Region: string, District: string, Name: string, Address: ?string, Phone: ?string}
      */
@@ -164,7 +289,7 @@ class PoliceStationController extends Controller
             'Region' => $data['region'],
             'District' => $data['district'],
             'Name' => $data['name'],
-            'Address' => $data['address'] ?? null,
+            'Address' => PoliceStation::lineBreaks($data['address'] ?? null),
             'Phone' => $data['phone'] ?? null,
         ];
     }

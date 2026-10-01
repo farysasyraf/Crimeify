@@ -1,6 +1,5 @@
 /* Crime data page: the upload and add forms side by side, then the filters and the list of figures, then the update
    log, paged the same way. */
-.btn-icon { font-size: 18px; margin-right: 6px; vertical-align: -4px; }
 
 /* A note, not a problem: in the app's blue. */
 .crime-note { background: var(--nav-active-bg); color: var(--text); }
