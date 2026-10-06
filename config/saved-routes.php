@@ -5,8 +5,8 @@ use App\Models\AppRoute;
 use App\Models\Role;
 use Farysasyraf\SavedRoutes\Roles\EloquentRoleProvider;
 
-// farysasyraf/laravel-saved-routes (packages/laravel-saved-routes) adds the routes saved on the Routes page to the
-// app once it has booted. Crimeify keeps them in its own dbo.AppRoutes, edited on its own Routes page (the Setup
+// farysasyraf/laravel-saved-routes (https://github.com/farysasyraf/laravel-saved-routes) adds the routes saved on the
+// Routes page to the app once it has booted. Crimeify keeps them in its own dbo.AppRoutes, edited on its own Routes page (the Setup
 // module's AppRouteController), so the package's table and admin page are off.
 return [
 

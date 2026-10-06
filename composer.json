@@ -5,20 +5,9 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "path",
-            "url": "packages/laravel-saved-routes",
-            "options": {
-                "versions": {
-                    "farysasyraf/laravel-saved-routes": "1.0.x-dev"
-                }
-            }
-        }
-    ],
     "require": {
         "php": "^8.3",
-        "farysasyraf/laravel-saved-routes": "^1.0@dev",
+        "farysasyraf/laravel-saved-routes": "^1.0",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "nwidart/laravel-modules": "^13.0",

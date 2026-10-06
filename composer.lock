@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "633c79c0a42b53ba14750116860e9a5a",
+    "content-hash": "d683a4a3ae5c94a9910ea8f21272c275",
     "packages": [
         {
             "name": "brick/math",
@@ -513,11 +513,17 @@
         },
         {
             "name": "farysasyraf/laravel-saved-routes",
-            "version": "1.0.x-dev",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/farysasyraf/laravel-saved-routes.git",
+                "reference": "dc918fa73e4c9e27beb834fd24f862ab508c0aec"
+            },
             "dist": {
-                "type": "path",
-                "url": "packages/laravel-saved-routes",
-                "reference": "4ec4c1560da23ce3fe147372edc212dd02fcb656"
+                "type": "zip",
+                "url": "https://api.github.com/repos/farysasyraf/laravel-saved-routes/zipball/dc918fa73e4c9e27beb834fd24f862ab508c0aec",
+                "reference": "dc918fa73e4c9e27beb834fd24f862ab508c0aec",
+                "shasum": ""
             },
             "require": {
                 "illuminate/database": "^12.0|^13.0",
@@ -550,16 +556,7 @@
                     "Farysasyraf\\SavedRoutes\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Farysasyraf\\SavedRoutes\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "phpunit"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -577,9 +574,11 @@
                 "roles",
                 "routes"
             ],
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/farysasyraf/laravel-saved-routes/issues",
+                "source": "https://github.com/farysasyraf/laravel-saved-routes/tree/v1.0.0"
+            },
+            "time": "2026-10-06T16:02:02+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -8655,9 +8654,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "farysasyraf/laravel-saved-routes": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
