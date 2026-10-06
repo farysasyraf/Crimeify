@@ -2,7 +2,6 @@
 
 namespace Modules\Map\Tests\Feature;
 
-use App\Models\AppRoute;
 use App\Models\MenuItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Map\Entities\PoliceStation;
@@ -272,11 +271,6 @@ class PoliceStationsTest extends TestCase
     public function test_the_app_map_loads_sweetalert2_once(): void
     {
         $this->signIn();
-        $module = MenuItem::create(['Label' => 'Map Module', 'SortOrder' => 9]);
-        $map = MenuItem::create(['Label' => 'Map', 'Url' => '/map', 'SortOrder' => 1, 'ParentId' => $module->Id]);
-        $this->post('/routes', ['menu_item_id' => $map->Id, 'path' => 'map', 'controller' => 'MapController', 'function' => 'index', 'method' => 'GET', 'parameter' => ''])
-            ->assertSessionHasNoErrors();
-        AppRoute::registerBehindLogin();
 
         // The app's layout has it already, for its confirm boxes.
         $this->assertSame(1, substr_count($this->get('/map')->assertOk()->getContent(), 'sweetalert2.all.min.js'));

@@ -79,6 +79,8 @@ class RouteAccessTest extends TestCase
             'PUT /crime-data/update' => 'Map\CrimeDataController@update',
             'POST /crime-data/upload' => 'Map\CrimeDataController@upload',
             'GET /dashboard' => 'Dashboard\DashboardController@index',
+            'GET /map' => 'Map\MapController@index',
+            'GET /map/crime' => 'Map\MapController@crime',
             'GET /menu-items' => 'Setup\MenuItemController@index',
             'GET /menu-items/create' => 'Setup\MenuItemController@create',
             'GET /menu-items/delete/{menu_item}' => 'Setup\MenuItemController@delete',
@@ -118,15 +120,16 @@ class RouteAccessTest extends TestCase
             'PUT /users/update/{user}' => 'Setup\UserController@update',
         ], $routes->mapWithKeys(fn (AppRoute $route) => [$route->label() => $route->handler()])->all());
 
-        // The lists and the dashboard are open to everyone logged in; adding, changing and deleting start ADMIN-only,
-        // as the whole Crime data page does.
-        $this->assertSame(['dashboard', 'menu-items', 'roles', 'users'], $routes->filter->OpenToEveryone->pluck('Path')->all());
+        // The lists, the dashboard and the map are open to everyone logged in; adding, changing and deleting start
+        // ADMIN-only, as the whole Crime data page does.
+        $this->assertSame(['dashboard', 'map', 'map/crime', 'menu-items', 'roles', 'users'], $routes->filter->OpenToEveryone->pluck('Path')->all());
         $this->assertTrue($routes->reject->OpenToEveryone->every(fn (AppRoute $route) => $route->roles->pluck('Name')->all() === ['ADMIN']));
 
         // Each page under the menu link that opens it, and its actions under the same one; the Users link moved from /
         // to /users with its page.
         $menuOf = fn (string $path) => $routes->firstWhere('Path', $path)->menuItem?->Label;
         $this->assertSame(['Users', 'Add user', 'Roles', 'Roles', 'Manage menu'], array_map($menuOf, ['users', 'users/create', 'roles', 'roles/create', 'menu-items']));
+        $this->assertSame(['Dashboard', 'Crime data', 'Crime data', 'Map', 'Map'], array_map($menuOf, ['dashboard', 'crime-data', 'crime-data/download', 'map', 'map/crime']));
         foreach ($routes as $route) {
             if (preg_match('~^(.+)/(store|edit|update|delete|destroy|upload|apply|cancel|photo|store-photo|destroy-photo)$~', $route->Path, $action)) {
                 $this->assertSame($menuOf($action[1]), $route->menuItem?->Label, $route->Path);

@@ -196,25 +196,23 @@ class DashboardPageTest extends TestCase
         $this->assertContains('/dashboard', AppRoute::linkablePages()['saved']);
         $this->assertSame('Dashboard\DashboardController', AppRoute::where('Path', 'dashboard')->value('Controller'));
 
-        MenuItem::create(['Label' => 'Dashboard', 'Url' => '/dashboard', 'SortOrder' => 0, 'Icon' => 'dashboard']);
+        // Its menu link comes with the migrations, at the top.
+        $this->assertSame(['Dashboard', 0, null], [MenuItem::firstWhere('Url', '/dashboard')->Label, MenuItem::firstWhere('Url', '/dashboard')->SortOrder, MenuItem::firstWhere('Url', '/dashboard')->ParentId]);
         $this->get('/dashboard')->assertSee($this->sideLink('Dashboard', 'page', 'dashboard'), false);
     }
 
-    public function test_the_crime_by_state_card_links_to_the_map_once_there_is_one(): void
+    public function test_the_crime_by_state_card_links_to_the_map_while_there_is_one(): void
     {
         $this->signIn();
         $this->importFigures();
 
-        $this->get('/dashboard')->assertDontSee('Open the map');
+        // The Map page comes with the migrations.
+        $this->get('/dashboard')->assertSee('<a class="dash-link" href="'.route('map').'">Open the map</a>', false);
 
-        $module = MenuItem::create(['Label' => 'Map Module', 'SortOrder' => 9, 'Icon' => 'map']);
-        $map = MenuItem::create(['Label' => 'Map', 'Url' => '/map', 'SortOrder' => 1, 'ParentId' => $module->Id, 'Icon' => 'place']);
-        $this->post('/routes', [
-            'menu_item_id' => $map->Id, 'path' => 'map', 'controller' => 'MapController',
-            'function' => 'index', 'method' => 'GET', 'parameter' => '',
-        ])->assertSessionHasNoErrors();
+        // Deleted on the Routes page, there's nothing to link to.
+        $this->delete('/routes/'.AppRoute::firstWhere('Path', 'map')->Id)->assertSessionHasNoErrors();
         AppRoute::registerBehindLogin();
 
-        $this->get('/dashboard')->assertSee('<a class="dash-link" href="'.route('map').'">Open the map</a>', false);
+        $this->get('/dashboard')->assertDontSee('Open the map');
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\AppRoute;
 use App\Models\MenuItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -109,16 +108,9 @@ class PublicPagesTest extends TestCase
 
     public function test_the_apps_own_pages_still_need_a_login(): void
     {
+        // The app's map and its figures, from the migrations, alongside its other pages.
         $this->signIn();
-        $module = MenuItem::create(['Label' => 'Map Module', 'SortOrder' => 9, 'Icon' => 'map']);
-        $map = MenuItem::create(['Label' => 'Map', 'Url' => '/map', 'SortOrder' => 1, 'ParentId' => $module->Id]);
-        foreach (['map' => 'index', 'map/crime' => 'crime'] as $path => $function) {
-            $this->post('/routes', [
-                'menu_item_id' => $map->Id, 'path' => $path, 'controller' => 'MapController',
-                'function' => $function, 'method' => 'GET', 'parameter' => '',
-            ])->assertSessionHasNoErrors();
-        }
-        AppRoute::registerBehindLogin();
+        $this->get('/map')->assertOk();
         $this->post('/logout');
 
         foreach (['/dashboard', '/map', '/map/crime', '/crime-data', '/users/create'] as $address) {

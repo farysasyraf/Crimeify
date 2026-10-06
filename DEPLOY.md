@@ -135,8 +135,9 @@ php artisan db:seed --force        # the admin (with the ADMIN role) and demo lo
 php artisan map:import-crime       # the crime figures (downloads from data.gov.my) and 2024 by state
 php artisan map:import-stations    # a police station for each district
 
-# The menu and pages you made on Manage menu and Manage routes: they're rows in the database, not code, so a new
-# database only has the starter links. Export them from your own database (in a window WITHOUT the $env: settings)...
+# The migrations give a new database the app's pages, the Dashboard, Crime data and the Map. Changes you made by
+# hand on Manage menu and Manage routes are rows in your database, not code, so to bring those across too,
+# export them from your own database (in a window WITHOUT the $env: settings)...
 #   php artisan menu:export
 # ...then put the file it names into this one (it saves what was there first, and adds the roles it needs):
 php artisan menu:import "<the file menu:export saved>"

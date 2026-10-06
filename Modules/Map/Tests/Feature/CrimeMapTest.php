@@ -81,14 +81,10 @@ class CrimeMapTest extends TestCase
      */
     private function addMapRoutes(bool $crime = true): void
     {
-        $module = MenuItem::create(['Label' => 'Map Module', 'SortOrder' => 9, 'Icon' => 'map']);
-        $map = MenuItem::create(['Label' => 'Map', 'Url' => '/map', 'SortOrder' => 1, 'ParentId' => $module->Id, 'Icon' => 'place']);
-
-        foreach ($crime ? ['map' => 'index', 'map/crime' => 'crime'] : ['map' => 'index'] as $path => $function) {
-            $this->post('/routes', [
-                'menu_item_id' => $map->Id, 'path' => $path, 'controller' => 'MapController',
-                'function' => $function, 'method' => 'GET', 'parameter' => '',
-            ])->assertSessionHasNoErrors();
+        // Both come with the migrations now (add_dashboard_crime_data_and_map_to_menu); without $crime, the figures'
+        // route is taken out, as an administrator could on the Routes page.
+        if (! $crime) {
+            AppRoute::where('Path', 'map/crime')->delete();
         }
 
         AppRoute::registerBehindLogin();

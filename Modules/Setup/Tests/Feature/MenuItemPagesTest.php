@@ -206,7 +206,8 @@ class MenuItemPagesTest extends TestCase
     {
         $this->get('/menu-items/create')
             ->assertOk()
-            ->assertSee('name="sort_order" value="7"', false);
+            // After the starter links, Crime data (7) and the Map Module heading (8).
+            ->assertSee('name="sort_order" value="9"', false);
     }
 
     public function test_create_adds_item_to_the_sidebar(): void
@@ -346,7 +347,8 @@ class MenuItemPagesTest extends TestCase
         $this->post('/menu-items/store', ['label' => 'Reports', 'url' => 'reports', 'sort_order' => 'first'])
             ->assertSessionHasErrors(['url', 'sort_order']);
 
-        $this->assertDatabaseCount('MenuItems', 6);
+        // Only the links the migrations add.
+        $this->assertDatabaseCount('MenuItems', 10);
     }
 
     public function test_edit_updates_item_and_reorders_the_sidebar(): void

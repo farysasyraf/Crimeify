@@ -11,26 +11,28 @@ class MapPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Add the Map page the AMV way, as on the Routes page: a menu link to group it under, then a route row
-     * naming the module's controller. Saved routes reach the router once the app has booted, so add them again here.
-     */
-    private function addMapRoute(): void
+    public function test_a_new_database_has_the_map_page_under_a_map_module_link(): void
     {
-        $module = MenuItem::create(['Label' => 'Map Module', 'SortOrder' => 9, 'Icon' => 'map']);
-        $map = MenuItem::create(['Label' => 'Map', 'Url' => '/map', 'SortOrder' => 1, 'ParentId' => $module->Id, 'Icon' => 'place']);
+        // From the migrations (add_dashboard_crime_data_and_map_to_menu), as MyAppDB has them: the page and the
+        // figures its pins load, both open to everyone who is logged in, like the public map.
+        $routes = AppRoute::with('menuItem')->whereIn('Path', ['map', 'map/crime'])->orderBy('Path')->get();
+        $this->assertSame(['Map\MapController@index', 'Map\MapController@crime'], $routes->map->handler()->all());
+        $this->assertSame([true, true], $routes->pluck('OpenToEveryone')->all());
+        $this->assertSame(['Map', 'Map'], $routes->map(fn (AppRoute $route) => $route->menuItem->Label)->all());
 
-        $this->post('/routes', [
-            'menu_item_id' => $map->Id, 'path' => 'map', 'controller' => 'MapController',
-            'function' => 'index', 'method' => 'GET', 'parameter' => '',
-        ])->assertSessionHasNoErrors();
-
-        AppRoute::registerBehindLogin();
+        $map = MenuItem::firstWhere('Url', '/map');
+        $this->assertSame(['Map Module', null, 'map'], [MenuItem::find($map->ParentId)->Label, MenuItem::find($map->ParentId)->Url, MenuItem::find($map->ParentId)->Icon]);
+        $this->assertSame('place', $map->Icon);
+        $this->assertTrue($map->VisibleToEveryone);
     }
 
-    public function test_the_module_has_no_page_of_its_own_until_the_routes_page_adds_one(): void
+    public function test_the_map_page_goes_once_its_route_is_deleted_on_the_routes_page(): void
     {
         $this->signIn();
+        $this->get('/map')->assertOk();
+
+        $this->delete('/routes/'.AppRoute::firstWhere('Path', 'map')->Id)->assertSessionHasNoErrors();
+        AppRoute::registerBehindLogin();
 
         $this->get('/map')->assertNotFound();
     }
@@ -38,7 +40,6 @@ class MapPageTest extends TestCase
     public function test_the_map_page_comes_from_the_routes_page(): void
     {
         $this->signIn();
-        $this->addMapRoute();
 
         // Saved as the module's controller, and named after its path, as in AMV.
         $this->assertSame('Map\MapController', AppRoute::where('Path', 'map')->value('Controller'));
@@ -61,7 +62,6 @@ class MapPageTest extends TestCase
     public function test_the_street_map_comes_from_openstreetmap_until_a_tile_provider_is_set(): void
     {
         $this->signIn();
-        $this->addMapRoute();
 
         $this->get('/map')
             ->assertOk()
@@ -87,7 +87,6 @@ class MapPageTest extends TestCase
     public function test_the_map_page_shows_malaysias_states_on_a_leaflet_map(): void
     {
         $this->signIn();
-        $this->addMapRoute();
 
         $page = $this->get('/map')->assertOk();
 
@@ -165,8 +164,6 @@ class MapPageTest extends TestCase
 
         $this->assertSame('Map\MapController', AppRoute::controllerName(AppRoute::findController('MapController')));
         $this->assertSame(['index', 'publicIndex', 'crime'], AppRoute::controllerOptions()['Map\MapController']);
-
-        $this->addMapRoute();
 
         // Once saved, the page is offered in Manage menu's Link list.
         $this->assertContains('/map', AppRoute::linkablePages()['saved']);
