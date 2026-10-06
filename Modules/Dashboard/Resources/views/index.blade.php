@@ -69,17 +69,21 @@
                 </ul>
             </header>
             <div class="dash-chart"><canvas id="trend-chart" aria-hidden="true"></canvas></div>
-            <table class="visually-hidden">
-                <caption>{{ __('Crime in Malaysia each year') }}</caption>
-                <thead>
-                    <tr><th scope="col">{{ __('Year') }}</th>@foreach ($charts['trend']['series'] as $series)<th scope="col">{{ $series['label'] }}</th>@endforeach</tr>
-                </thead>
-                <tbody>
-                    @foreach ($charts['trend']['years'] as $index => $each)
-                        <tr><th scope="row">{{ $each }}</th>@foreach ($charts['trend']['series'] as $series)<td>{{ $number($series['counts'][$index]) }}</td>@endforeach</tr>
-                    @endforeach
-                </tbody>
-            </table>
+            {{-- The chart's figures for screen readers. In a div, which shrinks to nothing as a table wouldn't, so the
+                 table doesn't make the page wider than the window. --}}
+            <div class="visually-hidden">
+                <table>
+                    <caption>{{ __('Crime in Malaysia each year') }}</caption>
+                    <thead>
+                        <tr><th scope="col">{{ __('Year') }}</th>@foreach ($charts['trend']['series'] as $series)<th scope="col">{{ $series['label'] }}</th>@endforeach</tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($charts['trend']['years'] as $index => $each)
+                            <tr><th scope="row">{{ $each }}</th>@foreach ($charts['trend']['series'] as $series)<td>{{ $number($series['counts'][$index]) }}</td>@endforeach</tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <section class="dash-card dash-regions" aria-labelledby="regions-heading">
@@ -93,17 +97,19 @@
             @if ($byState && $countedIn)
                 <p class="dash-note">{{ __(":year's figures are by state, so :list.", ['year' => $year, 'list' => collect($countedIn)->map(fn ($under, $region) => __(":region's are in :under's", ['region' => $region, 'under' => $under]))->join(', ', ' '.__('and').' ')]) }}</p>
             @endif
-            <table class="visually-hidden">
-                <caption>{{ __('Crime by state in :year, most first', ['year' => $year]) }}</caption>
-                <thead>
-                    <tr><th scope="col">{{ __('State') }}</th>@foreach (config('map.crime.categories') as $label)<th scope="col">{{ __($label) }}</th>@endforeach<th scope="col">{{ __('All crime') }}</th></tr>
-                </thead>
-                <tbody>
-                    @foreach ($charts['regions'] as $region)
-                        <tr><th scope="row">{{ $region['name'] }}</th>@foreach (array_keys(config('map.crime.categories')) as $category)<td>{{ $number($region['totals'][$category] ?? 0) }}</td>@endforeach<td>{{ $number($region['total']) }}</td></tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="visually-hidden">
+                <table>
+                    <caption>{{ __('Crime by state in :year, most first', ['year' => $year]) }}</caption>
+                    <thead>
+                        <tr><th scope="col">{{ __('State') }}</th>@foreach (config('map.crime.categories') as $label)<th scope="col">{{ __($label) }}</th>@endforeach<th scope="col">{{ __('All crime') }}</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($charts['regions'] as $region)
+                            <tr><th scope="row">{{ $region['name'] }}</th>@foreach (array_keys(config('map.crime.categories')) as $category)<td>{{ $number($region['totals'][$category] ?? 0) }}</td>@endforeach<td>{{ $number($region['total']) }}</td></tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <section class="dash-card dash-types" aria-labelledby="types-heading">
