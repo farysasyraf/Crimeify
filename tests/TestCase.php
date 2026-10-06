@@ -2,10 +2,10 @@
 
 namespace Tests;
 
-use App\Models\AppRoute;
 use App\Models\MenuItem;
 use App\Models\Role;
 use App\Models\User;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -19,7 +19,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         // Without the crime by state file (StateCrime), so the crime import loads only a test's own figures. The
         // tests of it give it a file.

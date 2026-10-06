@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\LoginController;
-use App\Http\Middleware\EnsureUserCanOpenRoute;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RecordLastSeen;
 use App\Http\Middleware\SetPublicLocale;
@@ -37,18 +36,16 @@ return Application::configure(basePath: dirname(__DIR__))
             ? route('public.dashboard')
             : route('login'));
 
-        // A route saved on the Routes page for only some roles gets route-roles.
         // The Routes page is only for ADMIN, set in the code with admin, as it decides who can open everything else.
+        // (A route saved on it for only some roles gets the saved-routes package's saved-route-roles.)
         // The public dashboard and map get public-locale, for Bahasa Melayu or English.
         $middleware->alias([
-            'route-roles' => EnsureUserCanOpenRoute::class,
             'admin' => EnsureUserIsAdmin::class,
             'public-locale' => SetPublicLocale::class,
         ]);
 
-        // Both run before the record in the address is looked up, so someone without the role gets "Not allowed"
-        // whether or not /users/edit/5 exists, rather than learning which records do.
-        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserCanOpenRoute::class);
+        // It runs before the record in the address is looked up, as saved-route-roles does, so someone without the
+        // role gets "Not allowed" whether or not /routes/5/edit exists, rather than learning which records do.
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EnsureUserIsAdmin::class);
 
         // A login made before the account's password changed, like elsewhere after "Forgot password?", ends then

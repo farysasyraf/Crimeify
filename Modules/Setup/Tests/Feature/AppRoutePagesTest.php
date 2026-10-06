@@ -6,6 +6,7 @@ use App\Models\AppRoute;
 use App\Models\MenuItem;
 use App\Models\Role;
 use App\Models\User;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -76,7 +77,7 @@ class AppRoutePagesTest extends TestCase
      */
     private function reloadRoutes(): void
     {
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
     }
 
     public function test_page_shows_the_form_with_menu_links_grouped_as_in_amv(): void

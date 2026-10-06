@@ -41,8 +41,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /var/www/html
 
-# The packages first, so a change to the code alone doesn't download them again.
+# The packages first, so a change to the code alone doesn't download them again. packages/ holds the ones kept in
+# this repository, like the saved-routes package, which composer.json installs from there.
 COPY composer.json composer.lock ./
+COPY packages ./packages
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
 
 COPY . .

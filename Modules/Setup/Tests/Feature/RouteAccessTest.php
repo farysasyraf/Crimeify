@@ -7,6 +7,7 @@ use App\Models\MenuItem;
 use App\Models\Role;
 use App\Models\User;
 use Closure;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -58,7 +59,7 @@ class RouteAccessTest extends TestCase
             'function' => $route->Action, 'method' => $route->HttpMethods, 'parameter' => (string) $route->Parameters,
         ])->assertSessionHasNoErrors());
 
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
     }
 
     public function test_the_apps_pages_and_their_actions_are_routes_on_the_routes_page_under_their_menu_links(): void
@@ -182,7 +183,7 @@ class RouteAccessTest extends TestCase
     public function test_without_the_dashboard_or_users_list_logging_in_leads_admin_to_routes_and_others_to_their_profile(): void
     {
         AppRoute::whereIn('Path', ['dashboard', 'users'])->delete();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get('/')->assertRedirect('/profile');
         $this->asAdmin(fn () => $this->get('/')->assertRedirect('/routes'));
@@ -251,7 +252,7 @@ class RouteAccessTest extends TestCase
             'menu_item_id' => $menu->Id, 'path' => 'reports', 'controller' => 'RoleController', 'function' => 'index',
             'method' => 'GET', 'parameter' => '', 'open_to' => 'roles', 'roles' => [$editor->Id],
         ])->assertSessionHasNoErrors());
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $route = AppRoute::firstWhere('Path', 'reports');
         $this->assertFalse($route->OpenToEveryone);
@@ -300,7 +301,7 @@ class RouteAccessTest extends TestCase
         $route->roles()->attach($editor->Id);
         $this->me->roles()->attach($editor->Id);
         $editor->delete();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get('/reports')->assertForbidden()->assertSee('No one can open this page: the roles it was limited to have been deleted.');
         $this->asAdmin(fn () => $this->get('/routes')->assertSee('<span class="material-icon" aria-hidden="true">lock</span>No one', false));
@@ -329,7 +330,7 @@ class RouteAccessTest extends TestCase
 
         // Deleted from the Routes page, an action stops answering from the next request.
         $routes->firstWhere('Path', 'crime-data/update')->delete();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
         $this->put('/crime-data/update', ['crimes' => ['1' => '5'], 'original' => ['1' => '5']])->assertNotFound();
         $this->get('/crime-data')->assertOk();
     }

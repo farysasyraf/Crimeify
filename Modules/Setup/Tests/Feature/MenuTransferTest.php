@@ -6,6 +6,7 @@ use App\Models\AppRoute;
 use App\Models\MenuItem;
 use App\Models\Role;
 use App\Models\User;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -104,7 +105,7 @@ class MenuTransferTest extends TestCase
         $this->assertCount(1, Storage::disk('local')->files('menu-backups'));
 
         // And the app uses them straight away: someone with EDITOR sees the Map link and can open the page.
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
         $editor = $this->signIn(admin: false);
         $editor->roles()->attach(Role::firstWhere('Name', 'EDITOR')->Id);
         $this->get('/map')->assertOk()->assertSee($this->sideLink('Map', 'page', 'place'), false);

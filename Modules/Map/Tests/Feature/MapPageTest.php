@@ -4,6 +4,7 @@ namespace Modules\Map\Tests\Feature;
 
 use App\Models\AppRoute;
 use App\Models\MenuItem;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ class MapPageTest extends TestCase
         $this->get('/map')->assertOk();
 
         $this->delete('/routes/'.AppRoute::firstWhere('Path', 'map')->Id)->assertSessionHasNoErrors();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get('/map')->assertNotFound();
     }
@@ -162,8 +163,8 @@ class MapPageTest extends TestCase
     {
         $this->signIn();
 
-        $this->assertSame('Map\MapController', AppRoute::controllerName(AppRoute::findController('MapController')));
-        $this->assertSame(['index', 'publicIndex', 'crime'], AppRoute::controllerOptions()['Map\MapController']);
+        $this->assertSame('Map\MapController', SavedRoutes::controllers()->nameOf(SavedRoutes::controllers()->findOne('MapController')));
+        $this->assertSame(['index', 'publicIndex', 'crime'], SavedRoutes::controllers()->options()['Map\MapController']);
 
         // Once saved, the page is offered in Manage menu's Link list.
         $this->assertContains('/map', AppRoute::linkablePages()['saved']);

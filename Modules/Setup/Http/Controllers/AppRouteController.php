@@ -7,6 +7,8 @@ use App\Models\AppRoute;
 use App\Models\MenuItem;
 use App\Models\Role;
 use Closure;
+use Farysasyraf\SavedRoutes\Parameters;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -99,7 +101,7 @@ class AppRouteController extends Controller
             'openMenuIds' => $openMenuIds,
             'highlight' => $this->highlighter($search),
             'totalCount' => $routes->count(),
-            'controllers' => AppRoute::controllerOptions(),
+            'controllers' => SavedRoutes::controllers()->options(),
             'routesCached' => app()->routesAreCached(),
             'roles' => Role::orderBy('Name')->get(),
             'openTo' => old('open_to', $route->isLimitedToRoles() ? 'roles' : 'everyone'),
@@ -197,7 +199,8 @@ class AppRouteController extends Controller
      */
     private function fillFromForm(Request $request, AppRoute $route): array
     {
-        $controllers = AppRoute::findControllers((string) $request->input('controller'));
+        $locator = SavedRoutes::controllers();
+        $controllers = $locator->find((string) $request->input('controller'));
         $controller = count($controllers) === 1 ? $controllers[0] : null;
         $menuIds = collect($this->menuGroups(MenuItem::tree(MenuItem::ordered()->get())))
             ->map(fn (array $group) => array_keys($group['options']))
@@ -208,22 +211,22 @@ class AppRouteController extends Controller
             'menu_item_id' => ['required', 'integer', Rule::in($menuIds)],
             // The fixed part of the address, which is also the route's name. Parameters go in their own box.
             'path' => ['required', 'string', 'max:200', 'regex:#^/?[\w.~-]+(/[\w.~-]+)*/?$#'],
-            'controller' => ['required', 'string', 'max:150', function (string $attribute, mixed $value, Closure $fail) use ($controllers) {
+            'controller' => ['required', 'string', 'max:150', function (string $attribute, mixed $value, Closure $fail) use ($controllers, $locator) {
                 if ($controllers === []) {
                     $fail("There's no controller named {$value} in app/Http/Controllers or a module's Http/Controllers.");
                 } elseif (count($controllers) > 1) {
-                    $names = collect($controllers)->map(fn (ReflectionClass $found) => AppRoute::controllerName($found))->implode(' and ');
+                    $names = collect($controllers)->map(fn (ReflectionClass $found) => $locator->nameOf($found))->implode(' and ');
                     $fail("More than one controller is called {$value}: {$names}. Type the one you mean, with its module.");
                 }
             }],
-            'function' => ['required', 'string', 'max:100', function (string $attribute, mixed $value, Closure $fail) use ($controller) {
-                if ($controller !== null && AppRoute::findAction($controller, $value) === null) {
+            'function' => ['required', 'string', 'max:100', function (string $attribute, mixed $value, Closure $fail) use ($controller, $locator) {
+                if ($controller !== null && $locator->findAction($controller, $value) === null) {
                     $fail("{$controller->getShortName()} has no public function named {$value}.");
                 }
             }],
             'method' => ['required', Rule::in(AppRoute::Methods)],
             'parameter' => ['nullable', 'string', 'max:200', function (string $attribute, mixed $value, Closure $fail) {
-                if (AppRoute::parseParameters($value) === null) {
+                if (Parameters::parse($value) === null) {
                     $fail('Write parameter names like id or id/kw: letters, numbers and _, each name once, with optional ones (ending in ?) last.');
                 }
             }],
@@ -249,11 +252,11 @@ class AppRouteController extends Controller
         $route->fill([
             'MenuItemId' => (int) $data['menu_item_id'],
             'Path' => trim($data['path'], '/'),
-            'Parameters' => filled($data['parameter'] ?? null) ? AppRoute::parseParameters($data['parameter']) : null,
+            'Parameters' => filled($data['parameter'] ?? null) ? Parameters::parse($data['parameter']) : null,
             // Saved as the code spells them, with the module in front, like Setup\RoleController, so the route
             // still works on a server where file names are case-sensitive.
-            'Controller' => AppRoute::controllerName($controller),
-            'Action' => AppRoute::findAction($controller, $data['function'])->getName(),
+            'Controller' => $locator->nameOf($controller),
+            'Action' => $locator->findAction($controller, $data['function'])->getName(),
             'HttpMethods' => $data['method'],
             'OpenToEveryone' => $openToEveryone,
         ]);

@@ -5,6 +5,7 @@ namespace Modules\Setup\Tests\Feature;
 use App\Models\AppRoute;
 use App\Models\Role;
 use App\Models\User;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -84,7 +85,7 @@ class AdminRoleTest extends TestCase
 
         // Deleting users opened to everyone, on the Routes page.
         AppRoute::whereIn('Path', ['users/delete', 'users/destroy'])->update(['OpenToEveryone' => true]);
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get("/users/delete/{$only->Id}")
             ->assertSee('Siti Aminah is the only user with the ADMIN role, which opens the Routes page, so they can\'t be deleted.', false)

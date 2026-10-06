@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "efdf5e64b7411601e37b579890008ed8",
+    "content-hash": "633c79c0a42b53ba14750116860e9a5a",
     "packages": [
         {
             "name": "brick/math",
@@ -510,6 +510,76 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "farysasyraf/laravel-saved-routes",
+            "version": "1.0.x-dev",
+            "dist": {
+                "type": "path",
+                "url": "packages/laravel-saved-routes",
+                "reference": "4ec4c1560da23ce3fe147372edc212dd02fcb656"
+            },
+            "require": {
+                "illuminate/database": "^12.0|^13.0",
+                "illuminate/http": "^12.0|^13.0",
+                "illuminate/routing": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "illuminate/validation": "^12.0|^13.0",
+                "illuminate/view": "^12.0|^13.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^10.0|^11.0",
+                "phpunit/phpunit": "^11.5|^12.0",
+                "spatie/laravel-permission": "^6.0|^7.0|^8.0"
+            },
+            "suggest": {
+                "nwidart/laravel-modules": "To point saved routes at controllers inside your modules.",
+                "spatie/laravel-permission": "To limit saved routes to spatie roles with SpatieRoleProvider."
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Farysasyraf\\SavedRoutes\\SavedRoutesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Farysasyraf\\SavedRoutes\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Farysasyraf\\SavedRoutes\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "farysasyraf"
+                }
+            ],
+            "description": "Add routes to a Laravel app from a page in the app: each one stored in the database, pointing to one of your controllers, open to everyone logged in or only to chosen roles.",
+            "keywords": [
+                "admin",
+                "database routes",
+                "dynamic routes",
+                "laravel",
+                "roles",
+                "routes"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "fruitcake/php-cors",
@@ -8585,7 +8655,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "farysasyraf/laravel-saved-routes": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

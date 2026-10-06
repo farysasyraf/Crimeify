@@ -5,6 +5,7 @@ namespace Modules\Setup\Tests\Feature;
 use App\Models\AppRoute;
 use App\Models\Role;
 use App\Models\User;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -286,7 +287,7 @@ class UserPagesTest extends TestCase
         // Deleting every role, the ADMIN one the migrations add too, leaves Add user limited to no one, so open it to
         // everyone first, as the Routes page would.
         AppRoute::firstWhere('Path', 'users/create')->update(['OpenToEveryone' => true]);
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
         Role::query()->delete();
 
         $this->get('/users/create')->assertOk()->assertSee('No roles yet.');

@@ -4,6 +4,7 @@ namespace Modules\Dashboard\Tests\Feature;
 
 use App\Models\AppRoute;
 use App\Models\MenuItem;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -211,7 +212,7 @@ class DashboardPageTest extends TestCase
 
         // Deleted on the Routes page, there's nothing to link to.
         $this->delete('/routes/'.AppRoute::firstWhere('Path', 'map')->Id)->assertSessionHasNoErrors();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get('/dashboard')->assertDontSee('Open the map');
     }

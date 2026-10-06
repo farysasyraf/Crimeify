@@ -11,6 +11,11 @@
 
 vendor
 node_modules
+# A package kept in packages/ brings only its code: not the packages and tests it's developed with.
+packages/*/vendor
+packages/*/tests
+packages/*/composer.lock
+packages/*/.phpunit.cache
 .phpunit.cache
 .phpunit.result.cache
 

@@ -4,6 +4,7 @@ namespace Modules\Map\Tests\Feature;
 
 use App\Models\AppRoute;
 use App\Models\MenuItem;
+use Farysasyraf\SavedRoutes\SavedRoutes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Modules\Map\Entities\CrimeStat;
@@ -87,7 +88,7 @@ class CrimeMapTest extends TestCase
             AppRoute::where('Path', 'map/crime')->delete();
         }
 
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
     }
 
     public function test_the_import_loads_the_figures_and_the_police_district_pins(): void
@@ -309,7 +310,7 @@ class CrimeMapTest extends TestCase
             'menu_item_id' => MenuItem::where('Label', 'Map')->value('Id'), 'path' => 'map/crime', 'controller' => 'MapController',
             'function' => 'crime', 'method' => 'GET', 'parameter' => '',
         ])->assertSessionHasNoErrors();
-        AppRoute::registerBehindLogin();
+        SavedRoutes::register();
 
         $this->get('/map')
             ->assertOk()
