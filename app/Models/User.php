@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -15,13 +16,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-// Mirrors dbo.Users in MyAppDB. CreatedAt is filled in by the column's database default.
+// Mirrors dbo.Users in MyAppDB. CreatedAt is filled in by the app, in Malaysia time (SetsCreatedAt).
 #[Table(name: 'Users', key: 'Id', timestamps: false)]
 #[Fillable(['Name', 'Username', 'Email', 'Phone', 'Password'])]
 #[Hidden(['Password'])]
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, SetsCreatedAt;
 
     /**
      * How recently a user must have opened a page to count as online in the users log.

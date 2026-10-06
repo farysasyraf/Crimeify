@@ -3,6 +3,8 @@
 namespace Modules\Setup\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Setup\Console\ExportMenu;
+use Modules\Setup\Console\ImportMenu;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class SetupServiceProvider extends ModuleServiceProvider
@@ -22,7 +24,10 @@ class SetupServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        ExportMenu::class,
+        ImportMenu::class,
+    ];
 
     /**
      * Provider classes to register.

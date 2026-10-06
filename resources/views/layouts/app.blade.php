@@ -82,8 +82,11 @@
                 @yield('content')
             </main>
 
+            {{-- The database the app is using, from config/database.php: MyAppDB here, CrimeifyDB on Azure. Not its
+                 server's address, which logged-in users have no need of. --}}
+            @php($database = config('database.connections.'.config('database.default')))
             <footer class="footer">
-                Connected to <strong>MyAppDB</strong> on SQL Server (localhost)
+                Connected to <strong>{{ $database['database'] ?? '' }}</strong> on {{ ['sqlsrv' => 'SQL Server', 'sqlite' => 'SQLite', 'mysql' => 'MySQL', 'mariadb' => 'MariaDB', 'pgsql' => 'PostgreSQL'][$database['driver'] ?? ''] ?? 'a database' }}
             </footer>
         </div>
     </div>

@@ -77,9 +77,15 @@ Saving opens the route for editing, with **Delete** and **Update** buttons. Save
 
 `routes/web.php` adds the saved routes on every request, after the built-in pages and behind the same login. A parameter named like the function's argument, such as `user` for `User $user`, loads that record, or shows Not found. The page refuses an address and method that something else already answers, and a route name a built-in page already has. A saved route never replaces a built-in page or takes its name, even one written straight into the table. When two routes share a route name (a GET and a POST, say), the first one saved gets the name. Deleting a menu link keeps its routes; they show under **No menu** until you pick a new one. A route whose controller or function has since been removed from the code is marked **Code not found**. If you cache routes (`php artisan route:cache` or `php artisan optimize`), changes on this page only take effect after `php artisan route:clear`.
 
+**Copying the menu and routes to another database:** what Manage menu and Manage routes save are rows in the database, not code, so a new database, like the cloud host's, has only the starter links the migrations add. `php artisan menu:export` saves every menu link, route and the roles that can see or open each to a JSON file (in `storage/app/private/menu-exports` unless given a path). `php artisan menu:import <file>`, run against the other database, replaces all of its menu links and routes with the file's, in one go or not at all. It first shows both sides and asks, unless given `--force`.
+- **Roles go by name,** since each database numbers them its own way. Roles the file has and the database doesn't are added; none are changed or deleted. Users and the roles they have aren't copied.
+- **A backup first:** before replacing anything, `menu:import` saves what was there in `storage/app/private/menu-backups`, which `menu:import` can put back.
+- **Checked first:** a file whose links sit under links it doesn't have, deeper than three levels or under themselves, or whose routes name a role, link or method that doesn't exist, changes nothing.
+- **Code:** `Modules/Setup/Support/MenuTransfer.php`, and the commands in `Modules/Setup/Console`.
+
 ## Requirements
 
-- PHP 8.3 or newer with the `pdo_sqlsrv` extension enabled. In Laragon: **Menu → PHP → Extensions → pdo_sqlsrv**.
+- PHP 8.4.1 or newer (`composer.lock` needs it) with the `pdo_sqlsrv` extension enabled. In Laragon: **Menu → PHP → Extensions → pdo_sqlsrv**.
 - Composer
 - Microsoft ODBC Driver 17 or 18 for SQL Server
 
@@ -97,6 +103,15 @@ Open http://localhost:8000.
 
 `php artisan migrate` creates `dbo.MenuItems` with the default links, and it creates `dbo.Users` only if that table doesn't exist yet. Laravel records which migrations have run in `dbo.migrations`. Rolling back never drops `dbo.Users`.
 
+## Putting it online
+
+[`DEPLOY.md`](DEPLOY.md) walks through Azure App Service with Azure SQL, step by step, and ends with a checklist for before the site is opened to the public. What it uses, which is also what a VPS or any other Docker host needs:
+- **`Dockerfile`** builds one image: Apache and PHP 8.4 with `pdo_sqlsrv` and Microsoft's ODBC driver 18. `docker/` holds its Apache and PHP settings and `entrypoint.sh`, which checks `APP_KEY`, optionally migrates (`RUN_MIGRATIONS=true`), and caches the settings and views. `.dockerignore` keeps `.env`, `vendor/` and this computer's caches out of the image.
+- **`.env.production.example`** lists every setting for a cloud host. On Azure they're Application settings; the image never holds a `.env`.
+- **Logins and the cache in the database:** `SESSION_DRIVER=database` and `CACHE_STORE=database` use `dbo.sessions`, `dbo.cache` and `dbo.cache_locks` (made by `migrate`), because a cloud host's disk is wiped on each deploy. On your own computer they can stay `file`.
+- **Behind a load balancer:** `TRUSTED_PROXIES=*` makes the app trust `X-Forwarded-*` for the real IP address and https (`bootstrap/app.php`). It's off when empty, so on your own computer a visitor can't make up an IP address to get around the rate limits. An `https://` `APP_URL` makes every link and file address https.
+- **Routes aren't cached** (`route:cache`): the Routes page adds its routes from `dbo.AppRoutes` on every request.
+
 ## Logging in
 
 Every page requires login. Passwords are stored hashed in the `Password` column of `dbo.Users`. Users without a password can't log in.
@@ -106,7 +121,7 @@ Every page requires login. Passwords are stored hashed in the `Password` column 
   - When the column was added, each user got a username from their email: the part before the `@`, as far as a username allows, with a number after it if it was taken (`ada@example.com` → `ada`, then `ada2`), and `user` in front if it was under 3 characters. A user added without one, like by the seeder, gets one the same way.
   - Each user can change theirs on **My profile**, and whoever can edit users on **Edit user**. The Add user form asks for one.
   - As a username is typed there, the field says under it whether it's free or taken, or what's wrong with it. `public/js/username-check.js` asks `POST /username-check` (`UserController@checkUsername`, for anyone logged in, 60 checks a minute) a moment after typing stops. Saving checks again, so without JavaScript saving still says if it's taken.
-- To create the starter accounts `admin@myapp.local` and `demo@myapp.local`, run `php artisan db:seed`. Each gets a random 16-character password of its own, shown once when the command runs, and the usernames `admin` and `demo`. Write the passwords down, or change them on My profile after logging in. Accounts that already exist are left unchanged. (Accounts seeded before this change got the password `secret`: change it.)
+- To create the starter accounts `admin@myapp.local` and `demo@myapp.local`, run `php artisan db:seed`. Each gets a random 16-character password of its own, shown once when the command runs, and the usernames `admin` and `demo`. `admin` also gets the ADMIN role when it's created, so a new database has someone who can open the Routes page. Write the passwords down, or change them on My profile after logging in. Accounts that already exist are left unchanged. (Accounts seeded before this change got the password `secret`: change it.)
 - **Before anyone else can reach the app,** set `APP_DEBUG=false` in `.env`, so an error shows the app's own "Something went wrong" page rather than details of the code and settings. Turn it back on only while fixing something on your own computer.
 - To let any other user log in, set a password in the Password box on their **Edit user** page.
 - After 5 wrong passwords for the same email or username, login is locked for a minute.
@@ -165,7 +180,7 @@ The Map page shows Malaysia's 13 states and 3 federal territories on an interact
   - Leaflet is in `public/vendor/leaflet`, under the BSD-2-Clause licence.
   - The page's own script and styles are `public/modules/map/map.js` and `map.css`.
   - The boundaries are `public/modules/map/malaysia-states.geojson`, from geoBoundaries and made from OpenStreetMap data under the ODbL. The map shows the "© OpenStreetMap contributors" credit it requires; see `malaysia-states-LICENSE.txt`.
-- **Offline:** the regions are drawn from this app's files, so they show without the internet. The street map underneath comes from OpenStreetMap's tile server and needs the internet. That server is meant for light use; for heavy use, switch the tile address in `map.js` to a paid provider or your own tile server.
+- **Offline:** the regions are drawn from this app's files, so they show without the internet. The street map underneath comes from OpenStreetMap's tile server and needs the internet. That server is meant for light use; for a public site, set `MAP_TILE_URL` in `.env` to a tile provider's address (with `{z}/{x}/{y}` in it), and `MAP_TILE_ATTRIBUTION` to the credit the provider asks for, and optionally `MAP_TILE_MAX_ZOOM`. They're read into `config('map.tiles')` and handed to `map.js` as `data-tile-*` attributes on `#state-map`; left out, the map uses OpenStreetMap's server and credit as before.
 
 The map also has a pin for each of Malaysia's 155 police districts, with its crime figures:
 - **Using it:** choose a year in the panel. Clicking a pin opens a popup with the district's violent and property crime for that year, each compared with the year before, and the number of each crime type. With no region chosen, the panel shows the whole country's totals; with one chosen, that region's. Pins close together are grouped into numbered circles until you zoom in (the [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) 1.5.3 plugin, MIT licence, in `public/vendor/leaflet-markercluster`).

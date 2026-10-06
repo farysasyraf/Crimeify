@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\MenuItem;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -28,6 +30,27 @@ class TimeZoneTest extends TestCase
             'CreatedAt' => now(),
         ]);
         $this->get('/crime-data')->assertSeeInOrder(['Update Logs by User', '29 Sep 2026, 16:00', 'Siti Aminah'], false);
+    }
+
+    public function test_the_app_fills_in_when_a_record_was_added_in_malaysia_time(): void
+    {
+        // Not the database's default: Azure SQL's GETDATE() is always UTC, which would show 8am here.
+        $this->travelTo(Carbon::parse('2026-09-29 08:00:00', 'UTC'));
+
+        $records = [
+            User::create(['Name' => 'Ada', 'Email' => 'ada@example.com']),
+            Role::create(['Name' => 'EDITOR']),
+            MenuItem::create(['Label' => 'Reports', 'SortOrder' => 9]),
+        ];
+
+        foreach ($records as $record) {
+            $this->assertSame('2026-09-29 16:00:00', (string) DB::table($record->getTable())->where('Id', $record->Id)->value('CreatedAt'), $record->getTable());
+        }
+
+        // One given on purpose is kept.
+        $user = User::create(['Name' => 'Bo', 'Email' => 'bo@example.com']);
+        $user->forceFill(['CreatedAt' => '2026-01-01 09:00:00'])->save();
+        $this->assertSame('2026-01-01 09:00:00', $user->fresh()->CreatedAt->toDateTimeString());
     }
 
     public function test_the_times_the_app_wrote_in_utc_move_to_malaysia_time(): void

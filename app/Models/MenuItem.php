@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -17,6 +18,8 @@ use Illuminate\Support\Collection;
 #[Fillable(['Label', 'Url', 'SortOrder', 'VisibleToEveryone', 'ParentId', 'Icon'])]
 class MenuItem extends Model
 {
+    use SetsCreatedAt;
+
     /**
      * The deepest level a link can sit at.
      */

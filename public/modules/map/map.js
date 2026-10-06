@@ -65,9 +65,11 @@
         zoomControl: false,
     });
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    // The street map's address, zoom limit and credit come from config('map.tiles') (MAP_TILE_URL in .env), so a
+    // public site can use a tile provider instead of OpenStreetMap's own server, which is for light use only.
+    L.tileLayer(container.dataset.tileUrl || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: Number(container.dataset.tileMaxZoom) || 18,
+        attribution: container.dataset.tileAttribution ?? '',
     }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 

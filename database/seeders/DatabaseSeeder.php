@@ -2,15 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Seed the application's database. Model events stay on (no WithoutModelEvents): a new user gets their username
+     * and CreatedAt from them, and dbo.Users requires a username.
      */
     public function run(): void
     {

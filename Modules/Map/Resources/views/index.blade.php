@@ -137,6 +137,7 @@
     </div>
 
     <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
+        data-tile-url="{{ config('map.tiles.url') }}" data-tile-attribution="{{ config('map.tiles.attribution') }}" data-tile-max-zoom="{{ config('map.tiles.max_zoom') }}"
         @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
         role="region" aria-label="{{ __("Map of Malaysia's states and police districts") }}">
         <noscript><p class="state-map-note">{{ __('The map needs JavaScript turned on.') }}</p></noscript>

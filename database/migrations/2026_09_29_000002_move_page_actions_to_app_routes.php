@@ -74,7 +74,11 @@ return new class extends Migration
         // The Add pages, if they're still open to everyone as they were saved.
         foreach (DB::table('AppRoutes')->whereIn('Path', self::AddPages)->where('OpenToEveryone', true)->pluck('Id') as $id) {
             DB::table('AppRoutes')->where('Id', $id)->update(['OpenToEveryone' => false]);
-            DB::table('AppRouteRoles')->insertOrIgnore(['AppRouteId' => $id, 'RoleId' => $admin]);
+            // Not insertOrIgnore, which SQL Server doesn't have: only when the route doesn't have ADMIN already.
+            $role = ['AppRouteId' => $id, 'RoleId' => $admin];
+            if (! DB::table('AppRouteRoles')->where($role)->exists()) {
+                DB::table('AppRouteRoles')->insert($role);
+            }
         }
     }
 

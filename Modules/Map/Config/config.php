@@ -6,6 +6,15 @@ return [
     // The boundaries of Malaysia's states and federal territories, in public/ (see malaysia-states-LICENSE.txt).
     'boundaries' => 'modules/map/malaysia-states.geojson',
 
+    // The street map under the regions (Leaflet's tile layer, map.js). OpenStreetMap's own server is for light use
+    // only, so a public site should set MAP_TILE_URL to a tile provider's address, with {z}/{x}/{y} in it, and
+    // MAP_TILE_ATTRIBUTION to the credit that provider asks for (it may hold a link; it is shown as written).
+    'tiles' => [
+        'url' => env('MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+        'attribution' => env('MAP_TILE_ATTRIBUTION', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'),
+        'max_zoom' => (int) env('MAP_TILE_MAX_ZOOM', 18),
+    ],
+
     // Each region by its ISO 3166-2 code, which the boundaries file names it by (shapeISO), with its official name.
     'states' => [
         'MY-01' => ['name' => 'Johor', 'territory' => false],

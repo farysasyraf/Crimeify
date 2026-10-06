@@ -20,6 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind a cloud host's load balancer (Azure App Service and the like), the browser's https address and its
+        // real IP arrive in X-Forwarded-* headers. TRUSTED_PROXIES is "*" for a host that is only reachable through
+        // its balancer, or a comma-separated list of the balancer's addresses. Left empty, as on your own computer,
+        // no one is trusted, so a visitor can't pass off a made-up IP address to get around the rate limits.
+        if (filled($proxies = env('TRUSTED_PROXIES'))) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
+
         // Someone already logged in who opens the login page goes to the page to start from instead.
         $middleware->redirectUsersTo(fn () => LoginController::home());
 

@@ -58,6 +58,32 @@ class MapPageTest extends TestCase
         $this->get('/map')->assertRedirect('/login');
     }
 
+    public function test_the_street_map_comes_from_openstreetmap_until_a_tile_provider_is_set(): void
+    {
+        $this->signIn();
+        $this->addMapRoute();
+
+        $this->get('/map')
+            ->assertOk()
+            ->assertSee('data-tile-url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"', false)
+            ->assertSee('data-tile-attribution="&amp;copy; &lt;a href=&quot;https://www.openstreetmap.org/copyright&quot;&gt;OpenStreetMap&lt;/a&gt; contributors"', false)
+            ->assertSee('data-tile-max-zoom="18"', false);
+
+        config([
+            'map.tiles.url' => 'https://tiles.example.com/{z}/{x}/{y}.png?key=abc',
+            'map.tiles.attribution' => '&copy; Example Maps',
+            'map.tiles.max_zoom' => 19,
+        ]);
+
+        // The address is written into the page as a data attribute, so & is escaped; the browser reads it back as &.
+        $this->get('/map')
+            ->assertOk()
+            ->assertSee('data-tile-url="https://tiles.example.com/{z}/{x}/{y}.png?key=abc"', false)
+            ->assertSee('data-tile-attribution="&amp;copy; Example Maps"', false)
+            ->assertSee('data-tile-max-zoom="19"', false)
+            ->assertDontSee('tile.openstreetmap.org');
+    }
+
     public function test_the_map_page_shows_malaysias_states_on_a_leaflet_map(): void
     {
         $this->signIn();

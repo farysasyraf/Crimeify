@@ -230,6 +230,22 @@ class LoginTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_db_seed_on_its_own_creates_the_accounts_with_usernames(): void
+    {
+        // php artisan db:seed runs DatabaseSeeder, as on a new database (DEPLOY.md, step 7).
+        $this->artisan('db:seed')
+            ->expectsOutputToContain('admin@myapp.local  username: admin  password:')
+            ->assertSuccessful();
+
+        $this->assertSame(['admin', 'demo'], User::orderBy('Id')->pluck('Username')->all());
+        $this->assertNotNull(User::firstWhere('Username', 'admin')->CreatedAt);
+
+        // A new database has no one with ADMIN until then: the admin account gets it, so it can open the Routes page.
+        $this->assertTrue(User::firstWhere('Username', 'admin')->isAdmin());
+        $this->assertFalse(User::firstWhere('Username', 'demo')->isAdmin());
+        $this->actingAs(User::firstWhere('Username', 'admin'))->get('/routes')->assertOk();
+    }
+
     public function test_passwords_are_never_stored_in_plain_text(): void
     {
         $user = $this->makeUser();

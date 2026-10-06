@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\Controller;
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,8 @@ use ReflectionMethod;
 #[Fillable(['MenuItemId', 'Path', 'Parameters', 'Controller', 'Action', 'HttpMethods', 'OpenToEveryone'])]
 class AppRoute extends Model
 {
+    use SetsCreatedAt;
+
     /**
      * The method a route can answer, one per route: GET opens a page, POST adds from a form, PUT saves changes to a
      * record and DELETE deletes one (forms send them with @method('PUT') or @method('DELETE')). ANY answers every method.

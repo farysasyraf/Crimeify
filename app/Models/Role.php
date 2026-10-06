@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SetsCreatedAt;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['Name', 'Description'])]
 class Role extends Model
 {
+    use SetsCreatedAt;
+
     /**
      * The role that opens the Routes page, set in the code, as that page decides who can open every other page.
      * So there's always an ADMIN role with someone in it: it can't be deleted or renamed, and its last user can't

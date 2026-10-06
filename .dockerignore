@@ -1,0 +1,33 @@
+# Kept out of the image: secrets, this computer's caches and the things the image builds for itself.
+.git
+.github
+.gitattributes
+.gitignore
+.editorconfig
+
+# Real settings come from the host's environment variables, never from a file in the image.
+.env
+.env.*
+
+vendor
+node_modules
+.phpunit.cache
+.phpunit.result.cache
+
+# A config or route cache made on this computer holds its paths and settings.
+bootstrap/cache/*.php
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+storage/app/private/*
+
+tests
+Modules/*/Tests
+
+Dockerfile
+.dockerignore
+docker-compose*.yml
+*.md
