@@ -4,7 +4,7 @@ This puts Crimeify on **Azure App Service** (the app, as the Docker image built 
 
 The commands are for **PowerShell** with the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (`az`). You don't need Docker on your computer: Azure builds the image for you. Do **staging first**, a copy that only you use, and open it to the public once the checklist at the end is done.
 
-> These steps were first run on 6 October 2026 with Azure CLI 2.91, for the staging site `crimeify-staging-4200.azurewebsites.net` (resource group `crimeify-rg`, Southeast Asia). If a step fails, **Troubleshooting** at the end covers the likely causes.
+> These steps were first run on 6 October 2026 with Azure CLI 2.91, for the staging site, now at `crimeify.azurewebsites.net` (web app `crimeify`, resource group `crimeify-rg`, Southeast Asia). If a step fails, **Troubleshooting** at the end covers the likely causes.
 
 ## What you're building
 
@@ -155,6 +155,34 @@ Then open `https://$app.azurewebsites.net` and log in as `admin` with the passwo
 **After a later release that adds a migration:** run `php artisan migrate --force` the same way, before or just after restarting the app on the new image. Or set `RUN_MIGRATIONS` = `true` for one start, then back to `false`. Keep to **one instance** while it's on, so two copies don't migrate at once.
 
 **Moving what's in your local MyAppDB instead of starting fresh:** back it up as a `.bacpac` from SQL Server Management Studio (Tasks → Export Data-tier Application) and import it into Azure SQL (`az sql db import`, or SSMS). Run `migrate --force` afterwards for the tables it doesn't have yet.
+
+## Changing the `azurewebsites.net` address (free)
+
+A web app can't be renamed, but a second one on the same plan costs nothing more. Make one with the name you want, give it the old one's settings, then delete the old one. The database, its data and the image stay as they are; only logins in progress end.
+
+```powershell
+$new = "crimeify"   # becomes crimeify.azurewebsites.net, if no one has it
+
+$acrPass = az acr credential show -n $acr --query "passwords[0].value" -o tsv
+az webapp create -g $rg -p $plan -n $new --container-image-name "$acr.azurecr.io/crimeify:latest" --container-registry-url "https://$acr.azurecr.io" --container-registry-user $acr --container-registry-password $acrPass --https-only true
+az webapp config container set -g $rg -n $new --container-image-name "$acr.azurecr.io/crimeify:latest" --container-registry-url "https://$acr.azurecr.io" --container-registry-user $acr --container-registry-password $acrPass
+
+# The old app's settings, with APP_URL changed to the new address.
+az webapp config appsettings list -g $rg -n $app -o json | ConvertFrom-Json |
+    Where-Object { $_.name -notlike 'DOCKER_REGISTRY_*' } |
+    ForEach-Object { if ($_.name -eq 'APP_URL') { $_.value = "https://$new.azurewebsites.net" }; $_ } |
+    ConvertTo-Json | Set-Content new-settings.json
+az webapp config appsettings set -g $rg -n $new --settings "@new-settings.json"
+Remove-Item new-settings.json   # it holds the passwords
+
+az webapp config set -g $rg -n $new --always-on true --http20-enabled true --ftps-state Disabled --generic-configurations "@health.json"
+az webapp log config -g $rg -n $new --docker-container-logging filesystem
+az webapp restart -g $rg -n $new
+
+# Once https://<new>.azurewebsites.net works:
+az webapp delete -g $rg -n $app --keep-empty-plan
+$app = $new
+```
 
 ## 8. Your own domain (optional)
 
