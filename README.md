@@ -83,6 +83,13 @@ Saving opens the route for editing, with **Delete** and **Update** buttons. Save
 - **Checked first:** a file whose links sit under links it doesn't have, deeper than three levels or under themselves, or whose routes name a role, link or method that doesn't exist, changes nothing.
 - **Code:** `Modules/Setup/Support/MenuTransfer.php`, and the commands in `Modules/Setup/Console`.
 
+**Copying all the data to staging:** `php artisan data:push-to-staging` copies this database's data to staging's (the `staging` connection in `config/database.php`, set with `STAGING_DB_*` in `.env`), replacing what staging has. `--only=users`, `--only=crime` or `--only=stations` (or more than one) copies only those groups. It shows each table's rows on both sides and asks first, unless given `--force`.
+- **The groups:** `users` is the users, their photos and roles, and with the roles the menu and routes, which are limited by role; `crime` is the police districts, the crime figures and their edit log; `stations` is the police stations and their edit log. A group's tables refer to each other, so they always go together.
+- **Exactly as here:** every row keeps its Id, so logins, passwords and links between rows work the same on staging. Pushing `users` logs everyone out on staging and drops its password-reset links. Never copied: the migrations, logins in progress, the cache.
+- **All or nothing:** it all goes in one transaction on staging, and the foreign keys are checked at the end, so a problem leaves staging as it was. Both databases must have run the same migrations, or it stops and says which.
+- **Times:** a `datetime` column takes milliseconds at most, so longer times (MyAppDB's `Users.CreatedAt` is a `datetime2`) are cut to milliseconds.
+- **Code:** `app/Console/Commands/PushDataToStaging.php`.
+
 ## Requirements
 
 - PHP 8.4.1 or newer (`composer.lock` needs it) with the `pdo_sqlsrv` extension enabled. In Laragon: **Menu → PHP → Extensions → pdo_sqlsrv**.

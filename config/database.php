@@ -114,6 +114,21 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // Staging's database (Azure SQL), which "php artisan data:push-to-staging" copies this database's data to, from
+        // your own computer. Set with STAGING_DB_* in .env; the app itself never uses it.
+        'staging' => [
+            'driver' => 'sqlsrv',
+            'host' => env('STAGING_DB_HOST'),
+            'port' => env('STAGING_DB_PORT', '1433'),
+            'database' => env('STAGING_DB_DATABASE'),
+            'username' => env('STAGING_DB_USERNAME'),
+            'password' => env('STAGING_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'trust_server_certificate' => env('STAGING_DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
     ],
 
     /*

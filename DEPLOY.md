@@ -179,6 +179,15 @@ The app starts on the new image in a minute or two. If it added a migration, see
 
 A release carries the code only. If you've changed the menu or routes on your own computer since, copy them across with `menu:export` and `menu:import` as in step 7, or make the same change on the site's Manage menu and Manage routes pages. `menu:import` replaces the site's whole menu and all its routes with the file's.
 
+**Copying your data to staging:** with the `STAGING_DB_*` settings in your local `.env` (see `.env.example`), one command copies this computer's database to staging's, replacing what's there:
+
+```powershell
+php artisan data:push-to-staging                  # everything: users, crime figures, police stations
+php artisan data:push-to-staging --only=crime     # or some of it: users, crime, stations
+```
+
+It shows both sides and asks first. Pushing `users` makes staging's users, passwords and roles (and so its menu and routes) the same as yours, and logs everyone out there. Both databases need the same migrations, so run them on staging first after a release that adds one. A full push takes about a minute; if it goes wrong, staging is left as it was, and Azure SQL can also go back to any point in the last 7 days (the database's **Restore** in the portal).
+
 ## Trying the image on your own computer (needs Docker)
 
 ```powershell
