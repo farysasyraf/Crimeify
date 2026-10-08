@@ -43,10 +43,9 @@ class StateCrime
         $counts = [];
         foreach ($figures as $figure) {
             if (in_array($figure['year'], $years, true)) {
-                $counts[$figure['state']][$figure['year']][$figure['category']][$figure['type']] = $figure['crimes'];
-                $national = &$counts['Malaysia'][$figure['year']][$figure['category']][$figure['type']];
-                $national = ($national ?? 0) + $figure['crimes'];
-                unset($national);
+                [$year, $category, $type] = [$figure['year'], $figure['category'], $figure['type']];
+                $counts[$figure['state']][$year][$category][$type] = $figure['crimes'];
+                $counts['Malaysia'][$year][$category][$type] = ($counts['Malaysia'][$year][$category][$type] ?? 0) + $figure['crimes'];
             }
         }
 

@@ -9,6 +9,7 @@ use App\Models\Role;
 use Closure;
 use Farysasyraf\SavedRoutes\Parameters;
 use Farysasyraf\SavedRoutes\SavedRoutes;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -152,7 +153,7 @@ class AppRouteController extends Controller
      * other links keep only the matching ones, and links with nothing left on or under them are left out.
      *
      * @param  Collection<int, MenuItem>  $items
-     * @param  Collection<int, Collection<int, AppRoute>>  $routesByMenu
+     * @param  Collection<array-key, EloquentCollection<int, AppRoute>>  $routesByMenu  by menu link Id, 0 for none
      * @return Collection<int, MenuItem>
      */
     private function withRoutes(Collection $items, Collection $routesByMenu, string $search, bool $aboveMatched = false): Collection

@@ -1,0 +1,31 @@
+# Static analysis with Larastan (PHPStan for Laravel): `vendor/bin/phpstan analyse`, run on every push by
+# .github/workflows/ci.yml. It reads the models' columns from the migrations, the modules' as well as the app's.
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    # The app's own code. Not the tests, the root tests/ folder's or the modules'.
+    paths:
+        - app
+        - Modules
+        - database
+        - routes
+    excludePaths:
+        - Modules/*/Tests/*
+    ignoreErrors:
+        # A module's config file is config, merged into it and cached with it (config:cache), so env() is right there.
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: Modules/*/Config/*
+        # Laravel types a seeder's $command as always set, but it's null when a seeder runs on its own, as LoginTest
+        # runs LoginUserSeeder, so ?-> is needed.
+        -
+            identifier: nullsafe.neverNull
+            path: database/seeders/*
+            message: '#^Using nullsafe method call on non-nullable type Illuminate\\Console\\Command#'
+    databaseMigrationsPath:
+        - database/migrations
+        - Modules/Map/Database/Migrations
+    # The models give their casts in casts(), as an array: read it, so a datetime column is a date, not a string.
+    parseModelCastsMethod: true

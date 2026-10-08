@@ -182,7 +182,7 @@ class CrimeData
             }
 
             foreach ($inGroup->unique(fn (array $change) => mb_strtolower($change['state'])) as $change) {
-                $state = $current->first(fn (CrimeStat $figure) => mb_strtolower($figure->State) === mb_strtolower($change['state']))?->State ?? $change['state'];
+                $state = $current->first(fn (CrimeStat $figure) => mb_strtolower($figure->State) === mb_strtolower($change['state']))->State ?? $change['state'];
                 $byType = $districtTypes->filter(fn (CrimeStat $figure) => mb_strtolower($figure->State) === mb_strtolower($state))
                     ->groupBy('Type')->map(fn (Collection $figures) => $figures->sum('Crimes'));
 
@@ -381,9 +381,10 @@ class CrimeData
      * The names a file's rows may use, as the Add a figure form allows: states and police districts with a map pin or
      * already in the figures, and crime types named in the Map module's config (the Read me sheet's) or already in the
      * figures. A misspelled one is turned down, rather than delete the figure it meant and add one the map can't show.
+     * Each name is keyed by its spelling in lowercase and gives its spelling here; districts are by state, types by
+     * category.
      *
      * @return array{states: array<string, string>, districts: array<string, array<string, string>>, types: array<string, array<string, string>>}
-     *         each by its spelling in lowercase, to its spelling here; districts by state, types by category
      */
     private function knownNames(): array
     {

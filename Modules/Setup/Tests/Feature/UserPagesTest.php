@@ -96,7 +96,8 @@ class UserPagesTest extends TestCase
 
     public function test_index_reports_database_errors(): void
     {
-        Schema::drop('Users');
+        // Renamed, not dropped: SQL Server won't drop a table that other tables' foreign keys point at.
+        Schema::rename('Users', 'UsersGone');
 
         $this->get('/users')
             ->assertOk()
@@ -232,39 +233,39 @@ class UserPagesTest extends TestCase
 
     public function test_create_assigns_the_ticked_roles(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $editor = Role::create(['Name' => 'Editor']);
         Role::create(['Name' => 'Viewer']);
 
-        $this->get('/users/create')->assertSeeInOrder(['Admin', 'Editor', 'Viewer']);
+        $this->get('/users/create')->assertSeeInOrder(['Auditor', 'Editor', 'Viewer']);
 
-        $this->post('/users/store', ['name' => 'Grace', 'username' => 'grace', 'email' => 'grace@example.com', 'roles' => [$admin->Id, $editor->Id]])
+        $this->post('/users/store', ['name' => 'Grace', 'username' => 'grace', 'email' => 'grace@example.com', 'roles' => [$auditor->Id, $editor->Id]])
             ->assertRedirect('/users');
 
         $grace = User::firstWhere('Email', 'grace@example.com');
-        $this->assertEqualsCanonicalizing(['Admin', 'Editor'], $grace->roles->pluck('Name')->all());
+        $this->assertEqualsCanonicalizing(['Auditor', 'Editor'], $grace->roles->pluck('Name')->all());
     }
 
     public function test_edit_shows_current_roles_and_replaces_them_on_save(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $editor = Role::create(['Name' => 'Editor']);
         $user = User::create(['Name' => 'Ada', 'Email' => 'ada@example.com']);
-        $user->roles()->attach($admin->Id);
+        $user->roles()->attach($auditor->Id);
 
         $this->get("/users/edit/{$user->Id}")
-            ->assertSee('<span class="badge badge-role">Admin</span>', false)
+            ->assertSee('<span class="badge badge-role">Auditor</span>', false)
             ->assertSee('href="'.url("/users/edit/{$user->Id}").'?edit=roles#profile-roles"', false)
             ->assertDontSee('name="roles[]"', false);
         $this->get("/users/edit/{$user->Id}?edit=roles")
-            ->assertSee('value="'.$admin->Id.'" checked', false)
+            ->assertSee('value="'.$auditor->Id.'" checked', false)
             ->assertDontSee('value="'.$editor->Id.'" checked', false);
 
         $this->put("/users/update/{$user->Id}", ['section' => 'roles', 'roles' => [$editor->Id]]);
         $this->assertSame(['Editor'], $user->fresh()->roles->pluck('Name')->all());
 
         // Saving the other boxes, or no box, leaves the roles alone.
-        $this->put("/users/update/{$user->Id}", ['section' => 'info', 'name' => 'Ada', 'username' => 'ada', 'email' => 'ada@example.com', 'roles' => [$admin->Id]]);
+        $this->put("/users/update/{$user->Id}", ['section' => 'info', 'name' => 'Ada', 'username' => 'ada', 'email' => 'ada@example.com', 'roles' => [$auditor->Id]]);
         $this->put("/users/update/{$user->Id}", ['name' => 'Ada', 'username' => 'ada', 'email' => 'ada@example.com']);
         $this->assertSame(['Editor'], $user->fresh()->roles->pluck('Name')->all());
 
@@ -297,11 +298,11 @@ class UserPagesTest extends TestCase
     {
         User::create(['Name' => 'Alan', 'Email' => 'alan@example.com']);
         $user = User::create(['Name' => 'Ada', 'Email' => 'ada@example.com']);
-        $user->roles()->attach([Role::create(['Name' => 'Editor'])->Id, Role::create(['Name' => 'Admin'])->Id]);
+        $user->roles()->attach([Role::create(['Name' => 'Editor'])->Id, Role::create(['Name' => 'Auditor'])->Id]);
 
         $this->get('/users')->assertSeeInOrder([
             'Ada',
-            '<span class="badge badge-role">Admin</span>',
+            '<span class="badge badge-role">Auditor</span>',
             '<span class="badge badge-role">Editor</span>',
             'Alan',
             'None',

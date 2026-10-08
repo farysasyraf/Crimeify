@@ -1,5 +1,7 @@
 # Crimeify
 
+[![CI](https://github.com/farysasyraf/Crimeify/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/farysasyraf/Crimeify/actions/workflows/ci.yml)
+
 A Laravel + Blade app for managing `dbo.Users` in the `MyAppDB` SQL Server database: list, search, add, edit and delete users. The menu on the left comes from `dbo.MenuItems`, and you can edit it under **Manage menu**. Links nest up to three levels: a level 2 link sits under a level 1 link (`ParentId`), and a level 3 link under a level 2 link. A link's address is picked from a list: the app's own pages and the routes saved on **Manage routes** that open without a parameter. Choose **Other address…** to type anything else, like an outside site. A link set to **None** is a heading that only groups the links under it. Deleting a link also deletes the links under it. Each link is shown either to everyone who is logged in or only to users with chosen roles (`dbo.MenuItemRoles`). A link limited to roles whose roles have all been deleted is hidden from everyone until you pick new ones. Hiding a link doesn't block its page: to stop others opening the address, limit its route to the same roles on **Manage routes**.
 
 The sidebar is laid out like AMV's: a floating dark panel with the logo, then the signed-in user, which opens to **My profile** and **Log out**, then the **Modules** from `dbo.MenuItems`.
@@ -118,6 +120,10 @@ Open http://localhost:8000.
 - **Logins and the cache in the database:** `SESSION_DRIVER=database` and `CACHE_STORE=database` use `dbo.sessions`, `dbo.cache` and `dbo.cache_locks` (made by `migrate`), because a cloud host's disk is wiped on each deploy. On your own computer they can stay `file`.
 - **Behind a load balancer:** `TRUSTED_PROXIES=*` makes the app trust `X-Forwarded-*` for the real IP address and https (`bootstrap/app.php`). It's off when empty, so on your own computer a visitor can't make up an IP address to get around the rate limits. An `https://` `APP_URL` makes every link and file address https.
 - **Routes aren't cached** (`route:cache`): the Routes page adds its routes from `dbo.AppRoutes` on every request.
+- **Releases** go out from GitHub Actions. Once a push to `main` passes the checks, the workflow:
+  - builds the image in Azure, tagged with the commit;
+  - switches the web app to it, then waits for `/version.txt` to give the new commit;
+  - puts the previous image back if the new one doesn't come up.
 
 ## Logging in
 
@@ -259,13 +265,21 @@ A module's pages have the addresses their routes give them, on Manage routes or 
 
 On the Routes page, a controller in a module is saved with the module's name in front, like `Setup\RoleController`. The class name alone is enough when only one module has it. `AppServiceProvider` adds saved routes after every module's routes, so a saved route can never catch a page's address.
 
-## Tests
+## Tests and checks
 
 ```sh
-php artisan test
+php artisan test                            # the whole suite, on an in-memory SQLite database
+vendor/bin/phpunit -c phpunit.sqlsrv.xml    # the same suite on SQL Server, in a database called CrimeifyTest
+vendor/bin/pint                             # puts the code in Laravel's style (--test only reports)
+vendor/bin/phpstan analyse                  # Larastan at level 5, set in phpstan.neon
 ```
 
-This runs `tests/` and every module's `Tests/` folder. The tests use an in-memory SQLite database and never touch `MyAppDB`.
+The suite runs `tests/` and every module's `Tests/` folder, and neither run touches `MyAppDB`. The SQLite run keeps everything in memory. The SQL Server run always uses `CrimeifyTest`, whatever `.env` says, and empties it as it goes. It takes the server, user and password from `.env`, so create that database once, with a login that owns it. SQL Server catches what SQLite can't:
+- a migration's own SQL;
+- names that differ only in capitals, since `Admin` and `ADMIN` are the same role there;
+- times kept to the millisecond.
+
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all four on every push. The tests run on PHP 8.4 and 8.5 with SQLite, and on SQL Server 2022 after a new database is migrated and seeded the way a release does it. A push to `main` that passes them all goes to staging by itself ([DEPLOY.md](DEPLOY.md#releasing-a-change)).
 
 ## Where things moved from the ASP.NET Core version
 

@@ -39,7 +39,7 @@ return new class extends Migration
             }
 
             $id = DB::table('AppRoutes')->insertGetId([
-                'MenuItemId' => $list?->MenuItemId ?? DB::table('MenuItems')->where('Url', '/police-stations')->value('Id'),
+                'MenuItemId' => $list->MenuItemId ?? DB::table('MenuItems')->where('Url', '/police-stations')->value('Id'),
                 'Path' => $path,
                 'Parameters' => $parameter,
                 'Controller' => 'Map\PoliceStationController',

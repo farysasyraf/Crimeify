@@ -152,7 +152,7 @@ Then open `https://$app.azurewebsites.net` and log in as `admin` with the passwo
 2. Check the demo user is gone from **Users**.
 3. Check the email settings: in the same PowerShell window, set the same `MAIL_*` values as `$env:MAIL_HOST = "..."` and so on, then run `php artisan mail:test you@example.com`. Then try **Forgot password?** on the site itself.
 
-**After a later release that adds a migration:** run `php artisan migrate --force` the same way, before or just after restarting the app on the new image. Or set `RUN_MIGRATIONS` = `true` for one start, then back to `false`. Keep to **one instance** while it's on, so two copies don't migrate at once.
+**After a later release that adds a migration:** with releases from GitHub (**Releasing a change**), `RUN_MIGRATIONS` stays `true` and the app migrates as it starts. Otherwise, run `php artisan migrate --force` the same way, before or just after switching the app to the new image. Or set `RUN_MIGRATIONS` = `true` for one start, then back to `false`. Keep to **one instance** while it's on, so two copies don't migrate at once.
 
 **Moving what's in your local MyAppDB instead of starting fresh:** back it up as a `.bacpac` from SQL Server Management Studio (Tasks → Export Data-tier Application) and import it into Azure SQL (`az sql db import`, or SSMS). Run `migrate --force` afterwards for the tables it doesn't have yet.
 
@@ -198,12 +198,75 @@ Then change the `APP_URL` setting to the new `https://` address.
 
 ## Releasing a change
 
+Once it's set up (below), a push to `main` releases itself. GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) checks the code style and runs Larastan. It runs the tests on SQLite, then on a real SQL Server after migrating a new database. If all of that passes, it:
+
+1. builds the image in Azure, tagged with the commit (`crimeify:<commit>`), which writes the commit to `/version.txt`;
+2. switches the web app to that image, which restarts the app on it, and the app migrates as it starts;
+3. waits for `/version.txt` to give the new commit, then checks `/up` and the login page, which needs the database;
+4. puts the image that was running back if that hasn't happened in 10 minutes.
+
+A run's page on GitHub (**Actions**) has each step's log. The **staging** environment (**Deployments**) lists every release. Pending Excel uploads waiting on a review page are lost by a release (they're kept on the container's disk): upload the file again.
+
+### Setting it up (once)
+
+GitHub logs in to Azure with OpenID Connect. Azure trusts GitHub's word that a run is this repository's `staging` job, so no Azure password or key is kept in GitHub. Until the three variables at the end are set, the deploy is skipped and only the checks run.
+
+Run these in PowerShell, logged in with `az login` and `gh auth login`:
+
 ```powershell
-az acr build -r $acr -t crimeify:latest .
-az webapp restart -g $rg -n $app
+$rg = "crimeify-rg"; $app = "crimeify"; $repo = "farysasyraf/Crimeify"
+
+# An identity for the deploys that can change this resource group and nothing else.
+$appId = az ad app create --display-name "crimeify-github-deploy" --query appId -o tsv
+az ad sp create --id $appId
+az role assignment create --assignee $appId --role Contributor --scope (az group show -n $rg --query id -o tsv)
+
+# Trust GitHub's runs of this repository's staging environment, and only those.
+('{"name": "github-staging", "issuer": "https://token.actions.githubusercontent.com", "subject": "repo:' + $repo + ':environment:staging", "audiences": ["api://AzureADTokenExchange"]}') | Set-Content federated.json
+az ad app federated-credential create --id $appId --parameters "@federated.json"
+Remove-Item federated.json
+
+# The app runs its new migrations as it starts (docker/entrypoint.sh), so a release with one needs nothing by hand.
+az webapp config appsettings set -g $rg -n $app --settings RUN_MIGRATIONS=true -o none
+
+# The Ids GitHub logs in with. They aren't secrets, so they're variables.
+gh variable set AZURE_CLIENT_ID --body $appId
+gh variable set AZURE_TENANT_ID --body (az account show --query tenantId -o tsv)
+gh variable set AZURE_SUBSCRIPTION_ID --body (az account show --query id -o tsv)
 ```
 
-The app starts on the new image in a minute or two. If it added a migration, see step 7. Pending Excel uploads waiting on a review page are lost by a restart (they're kept in the container's disk): upload the file again.
+`RUN_MIGRATIONS` is safe here because there's only one instance (see **Limits to know about**). The first push to `main` after this releases.
+
+### Going back to an earlier release
+
+Every release stays in the registry under its commit:
+
+```powershell
+az acr repository show-tags -n $acr --repository crimeify --orderby time_desc --top 10 -o table
+az webapp config container set -g $rg -n $app --container-image-name "$acr.azurecr.io/crimeify:<an earlier commit>"
+```
+
+Going back doesn't undo the migrations the newer release ran. That's safe while migrations only add tables, columns and rows, as this app's do.
+
+The images take space in the registry: a Basic registry includes 10 GB, and more costs extra. To delete releases older than 30 days, keeping the newest 10:
+
+```powershell
+az acr run -r $acr --cmd "acr purge --filter 'crimeify:.*' --ago 30d --keep 10 --untagged" /dev/null
+```
+
+### Releasing by hand
+
+When GitHub isn't set up, or to try something on staging, commit first, then build and switch:
+
+```powershell
+$tag = git rev-parse HEAD
+az acr build -r $acr -t "crimeify:$tag" --build-arg "APP_VERSION=$tag" .
+az webapp config container set -g $rg -n $app --container-image-name "$acr.azurecr.io/crimeify:$tag"
+```
+
+The app starts on the new image in a minute or two. Without `RUN_MIGRATIONS=true`, run a release's new migrations as in step 7.
+
+### Data and menus
 
 A release carries the code only. If you've changed the menu or routes on your own computer since, copy them across with `menu:export` and `menu:import` as in step 7, or make the same change on the site's Manage menu and Manage routes pages. `menu:import` replaces the site's whole menu and all its routes with the file's.
 

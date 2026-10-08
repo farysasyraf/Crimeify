@@ -4,6 +4,7 @@ namespace Modules\Setup\Tests\Feature;
 
 use App\Models\AppRoute;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -27,7 +28,7 @@ class UsernameTest extends TestCase
         $this->assertSame(['ada', 'ada2', 'userjo', 'nur.imanwork', 'userx'], DB::table('Users')->orderBy('Id')->pluck('Username')->all());
 
         // And no two the same from now on.
-        $this->expectException(\Illuminate\Database\UniqueConstraintViolationException::class);
+        $this->expectException(UniqueConstraintViolationException::class);
         DB::table('Users')->insert(['Name' => 'Another', 'Email' => 'another@example.com', 'Username' => 'ada']);
     }
 

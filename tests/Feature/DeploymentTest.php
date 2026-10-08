@@ -51,15 +51,17 @@ class DeploymentTest extends TestCase
 
     public function test_the_footer_names_the_database_in_use_but_not_its_server(): void
     {
+        // The connection the tests run on, SQLite or SQL Server.
+        $connection = 'database.connections.'.config('database.default');
         config([
-            'database.connections.sqlite.database' => 'CrimeifyDB',
-            'database.connections.sqlite.host' => 'crimeify-sql.database.windows.net',
+            "{$connection}.database" => 'CrimeifyDB',
+            "{$connection}.host" => 'crimeify-sql.database.windows.net',
         ]);
         $this->signIn();
 
         $this->get('/profile')
             ->assertOk()
-            ->assertSee('Connected to <strong>CrimeifyDB</strong> on SQLite', false)
+            ->assertSee('Connected to <strong>CrimeifyDB</strong> on '.['sqlite' => 'SQLite', 'sqlsrv' => 'SQL Server'][config("{$connection}.driver")], false)
             ->assertDontSee('MyAppDB')
             ->assertDontSee('database.windows.net');
     }

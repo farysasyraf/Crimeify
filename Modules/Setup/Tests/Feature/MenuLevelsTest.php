@@ -168,11 +168,11 @@ class MenuLevelsTest extends TestCase
 
     public function test_links_under_a_hidden_link_are_hidden_too(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $this->buildSettingsGroup();
         $settings = $this->link('Settings');
 
-        $this->saveLink(['visible_to' => 'roles', 'roles' => [$admin->Id]], $settings)->assertRedirect('/menu-items');
+        $this->saveLink(['visible_to' => 'roles', 'roles' => [$auditor->Id]], $settings)->assertRedirect('/menu-items');
 
         // Roles itself is visible to everyone, but it sits under Settings.
         $this->get('/users')
@@ -180,7 +180,7 @@ class MenuLevelsTest extends TestCase
             ->assertDontSee('>Roles</span></a>', false)
             ->assertSee('>Users</span></a>', false);
 
-        $this->giveMeRoles($admin);
+        $this->giveMeRoles($auditor);
         $this->get('/users')
             ->assertSee('<span class="side-text">Settings</span><svg class="chevron"', false)
             ->assertSee('>Roles</span></a>', false);
@@ -188,19 +188,19 @@ class MenuLevelsTest extends TestCase
 
     public function test_headings_with_nothing_visible_under_them_are_hidden(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $this->saveLink(['label' => 'Empty group'])->assertRedirect('/menu-items');
         $this->saveLink(['label' => 'Admin group'])->assertRedirect('/menu-items');
         $this->saveLink([
             'label' => 'Audit log', 'url' => '/audit', 'level' => 2, 'parent_for_level_2' => $this->link('Admin group')->Id,
-            'visible_to' => 'roles', 'roles' => [$admin->Id],
+            'visible_to' => 'roles', 'roles' => [$auditor->Id],
         ])->assertRedirect('/menu-items');
 
         $this->get('/users')
             ->assertDontSee('<span class="side-text">Empty group</span><svg class="chevron"', false)
             ->assertDontSee('<span class="side-text">Admin group</span><svg class="chevron"', false);
 
-        $this->giveMeRoles($admin);
+        $this->giveMeRoles($auditor);
         $this->get('/users')
             ->assertSee('<span class="side-text">Admin group</span><svg class="chevron"', false)
             ->assertSee('>Audit log</span></a>', false)
@@ -261,10 +261,10 @@ class MenuLevelsTest extends TestCase
 
     public function test_deleting_a_link_deletes_the_links_under_it(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $this->buildSettingsGroup();
         $reports = $this->link('Role reports');
-        $this->saveLink(['visible_to' => 'roles', 'roles' => [$admin->Id]], $reports)->assertRedirect('/menu-items');
+        $this->saveLink(['visible_to' => 'roles', 'roles' => [$auditor->Id]], $reports)->assertRedirect('/menu-items');
         $settings = $this->link('Settings');
 
         $this->get("/menu-items/delete/{$settings->Id}")

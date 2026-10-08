@@ -5,6 +5,7 @@ namespace Modules\Setup\Support;
 use App\Models\AppRoute;
 use App\Models\MenuItem;
 use App\Models\Role;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -200,7 +201,7 @@ class MenuTransfer
 
     /**
      * @param  array<int, mixed>  $names
-     * @param  \Illuminate\Support\Collection<int, string>  $known
+     * @param  Collection<int, string>  $known
      */
     private static function checkRoles(array $names, $known, string $what): void
     {

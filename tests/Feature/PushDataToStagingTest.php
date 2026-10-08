@@ -6,10 +6,12 @@ use App\Console\Commands\PushDataToStaging;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserPhoto;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -96,7 +98,11 @@ class PushDataToStagingTest extends TestCase
 
     public function test_times_with_more_than_milliseconds_fit_a_datetime_column(): void
     {
-        // As MyAppDB's Users.CreatedAt is a datetime2, with seven digits, where a new database has a datetime.
+        // As MyAppDB's Users.CreatedAt is a datetime2, with seven digits, where a new database has a datetime. SQLite
+        // keeps whatever it's given; SQL Server's column needs to be one first.
+        if (DB::getDriverName() === 'sqlsrv') {
+            Schema::table('Users', fn (Blueprint $table) => $table->dateTime('CreatedAt', 7)->nullable()->change());
+        }
         DB::table('Users')->where('Email', 'ada@example.com')->update(['CreatedAt' => '2026-09-24 08:36:55.0270121']);
 
         $this->artisan('data:push-to-staging', ['--only' => ['users'], '--force' => true])->assertSuccessful();
@@ -124,7 +130,7 @@ class PushDataToStagingTest extends TestCase
         $before = $this->rows('staging', ['Users', 'CrimeStats', 'sessions']);
 
         $this->artisan('data:push-to-staging')
-            ->expectsOutputToContain('From: :memory:')
+            ->expectsOutputToContain('From: '.DB::connection()->getDatabaseName())
             ->expectsConfirmation("Replace these tables on staging with this database's?", 'no')
             ->expectsOutput('Nothing was changed.')
             ->assertSuccessful();
@@ -150,7 +156,7 @@ class PushDataToStagingTest extends TestCase
         $this->assertEquals($before, $this->rows('staging', ['Users', 'CrimeStats']));
 
         // Settings that name this same database.
-        config(['database.connections.staging' => config('database.connections.sqlite')]);
+        config(['database.connections.staging' => config('database.connections.'.config('database.default'))]);
         DB::purge('staging');
         $this->artisan('data:push-to-staging', ['--force' => true])
             ->expectsOutputToContain("The STAGING_DB_* settings name this computer's own database")

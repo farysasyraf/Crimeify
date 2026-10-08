@@ -62,7 +62,7 @@ class ConfirmationTest extends TestCase
 
     public function test_role_forms_ask_before_saving_updating_and_deleting(): void
     {
-        $role = Role::create(['Name' => 'Admin']);
+        $role = Role::create(['Name' => 'Auditor']);
 
         $this->get('/roles/create')->assertSee($this->asks('Are you sure you want to save this role?', 'save'), false);
         $this->get("/roles/edit/{$role->Id}")->assertSee($this->asks('Are you sure you want to update this role?', 'update'), false);

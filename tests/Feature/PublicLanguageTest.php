@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\SetPublicLocale;
-use App\Models\AppRoute;
-use App\Models\MenuItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;

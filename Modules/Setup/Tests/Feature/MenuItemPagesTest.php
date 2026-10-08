@@ -36,13 +36,13 @@ class MenuItemPagesTest extends TestCase
 
     public function test_links_limited_to_roles_are_only_shown_to_users_with_one_of_those_roles(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $editor = Role::create(['Name' => 'Editor']);
         $viewer = Role::create(['Name' => 'Viewer']);
 
         $this->post('/menu-items/store', [
             'label' => 'Reports', 'url' => '/reports', 'sort_order' => 5,
-            'level' => 1, 'visible_to' => 'roles', 'roles' => [$admin->Id, $editor->Id],
+            'level' => 1, 'visible_to' => 'roles', 'roles' => [$auditor->Id, $editor->Id],
         ])->assertRedirect('/menu-items');
 
         // No roles: only the links visible to everyone.
@@ -54,13 +54,13 @@ class MenuItemPagesTest extends TestCase
         $this->giveMeRoles($editor);
         $this->get('/users')->assertSee('>Reports</span></a>', false)->assertSee('>Users</span></a>', false);
 
-        $this->giveMeRoles($viewer, $admin);
+        $this->giveMeRoles($viewer, $auditor);
         $this->get('/users')->assertSee('>Reports</span></a>', false);
     }
 
     public function test_limiting_a_link_to_roles_requires_at_least_one_role(): void
     {
-        Role::create(['Name' => 'Admin']);
+        Role::create(['Name' => 'Auditor']);
 
         $this->post('/menu-items/store', ['label' => 'Reports', 'url' => '/reports', 'sort_order' => 5, 'level' => 1, 'visible_to' => 'roles'])
             ->assertSessionHasErrors(['roles' => 'Tick at least one role, or choose "Everyone who is logged in".']);
@@ -76,17 +76,17 @@ class MenuItemPagesTest extends TestCase
 
     public function test_edit_form_shows_the_current_visibility_and_everyone_clears_the_roles(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $item = MenuItem::create(['Label' => 'Reports', 'Url' => '/reports', 'SortOrder' => 5, 'VisibleToEveryone' => false]);
-        $item->roles()->attach($admin->Id);
+        $item->roles()->attach($auditor->Id);
 
         $this->get("/menu-items/edit/{$item->Id}")
             ->assertSee('value="roles" checked', false)
-            ->assertSee('value="'.$admin->Id.'" checked', false);
+            ->assertSee('value="'.$auditor->Id.'" checked', false);
 
         $this->put("/menu-items/update/{$item->Id}", [
             'label' => 'Reports', 'url' => '/reports', 'sort_order' => 5,
-            'level' => 1, 'visible_to' => 'everyone', 'roles' => [$admin->Id],
+            'level' => 1, 'visible_to' => 'everyone', 'roles' => [$auditor->Id],
         ])->assertRedirect('/menu-items');
 
         $item->refresh();
@@ -98,25 +98,25 @@ class MenuItemPagesTest extends TestCase
     public function test_index_shows_who_can_see_each_link(): void
     {
         $item = MenuItem::create(['Label' => 'Reports', 'Url' => '/reports', 'SortOrder' => 5, 'VisibleToEveryone' => false]);
-        $item->roles()->attach([Role::create(['Name' => 'Editor'])->Id, Role::create(['Name' => 'Admin'])->Id]);
+        $item->roles()->attach([Role::create(['Name' => 'Editor'])->Id, Role::create(['Name' => 'Auditor'])->Id]);
 
         $this->get('/menu-items')->assertSeeInOrder([
             '<code>/users</code>', 'Everyone',
-            '<code>/reports</code>', '<span class="badge badge-role">Admin</span>', '<span class="badge badge-role">Editor</span>',
+            '<code>/reports</code>', '<span class="badge badge-role">Auditor</span>', '<span class="badge badge-role">Editor</span>',
         ], false);
     }
 
     public function test_deleting_the_only_role_of_a_link_hides_it_from_everyone(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $item = MenuItem::create(['Label' => 'Reports', 'Url' => '/reports', 'SortOrder' => 5, 'VisibleToEveryone' => false]);
-        $item->roles()->attach($admin->Id);
-        $this->giveMeRoles($admin);
+        $item->roles()->attach($auditor->Id);
+        $this->giveMeRoles($auditor);
 
         $this->get('/users')->assertSee('>Reports</span></a>', false);
 
-        $this->get("/roles/delete/{$admin->Id}")->assertSee('1 menu link is shown to this role.');
-        $this->delete("/roles/destroy/{$admin->Id}");
+        $this->get("/roles/delete/{$auditor->Id}")->assertSee('1 menu link is shown to this role.');
+        $this->delete("/roles/destroy/{$auditor->Id}");
         $this->me->unsetRelation('roles');
 
         $this->get('/users')->assertDontSee('>Reports</span></a>', false);
@@ -162,17 +162,17 @@ class MenuItemPagesTest extends TestCase
 
     public function test_manage_menu_link_can_be_limited_to_a_role_like_any_other_link(): void
     {
-        $admin = Role::create(['Name' => 'Admin']);
+        $auditor = Role::create(['Name' => 'Auditor']);
         $item = MenuItem::where('Url', '/menu-items')->firstOrFail();
 
         $this->put("/menu-items/update/{$item->Id}", [
             'label' => 'Manage menu', 'url' => '/menu-items', 'sort_order' => $item->SortOrder,
-            'level' => 1, 'visible_to' => 'roles', 'roles' => [$admin->Id],
+            'level' => 1, 'visible_to' => 'roles', 'roles' => [$auditor->Id],
         ])->assertRedirect('/menu-items');
 
         $this->get('/users')->assertDontSee('>Manage menu</span></a>', false);
 
-        $this->giveMeRoles($admin);
+        $this->giveMeRoles($auditor);
         $this->get('/users')->assertSee('>Manage menu</span></a>', false);
     }
 
@@ -187,7 +187,8 @@ class MenuItemPagesTest extends TestCase
 
     public function test_pages_still_render_when_the_menu_table_is_missing(): void
     {
-        Schema::drop('MenuItems');
+        // Renamed, not dropped: SQL Server won't drop a table that other tables' foreign keys point at.
+        Schema::rename('MenuItems', 'MenuItemsGone');
 
         $this->get('/users/create')
             ->assertOk()

@@ -44,7 +44,7 @@ class TimeZoneTest extends TestCase
         ];
 
         foreach ($records as $record) {
-            $this->assertSame('2026-09-29 16:00:00', (string) DB::table($record->getTable())->where('Id', $record->Id)->value('CreatedAt'), $record->getTable());
+            $this->assertSame('2026-09-29 16:00:00', self::toSecond(DB::table($record->getTable())->where('Id', $record->Id)->value('CreatedAt')), $record->getTable());
         }
 
         // One given on purpose is kept.
@@ -62,9 +62,9 @@ class TimeZoneTest extends TestCase
             'Category' => 'assault', 'Type' => 'rape', 'Year' => 2023, 'NewCrimes' => 1, 'CreatedAt' => '2026-09-29 23:30:00',
         ]);
         $times = fn () => [
-            (string) DB::table('Users')->where('Id', $user->Id)->value('LastSeenAt'),
-            (string) DB::table('Users')->where('Id', $user->Id)->value('LoggedOutAt'),
-            (string) DB::table('CrimeDataEdits')->value('CreatedAt'),
+            self::toSecond(DB::table('Users')->where('Id', $user->Id)->value('LastSeenAt')),
+            self::toSecond(DB::table('Users')->where('Id', $user->Id)->value('LoggedOutAt')),
+            self::toSecond(DB::table('CrimeDataEdits')->value('CreatedAt')),
         ];
 
         $migration = require database_path('migrations/2026_09_30_000005_move_app_times_to_malaysia_time.php');
@@ -77,5 +77,13 @@ class TimeZoneTest extends TestCase
 
         $migration->down();
         $this->assertSame(['2026-09-29 08:00:00', '2026-09-29 08:05:00', '2026-09-29 23:30:00'], $times());
+    }
+
+    /**
+     * A stored time to the second: SQL Server gives a datetime column's with its milliseconds, like 16:00:00.000.
+     */
+    private static function toSecond(mixed $time): string
+    {
+        return substr((string) $time, 0, 19);
     }
 }

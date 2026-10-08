@@ -44,7 +44,7 @@ class RolePagesTest extends TestCase
     public function test_index_lists_roles_by_name_with_user_counts(): void
     {
         $editor = Role::create(['Name' => 'Editor', 'Description' => 'Can edit content']);
-        Role::create(['Name' => 'Admin']);
+        Role::create(['Name' => 'Auditor']);
         $editor->users()->attach([
             User::create(['Name' => 'Ada', 'Email' => 'ada@example.com'])->Id,
             User::create(['Name' => 'Alan', 'Email' => 'alan@example.com'])->Id,
@@ -52,7 +52,7 @@ class RolePagesTest extends TestCase
 
         $this->get('/roles')
             ->assertOk()
-            ->assertSeeInOrder(['Admin', '<td class="num">0</td>', 'Editor', 'Can edit content', '<td class="num">2</td>'], false);
+            ->assertSeeInOrder(['Auditor', '<td class="num">0</td>', 'Editor', 'Can edit content', '<td class="num">2</td>'], false);
     }
 
     public function test_create_adds_role(): void
@@ -94,10 +94,10 @@ class RolePagesTest extends TestCase
 
     public function test_edit_rejects_another_roles_name(): void
     {
-        Role::create(['Name' => 'Admin']);
+        Role::create(['Name' => 'Auditor']);
         $editor = Role::create(['Name' => 'Editor']);
 
-        $this->put("/roles/update/{$editor->Id}", ['name' => 'Admin'])->assertSessionHasErrors('name');
+        $this->put("/roles/update/{$editor->Id}", ['name' => 'Auditor'])->assertSessionHasErrors('name');
 
         $this->assertDatabaseHas('Roles', ['Id' => $editor->Id, 'Name' => 'Editor']);
     }

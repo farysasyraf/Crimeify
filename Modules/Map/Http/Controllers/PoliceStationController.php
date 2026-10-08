@@ -304,10 +304,11 @@ class PoliceStationController extends Controller
      */
     private function districts(): Collection
     {
-        return PoliceDistrict::query()->get(['Region', 'Name'])->map(fn (PoliceDistrict $district) => [$district->Region, $district->Name])
-            ->concat(PoliceStation::query()->get(['Region', 'District'])->map(fn (PoliceStation $station) => [$station->Region, $station->District]))
-            ->groupBy(0)
-            ->map(fn (Collection $pairs) => $pairs->pluck(1)->unique()->sort()->values()->all());
+        // toBase(): as plain collections, whose unique() compares values, not models' keys, even with no districts yet.
+        return PoliceDistrict::query()->get(['Region', 'Name'])->toBase()->map(fn (PoliceDistrict $district) => [$district->Region, $district->Name])
+            ->concat(PoliceStation::query()->get(['Region', 'District'])->toBase()->map(fn (PoliceStation $station) => [$station->Region, $station->District]))
+            ->mapToGroups(fn (array $pair) => [$pair[0] => $pair[1]])
+            ->map(fn (Collection $districts) => array_values($districts->unique()->sort()->all()));
     }
 
     /**

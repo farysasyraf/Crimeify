@@ -1,0 +1,212 @@
+# Checks every push, then puts main on staging (https://crimeify.azurewebsites.net) once every check has passed.
+#
+#   style      Pint, Laravel's code style
+#   analyse    Larastan (PHPStan for Laravel), see phpstan.neon
+#   tests      the whole suite on SQLite, on PHP 8.4 (the image's) and 8.5
+#   sqlserver  a new database migrated and seeded as a release does, then the whole suite again, on a real SQL Server
+#   deploy     main only: builds the image in Azure, switches the web app to it, waits for it to answer, and puts the
+#              previous image back if it doesn't. Skipped until the AZURE_* variables are set (DEPLOY.md).
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to a branch cancels the checks still running for the older one. Not on main, where each push deploys.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  style:
+    name: Code style
+    runs-on: ubuntu-24.04
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, intl, zip
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - run: vendor/bin/pint --test
+
+  analyse:
+    name: Static analysis
+    runs-on: ubuntu-24.04
+    # Larastan starts the app to learn about it, so it gets a database, an empty one.
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, intl, zip
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=github
+
+  tests:
+    name: Tests (PHP ${{ matrix.php }}, SQLite)
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, intl, zip, pdo_sqlite
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - name: Settings
+        run: cp .env.example .env && php artisan key:generate
+      - run: vendor/bin/phpunit
+
+  sqlserver:
+    name: Tests (PHP 8.4, SQL Server 2022)
+    runs-on: ubuntu-24.04
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_SA_PASSWORD: Crimeify_CI_2026
+        ports:
+          - 1433:1433
+    # A throwaway server that only lives as long as this job, so its password can be written here.
+    env:
+      DB_CONNECTION: sqlsrv
+      DB_HOST: 127.0.0.1
+      DB_PORT: 1433
+      DB_USERNAME: sa
+      DB_PASSWORD: Crimeify_CI_2026
+      DB_TRUST_SERVER_CERTIFICATE: 'true'
+    steps:
+      - uses: actions/checkout@v5
+      # The driver PHP's sqlsrv talks to SQL Server through, the same one the image installs. Ubuntu's runners usually
+      # have it already.
+      - name: Microsoft's ODBC driver 18
+        run: |
+          if ! odbcinst -q -d 2>/dev/null | grep -q 'ODBC Driver 18 for SQL Server'; then
+            curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/microsoft-prod.gpg
+            curl -fsSL "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+            sudo apt-get update
+            sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+          fi
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, intl, zip, sqlsrv, pdo_sqlsrv
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - name: Settings
+        run: cp .env.example .env && php artisan key:generate
+      # SQL Server takes a few seconds to start, so this tries for up to a minute.
+      - name: Databases
+        run: |
+          php -r '
+            for ($try = 1; ; $try++) {
+                try {
+                    $server = new PDO("sqlsrv:Server=127.0.0.1,1433;TrustServerCertificate=1", "sa", getenv("DB_PASSWORD"), [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                    break;
+                } catch (PDOException $e) {
+                    if ($try === 30) { throw $e; }
+                    sleep(2);
+                }
+            }
+            $server->exec("CREATE DATABASE CrimeifyNew");
+            $server->exec("CREATE DATABASE CrimeifyTest");
+          '
+      # What staging's database went through: every migration on an empty SQL Server database, then the first login.
+      # SQLite can't catch SQL Server-only problems, like a migration's own SQL.
+      - name: Migrate a new database
+        run: php artisan migrate --force --seed
+        env:
+          DB_DATABASE: CrimeifyNew
+      - name: Tests
+        run: vendor/bin/phpunit -c phpunit.sqlsrv.xml
+
+  deploy:
+    name: Deploy to staging
+    needs: [style, analyse, tests, sqlserver]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AZURE_CLIENT_ID != ''
+    runs-on: ubuntu-24.04
+    environment:
+      name: staging
+      url: https://crimeify.azurewebsites.net
+    # One deploy at a time; a newer one waits for the one running to finish.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      # Logs in to Azure with GitHub's OpenID Connect token, so no Azure password is kept in GitHub.
+      id-token: write
+    env:
+      RESOURCE_GROUP: crimeify-rg
+      WEB_APP: crimeify
+      REGISTRY: crimeify4200
+      SITE: https://crimeify.azurewebsites.net
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # Tagged with the commit, so every release stays in the registry to go back to. It writes the commit to
+      # /version.txt (Dockerfile).
+      - name: Build the image in Azure
+        run: az acr build -r "$REGISTRY" -t "crimeify:$GITHUB_SHA" --build-arg "APP_VERSION=$GITHUB_SHA" .
+      - name: Note the image running now
+        id: before
+        run: echo "image=$(az webapp config show -g "$RESOURCE_GROUP" -n "$WEB_APP" --query linuxFxVersion -o tsv | sed 's/^DOCKER|//')" >> "$GITHUB_OUTPUT"
+      # Changing the image restarts the app on it. With RUN_MIGRATIONS=true in its settings, it migrates as it starts.
+      - name: Switch the web app to the new image
+        run: az webapp config container set -g "$RESOURCE_GROUP" -n "$WEB_APP" --container-image-name "$REGISTRY.azurecr.io/crimeify:$GITHUB_SHA" -o none
+      # The old release answers until the new one has started. /up answers once the app is running; the login page
+      # also needs the database, where logins are kept.
+      - name: Wait for the new release to answer
+        run: |
+          for try in $(seq 1 60); do
+            if [ "$(curl -fsS --max-time 10 "$SITE/version.txt?try=$try" || true)" = "$GITHUB_SHA" ]; then
+              curl -fsS --max-time 30 -o /dev/null "$SITE/up"
+              curl -fsS --max-time 30 -o /dev/null "$SITE/login"
+              echo "Staging is running $GITHUB_SHA."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Staging wasn't running $GITHUB_SHA after 10 minutes. See its log: az webapp log tail -g $RESOURCE_GROUP -n $WEB_APP"
+          exit 1
+      - name: Put the previous image back
+        if: failure() && steps.before.outputs.image != ''
+        env:
+          PREVIOUS: ${{ steps.before.outputs.image }}
+        run: |
+          az webapp config container set -g "$RESOURCE_GROUP" -n "$WEB_APP" --container-image-name "$PREVIOUS" -o none
+          echo "::warning::Staging is back on $PREVIOUS. A migration the new release ran stays run."
+      - name: Summary
+        if: success()
+        env:
+          PREVIOUS: ${{ steps.before.outputs.image }}
+        run: |
+          {
+            echo "### Staging is running \`${GITHUB_SHA::7}\`"
+            echo
+            echo "$SITE, image \`$REGISTRY.azurecr.io/crimeify:$GITHUB_SHA\`, replacing \`$PREVIOUS\`."
+          } >> "$GITHUB_STEP_SUMMARY"

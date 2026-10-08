@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 // app's own code.
 #[Table(name: 'AppRoutes', key: 'Id', timestamps: false)]
 #[Fillable(['MenuItemId', 'Path', 'Parameters', 'Controller', 'Action', 'HttpMethods', 'OpenToEveryone'])]
-class AppRoute extends Model implements RouteRecord
+final class AppRoute extends Model implements RouteRecord
 {
     use ActsAsSavedRoute;
     use SetsCreatedAt;
@@ -83,11 +83,11 @@ class AppRoute extends Model implements RouteRecord
     public static function savedRoutes(): iterable
     {
         try {
-            return static::with('roles:Id,Name')->orderBy('Id')->get();
+            return self::with('roles:Id,Name')->orderBy('Id')->get();
         } catch (QueryException) {
             // Routes saved before they had roles, until migrate adds dbo.AppRouteRoles. Without the table itself, the
             // exception goes on to the package, which adds none.
-            return static::orderBy('Id')->get();
+            return self::orderBy('Id')->get();
         }
     }
 
@@ -149,7 +149,7 @@ class AppRoute extends Model implements RouteRecord
             ->values();
 
         // A plain collection, since the addresses below aren't models.
-        $saved = static::orderBy('Path')->get()->toBase()
+        $saved = self::orderBy('Path')->get()->toBase()
             ->filter(fn (AppRoute $route) => $route->canOpen())
             ->map(fn (AppRoute $route) => '/'.$route->Path)
             ->diff($builtIn)

@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 // Mirrors dbo.UserPhotos: a user's profile photo, as the bytes of a JPG or PNG.
+/**
+ * @property string|resource $Photo the bytes, or with SQL Server's driver a stream of them (UserPhotoController)
+ */
 #[Table(name: 'UserPhotos', key: 'UserId', incrementing: false, timestamps: false)]
-class UserPhoto extends Model
+final class UserPhoto extends Model
 {
     /**
      * The types a photo is stored as.
@@ -29,7 +32,7 @@ class UserPhoto extends Model
      */
     public static function saveFor(User $user, string $bytes, string $contentType): void
     {
-        $connection = (new static)->getConnection();
+        $connection = (new self)->getConnection();
 
         $connection->transaction(function () use ($connection, $user, $bytes, $contentType) {
             static::query()->whereKey($user->Id)->delete();

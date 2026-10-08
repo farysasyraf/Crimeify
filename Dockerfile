@@ -50,6 +50,11 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize --no-scripts \
     && rm -f /usr/bin/composer
 
+# Which commit the image was built from, at /version.txt, so a deploy can tell when the new release is the one
+# answering (.github/workflows/ci.yml). "local" for an image built by hand.
+ARG APP_VERSION=local
+RUN echo "${APP_VERSION}" > public/version.txt
+
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
     && chmod +x /usr/local/bin/entrypoint.sh \
