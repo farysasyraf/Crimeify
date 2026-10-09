@@ -82,7 +82,7 @@ class PasswordResetController extends Controller
     {
         $email = (string) $request->query('email', '');
         $user = $email === '' ? null : User::query()->where('Email', $email)->first();
-        $valid = $user?->canLogIn() && Password::broker()->tokenExists($user, $token);
+        $valid = $user?->canLogIn() && Password::tokenExists($user, $token);
 
         return response()
             ->view('auth.reset-password', ['token' => $token, 'email' => $email, 'valid' => $valid])

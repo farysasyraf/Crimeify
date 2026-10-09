@@ -5,6 +5,8 @@ includes:
 
 parameters:
     level: 5
+    # The PHP the site runs on (the Dockerfile's), whichever PHP runs the analysis, so this computer and CI agree.
+    phpVersion: 80400
     # The app's own code. Not the tests, the root tests/ folder's or the modules'.
     paths:
         - app
