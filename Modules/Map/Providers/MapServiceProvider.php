@@ -5,6 +5,7 @@ namespace Modules\Map\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Modules\Map\Console\ImportCrimeData;
 use Modules\Map\Console\ImportPoliceStations;
+use Modules\Map\Console\ImportPopulation;
 use Modules\Map\Console\ImportStateCrime;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
@@ -28,6 +29,7 @@ class MapServiceProvider extends ModuleServiceProvider
     protected array $commands = [
         ImportCrimeData::class,
         ImportPoliceStations::class,
+        ImportPopulation::class,
         ImportStateCrime::class,
     ];
 

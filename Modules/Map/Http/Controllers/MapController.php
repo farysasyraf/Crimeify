@@ -13,6 +13,8 @@ use Illuminate\View\View;
 use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
+use Modules\Map\Entities\Population;
+use Modules\Map\Support\CrimeRates;
 use Modules\Map\Support\StateCrime;
 
 // The Map module's pages.
@@ -49,6 +51,7 @@ class MapController extends Controller
             'territories' => $regions->where('territory', true)->values(),
             'boundaries' => versioned_asset(config('map.boundaries')),
             'years' => $this->years(),
+            'hasPopulation' => $this->hasPopulation(),
             'stations' => $this->stations(),
             // The pins' figures come from MapController@crime: in the app, as "map/crime" added on the Routes page;
             // on the public map, from its own address in Routes/web.php.
@@ -135,7 +138,27 @@ class MapController extends Controller
             ] : null,
             'regions' => (object) collect($regions)->all(),
             'districts' => $districts,
+            'rates' => $this->rates(),
         ]);
+    }
+
+    /**
+     * Crime per 100,000 people for every year, which the map shades the regions by and plays year by year, with its
+     * population's credit. The same in every year's figures, so the map has them all from the first it loads.
+     *
+     * @return array<string, mixed>
+     */
+    private function rates(): array
+    {
+        $rates = CrimeRates::all();
+
+        return [
+            ...$rates,
+            // Objects keyed by year and region, as the map expects, though there may be none.
+            'years' => (object) array_map(fn (array $year) => [...$year, 'regions' => (object) $year['regions']], $rates['years']),
+            'credit' => __(config('map.population.credit')),
+            'about' => config('map.population.about'),
+        ];
     }
 
     /**
@@ -182,6 +205,19 @@ class MapController extends Controller
         } catch (QueryException) {
             // dbo.CrimeStats isn't there until migrate runs.
             return [];
+        }
+    }
+
+    /**
+     * Whether "php artisan map:import-population" has run, which shading the map per 100,000 people needs.
+     */
+    private function hasPopulation(): bool
+    {
+        try {
+            return Population::query()->exists();
+        } catch (QueryException) {
+            // dbo.Populations isn't there until migrate runs.
+            return false;
         }
     }
 

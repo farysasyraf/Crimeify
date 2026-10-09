@@ -24,7 +24,7 @@ class PushDataToStaging extends Command
      */
     public const Groups = [
         'users' => ['Roles', 'Users', 'UserRoles', 'UserPhotos', 'MenuItems', 'MenuItemRoles', 'AppRoutes', 'AppRouteRoles'],
-        'crime' => ['PoliceDistricts', 'CrimeStats', 'CrimeDataEdits'],
+        'crime' => ['PoliceDistricts', 'CrimeStats', 'CrimeDataEdits', 'Populations'],
         'stations' => ['PoliceStations', 'PoliceStationEdits'],
     ];
 

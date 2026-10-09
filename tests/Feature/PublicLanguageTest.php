@@ -116,6 +116,7 @@ class PublicLanguageTest extends TestCase
             'resources/views/layouts/public.blade.php', 'resources/views/layouts/_language-switch.blade.php',
             'Modules/Dashboard/Resources/views/index.blade.php', 'Modules/Map/Resources/views/index.blade.php',
             'Modules/Dashboard/Http/Controllers/DashboardController.php', 'Modules/Map/Http/Controllers/MapController.php',
+            'Modules/Map/Support/CrimeRates.php',
             'public/modules/map/map.js', 'public/modules/map/station-finder.js', 'public/modules/dashboard/dashboard.js',
             'public/js/select2-init.js',
         ];
@@ -147,7 +148,7 @@ class PublicLanguageTest extends TestCase
             ...array_merge(...array_values(array_map('array_values', config('map.crime.types')))),
             ...array_merge(...array_values(array_map('array_values', config('map.by_state.types')))),
             ...array_column(config('dashboard.cards'), 'label'),
-            config('map.crime.credit'), config('map.by_state.source'), 'States', 'Federal territories',
+            config('map.crime.credit'), config('map.by_state.source'), config('map.population.credit'), 'States', 'Federal territories',
         ] as $label) {
             $keys[$label] = 'config';
         }

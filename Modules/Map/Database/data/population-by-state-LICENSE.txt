@@ -1,0 +1,22 @@
+population-by-state.csv: each state's and federal territory's population, to turn crime into crime per 100,000 people
+
+Each region's whole population (both sexes, all ages, all ethnic groups) in each year from 2016, in thousands, in
+DOSM's own columns. "php artisan map:import-population" loads it into dbo.Populations; with --download, it loads
+DOSM's latest file instead, which it reads the same way.
+
+Source:    Department of Statistics Malaysia (DOSM), "Population Table: States" (population_state), OpenDOSM,
+           https://open.dosm.gov.my/data-catalogue/population_state, from
+           https://storage.dosm.gov.my/population/population_state.csv (last changed 31 July 2026), downloaded on
+           9 October 2026.
+Licence:   Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/
+Credit:    Department of Statistics Malaysia, shown on the map as "Population: DOSM (CC BY 4.0)"
+
+Made by keeping the file's rows with sex "both", age "overall" and ethnicity "overall", from 2016 on, unchanged.
+
+As DOSM has them:
+  - Each year is the population at the middle of the year.
+  - 2020 is the 2020 census, adjusted; the other years are estimates, each from the year before (births, deaths
+    and migration). 2016 to 2019 were estimated from the 2010 census and weren't revised after the 2020 one, so some
+    regions step in 2020: Sabah's falls from 3.90 to 3.42 million and Sarawak's from 2.81 to 2.45 million, and
+    Selangor's rises from 6.51 to 6.99 million. Their crime per 100,000 people steps the other way that year.
+  - W.P. Labuan and W.P. Putrajaya are counted on their own, not in Sabah and W.P. Kuala Lumpur.

@@ -140,6 +140,8 @@
 .crime-year label { display: block; margin-bottom: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
 .crime-note { margin: 0 0 16px; padding: 10px 12px; border: 1px dashed rgba(255, 255, 255, .14); border-radius: 12px; color: var(--muted); font-size: .875rem; }
 .crime-note code { overflow-wrap: anywhere; }
+.crime-year-note { margin: 6px 0 0; color: var(--muted); font-size: .8125rem; }
+.crime-year-note code { overflow-wrap: anywhere; }
 
 /* Each category's total, side by side, with how it compares with the year before: more crime in red, less in green. */
 .crime-totals { display: flex; flex-wrap: wrap; gap: 8px 40px; margin: 0 0 12px; }
@@ -235,6 +237,65 @@ html:has(.map-dialog[open]) { overflow: hidden; }
 .state-map .marker-cluster { background-color: rgba(58, 170, 242, .35); }
 .state-map .marker-cluster div { background-color: rgba(58, 170, 242, .95); color: var(--primary-text); font-weight: 700; }
 
+/* Crime per 100,000 people. A region's tooltip gives its name and rate; the panel gives the chosen place's rate, how
+   it ranks, and the people it's divided by. Each year's shades fade into the next. */
+.region-tip { display: grid; gap: 1px; }
+.region-tip span { color: var(--muted); font-size: .8125rem; font-weight: 500; }
+.crime-rate { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .04); }
+.state-details .crime-rate p { margin: 0; }
+.crime-rate-value { color: var(--muted); font-size: .875rem; }
+.crime-rate-value strong { margin-right: 2px; color: var(--text); font-size: 1.15rem; }
+.crime-rate-about { color: var(--muted); font-size: .8125rem; }
+.state-map path.leaflet-interactive { transition: fill .6s ease, fill-opacity .6s ease; }
+@media (prefers-reduced-motion: reduce) {
+    .state-map path.leaflet-interactive { transition: none; }
+}
+
+/* The timeline over the bottom of the map, as a charcoal panel like the search: ▶, the year, and the slider with the
+   years under it, then the legend. map.js puts its left edge right of the column of cards, and its bottom above the
+   map's credits; its right edge clears the zoom buttons. On a narrow screen the legend goes under the slider. */
+.map-timeline {
+    position: absolute; z-index: 1000; left: 16px; right: 56px; bottom: 30px; max-width: 760px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; padding: 10px 18px 10px 10px;
+    border-radius: 18px; background: rgba(35, 37, 41, .95); color: var(--text); box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+    backdrop-filter: blur(6px); font-size: .875rem; cursor: auto;
+}
+.map-timeline-player { display: flex; flex: 1 1 280px; align-items: center; gap: 10px; min-width: 0; }
+.map-timeline-player[hidden] { display: none; }
+.map-play {
+    flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
+    background: var(--primary); color: var(--primary-text); cursor: pointer;
+}
+.map-play:hover { background: var(--primary-hover); }
+.map-play:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.map-play .material-icon { font-size: 26px; }
+.map-timeline-year { flex: none; min-width: 2.6em; font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.map-timeline-track { position: relative; flex: 1; min-width: 0; padding-bottom: 15px; }
+.map-timeline-track input { display: block; width: 100%; margin: 0; accent-color: var(--primary); cursor: pointer; }
+.map-timeline-track input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+/* Under the slider's thumb at each year: the thumb's centre runs from 8px in at either end. */
+.map-timeline-ticks { position: absolute; left: 8px; right: 8px; bottom: 0; height: 12px; }
+.map-timeline-ticks span, .map-legend-limits span {
+    position: absolute; left: calc(var(--at) * 100%); transform: translateX(-50%);
+    color: var(--muted); font-size: .6875rem; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* The legend: what the map is shaded by, then the shades in a strip with the rate where each begins under it. */
+.map-legend { display: grid; flex: 0 1 250px; gap: 5px; min-width: 210px; }
+.map-legend[hidden] { display: none; }
+.map-legend-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; color: var(--muted); font-size: .8125rem; }
+.map-legend-heading select {
+    width: auto; max-width: 100%; padding: 3px 8px; border-radius: 8px;
+    background: var(--raised); color: var(--text); font-size: .8125rem; font-weight: 600; cursor: pointer;
+}
+.map-legend-heading select:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.map-legend-scale { display: flex; height: 10px; border-radius: 999px; overflow: hidden; }
+.map-legend-scale span { flex: 1; }
+.map-legend-limits { position: relative; height: 12px; }
+.map-legend-none { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--muted); font-size: .75rem; }
+.map-legend-none[hidden] { display: none; }
+.map-legend-swatch { width: 16px; height: 10px; border: 1px dashed #9aa3ae; border-radius: 3px; }
+
 /* Too narrow for cards beside a map that's still worth seeing: the map first, nearly as tall as the window, with the
    search on it, then the cards under it, the panel, the regions and "Find a police station"; the panel's details and
    year side by side again, and the finder's lists. */
@@ -256,9 +317,14 @@ html:has(.map-dialog[open]) { overflow: hidden; }
     .station-finder-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
     .station-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .map-search { top: 12px; width: calc(100% - 24px); }
+    /* The timeline under the map, before the cards and like them (map.js moves it here). */
+    .map-timeline.map-timeline-under {
+        position: static; order: 2; max-width: none; margin: 0 16px; padding: 12px 18px 12px 12px;
+        border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); backdrop-filter: none;
+    }
     /* In the app, the page's own margin is the cards'. */
     .main .map-stage { padding-bottom: 0; }
-    .main .map-side > .card, .main .map-stage > [data-map-status] { margin: 0; }
+    .main .map-side > .card, .main .map-stage > [data-map-status], .main .map-timeline.map-timeline-under { margin: 0; }
 }
 
 /* On a phone, the panel's year goes above the region's details, and the button under them; the finder's lists and
@@ -271,4 +337,8 @@ html:has(.map-dialog[open]) { overflow: hidden; }
     .station-finder { padding: 16px; }
     .station-finder-fields, .station-facts { grid-template-columns: minmax(0, 1fr); }
     .station-finder-fields { gap: 14px; }
+    /* Every other year under the slider, so they don't run into one another. */
+    .map-timeline { gap: 8px; padding: 8px 14px 8px 8px; }
+    .map-timeline-ticks span:nth-child(even) { display: none; }
+    .map-legend { flex-basis: 100%; }
 }

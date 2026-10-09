@@ -69,6 +69,10 @@
                             <option value="{{ $year }}" @selected($loop->first)>{{ $year }}</option>
                         @endforeach
                     </select>
+                    {{-- How to load them is for the app's administrators, not the public. --}}
+                    @unless ($public || $hasPopulation)
+                        <p class="crime-year-note">Shading the map by crime per 100,000 people needs each state's population: run <code>php artisan map:import-population</code>.</p>
+                    @endunless
                 </div>
             @endif
 

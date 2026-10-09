@@ -126,5 +126,21 @@
 
     "No results found": "Tiada hasil ditemui",
     "Searching…": "Mencari…",
-    "Remove all items": "Buang semua pilihan"
+    "Remove all items": "Buang semua pilihan",
+
+    "Violent and property crime": "Jenayah kekerasan dan harta benda",
+    "Population: DOSM (CC BY 4.0)": "Penduduk: DOSM (CC BY 4.0)",
+    "Crime per 100,000 people, year by year": "Jenayah bagi setiap 100,000 penduduk, tahun demi tahun",
+    "Play the years": "Mainkan tahun demi tahun",
+    "Pause": "Jeda",
+    "Shade the map by": "Warnakan peta mengikut",
+    "per 100,000 people": "bagi setiap 100,000 penduduk",
+    ":rate per 100,000 people": ":rate bagi setiap 100,000 penduduk",
+    "Shaded from under :low to :high and over.": "Diwarnakan daripada bawah :low hingga :high dan ke atas.",
+    "No figures": "Tiada angka",
+    "Highest of :count": "Tertinggi daripada :count",
+    "Lowest of :count": "Terendah daripada :count",
+    ":ordinal highest of :count": "Tertinggi :ordinal daripada :count",
+    "Population :people in :year": "Penduduk :people pada :year",
+    ":count million": ":count juta"
 }

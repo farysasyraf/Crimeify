@@ -95,6 +95,17 @@ return [
         ],
     ],
 
+    // Each region's population by year, from the Department of Statistics Malaysia, to shade the map by crime per
+    // 100,000 people rather than by count. "php artisan map:import-population" loads it from this module's file (see
+    // population-by-state-LICENSE.txt), or with --download, DOSM's latest from source.
+    'population' => [
+        'file' => 'Database/data/population-by-state.csv',
+        'source' => 'https://storage.dosm.gov.my/population/population_state.csv',
+        // The map's credit for the figures, linked to the dataset's page.
+        'credit' => 'Population: DOSM (CC BY 4.0)',
+        'about' => 'https://open.dosm.gov.my/data-catalogue/population_state',
+    ],
+
     // The police stations "php artisan map:import-stations" starts dbo.PoliceStations with, in this module (see
     // police-stations-LICENSE.txt). The Police stations page keeps them up to date after that.
     'stations' => 'Database/data/police-stations.csv',
