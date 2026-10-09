@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title') · {{ config('app.name') }}</title>
-    <meta name="description" content="{{ __("Crime in Malaysia by state and police district, from the Royal Malaysia Police's figures.") }}" />
+    {{-- A page can give its own, like a police district's shared link. --}}
+    <meta name="description" content="@yield('description', __("Crime in Malaysia by state and police district, from the Royal Malaysia Police's figures."))" />
     <link rel="icon" type="image/png" href="{{ versioned_asset('images/logo.png') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('vendor/select2/select2.min.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('css/site.css') }}" />

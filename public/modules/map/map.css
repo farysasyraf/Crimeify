@@ -210,6 +210,18 @@
 .crime-types th { color: var(--popup-soft); text-align: left; }
 .crime-types td { color: var(--popup-text); text-align: right; font-variant-numeric: tabular-nums; }
 
+/* Under a popup's title, its link to share, on WhatsApp or copied, as small rounded buttons. */
+.crime-popup-share { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.crime-share {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 0; border-radius: 999px;
+    background: rgba(255, 255, 255, .07); color: var(--popup-text); font: inherit; font-size: .8125rem; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+}
+.state-map .crime-popup a.crime-share { color: var(--popup-text); }
+.crime-share:hover { background: rgba(255, 255, 255, .12); }
+.crime-share:focus-visible { outline: 2px solid var(--popup-accent); outline-offset: 1px; }
+.crime-share .material-icon { font-size: 16px; color: var(--popup-accent); }
+
 /* The enlarge button, over Leaflet's zoom buttons at the bottom right, and styled like them. */
 .map-enlarge button {
     display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0;

@@ -116,7 +116,7 @@ class PublicLanguageTest extends TestCase
             'resources/views/layouts/public.blade.php', 'resources/views/layouts/_language-switch.blade.php',
             'Modules/Dashboard/Resources/views/index.blade.php', 'Modules/Map/Resources/views/index.blade.php',
             'Modules/Dashboard/Http/Controllers/DashboardController.php', 'Modules/Map/Http/Controllers/MapController.php',
-            'Modules/Map/Support/CrimeRates.php',
+            'Modules/Map/Support/CrimeRates.php', 'Modules/Map/Support/DistrictPreview.php',
             'public/modules/map/map.js', 'public/modules/map/station-finder.js', 'public/modules/dashboard/dashboard.js',
             'public/js/select2-init.js',
         ];

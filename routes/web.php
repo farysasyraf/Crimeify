@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PaletteController;
 use App\Http\Controllers\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// The command palette's search, Ctrl+K on every page of the app. It asks again as each word is typed.
+Route::middleware(['auth', 'throttle:240,1'])->get('/palette', PaletteController::class)->name('palette');

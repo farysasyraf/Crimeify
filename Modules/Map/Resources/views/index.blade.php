@@ -1,7 +1,27 @@
 {{-- In the app for logged-in users, and at /public/map for everyone, in the public pages' layout. --}}
 @extends($public ? 'layouts.public' : 'layouts.app')
 
-@section('title', __('Map'))
+@section('title', $open ? $open['label'].' · '.__('Map') : __('Map'))
+
+{{-- A police district's shared link (MapController@publicDistrict): what WhatsApp and the like show for it, from the
+     Open Graph tags, with an image of its chart (DistrictPreview). --}}
+@if ($share)
+    @section('description', $share['description'])
+    @push('head')
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="{{ config('app.name') }}" />
+        <meta property="og:title" content="{{ $share['title'] }}" />
+        <meta property="og:description" content="{{ $share['description'] }}" />
+        <meta property="og:url" content="{{ $share['url'] }}" />
+        <meta property="og:image" content="{{ $share['image'] }}" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="{{ \Modules\Map\Support\DistrictPreview::Width }}" />
+        <meta property="og:image:height" content="{{ \Modules\Map\Support\DistrictPreview::Height }}" />
+        <meta property="og:image:alt" content="{{ $share['alt'] }}" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="{{ $share['url'] }}" />
+    @endpush
+@endif
 
 {{-- The map fills the page between the bar and the footer. --}}
 @section('main-class', 'main-full')
@@ -66,7 +86,7 @@
                     <label for="crime-year">{{ __('Crime figures for') }}</label>
                     <select id="crime-year" data-crime-year>
                         @foreach (array_reverse($years) as $year)
-                            <option value="{{ $year }}" @selected($loop->first)>{{ $year }}</option>
+                            <option value="{{ $year }}" @selected($year === $selectedYear)>{{ $year }}</option>
                         @endforeach
                     </select>
                     {{-- How to load them is for the app's administrators, not the public. --}}
@@ -143,6 +163,8 @@
     <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
         data-tile-url="{{ config('map.tiles.url') }}" data-tile-attribution="{{ config('map.tiles.attribution') }}" data-tile-max-zoom="{{ config('map.tiles.max_zoom') }}"
         @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
+        {{-- A police district or station to open, from a shared link or the command palette. --}}
+        @if ($open) data-open="{{ json_encode($open) }}" @endif
         role="region" aria-label="{{ __("Map of Malaysia's states and police districts") }}">
         <noscript><p class="state-map-note">{{ __('The map needs JavaScript turned on.') }}</p></noscript>
     </div>

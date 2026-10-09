@@ -2,6 +2,8 @@
 
 namespace Modules\Setup\Providers;
 
+use App\Models\User;
+use App\Support\Palette;
 use Illuminate\Console\Scheduling\Schedule;
 use Modules\Setup\Console\ExportMenu;
 use Modules\Setup\Console\ImportMenu;
@@ -38,6 +40,27 @@ class SetupServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
     ];
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        // The command palette's users, by name, username or email, each to its Edit user page, for whoever can open it.
+        $this->app->make(Palette::class)->add('Users', 20, function (string $term, User $user) {
+            if ($term === '' || ! Palette::canOpen($user, 'users/edit')) {
+                return [];
+            }
+
+            return User::query()->search($term)->orderBy('Name')->limit(20)->get()
+                ->map(fn (User $found) => [
+                    'label' => $found->Name,
+                    'about' => "{$found->Username} · {$found->Email}",
+                    'also' => "{$found->Username} {$found->Email}",
+                    'url' => route('users/edit', $found),
+                    'icon' => 'person',
+                ]);
+        });
+    }
 
     /**
      * Define module schedules.

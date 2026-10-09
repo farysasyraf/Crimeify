@@ -66,6 +66,13 @@
                     <svg width="20" height="20" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
                 @auth
+                    {{-- The command palette (palette.js): a search for a page, user, police district or station to go to,
+                         from this button or Ctrl+K anywhere in the app. Without JavaScript, there's the menu. --}}
+                    <button type="button" class="palette-open" data-palette="{{ route('palette') }}" aria-label="Search" aria-keyshortcuts="Control+K Meta+K" hidden>
+                        <span class="material-icon" aria-hidden="true">search</span>
+                        <span class="palette-open-text">Search</span>
+                        <kbd aria-hidden="true">Ctrl K</kbd>
+                    </button>
                     <div class="topbar-user">
                         <span class="topbar-name">{{ auth()->user()->Name }}</span>
                         <form method="post" action="{{ route('logout') }}">
@@ -103,5 +110,7 @@
     <script src="{{ versioned_asset('js/live-table.js') }}" defer></script>
     {{-- An uploaded Excel file's check, shown step by step as it goes (forms marked data-upload-progress). --}}
     <script src="{{ versioned_asset('js/upload-progress.js') }}" defer></script>
+    {{-- The command palette, Ctrl+K. --}}
+    <script src="{{ versioned_asset('js/palette.js') }}" defer></script>
 </body>
 </html>

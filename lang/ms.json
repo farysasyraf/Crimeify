@@ -142,5 +142,22 @@
     "Lowest of :count": "Terendah daripada :count",
     ":ordinal highest of :count": "Tertinggi :ordinal daripada :count",
     "Population :people in :year": "Penduduk :people pada :year",
-    ":count million": ":count juta"
+    ":count million": ":count juta",
+
+    ":name police district: crime each year": "Daerah polis :name: jenayah setiap tahun",
+    "Share on WhatsApp": "Kongsi di WhatsApp",
+    "Copy link": "Salin pautan",
+    "Link copied": "Pautan disalin",
+    "Copy this link": "Salin pautan ini",
+    ":name police district, :region: crime :from–:to": "Daerah polis :name, :region: jenayah :from–:to",
+    ":count violent and property crimes in :year": ":count jenayah kekerasan dan harta benda pada :year",
+    "Each year from :from to :to on Crimeify's map, from the Royal Malaysia Police's figures.": "Setiap tahun dari :from hingga :to di peta Crimeify, daripada angka Polis Diraja Malaysia.",
+    "Bar chart of :name's violent and property crime each year from :from to :to.": "Carta bar jenayah kekerasan dan harta benda :name setiap tahun dari :from hingga :to.",
+    "Crimes reported each year": "Jenayah yang dilaporkan setiap tahun",
+    "crimes in :year": "jenayah pada :year",
+    "No crime figures yet.": "Belum ada angka jenayah.",
+    "the same as in :year": "sama seperti pada :year",
+    "down :size from :year": "turun :size berbanding :year",
+    "up :size from :year": "naik :size berbanding :year",
+    "Source: Royal Malaysia Police and DOSM, through data.gov.my (CC BY 4.0)": "Sumber: Polis Diraja Malaysia dan DOSM, melalui data.gov.my (CC BY 4.0)"
 }

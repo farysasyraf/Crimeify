@@ -164,7 +164,7 @@ class MapPageTest extends TestCase
         $this->signIn();
 
         $this->assertSame('Map\MapController', SavedRoutes::controllers()->nameOf(SavedRoutes::controllers()->findOne('MapController')));
-        $this->assertSame(['index', 'publicIndex', 'crime'], SavedRoutes::controllers()->options()['Map\MapController']);
+        $this->assertSame(['index', 'publicIndex', 'publicDistrict', 'districtPreview', 'crime'], SavedRoutes::controllers()->options()['Map\MapController']);
 
         // Once saved, the page is offered in Manage menu's Link list.
         $this->assertContains('/map', AppRoute::linkablePages()['saved']);

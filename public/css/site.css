@@ -215,6 +215,63 @@ code {
 }
 .app-topbar { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 28px; }
 .app-topbar .topbar-user { margin-left: auto; }
+
+/* The command palette (palette.js): Search in the top bar, like a search box, with its shortcut, and the box it opens
+   over the page, a charcoal panel near the top with the results under the search, grouped under headings. */
+.palette-open {
+    display: inline-flex; align-items: center; gap: 8px; min-width: 240px; margin-left: auto; padding: 6px 8px 6px 10px;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--field); color: var(--muted);
+    font: inherit; font-size: .875rem; cursor: pointer;
+}
+.palette-open[hidden] { display: none; }
+.palette-open:hover { border-color: var(--field-border); color: var(--text); }
+.palette-open:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.palette-open .material-icon { font-size: 18px; }
+.palette-open kbd { margin-left: auto; }
+.app-topbar .palette-open:not([hidden]) + .topbar-user { margin-left: 0; }
+kbd {
+    display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px solid var(--field-border); border-radius: 6px;
+    background: var(--raised); color: var(--muted); font: inherit; font-size: .75rem; line-height: 1.5; text-align: center;
+}
+
+.palette {
+    width: min(640px, calc(100vw - 32px)); max-width: none; max-height: min(560px, calc(100dvh - 32px)); margin: 12vh auto auto; padding: 0;
+    border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--text);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .5); overflow: hidden;
+}
+.palette[open] { display: flex; flex-direction: column; animation: palette-in .15s ease-out; }
+.palette::backdrop { background: rgba(8, 12, 24, .6); }
+@keyframes palette-in { from { transform: translateY(-6px) scale(.98); opacity: 0; } }
+.palette-search { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.palette-search .material-icon { color: var(--primary); font-size: 22px; }
+/* More particular than the app's fields, whose box it doesn't have: the panel is its box. */
+.palette .palette-search input { flex: 1; width: auto; min-width: 0; padding: 4px 0; border: 0; border-radius: 0; background: none; font-size: 1.05rem; outline: none; }
+.palette-results { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 8px; overscroll-behavior: contain; }
+.palette-results:empty { display: none; }
+.palette-group + .palette-group { margin-top: 4px; }
+.palette-heading {
+    margin: 10px 10px 4px; color: var(--accent-soft);
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.palette-option {
+    display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: center;
+    padding: 8px 10px; border-radius: 10px; color: var(--text); text-decoration: none;
+}
+.palette-option .material-icon { grid-row: span 2; color: var(--muted); font-size: 22px; }
+.palette-option[aria-selected="true"] { background: var(--nav-active-bg); }
+.palette-option[aria-selected="true"] .material-icon { color: var(--primary); }
+.palette-label { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-label mark { background: none; color: var(--primary); }
+.palette-about { color: var(--muted); font-size: .8125rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-status { margin: 0; padding: 0 18px; color: var(--muted); font-size: .875rem; }
+/* Read out, but shown only when it's all there is: no matches, or a problem. */
+.palette-status:not(.palette-status-empty) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.palette-status.palette-status-empty { padding: 18px; }
+.palette-help { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; padding: 10px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .75rem; }
+.palette-help kbd + kbd { margin-left: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .palette[open] { animation: none; }
+}
 .main { flex: 1; width: 100%; max-width: 1140px; padding: 28px 28px 40px; }
 /* A page that fills the window between the bar and the footer, like the map (main-class main-full): no width limit,
    and in the app only a margin like the menu's, beside it; on the public pages none at all. */
@@ -747,6 +804,10 @@ select.is-invalid + .select2-container .select2-selection { border-color: var(--
 
 @media (max-width: 760px) {
     .app-topbar { padding: 0 16px; height: 56px; }
+    /* Only the magnifying glass, as a button, and no shortcut, which a phone has no keys for. */
+    .palette-open { min-width: 0; padding: 7px; border-color: transparent; background: none; }
+    .palette-open .palette-open-text, .palette-open kbd, .palette-search kbd, .palette-help { display: none; }
+    .palette { margin-top: 16px; }
     .main { padding: 20px 16px 32px; }
     .footer { padding: 14px 16px 20px; }
 }

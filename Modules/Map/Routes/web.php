@@ -16,4 +16,13 @@ use Modules\Map\Http\Controllers\MapController;
 Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
     Route::get('/public/map', [MapController::class, 'publicIndex'])->name('public.map');
     Route::get('/public/map/crime', [MapController::class, 'crime'])->name('public.map.crime');
+
+    // A police district's own address, to share, like /public/map/johor/batu-pahat: the public map with its pin open,
+    // and for the preview WhatsApp and the like show of the link, an image of its chart.
+    Route::get('/public/map/{region}/{district}', [MapController::class, 'publicDistrict'])
+        ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
+        ->name('public.map.district');
+    Route::get('/public/map/{region}/{district}/preview.png', [MapController::class, 'districtPreview'])
+        ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
+        ->name('public.map.district.preview');
 });

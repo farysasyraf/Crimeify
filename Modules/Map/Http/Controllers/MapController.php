@@ -7,6 +7,7 @@ use App\Http\Middleware\SetPublicLocale;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
 use Modules\Map\Entities\Population;
 use Modules\Map\Support\CrimeRates;
+use Modules\Map\Support\DistrictPreview;
 use Modules\Map\Support\StateCrime;
 
 // The Map module's pages.
@@ -25,41 +27,125 @@ class MapController extends Controller
      * for each police district with its crime figures for a chosen year. Under it, the police stations of a chosen
      * state, with the chosen one's address and phone number.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        return $this->page(public: false);
+        return $this->page(public: false, open: $this->opening($request));
     }
 
     /**
      * The same map for everyone, without logging in, in the public pages' layout (/public/map).
      */
-    public function publicIndex(): View
+    public function publicIndex(Request $request): View
     {
-        return $this->page(public: true);
+        return $this->page(public: true, open: $this->opening($request));
     }
 
-    private function page(bool $public): View
+    /**
+     * A police district's own address, to share (/public/map/johor/batu-pahat): the public map with its pin open, and
+     * the Open Graph tags that WhatsApp and the like make the link's preview from, with an image of its chart.
+     */
+    public function publicDistrict(string $region, string $district): View
+    {
+        $found = PoliceDistrict::findByPath($region, $district) ?? abort(404);
+        $preview = DistrictPreview::of($found);
+        $path = $found->path() + $this->language();
+
+        return $this->page(public: true, open: ['kind' => 'district', 'region' => $found->Region, 'name' => $found->Name, 'label' => $found->Name], share: [
+            'title' => $preview->title(),
+            'description' => $preview->description(),
+            'url' => route('public.map.district', $path),
+            'image' => route('public.map.district.preview', $path + ['v' => $preview->version()]),
+            'alt' => $preview->alt(),
+        ]);
+    }
+
+    /**
+     * A police district's chart as a PNG image, for its link's preview. Its address changes with the figures (?v=),
+     * so it can be kept a day.
+     */
+    public function districtPreview(string $region, string $district): Response
+    {
+        $found = PoliceDistrict::findByPath($region, $district) ?? abort(404);
+
+        return response(DistrictPreview::of($found)->png(), 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
+     * @param  array{kind: string, region: string, label: string, name?: string, id?: int}|null  $open
+     * @param  array{title: string, description: string, url: string, image: string, alt: string}|null  $share
+     */
+    private function page(bool $public, ?array $open = null, ?array $share = null): View
     {
         $regions = collect(config('map.states'))
             ->map(fn (array $region, string $code) => $region + ['code' => $code])
             ->sortBy('name')
             ->values();
+        $years = $this->years();
 
         return view('map::index', [
             'public' => $public,
             'states' => $regions->where('territory', false)->values(),
             'territories' => $regions->where('territory', true)->values(),
             'boundaries' => versioned_asset(config('map.boundaries')),
-            'years' => $this->years(),
+            'years' => $years,
+            // The latest year, or with a police district or station to open, the latest with police district pins.
+            'selectedYear' => ($open ? max([0, ...array_intersect($years, StateCrime::districtYears())]) : 0) ?: end($years),
+            'open' => $open,
+            'share' => $share,
             'hasPopulation' => $this->hasPopulation(),
             'stations' => $this->stations(),
             // The pins' figures come from MapController@crime: in the app, as "map/crime" added on the Routes page;
             // on the public map, from its own address in Routes/web.php.
             // On the public map, in the page's language, even where cookies aren't kept.
             'crimeUrl' => $public
-                ? route('public.map.crime', app()->getLocale() === SetPublicLocale::defaultLocale() ? [] : ['lang' => app()->getLocale()])
+                ? route('public.map.crime', $this->language())
                 : (Route::has('map/crime') ? route('map/crime') : null),
         ]);
+    }
+
+    /**
+     * The police district (?district=johor/batu-pahat) or station (?station=12) to open on the map, as the command
+     * palette links to them, if there is one.
+     *
+     * @return array{kind: string, region: string, label: string, name?: string, id?: int}|null
+     */
+    private function opening(Request $request): ?array
+    {
+        // Text, as the palette gives them, not ?district[]=.
+        [$district, $station] = [$request->query('district'), $request->query('station')];
+
+        try {
+            if (is_string($district) && $district !== '') {
+                [$region, $name] = array_pad(explode('/', $district, 2), 2, '');
+                $found = PoliceDistrict::findByPath($region, $name);
+
+                return $found ? ['kind' => 'district', 'region' => $found->Region, 'name' => $found->Name, 'label' => $found->Name] : null;
+            }
+
+            if (is_string($station) && ctype_digit($station)) {
+                $found = PoliceStation::find((int) $station);
+
+                return $found ? ['kind' => 'station', 'region' => $found->Region, 'id' => $found->Id, 'label' => $found->Name] : null;
+            }
+        } catch (QueryException) {
+            // The tables aren't there until migrate runs.
+        }
+
+        return null;
+    }
+
+    /**
+     * On the public pages, the page's language for the addresses they give, so a link keeps it, even where cookies
+     * aren't kept. English, the default, needs none.
+     *
+     * @return array<string, string>
+     */
+    private function language(): array
+    {
+        return app()->getLocale() === SetPublicLocale::defaultLocale() ? [] : ['lang' => app()->getLocale()];
     }
 
     /**
@@ -102,6 +188,8 @@ class MapController extends Controller
                     ? $this->totals($figures[$place][$previousYear])
                     : null,
                 'types' => $this->types($figures[$place][$year]),
+                // Its own public address, to share, in the app too: whoever it's sent to may not have a login.
+                'share' => route('public.map.district', $district->path() + $this->language()),
             ];
         }
 

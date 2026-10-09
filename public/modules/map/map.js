@@ -261,6 +261,45 @@
 
     // A police district's popup: each category's total and how it compares with the year before, then the
     // number of each crime type in it.
+    // A police district's own public address, to send, under its name in its popup: WhatsApp and the like show it with an
+    // image of the district's chart. None without one.
+    const shareRow = (district) => {
+        if (!district.share) {
+            return null;
+        }
+
+        const icon = (name) => {
+            const glyph = element('span', name, 'material-icon');
+            glyph.setAttribute('aria-hidden', 'true');
+            return glyph;
+        };
+        const share = element('div', undefined, 'crime-popup-share');
+
+        const whatsapp = element('a', undefined, 'crime-share');
+        const text = t(':name police district: crime each year', { name: district.name });
+        whatsapp.href = `https://wa.me/?text=${encodeURIComponent(`${text} ${district.share}`)}`;
+        whatsapp.target = '_blank';
+        whatsapp.rel = 'noopener';
+        whatsapp.append(icon('share'), t('Share on WhatsApp'));
+
+        const copy = element('button', undefined, 'crime-share');
+        const copyLabel = element('span', t('Copy link'));
+        copy.type = 'button';
+        copy.append(icon('link'), copyLabel);
+        copy.addEventListener('click', () => {
+            const copied = () => {
+                copyLabel.textContent = t('Link copied');
+                setTimeout(() => { copyLabel.textContent = t('Copy link'); }, 2000);
+            };
+            // Without the clipboard, as on a page that isn't https, the link to copy by hand.
+            const byHand = () => window.prompt(t('Copy this link'), district.share);
+            navigator.clipboard ? navigator.clipboard.writeText(district.share).then(copied, byHand) : byHand();
+        });
+
+        share.append(whatsapp, copy);
+        return share;
+    };
+
     const popup = (district) => {
         const content = element('div', undefined, 'crime-popup');
         const region = choices.get(district.region)?.dataset.name ?? district.region;
@@ -268,6 +307,7 @@
         content.append(
             element('h3', district.name),
             element('p', t('Police district in :region · :year', { region, year: crime.year }), 'crime-popup-place'),
+            ...[shareRow(district)].filter(Boolean),
         );
 
         for (const [category, types] of Object.entries(crime.types)) {
@@ -544,7 +584,11 @@
                 },
                 attribution: `${t('Boundaries')}: <a href="https://www.geoboundaries.org">geoBoundaries</a>`,
             }).addTo(map);
-            layers.get(selected)?.bringToFront();
+
+            // A region chosen before its shape was here, as a shared link or the palette can, is chosen again with it.
+            if (selected) {
+                select(selected);
+            }
         })
         .catch(() => showStatus(t("The states' boundaries couldn't load. Reload the page to try again.")));
 
@@ -752,7 +796,23 @@
         });
     }
 
+    // A police district or station given in the address, from a shared link or the command palette: the district's pin
+    // opened, or the station shown in "Find a police station" and the map at its district, once the pins are in
+    // (show, below), or straight away without them.
+    const opening = container.dataset.open ? JSON.parse(container.dataset.open) : null;
+    const openGiven = () => {
+        if (opening?.kind === 'district') {
+            go({ kind: 'district', region: opening.region, name: opening.name });
+        } else if (opening?.kind === 'station') {
+            const station = stations.find((candidate) => candidate.id === opening.id);
+            if (station) {
+                go({ kind: 'station', region: station.region, station });
+            }
+        }
+    };
+
     if (!container.dataset.crime) {
+        openGiven();
         return;
     }
 
@@ -1034,9 +1094,13 @@
         placeTimeline();
         describe(selected);
 
-        // Malaysia framed again clear of the new timeline and credits, unless a region has been chosen meanwhile.
-        if (first && !selected) {
-            map.fitBounds(malaysia, uncovered());
+        // Malaysia framed again clear of the new timeline and credits, unless a region has been chosen meanwhile; then
+        // the district or station the address gives.
+        if (first) {
+            if (!selected) {
+                map.fitBounds(malaysia, uncovered());
+            }
+            openGiven();
         }
     };
 
