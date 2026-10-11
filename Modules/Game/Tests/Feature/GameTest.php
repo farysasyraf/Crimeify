@@ -71,7 +71,9 @@ class GameTest extends TestCase
 
         $this->get('/public/game')->assertOk()
             ->assertSee('<title>Higher or Lower · '.config('app.name').'</title>', false)
-            ->assertSee('<h1>Higher or Lower</h1>', false)
+            // The title as drawn, with the heading's text.
+            ->assertSee('<h1 class="game-title">', false)
+            ->assertSee('<img src="'.versioned_asset('modules/game/title.svg').'" alt="Higher or Lower" lang="en" width="4375" height="2368" />', false)
             ->assertSee('class="public-link active" aria-current="page"', false)
             ->assertSee('data-guess="'.route('public.game.guess').'" data-seconds="20"', false)
             ->assertSee('action="'.route('public.game.start').'" data-game-start', false)
@@ -82,6 +84,20 @@ class GameTest extends TestCase
         $this->get('/public/dashboard')->assertSeeInOrder([route('public.map'), 'Map', route('public.game'), 'Game'], false);
 
         $this->assertGuest();
+    }
+
+    public function test_the_title_is_drawn(): void
+    {
+        $svg = file_get_contents(public_path('modules/game/title.svg'));
+
+        // HIGHER in green, LOWER in red, as the page's width and height for it say.
+        $this->assertStringContainsString('aria-label="Higher or Lower"', $svg);
+        $this->assertStringContainsString('viewBox="0 0 4375 2368"', $svg);
+        $this->assertStringContainsString('<g fill="#59ac51">', $svg);
+        $this->assertStringContainsString('<g fill="#c75555">', $svg);
+
+        // Its lettering is Montserrat's, whose licence goes with it.
+        $this->assertFileExists(public_path('modules/game/Montserrat-OFL.txt'));
     }
 
     public function test_with_no_figures_the_game_says_so(): void
@@ -355,7 +371,10 @@ class GameTest extends TestCase
         ]);
 
         $this->get('/public/game?lang=ms')->assertOk()
-            ->assertSee('<h1>Tinggi atau Rendah</h1>', false)
+            // The game's name stays in English, as its title is drawn.
+            ->assertSee('<title>Higher or Lower · '.config('app.name').'</title>', false)
+            ->assertSee('<img src="'.versioned_asset('modules/game/title.svg').'" alt="Higher or Lower" lang="en" width="4375" height="2368" />', false)
+            ->assertSee('Daerah polis mana yang mencatat lebih banyak jenayah?')
             ->assertSeeInOrder(['Papan Pemuka', 'Peta', 'Permainan'])
             ->assertSee('data-guess="'.route('public.game.guess', ['lang' => 'ms']).'"', false)
             ->assertSee('action="'.route('public.game.start', ['lang' => 'ms']).'"', false)

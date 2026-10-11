@@ -1,15 +1,22 @@
 /* Higher or Lower (game.js): the two cards side by side, as the dashboard's dark, rounded cards, with VS between
-   them, and over them the score and the time left. A right guess lights its card mint and a wrong one coral. As
-   elsewhere, up is red and down is green, as more crime is worse. On a phone, the cards stack. */
+   them, and over them the score and the time left. A right guess lights its card mint and a wrong one coral. Higher's
+   arrow is the title's green and Lower's its red, unlike the rest of the app, where up is red as more crime is worse:
+   here they're guesses, not trends. On a phone, the cards stack. */
 .game {
-    --game-up: #ff8f8a;
-    --game-down: #7fd8a4;
+    --game-up: #59ac51;
+    --game-down: #c75555;
     --game-right: #7fd8a4;
     --game-wrong: #ff8f8a;
     --game-hurry: #f5b041;
 }
 /* The heading and the game, centred together. */
 .game-page { max-width: 960px; margin: 0 auto; }
+/* The title (title.svg), its arrows reaching above and below its words. */
+.game-title { margin: 0 0 12px; line-height: 0; }
+.game-title img { display: block; width: auto; height: 120px; }
+@media (max-width: 720px) {
+    .game-title img { height: 92px; }
+}
 /* Without JavaScript, the game can't be played, so only the rules show, with the note to turn it on. */
 html:not(.js) .game-start { display: none; }
 

@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
-@section('title', __('Higher or Lower'))
+{{-- The game's name stays in English in Bahasa Melayu too, as its title is drawn. --}}
+@section('title', 'Higher or Lower')
 @section('description', __('Which police district had more crime? A game with the Royal Malaysia Police\'s figures.'))
 
 @push('head')
@@ -9,14 +10,20 @@
 @endpush
 
 {{-- Higher or Lower, for everyone without logging in: a police district's count of a crime in a year, then another
-     card of the same crime with its count hidden, to guess whether it's higher or lower before the time runs out. game.js plays it,
-     asking GameController@start and @guess, which keep the cards and the score; the cards come from <template>s here,
-     so their words are in the page's language. Only administrators see the scores, on the Game scores page. --}}
+     card of the same crime with its count hidden, to guess whether it's higher or lower before the time runs out.
+     game.js plays it, asking GameController@start and @guess, which keep the cards and the score; the cards come from
+     <template>s here, so their words are in the page's language. Only administrators see the scores, on the Game
+     scores page. --}}
 @section('content')
 <div class="game-page">
 <div class="page-head">
     <div>
-        <h1>{{ __('Higher or Lower') }}</h1>
+        {{-- The title as drawn, HIGHER in green rising into an arrow over LOWER in red dropping into one, in both
+             languages (title.svg, by Resources/title/make_title.py). Its alt is the heading's text, in English as it
+             shows; its width and height, the drawing's, keep its room while it loads. --}}
+        <h1 class="game-title">
+            <img src="{{ versioned_asset('modules/game/title.svg') }}" alt="Higher or Lower" lang="en" width="4375" height="2368" />
+        </h1>
         <p class="muted">{{ __('Which police district had more crime? Guess whether the next count is higher or lower.') }}</p>
     </div>
 </div>
@@ -58,7 +65,7 @@
         </section>
 
         {{-- During a game: the score, the time left, and the two cards. --}}
-        <section class="game-board" data-game-board hidden aria-label="{{ __('Higher or Lower') }}">
+        <section class="game-board" data-game-board hidden aria-label="Higher or Lower">
             <div class="game-status">
                 <p class="game-score">{{ __('Score') }} <strong data-game-score>0</strong></p>
                 <div class="game-timer" aria-hidden="true"><span class="game-timer-bar" data-game-timer-bar></span></div>

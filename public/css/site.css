@@ -169,10 +169,16 @@ code {
 .public-footer .public-bar { display: block; padding-top: 16px; padding-bottom: 24px; }
 @media (max-width: 640px) {
     .public-bar { padding: 10px 16px; }
-    /* The pages share the width under the logo. */
+    /* The pages share the width under the logo, each as wide as its name needs, so all three fit on a line in either
+       language. */
     .public-nav { order: 3; width: 100%; }
-    .public-link { flex: 1; justify-content: center; }
+    .public-link { flex: 1 1 auto; justify-content: center; gap: 6px; padding: 8px 10px; }
     .public-main { padding: 20px 16px 32px; }
+}
+/* The narrowest phones: a little tighter still, so the pages don't make the page wider than the screen. */
+@media (max-width: 360px) {
+    .public-nav { gap: 4px; }
+    .public-link { gap: 4px; padding: 8px 6px; font-size: .875rem; }
 }
 
 /* Login page */
