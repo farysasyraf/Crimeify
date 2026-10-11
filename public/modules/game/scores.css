@@ -29,3 +29,11 @@
 @media (max-width: 600px) {
     .scores-board { padding: 14px; }
 }
+
+/* Hosting a live game: what it is beside the rounds to choose and the button. */
+.scores-live { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; }
+.scores-live > div { flex: 1 1 360px; }
+.scores-live p { margin: 0; font-size: .9rem; }
+.scores-live-form { margin-bottom: 0; }
+.scores-live-form .select2-container { width: 96px !important; }
+.scores-host { display: block; font-size: .8125rem; }

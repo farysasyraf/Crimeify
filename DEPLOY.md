@@ -301,7 +301,7 @@ docker run --rm -p 8080:80 -e APP_KEY="<a key>" -e APP_URL=http://localhost:8080
 
 ## Limits to know about
 
-- **One instance.** Uploads waiting for review (`storage/app/private/*-uploads`) live on the container's disk, so a second instance wouldn't find the first one's. Fine for this app's size; scale up (a bigger plan) rather than out.
+- **One instance.** Uploads waiting for review (`storage/app/private/*-uploads`) live on the container's disk, so a second instance wouldn't find the first one's, and so does each live game's state, which the players' phones check every second (`game.live.store`). Fine for this app's size; scale up (a bigger plan) rather than out.
 - **No route cache.** The Routes page adds routes from the database on every request, so `route:cache` would hide its changes. The entrypoint only caches settings and views.
 - **The street map needs the internet** from the visitor's browser (tiles), as before. The regions, pins and figures come from the app.
 

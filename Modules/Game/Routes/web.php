@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Game\Http\Controllers\GameController;
+use Modules\Game\Http\Controllers\LivePlayController;
 
 // The Game scores page in the app (game-scores, GameScoreController@index) and its winner actions are routes saved on
 // the Routes page, for ADMIN to start with, so who can see the scores is set there. The module's RouteServiceProvider
@@ -14,4 +15,8 @@ Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
     Route::get('/public/game', [GameController::class, 'publicIndex'])->name('public.game');
     Route::post('/public/game/start', [GameController::class, 'start'])->name('public.game.start');
     Route::post('/public/game/guess', [GameController::class, 'guess'])->name('public.game.guess');
+
+    // A live game's page, to join with the code on the host's big screen and play on (LivePlayController). Joining,
+    // the checks and the answers are in Routes/api.php.
+    Route::get('/public/game/live', [LivePlayController::class, 'page'])->name('public.game.live');
 });

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 // One game of Higher or Lower, stored in dbo.GameRuns: who played it, its score, and the two cards in play.
@@ -31,6 +32,30 @@ class GameRun extends Model
             'StartedAt' => 'datetime',
             'EndedAt' => 'datetime',
         ];
+    }
+
+    /**
+     * The name a player typed, for a solo or a live game, tidied (tidyName()) and checked: 2 to config('game.name_length')
+     * letters, numbers and spaces, and a few marks names have, starting with a letter or number. A problem is a
+     * validation error, in the page's language.
+     */
+    public static function validName(Request $request): string
+    {
+        if (is_string($request->input('name'))) {
+            $request->merge(['name' => self::tidyName($request->input('name'))]);
+        }
+
+        $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:'.config('game.name_length'), "regex:/^[\\pL\\pM\\pN][\\pL\\pM\\pN .'’@\\/-]*$/u"],
+        ], [
+            'name.required' => __('Type your name to play.'),
+            'name.min' => __('Type your name to play.'),
+            'name.max' => __('Your name can be at most :max characters.', ['max' => config('game.name_length')]),
+            // Like "Muthu a/l Rajan" or "Nur Aisyah bt. Ahmad".
+            'name.regex' => __('Your name can have letters, numbers and spaces, and . \' @ / or -.'),
+        ]);
+
+        return $request->input('name');
     }
 
     /**

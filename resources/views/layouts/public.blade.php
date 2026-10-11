@@ -31,9 +31,12 @@
                 <img src="{{ versioned_asset('images/logo.png') }}" alt="" width="30" height="30" />
                 {{ config('app.name') }}
             </a>
+            {{-- A page shown on a big screen, like a live game's for the room (section presenting), has only the logo. --}}
+            @sectionMissing('presenting')
             <nav class="public-nav" aria-label="{{ __('Pages') }}">
                 @foreach ($pages as $page)
-                    @php $current = request()->routeIs($page['route']); @endphp
+                    {{-- The page, or one under it, like a live game's under the game's. --}}
+                    @php $current = request()->routeIs($page['route'], $page['route'].'.*'); @endphp
                     <a href="{{ route($page['route']) }}" @class(['public-link', 'active' => $current]) aria-current="{{ $current ? 'page' : 'false' }}">
                         <span class="material-icon" aria-hidden="true">{{ $page['icon'] }}</span>{{ $page['label'] }}
                     </a>
@@ -47,6 +50,7 @@
                     <a class="btn btn-sm btn-primary" href="{{ route('login') }}">{{ __('Log in') }}</a>
                 @endauth
             </div>
+            @endif
         </div>
     </header>
 

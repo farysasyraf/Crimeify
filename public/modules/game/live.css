@@ -1,0 +1,98 @@
+/* Live games (live.js on the players' phones, live-host.js on the big screen), on top of game.css's cards and panels:
+   the code, the players as they join, the countdown to each round, how a player did, the leaderboard, and the podium.
+   The big screen is wider, and its type larger, to read from across a room. */
+.game-live-link { align-self: center; }
+
+/* One panel at a time, centred: waiting, getting ready, the end. */
+.live-panel { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 12px; padding: 36px 24px; text-align: center; }
+.live-panel h2 { margin: 0; font-size: 1.5rem; }
+.live-panel h2:focus { outline: none; }
+.live-panel p { margin: 0; }
+.live-panel-icon { color: var(--primary); font-size: 44px; }
+.live-count { color: var(--accent-soft); font-weight: 600; }
+.live-round { color: var(--accent-soft); font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.live-countdown { color: var(--text); font-size: 6rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+
+/* The code, as typed on a phone and as shown on the big screen. */
+.live-code-field { font-size: 1.4rem !important; font-weight: 700; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
+.live-code { margin: 0; color: var(--text); font-size: 3.25rem; font-weight: 800; line-height: 1; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+
+/* How the player did, or where the round is up to, over the cards. */
+.live-note { margin: 0 0 14px; color: var(--muted); font-weight: 600; text-align: center; }
+.live-note.is-right { color: var(--game-right); font-size: 1.15rem; }
+.live-note.is-wrong { color: var(--game-wrong); }
+.live-standing { margin: 14px 0 0; color: var(--accent-soft); font-weight: 600; text-align: center; }
+.live-place { color: var(--accent-soft); font-size: 1.15rem; font-weight: 700; }
+
+/* The players' names as they join, as chips. */
+.live-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 760px; margin: 8px 0 0; padding: 0; list-style: none; }
+.live-names li {
+    padding: 6px 14px; border-radius: 999px; background: var(--nav-active-bg); color: var(--text); font-weight: 600;
+    animation: live-chip-in .25s ease-out;
+}
+@keyframes live-chip-in { from { opacity: 0; transform: scale(.9); } }
+
+/* A leaderboard: place, name and points a row, the top three's places in gold, silver and bronze, the player's own
+   row marked. */
+.live-board-heading { margin: 12px 0 4px; color: var(--muted); font-size: .8125rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.live-board { width: 100%; max-width: 520px; margin: 0; padding: 0; list-style: none; text-align: left; }
+.live-board-row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 12px; }
+.live-board-row + .live-board-row { margin-top: 2px; }
+.live-board-row:nth-child(odd) { background: rgba(255, 255, 255, .03); }
+.live-board-row.is-you { background: var(--nav-active-bg); box-shadow: inset 0 0 0 1px rgba(58, 170, 242, .45); }
+.live-board-rank {
+    display: inline-grid; place-items: center; flex: none; min-width: 30px; height: 30px; padding: 0 6px;
+    border-radius: 999px; background: rgba(255, 255, 255, .06); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.is-top-1 .live-board-rank { background: rgba(245, 176, 65, .2); color: #f5c26b; }
+.is-top-2 .live-board-rank { background: rgba(180, 190, 200, .18); color: #d3dae1; }
+.is-top-3 .live-board-rank { background: rgba(205, 140, 90, .2); color: #e0a77a; }
+.live-board-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.live-board-score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.live-board-gap { padding: 2px 12px; color: var(--muted); text-align: center; }
+
+/* The big screen. */
+.live-host { max-width: 1200px; }
+.live-host.is-hurrying .game-timer-bar { background: var(--game-hurry); }
+.live-host.is-hurrying .game-seconds { color: var(--game-hurry); }
+.live-host-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; margin-bottom: 20px; }
+.live-host-join { text-align: right; }
+.live-host-join p { margin: 0 0 6px; color: var(--muted); font-size: 1.05rem; }
+.live-host-join strong { color: var(--primary); }
+.live-host-join .live-code { margin: 0; color: var(--text); font-size: 3.25rem; }
+.live-host .game-card { min-height: 340px; }
+.live-host .game-card-district { font-size: 2rem; }
+.live-host .game-card-count strong { font-size: 3.5rem; }
+.live-host .live-note { font-size: 1.35rem; color: var(--text); }
+.live-host-top { display: grid; justify-items: center; margin-top: 18px; }
+.live-host-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.live-host-foot { display: flex; justify-content: center; margin-top: 24px; }
+
+/* The podium: second, first and third, the first tallest. */
+.live-podium { display: flex; align-items: flex-end; justify-content: center; gap: 12px; width: 100%; max-width: 640px; margin: 8px 0 12px; padding: 0; list-style: none; }
+.live-podium-step {
+    display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 0;
+    padding: 16px 10px; border-radius: 16px 16px 6px 6px; background: var(--raised);
+}
+.live-podium-step.is-top-1 { min-height: 190px; background: rgba(245, 176, 65, .16); }
+.live-podium-step.is-top-2 { min-height: 150px; background: rgba(180, 190, 200, .12); }
+.live-podium-step.is-top-3 { min-height: 120px; background: rgba(205, 140, 90, .14); }
+.live-podium-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1.15rem; font-weight: 700; }
+.live-podium-score { color: var(--muted); font-variant-numeric: tabular-nums; }
+.live-podium-rank { margin-top: auto; font-size: 2.5rem; font-weight: 800; line-height: 1; }
+.is-top-1 .live-podium-rank { color: #f5c26b; }
+.is-top-2 .live-podium-rank { color: #d3dae1; }
+.is-top-3 .live-podium-rank { color: #e0a77a; }
+
+@media (max-width: 720px) {
+    .game-live-link { align-self: flex-start; }
+    .live-countdown { font-size: 4.5rem; }
+    .live-code { font-size: 2.5rem; }
+    .live-host-join { text-align: left; }
+    .live-host .game-card { min-height: 0; }
+    .live-host .game-card-district { font-size: 1.3rem; }
+    .live-host .game-card-count strong { font-size: 2.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .live-names li { animation: none; }
+}

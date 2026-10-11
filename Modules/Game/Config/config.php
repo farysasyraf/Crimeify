@@ -43,6 +43,26 @@ return [
         'theft_vehicle_lorry' => 'local_shipping',
     ],
 
+    // Live games, hosted from the Game scores page like a quiz night: everyone joins with the game's code on their
+    // phone, and each round shows everyone the same two cards at once, for config('game.seconds') to answer. A right
+    // answer scores more the sooner it comes.
+    'live' => [
+        // The rounds a host can choose from, and the choice to start with.
+        'rounds' => ['least' => 3, 'most' => 30, 'default' => 10],
+        // Seconds to get ready before each round's cards can be answered, so every phone shows them at the same moment.
+        'ready' => 3,
+        // A right answer's points: all of them straight away, half at the last moment.
+        'points' => 1000,
+        // Seconds an answer may take to arrive after the round closes.
+        'grace' => 1,
+        // Hours a game can be joined for after it's made.
+        'hours' => 12,
+        // Where each game's state is kept between the phones' checks, about every second, and for how many seconds, so
+        // they don't each read the database. The file store, as the site runs as one instance (DEPLOY.md).
+        'store' => 'file',
+        'keep' => 2,
+    ],
+
     // The longest name a player can give.
     'name_length' => 40,
 ];

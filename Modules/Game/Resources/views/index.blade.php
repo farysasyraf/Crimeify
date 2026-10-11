@@ -18,14 +18,13 @@
 <div class="game-page">
 <div class="page-head">
     <div>
-        {{-- The title as drawn, HIGHER in green rising into an arrow over LOWER in red dropping into one, in both
-             languages (title.svg, by Resources/title/make_title.py). Its alt is the heading's text, in English as it
-             shows; its width and height, the drawing's, keep its room while it loads. --}}
-        <h1 class="game-title">
-            <img src="{{ versioned_asset('modules/game/title.svg') }}" alt="Higher or Lower" lang="en" width="4375" height="2368" />
-        </h1>
+        @include('game::_title')
         <p class="muted">{{ __('Which police district had more crime? Guess whether the next count is higher or lower.') }}</p>
     </div>
+    {{-- A live game, hosted on a big screen: its page asks for the code. --}}
+    <a class="btn btn-outline game-live-link" href="{{ route('public.game.live') }}">
+        <span class="material-icon" aria-hidden="true">groups</span>{{ __('Join a live game') }}
+    </a>
 </div>
 
 @if (! $ready)
@@ -90,29 +89,7 @@
             </div>
         </section>
 
-        {{-- A card, filled in by game.js: the one shown, with its count, or the one to guess, with the buttons. --}}
-        <template data-game-card>
-            <article class="game-card">
-                <span class="material-icon game-card-icon" aria-hidden="true" data-card="icon"></span>
-                <p class="game-card-type" data-card="type"></p>
-                <h3 class="game-card-district" data-card="district"></h3>
-                <p class="game-card-where"><span data-card="place"></span> · <span data-card="year"></span></p>
-                <div class="game-card-foot">
-                    <p class="game-card-count" data-card="count" hidden><strong data-card="crimes"></strong> <span>{{ __('crimes') }}</span></p>
-                    <div class="game-guess" data-card="guess" hidden>
-                        <p class="game-guess-ask" data-card="ask"></p>
-                        <div class="game-guess-buttons">
-                            <button type="button" class="btn game-higher" data-guess="higher">
-                                <span class="material-icon" aria-hidden="true">arrow_upward</span>{{ __('Higher') }}
-                            </button>
-                            <button type="button" class="btn game-lower" data-guess="lower">
-                                <span class="material-icon" aria-hidden="true">arrow_downward</span>{{ __('Lower') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </template>
+        @include('game::_card')
     </div>
 @endif
 </div>

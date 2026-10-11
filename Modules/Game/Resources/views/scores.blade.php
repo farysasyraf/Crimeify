@@ -1,13 +1,16 @@
 @extends('layouts.app')
 
+@use('Modules\Game\Entities\LiveGame')
+
 @section('title', 'Game scores')
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/scores.css') }}" />
 @endpush
 
-{{-- Higher or Lower's scores, for administrators only: each player's best game between the dates chosen, best first,
-     to choose the winner from, then the winners chosen so far. The game itself is public, at /public/game. --}}
+{{-- Higher or Lower's scores, for administrators only: hosting a live game, each player's best solo game between the
+     dates chosen, best first, to choose the winner from, then the winners chosen so far, then the live games. The game
+     itself is public, at /public/game. --}}
 @section('content')
 <div class="page-head">
     <div>
@@ -21,6 +24,33 @@
         <span class="material-icon btn-icon" aria-hidden="true">sports_esports</span>Open the game
     </a>
 </div>
+
+{{-- A live game, for a room: everyone joins with its code on their phone, and the big screen runs it. --}}
+<section class="card scores-board scores-live" aria-labelledby="host-heading">
+    <div>
+        <h2 id="host-heading">Host a live game</h2>
+        <p class="muted">
+            Like a quiz night: put its big screen on a projector or share it in a meeting, and everyone joins with its
+            code on their phone. Each round shows everyone the same two cards, and the sooner a right answer, the more
+            points. Its leaderboard shows at the end.
+        </p>
+    </div>
+    <form method="post" action="{{ page_url('game-scores/store-live') }}" class="scores-filters scores-live-form"
+        data-confirm="Are you sure you want to host a live game now?" data-confirm-kind="save">
+        @csrf
+        <div>
+            <label for="live-rounds">Rounds</label>
+            <select id="live-rounds" name="rounds">
+                @foreach (range($rounds['least'], $rounds['most']) as $count)
+                    <option value="{{ $count }}" @selected($count === (int) old('rounds', $rounds['default']))>{{ $count }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <span class="material-icon btn-icon" aria-hidden="true">groups</span>Host a live game
+        </button>
+    </form>
+</section>
 
 <section class="card scores-board" aria-labelledby="leaderboard-heading">
     <form method="get" action="{{ page_url('game-scores') }}" class="scores-filters">
@@ -137,6 +167,62 @@
                                     @if ($to)<input type="hidden" name="to" value="{{ $to }}" />@endif
                                     <button type="submit" class="btn btn-sm btn-danger-ghost">Remove</button>
                                 </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</section>
+
+{{-- The newest live games, each with where it's up to and its winner, and its big screen: after the game, its final
+     leaderboard. --}}
+<section class="card scores-board" aria-labelledby="live-games-heading">
+    <h2 id="live-games-heading">Live games</h2>
+    @if ($liveGames->isEmpty())
+        <p class="scores-empty muted">None yet. Host one above.</p>
+    @else
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Hosted</th>
+                        <th>Rounds</th>
+                        <th>Players</th>
+                        <th>Winner</th>
+                        <th class="actions"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($liveGames as $live)
+                        @php $top = $live->Status === LiveGame::Finished ? $live->players->first() : null; @endphp
+                        <tr>
+                            <td class="nowrap scores-score">{{ $live->spacedCode() }}</td>
+                            <td class="nowrap muted">{{ $live->CreatedAt->format('d M Y, H:i') }} <span class="scores-host">by {{ $live->HostName }}</span></td>
+                            <td>
+                                @if ($live->Status === LiveGame::Lobby)
+                                    {{ $live->Rounds }}, not started
+                                @elseif ($live->Status === LiveGame::Playing)
+                                    Round {{ $live->Round }} of {{ $live->Rounds }}
+                                @else
+                                    {{ $live->Rounds }}
+                                @endif
+                            </td>
+                            <td>{{ $live->players->count() }}</td>
+                            <td>
+                                @if ($top)
+                                    <span class="material-icon scores-trophy" aria-hidden="true">emoji_events</span>{{ $top->PlayerName }}
+                                    <span class="muted">· {{ number_format($top->Score) }} points</span>
+                                @else
+                                    <span class="muted">—</span>
+                                @endif
+                            </td>
+                            <td class="actions">
+                                <a class="btn btn-sm" href="{{ page_url('game-scores/live', ['liveGame' => $live]) }}">
+                                    {{ $live->Status === LiveGame::Finished ? 'Results' : 'Big screen' }}
+                                </a>
                             </td>
                         </tr>
                     @endforeach

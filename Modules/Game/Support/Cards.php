@@ -104,19 +104,19 @@ class Cards
     }
 
     /**
-     * A card as the page shows it, in the page's language: the crime type, the police district, the region its pin
-     * is in, the year, an icon, and the count unless it's the one to guess.
+     * A card as the page shows it, in the page's language, or the one given: the crime type, the police district, the
+     * region its pin is in, the year, an icon, and the count unless it's the one to guess.
      *
      * @param  array{state: string, district: string, category: string, type: string, year: int, crimes: int}  $card
      * @return array<string, int|string>
      */
-    public function face(array $card, bool $withCount): array
+    public function face(array $card, bool $withCount, ?string $locale = null): array
     {
         $district = PoliceDistrict::query()->where('State', $card['state'])->where('Name', $card['district'])->first();
         $icons = config('game.icons');
 
         return [
-            'type' => __(CrimeData::typeLabel($card['category'], $card['type'])),
+            'type' => __(CrimeData::typeLabel($card['category'], $card['type']), [], $locale),
             'district' => $card['district'],
             'place' => $district?->regionName() ?? $card['state'],
             'year' => $card['year'],

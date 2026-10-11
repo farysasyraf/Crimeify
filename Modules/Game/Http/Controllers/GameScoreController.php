@@ -10,11 +10,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Modules\Game\Entities\GameRun;
 use Modules\Game\Entities\GameWinner;
+use Modules\Game\Entities\LiveGame;
 
 // The Game scores page, where administrators see how everyone did at Higher or Lower and choose the winner: each
 // player's best score from the games played between the dates chosen, best first, and the winners chosen so far. A
-// player is everyone who gave the same name, whatever its capitals. Its routes are on the Routes page, for ADMIN to
-// start with: the game is public, but the scores aren't.
+// player is everyone who gave the same name, whatever its capitals. Live games are hosted from here too (Host a live
+// game, LiveGameController), and listed under the winners. Its routes are on the Routes page, for ADMIN to start with:
+// the game is public, but the solo game's scores aren't.
 class GameScoreController extends Controller
 {
     /**
@@ -49,6 +51,13 @@ class GameScoreController extends Controller
             'gameCount' => (int) $played->sum(),
             'winners' => $winners,
             'winningRuns' => $winners->pluck('GameRunId')->filter()->flip(),
+            'rounds' => config('game.live.rounds'),
+            // The newest live games, each with its players, most points first, for its winner.
+            'liveGames' => LiveGame::query()
+                ->with(['players' => fn ($query) => $query->orderByDesc('Score')->orderBy('PlayerName')])
+                ->orderByDesc('Id')
+                ->limit(20)
+                ->get(),
         ]);
     }
 

@@ -41,19 +41,7 @@ class GameController extends Controller
      */
     public function start(Request $request): JsonResponse
     {
-        if (is_string($request->input('name'))) {
-            $request->merge(['name' => GameRun::tidyName($request->input('name'))]);
-        }
-
-        $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:'.config('game.name_length'), "regex:/^[\\pL\\pM\\pN][\\pL\\pM\\pN .'’@\\/-]*$/u"],
-        ], [
-            'name.required' => __('Type your name to play.'),
-            'name.min' => __('Type your name to play.'),
-            'name.max' => __('Your name can be at most :max characters.', ['max' => config('game.name_length')]),
-            // Like "Muthu a/l Rajan" or "Nur Aisyah bt. Ahmad".
-            'name.regex' => __('Your name can have letters, numbers and spaces, and . \' @ / or -.'),
-        ]);
+        $name = GameRun::validName($request);
 
         $cards = $this->cards->deal(0);
         abort_if($cards === null, 503, __('There are no crime figures to play with yet.'));
@@ -61,8 +49,8 @@ class GameController extends Controller
 
         $run = GameRun::create([
             'Token' => Str::random(48),
-            'PlayerName' => $request->input('name'),
-            'PlayerKey' => GameRun::keyFor($request->input('name')),
+            'PlayerName' => $name,
+            'PlayerKey' => GameRun::keyFor($name),
             'Score' => 0,
             'Current' => $first,
             'Next' => $next,
