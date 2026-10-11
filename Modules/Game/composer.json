@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/game",
+    "description": "The Higher or Lower game, and its scores for administrators.",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Game\\": "",
+            "Modules\\Game\\Database\\Factories\\": "Database/factories/",
+            "Modules\\Game\\Database\\Seeders\\": "Database/Seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Game\\Tests\\": "Tests/"
+        }
+    }
+}

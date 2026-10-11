@@ -1,0 +1,31 @@
+/* Game scores page: the dates to show games from above the leaderboard, the top three's ranks in gold, silver and
+   bronze, then the winners chosen so far. */
+.scores-board { margin-bottom: 20px; padding: 18px 20px; }
+.scores-board h2 { margin: 0 0 6px; font-size: 1.05rem; }
+.scores-period { margin-left: 6px; color: var(--accent-soft); font-size: .875rem; font-weight: 500; }
+.scores-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: 18px; }
+.scores-filters label { display: block; margin-bottom: 4px; color: var(--muted); font-size: .875rem; font-weight: 500; }
+/* A day, as the app's other fields. */
+.scores-filters input[type=date] {
+    padding: 8px 12px; font: inherit; color: var(--text); color-scheme: dark;
+    background: var(--field); border: 1px solid var(--field-border); border-radius: 10px;
+}
+.scores-filters input[type=date]:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.scores-filter-actions { display: flex; gap: 8px; }
+.scores-count, .scores-empty { margin: 0 0 8px; font-size: .875rem; }
+
+.scores-score { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.scores-rank {
+    display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 6px;
+    border-radius: 999px; font-weight: 700;
+}
+.scores-top:nth-child(1) .scores-rank { background: rgba(245, 176, 65, .2); color: #f5c26b; }
+.scores-top:nth-child(2) .scores-rank { background: rgba(180, 190, 200, .18); color: #d3dae1; }
+.scores-top:nth-child(3) .scores-rank { background: rgba(205, 140, 90, .2); color: #e0a77a; }
+.scores-winner { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; background: rgba(245, 176, 65, .16); color: #f5c26b; }
+.scores-winner .material-icon { font-size: 15px; }
+.scores-trophy { margin-right: 6px; color: #f5c26b; font-size: 18px; vertical-align: -3px; }
+
+@media (max-width: 600px) {
+    .scores-board { padding: 14px; }
+}

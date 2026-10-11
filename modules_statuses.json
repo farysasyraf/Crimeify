@@ -1,5 +1,6 @@
 {
     "Setup": true,
     "Map": true,
-    "Dashboard": true
+    "Dashboard": true,
+    "Game": true
 }

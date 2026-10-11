@@ -119,6 +119,8 @@ class PublicLanguageTest extends TestCase
             'Modules/Map/Support/CrimeRates.php', 'Modules/Map/Support/DistrictPreview.php',
             'public/modules/map/map.js', 'public/modules/map/station-finder.js', 'public/modules/dashboard/dashboard.js',
             'public/js/select2-init.js',
+            'Modules/Game/Resources/views/index.blade.php', 'Modules/Game/Http/Controllers/GameController.php',
+            'public/modules/game/game.js',
         ];
         $literal = '([\'"])((?:\\\\.|(?!\\1).)*)\\1';
         $patterns = [

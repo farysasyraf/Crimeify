@@ -1,0 +1,11 @@
+{
+    "name": "Game",
+    "alias": "game",
+    "description": "Higher or Lower, a game with the crime figures for everyone, and its scores for administrators.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Game\\Providers\\GameServiceProvider"
+    ],
+    "files": []
+}

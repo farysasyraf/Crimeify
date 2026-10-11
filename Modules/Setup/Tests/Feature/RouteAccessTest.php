@@ -80,6 +80,9 @@ class RouteAccessTest extends TestCase
             'PUT /crime-data/update' => 'Map\CrimeDataController@update',
             'POST /crime-data/upload' => 'Map\CrimeDataController@upload',
             'GET /dashboard' => 'Dashboard\DashboardController@index',
+            'GET /game-scores' => 'Game\GameScoreController@index',
+            'DELETE /game-scores/destroy-winner/{winner}' => 'Game\GameScoreController@destroyWinner',
+            'POST /game-scores/store-winner' => 'Game\GameScoreController@storeWinner',
             'GET /map' => 'Map\MapController@index',
             'GET /map/crime' => 'Map\MapController@crime',
             'GET /menu-items' => 'Setup\MenuItemController@index',
@@ -132,7 +135,7 @@ class RouteAccessTest extends TestCase
         $this->assertSame(['Users', 'Add user', 'Roles', 'Roles', 'Manage menu'], array_map($menuOf, ['users', 'users/create', 'roles', 'roles/create', 'menu-items']));
         $this->assertSame(['Dashboard', 'Crime data', 'Crime data', 'Map', 'Map'], array_map($menuOf, ['dashboard', 'crime-data', 'crime-data/download', 'map', 'map/crime']));
         foreach ($routes as $route) {
-            if (preg_match('~^(.+)/(store|edit|update|delete|destroy|upload|apply|cancel|photo|store-photo|destroy-photo)$~', $route->Path, $action)) {
+            if (preg_match('~^(.+)/(store|edit|update|delete|destroy|upload|apply|cancel|photo|store-photo|destroy-photo|store-winner|destroy-winner)$~', $route->Path, $action)) {
                 $this->assertSame($menuOf($action[1]), $route->menuItem?->Label, $route->Path);
             }
         }

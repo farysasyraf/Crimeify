@@ -29,5 +29,6 @@ parameters:
     databaseMigrationsPath:
         - database/migrations
         - Modules/Map/Database/Migrations
+        - Modules/Game/Database/Migrations
     # The models give their casts in casts(), as an array: read it, so a datetime column is a date, not a string.
     parseModelCastsMethod: true

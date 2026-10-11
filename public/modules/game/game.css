@@ -1,0 +1,105 @@
+/* Higher or Lower (game.js): the two cards side by side, as the dashboard's dark, rounded cards, with VS between
+   them, and over them the score and the time left. A right guess lights its card mint and a wrong one coral. As
+   elsewhere, up is red and down is green, as more crime is worse. On a phone, the cards stack. */
+.game {
+    --game-up: #ff8f8a;
+    --game-down: #7fd8a4;
+    --game-right: #7fd8a4;
+    --game-wrong: #ff8f8a;
+    --game-hurry: #f5b041;
+}
+/* The heading and the game, centred together. */
+.game-page { max-width: 960px; margin: 0 auto; }
+/* Without JavaScript, the game can't be played, so only the rules show, with the note to turn it on. */
+html:not(.js) .game-start { display: none; }
+
+/* Before and after a game: one panel. */
+.game-panel {
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px 36px; padding: 28px;
+    border: 1px solid rgba(255, 255, 255, .04); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
+}
+.game-rules h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.game-rules ol { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--muted); }
+.game-start { align-self: center; }
+.game-start .field { margin-bottom: 12px; }
+.game-error { margin: 0 0 12px; color: var(--error-text); font-size: .875rem; }
+.game-play { padding: 11px 22px; font-size: 1rem; font-weight: 600; }
+.game-note { margin: 14px 0 0; font-size: .8125rem; }
+
+/* The score, the bar of time left, and the seconds, amber for the last few. */
+.game-status { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.game-score { margin: 0; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.game-score strong { margin-left: 6px; color: var(--text); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.game-timer { flex: 1; height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, .08); }
+.game-timer-bar { display: block; height: 100%; border-radius: inherit; background: var(--primary); transform-origin: left; }
+.game-seconds { min-width: 44px; margin: 0; color: var(--muted); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.game.is-hurrying .game-timer-bar { background: var(--game-hurry); }
+.game.is-hurrying .game-seconds { color: var(--game-hurry); }
+
+/* The cards: what, where and when at the top, the count or the guess at the bottom. */
+.game-cards { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: stretch; gap: 16px; }
+.game-card {
+    display: flex; flex-direction: column; min-height: 300px; padding: 24px;
+    border: 1px solid rgba(255, 255, 255, .06); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.game-card-next { border-color: rgba(58, 170, 242, .35); }
+.game-card-icon {
+    display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 16px;
+    border-radius: 14px; background: var(--nav-active-bg); color: var(--primary); font-size: 30px;
+}
+.game-card-type { margin: 0; color: var(--accent-soft); font-size: .8125rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.game-card-district { margin: 4px 0 2px; font-size: 1.6rem; line-height: 1.2; overflow-wrap: anywhere; }
+.game-card-where { margin: 0; color: var(--muted); }
+.game-card-foot { margin-top: auto; padding-top: 20px; }
+.game-card-count { display: flex; align-items: baseline; gap: 8px; margin: 0; }
+.game-card-count strong { font-size: 2.75rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.game-card-count span { color: var(--muted); }
+.game-guess-ask { margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+.game-guess-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.game-guess-buttons .btn { padding: 12px; font-size: 1rem; font-weight: 600; }
+.game-guess-buttons .btn .material-icon { font-size: 20px; }
+.game-higher .material-icon { color: var(--game-up); }
+.game-lower .material-icon { color: var(--game-down); }
+.game-guess-buttons .btn:disabled { cursor: default; opacity: .6; }
+.game-guess-buttons .btn.is-chosen { opacity: 1; box-shadow: inset 0 0 0 2px var(--primary); }
+.game-card.is-right { border-color: var(--game-right); box-shadow: 0 0 0 1px var(--game-right), 0 0 36px rgba(127, 216, 164, .18); }
+.game-card.is-right .game-card-count strong { color: var(--game-right); }
+.game-card.is-wrong { border-color: var(--game-wrong); box-shadow: 0 0 0 1px var(--game-wrong), 0 0 36px rgba(255, 143, 138, .18); }
+.game-card.is-wrong .game-card-count strong { color: var(--game-wrong); }
+.game-vs {
+    display: grid; place-items: center; align-self: center; width: 48px; height: 48px;
+    border: 1px solid var(--border); border-radius: 50%; background: var(--bg); color: var(--muted);
+    font-size: .8125rem; font-weight: 800; letter-spacing: .04em;
+}
+/* The new card to guess slides in from where the next one comes. */
+.game-card.is-entering { animation: game-card-in .35s ease-out; }
+@keyframes game-card-in { from { opacity: 0; transform: translateX(24px); } }
+.game-keys { margin: 14px 0 0; font-size: .8125rem; text-align: center; }
+
+/* After a game: the score, large, and how it ended. */
+.game-over { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 40px 24px; text-align: center; }
+.game-over-icon { color: var(--primary); font-size: 48px; }
+.game-over h2 { margin: 0; font-size: 1.5rem; }
+.game-over h2:focus { outline: none; }
+.game-over-why { margin: 0; color: var(--muted); }
+.game-final { margin: 8px 0; color: var(--muted); font-weight: 600; }
+.game-final strong { display: block; color: var(--text); font-size: 3.5rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.game-over-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+@media (max-width: 720px) {
+    .game-panel { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+    .game-cards { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .game-vs { position: relative; z-index: 1; margin: -12px auto; }
+    .game-card { min-height: 0; padding: 18px 20px; }
+    .game-card-icon { width: 44px; height: 44px; margin-bottom: 10px; font-size: 26px; }
+    .game-card-district { font-size: 1.3rem; }
+    .game-card-count strong { font-size: 2.25rem; }
+    .game-card.is-entering { animation-name: game-card-up; }
+    /* Phones have no arrow keys. */
+    .game-keys { display: none; }
+}
+@keyframes game-card-up { from { opacity: 0; transform: translateY(16px); } }
+@media (prefers-reduced-motion: reduce) {
+    .game-card, .game-card.is-entering { animation: none; transition: none; }
+}

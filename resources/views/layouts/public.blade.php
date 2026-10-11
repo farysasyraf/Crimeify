@@ -14,14 +14,15 @@
     <script>document.documentElement.classList.add('js');</script>
     @include('layouts._translations')
 </head>
-{{-- The public pages, for everyone without logging in: the dashboard and the map, with the logo and links to both
-     along the top instead of the app's menu, so nothing of the app beyond them shows. They come in Bahasa Melayu or
-     English, chosen with the switch at the top (SetPublicLocale). --}}
+{{-- The public pages, for everyone without logging in: the dashboard, the map and the game, with the logo and links
+     to them along the top instead of the app's menu, so nothing of the app beyond them shows. They come in Bahasa
+     Melayu or English, chosen with the switch at the top (SetPublicLocale). --}}
 <body class="public-body">
     @php
         $pages = collect([
             ['route' => 'public.dashboard', 'label' => __('Dashboard'), 'icon' => 'dashboard'],
             ['route' => 'public.map', 'label' => __('Map'), 'icon' => 'map'],
+            ['route' => 'public.game', 'label' => __('Game'), 'icon' => 'sports_esports'],
         ])->filter(fn (array $page) => Route::has($page['route']));
     @endphp
     <header class="public-topbar">

@@ -1,0 +1,17 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\Game\Http\Controllers\GameController;
+
+// The Game scores page in the app (game-scores, GameScoreController@index) and its winner actions are routes saved on
+// the Routes page, for ADMIN to start with, so who can see the scores is set there. The module's RouteServiceProvider
+// loads this file inside the "web" middleware group.
+
+// The game, for everyone without logging in, and its start and guesses. They're here rather than on the Routes page,
+// which adds its routes behind the login, so they're always public. Each visitor can load them 120 times a minute, far
+// more than playing needs, even answering a card a second. It comes in Bahasa Melayu or English (SetPublicLocale).
+Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
+    Route::get('/public/game', [GameController::class, 'publicIndex'])->name('public.game');
+    Route::post('/public/game/start', [GameController::class, 'start'])->name('public.game.start');
+    Route::post('/public/game/guess', [GameController::class, 'guess'])->name('public.game.guess');
+});
