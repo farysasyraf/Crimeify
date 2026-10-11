@@ -1,7 +1,7 @@
 // Higher or Lower (GameController): starts a game with the name given, then shows the card with its count beside the
-// one to guess, with a clock running down. Higher, Lower, or the ↑ and ↓ keys send the guess; the server says whether
-// it was right and what the count was, which counts up on the card. Right, and the guessed card moves over and a new
-// one comes; wrong, or out of time, and the game is over. The server keeps the cards and the score, so this only shows
+// one to guess, of the same crime, with a clock running down. Higher, Lower, or the ↑ and ↓ keys send the guess; the
+// server says whether it was right and what the count was, which counts up on the card. Right, and the next round's two
+// cards come, of a crime chosen again; wrong, or out of time, and the game is over. The server keeps the cards and the score, so this only shows
 // them. The name is remembered in the browser for next time.
 (() => {
     const game = document.querySelector('[data-game]');
@@ -105,12 +105,14 @@
         versus.setAttribute('aria-hidden', 'true');
         versus.textContent = 'VS';
 
+        const first = card(shown, 'shown');
         const guessed = card(next, 'next');
         if (entering && !calm) {
+            first.classList.add('is-entering');
             guessed.classList.add('is-entering');
         }
 
-        part('cards').replaceChildren(card(shown, 'shown'), versus, guessed);
+        part('cards').replaceChildren(first, versus, guessed);
         guessed.querySelector('[data-guess="higher"]').focus({ preventScroll: true });
         startClock();
     };
@@ -261,8 +263,7 @@
         }
 
         setTimeout(() => {
-            shown = { ...next, crimes: result.answer };
-            next = result.next;
+            ({ shown, next } = result);
             waiting = false;
             deal(true);
         }, pause.right);

@@ -4,26 +4,40 @@ namespace Modules\Game\Support;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Lottery;
 use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Support\CrimeData;
 
 // Higher or Lower's cards: each one a police district's count of one crime type in one year, from the Map module's
-// dbo.CrimeStats, so only the years with police district figures, not those by state (StateCrime). A card is kept with
-// its game as an array: state, district, category, type, year and crimes.
+// dbo.CrimeStats, so only the years with police district figures, not those by state (StateCrime). Each round deals two
+// cards of one crime type, chosen at random each round, so every guess compares like with like. A card is kept with its
+// game as an array: state, district, category, type, year and crimes.
 class Cards
 {
     /**
-     * Whether there are cards to play with: at least two different counts. None until "php artisan map:import-crime"
-     * has run.
+     * A round's two cards: the first(), shown with its count, and the one to guess after() it, of the same crime type.
+     * None when there are no cards to play with.
+     *
+     * @return list<array{state: string, district: string, category: string, type: string, year: int, crimes: int}>|null
+     */
+    public function deal(int $score): ?array
+    {
+        $shown = $this->first();
+        $next = $shown === null ? null : $this->after($shown, $score);
+
+        return $next === null ? null : [$shown, $next];
+    }
+
+    /**
+     * Whether there are cards to play with: a crime type with enough different counts (types()). None until
+     * "php artisan map:import-crime" has run.
      */
     public function ready(): bool
     {
         try {
-            $crimes = $this->pool()->value('Crimes');
-
-            return $crimes !== null && $this->pool()->where('Crimes', '!=', $crimes)->exists();
+            return $this->types() !== [];
         } catch (QueryException) {
             // dbo.CrimeStats isn't there until migrate runs.
             return false;
@@ -31,22 +45,38 @@ class Cards
     }
 
     /**
-     * A game's first card: any of them.
+     * A round's first card, which sets its crime type: a type chosen at random from types(), each as likely as the
+     * others, then any card of it but those with its lowest or highest count, after which the second card could only
+     * be higher, or lower.
      *
      * @return array{state: string, district: string, category: string, type: string, year: int, crimes: int}|null
      */
     public function first(): ?array
     {
-        $row = $this->pool()->inRandomOrder()->first();
+        $types = $this->types();
+
+        if ($types === []) {
+            return null;
+        }
+
+        [$category, $type] = Arr::random($types);
+        $ofType = fn () => $this->pool()->where('Category', $category)->where('Type', $type);
+
+        $row = $ofType()
+            ->where('Crimes', '>', $ofType()->min('Crimes'))
+            ->where('Crimes', '<', $ofType()->max('Crimes'))
+            ->inRandomOrder()->first()
+            // A type with only two counts has none between them.
+            ?? $ofType()->inRandomOrder()->first();
 
         return $row ? $this->card($row) : null;
     }
 
     /**
-     * The card to guess after one: higher or lower, half the time each, so neither guess is the safer one, whatever
-     * the count shown; no more than config('game.closeness') times more or fewer for the score so far; and some of the
-     * time of the same crime type. If there's none that way, the other way, and if none that close, any other count.
-     * None only when every card has the same count.
+     * The card to guess after one: of the same crime type; higher or lower, half the time each, so neither guess is
+     * the safer one, whatever the count shown; and no more than config('game.closeness') times more or fewer for the
+     * score so far. If there's none that way, the other way, and if none that close, any other count of the type.
+     * None only when every card of the type has the same count.
      *
      * @param  array{state: string, district: string, category: string, type: string, year: int, crimes: int}  $shown
      * @return array{state: string, district: string, category: string, type: string, year: int, crimes: int}|null
@@ -60,14 +90,8 @@ class Cards
             ? $query->whereBetween('Crimes', [$crimes + 1, max($crimes + 1, (int) floor($crimes * $times))])
             : $query->whereBetween('Crimes', [(int) ceil($crimes / $times), $crimes - 1]);
 
-        $tries = [$toward($higher), $toward(! $higher), fn (Builder $query) => $query];
-
-        if (Lottery::odds(config('game.same_type'))->choose()) {
-            array_unshift($tries, fn (Builder $query) => $toward($higher)($query)->where('Category', $shown['category'])->where('Type', $shown['type']));
-        }
-
-        foreach ($tries as $narrow) {
-            $query = $this->pool()->where('Crimes', '!=', $crimes);
+        foreach ([$toward($higher), $toward(! $higher), fn (Builder $query) => $query] as $narrow) {
+            $query = $this->pool()->where('Category', $shown['category'])->where('Type', $shown['type'])->where('Crimes', '!=', $crimes);
             $narrow($query);
             $row = $query->inRandomOrder()->first();
 
@@ -119,6 +143,25 @@ class Cards
                         ->whereIn('Type', array_values(array_diff(array_keys($types), config('game.left_out')))));
                 }
             });
+    }
+
+    /**
+     * The crime types a round can be dealt, as [category, type]: those with at least config('game.fewest_counts')
+     * different counts, so the second card can be close to the first. Armed gang robbery, which few districts have 5 of
+     * in a year, isn't one.
+     *
+     * @return list<array{string, string}>
+     */
+    private function types(): array
+    {
+        return $this->pool()
+            ->select('Category', 'Type')
+            ->groupBy('Category', 'Type')
+            ->havingRaw('COUNT(DISTINCT Crimes) >= ?', [config('game.fewest_counts')])
+            ->get()
+            ->map(fn (CrimeStat $row) => [$row->Category, $row->Type])
+            ->values()
+            ->all();
     }
 
     /**

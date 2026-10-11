@@ -13,7 +13,7 @@ use Modules\Game\Entities\GameRun;
 use Modules\Game\Support\Cards;
 
 // Higher or Lower, for everyone without logging in (/public/game): a police district's count of a crime, then another
-// to guess whether it's higher or lower. The page draws the game (game.js); start() and guess() play it, and the
+// district's count of the same crime to guess whether it's higher or lower, a new pair each round. The page draws the game (game.js); start() and guess() play it, and the
 // server keeps the cards and the score, so the browser never has the count to guess before it's guessed, and the score
 // can't be made up. Only administrators see the scores, on the Game scores page (GameScoreController).
 class GameController extends Controller
@@ -36,7 +36,8 @@ class GameController extends Controller
     }
 
     /**
-     * Start a game for the name given: the first card, with its count, and the next to guess, without.
+     * Start a game for the name given: the first round's two cards, the one shown with its count, and the one to guess
+     * without.
      */
     public function start(Request $request): JsonResponse
     {
@@ -54,9 +55,9 @@ class GameController extends Controller
             'name.regex' => __('Your name can have letters, numbers and spaces, and . \' @ / or -.'),
         ]);
 
-        $first = $this->cards->first();
-        $next = $first ? $this->cards->after($first, 0) : null;
-        abort_if($next === null, 503, __('There are no crime figures to play with yet.'));
+        $cards = $this->cards->deal(0);
+        abort_if($cards === null, 503, __('There are no crime figures to play with yet.'));
+        [$first, $next] = $cards;
 
         $run = GameRun::create([
             'Token' => Str::random(48),
@@ -80,7 +81,7 @@ class GameController extends Controller
 
     /**
      * A guess at the hidden card's count: higher or lower than the one shown, or none when the time ran out. Right,
-     * and the score goes up and the next card comes. Wrong, or later than config('game.seconds') and a few more for
+     * and the score goes up and the next round's two cards come, of a crime type chosen again. Wrong, or later than config('game.seconds') and a few more for
      * the answer to arrive, and the game ends. Either way, with the count that was hidden.
      */
     public function guess(Request $request): JsonResponse
@@ -108,21 +109,22 @@ class GameController extends Controller
                 return response()->json($result + ['score' => $run->Score, 'over' => true]);
             }
 
-            $next = $this->cards->after($run->Next, $run->Score + 1);
+            $cards = $this->cards->deal($run->Score + 1);
             $run->update([
                 'Score' => $run->Score + 1,
                 'ScoredAt' => now(),
-                'Current' => $run->Next,
-                'Next' => $next ?? $run->Next,
+                'Current' => $cards[0] ?? $run->Current,
+                'Next' => $cards[1] ?? $run->Next,
                 'AskedAt' => now(),
-                // Only if every other card has the same count, as with almost no figures.
-                'EndedAt' => $next === null ? now() : null,
+                // Only if the figures went while the game was being played.
+                'EndedAt' => $cards === null ? now() : null,
             ]);
 
             return response()->json($result + [
                 'score' => $run->Score,
-                'over' => $next === null,
-                'next' => $next === null ? null : $this->cards->face($next, withCount: false),
+                'over' => $cards === null,
+                'shown' => $cards === null ? null : $this->cards->face($cards[0], withCount: true),
+                'next' => $cards === null ? null : $this->cards->face($cards[1], withCount: false),
             ]);
         });
     }

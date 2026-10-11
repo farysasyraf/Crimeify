@@ -27,9 +27,10 @@ return [
         20 => 1.5,
     ],
 
-    // The share of cards that keep the crime type of the one before, to compare one district with another; the rest
-    // can be any type.
-    'same_type' => 0.5,
+    // Each round's two cards are of one crime type, chosen at random each round. A type needs this many different
+    // counts to be chosen, so the second card can be close to the first: armed gang robbery, with only a few counts
+    // of 5 or more, isn't.
+    'fewest_counts' => 10,
 
     // Each card's Material icon, by its crime type, or failing that its category, as the dashboard's cards have them.
     'icons' => [

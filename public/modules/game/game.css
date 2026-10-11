@@ -72,7 +72,7 @@ html:not(.js) .game-start { display: none; }
     border: 1px solid var(--border); border-radius: 50%; background: var(--bg); color: var(--muted);
     font-size: .8125rem; font-weight: 800; letter-spacing: .04em;
 }
-/* The new card to guess slides in from where the next one comes. */
+/* Each round's new cards slide in. */
 .game-card.is-entering { animation: game-card-in .35s ease-out; }
 @keyframes game-card-in { from { opacity: 0; transform: translateX(24px); } }
 .game-keys { margin: 14px 0 0; font-size: .8125rem; text-align: center; }

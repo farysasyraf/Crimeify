@@ -9,7 +9,7 @@
 @endpush
 
 {{-- Higher or Lower, for everyone without logging in: a police district's count of a crime in a year, then another
-     card with its count hidden, to guess whether it's higher or lower before the time runs out. game.js plays it,
+     card of the same crime with its count hidden, to guess whether it's higher or lower before the time runs out. game.js plays it,
      asking GameController@start and @guess, which keep the cards and the score; the cards come from <template>s here,
      so their words are in the page's language. Only administrators see the scores, on the Game scores page. --}}
 @section('content')
@@ -36,8 +36,8 @@
             <div class="game-rules">
                 <h2 id="game-rules-heading">{{ __('How to play') }}</h2>
                 <ol>
-                    <li>{{ __("Each card is a police district's count of one crime in one year.") }}</li>
-                    <li>{{ __('Guess whether the next card\'s count is higher or lower.') }}</li>
+                    <li>{{ __("Each round has two cards, each a police district's count of the same crime in one year.") }}</li>
+                    <li>{{ __("Guess whether the second card's count is higher or lower than the first's.") }}</li>
                     <li>{{ __('Each right guess scores a point. One wrong guess, or :seconds seconds without one, ends the game.', ['seconds' => $seconds]) }}</li>
                     <li>{{ __('The higher your score, the closer the counts get.') }}</li>
                 </ol>

@@ -14,6 +14,14 @@ class GameTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // The tests' figures are few, so any crime type with two different counts can be dealt.
+        config(['game.fewest_counts' => 2]);
+    }
+
     /**
      * Police district figures, each [state, district, category, type, year, crimes], with Labuan's district filed
      * under Sabah, as data.gov.my has it.
@@ -100,10 +108,12 @@ class GameTest extends TestCase
         $this->assertSame($run->Token, $started['token']);
         $this->assertSame(['Siti Aminah', 'siti aminah', 0, null], [$run->PlayerName, $run->PlayerKey, $run->Score, $run->EndedAt]);
 
-        // The card shown has its count; the one to guess doesn't, and has another.
+        // The card shown has its count; the one to guess doesn't, and has another of the same crime: break-ins, the
+        // only crime with two counts here.
         $this->assertSame($run->Current['crimes'], $started['shown']['crimes']);
         $this->assertArrayNotHasKey('crimes', $started['next']);
         $this->assertNotSame($run->Current['crimes'], $run->Next['crimes']);
+        $this->assertSame(['break_in', 'break_in'], [$run->Current['type'], $run->Next['type']]);
         $this->assertSame(['type', 'district', 'place', 'year', 'icon'], array_keys($started['next']));
     }
 
@@ -143,29 +153,33 @@ class GameTest extends TestCase
         $this->assertSame(6, GameRun::count());
     }
 
-    public function test_a_right_guess_scores_and_deals_the_next_card(): void
+    public function test_a_right_guess_scores_and_deals_a_new_round(): void
     {
-        // Kluang's card to guess, and the only other: Labuan's.
+        // After the game's break-ins, a new round: motorcycle thefts, the only crime here with two counts.
         $this->figures([
-            ['Johor', 'Kluang', 'property', 'break_in', 2023, 140],
+            ['Johor', 'Kluang', 'property', 'theft_vehicle_motorcycle', 2023, 60],
             ['Sabah', 'W.P. Labuan', 'property', 'theft_vehicle_motorcycle', 2022, 400],
         ]);
         $run = $this->game();
 
-        $this->postJson('/public/game/guess', ['token' => 'a-token', 'guess' => 'higher'])->assertOk()
-            ->assertExactJson([
-                'right' => true, 'late' => false, 'answer' => 140, 'score' => 1, 'over' => false,
-                'next' => ['type' => 'Motorcycle theft', 'district' => 'W.P. Labuan', 'place' => 'Labuan', 'year' => 2022, 'icon' => 'two_wheeler'],
-            ]);
+        $round = $this->postJson('/public/game/guess', ['token' => 'a-token', 'guess' => 'higher'])->assertOk()
+            ->assertJsonPath('right', true)->assertJsonPath('late', false)->assertJsonPath('answer', 140)
+            ->assertJsonPath('score', 1)->assertJsonPath('over', false)
+            ->json();
 
-        // Kluang's card is the one shown now.
+        // Both of the new round's cards are of the same crime, and only the one shown has its count.
         $run->refresh();
-        $this->assertSame([1, 'Kluang', 400, null], [$run->Score, $run->Current['district'], $run->Next['crimes'], $run->EndedAt]);
+        $this->assertSame([1, null], [$run->Score, $run->EndedAt]);
         $this->assertNotNull($run->ScoredAt);
+        $this->assertSame([60, 400], collect([$run->Current['crimes'], $run->Next['crimes']])->sort()->values()->all());
+        $this->assertSame($run->Current['crimes'], $round['shown']['crimes']);
+        $this->assertSame($run->Next['district'], $round['next']['district']);
+        $this->assertArrayNotHasKey('crimes', $round['next']);
+        $this->assertSame(['Motorcycle theft', 'Motorcycle theft', 'two_wheeler'], [$round['shown']['type'], $round['next']['type'], $round['next']['icon']]);
 
-        // Labuan's 400 is higher than Kluang's 140, and Kluang's comes again after it.
-        $this->postJson('/public/game/guess', ['token' => 'a-token', 'guess' => 'higher'])->assertOk()
-            ->assertJsonPath('right', true)->assertJsonPath('answer', 400)->assertJsonPath('score', 2)->assertJsonPath('next.district', 'Kluang');
+        $right = $run->Next['crimes'] > $run->Current['crimes'] ? 'higher' : 'lower';
+        $this->postJson('/public/game/guess', ['token' => 'a-token', 'guess' => $right])->assertOk()
+            ->assertJsonPath('right', true)->assertJsonPath('answer', $run->Next['crimes'])->assertJsonPath('score', 2);
     }
 
     public function test_a_wrong_guess_ends_the_game_and_keeps_its_score(): void
@@ -225,55 +239,92 @@ class GameTest extends TestCase
             ['Malaysia', 'All', 'property', 'break_in', 2023, 900],
             ['Johor', 'All', 'property', 'break_in', 2023, 800],
             ['Johor', 'Batu Pahat', 'property', 'all', 2023, 700],
-            ['Johor', 'Batu Pahat', 'assault', 'murder', 2023, 4],
+            ['Johor', 'Muar', 'property', 'break_in', 2023, 4],
             // Cards.
             ['Johor', 'Batu Pahat', 'property', 'break_in', 2023, 100],
-            ['Johor', 'Kluang', 'assault', 'murder', 2023, 5],
+            ['Johor', 'Kluang', 'property', 'break_in', 2023, 60],
         ]);
         $cards = app(Cards::class);
 
-        foreach (range(1, 10) as $deal) {
-            $first = $cards->first();
-            $this->assertContains([$first['district'], $first['crimes']], [['Batu Pahat', 100], ['Kluang', 5]]);
-            $this->assertSame($first['crimes'] === 100 ? 5 : 100, $cards->after($first, 0)['crimes']);
+        foreach (range(1, 10) as $round) {
+            [$shown, $next] = $cards->deal(0);
+            $this->assertContains([$shown['district'], $shown['crimes']], [['Batu Pahat', 100], ['Kluang', 60]]);
+            $this->assertSame($shown['crimes'] === 100 ? 60 : 100, $next['crimes']);
         }
 
         // Nothing to play with when every count is the same.
-        CrimeStat::where('Crimes', 5)->update(['Crimes' => 100]);
+        CrimeStat::where('Crimes', 60)->update(['Crimes' => 100]);
         $this->assertFalse($cards->ready());
+        $this->assertNull($cards->deal(0));
         $this->assertNull($cards->after($this->card('Batu Pahat', 100), 0));
     }
 
-    public function test_the_next_count_is_higher_or_lower_and_gets_closer_as_the_score_goes_up(): void
+    public function test_each_round_is_two_cards_of_a_crime_chosen_at_random(): void
+    {
+        config(['game.fewest_counts' => 3]);
+        $this->figures([
+            ['Johor', 'Batu Pahat', 'property', 'break_in', 2023, 100],
+            ['Johor', 'Kluang', 'property', 'break_in', 2023, 140],
+            ['Johor', 'Muar', 'property', 'break_in', 2023, 200],
+            ['Johor', 'Batu Pahat', 'assault', 'murder', 2023, 10],
+            ['Johor', 'Kluang', 'assault', 'murder', 2023, 12],
+            ['Johor', 'Muar', 'assault', 'murder', 2023, 15],
+            // Too few different counts to be dealt.
+            ['Johor', 'Batu Pahat', 'assault', 'robbery_gang_armed', 2023, 5],
+            ['Johor', 'Kluang', 'assault', 'robbery_gang_armed', 2023, 6],
+        ]);
+        $cards = app(Cards::class);
+
+        $types = collect(range(1, 60))->map(function () use ($cards) {
+            [$shown, $next] = $cards->deal(0);
+            $this->assertSame([$shown['category'], $shown['type']], [$next['category'], $next['type']]);
+
+            // Never a crime's lowest or highest count first, after which the answer would be sure.
+            $this->assertSame($shown['type'] === 'break_in' ? 140 : 12, $shown['crimes']);
+
+            return $shown['type'];
+        });
+        $this->assertSame(['break_in', 'murder'], $types->unique()->sort()->values()->all());
+
+        // With only armed gang robbery left, there's nothing to play with.
+        CrimeStat::where('Type', '!=', 'robbery_gang_armed')->delete();
+        $this->assertFalse($cards->ready());
+        $this->assertNull($cards->deal(0));
+    }
+
+    public function test_the_second_count_is_higher_or_lower_and_gets_closer_as_the_score_goes_up(): void
     {
         $this->figures([
             ['Johor', 'Batu Pahat', 'property', 'break_in', 2023, 100],
             ['Johor', 'Kluang', 'property', 'break_in', 2023, 140],
-            ['Johor', 'Kluang', 'property', 'theft_other', 2023, 120],
             ['Johor', 'Muar', 'property', 'break_in', 2023, 400],
-            ['Johor', 'Muar', 'property', 'theft_other', 2023, 80],
-            ['Johor', 'Segamat', 'property', 'theft_other', 2023, 30],
+            ['Johor', 'Segamat', 'property', 'break_in', 2023, 80],
+            ['Johor', 'Kulai', 'property', 'break_in', 2023, 30],
+            // Another crime, never the second card to a break-in.
+            ['Johor', 'Kluang', 'property', 'theft_other', 2023, 120],
+            ['Johor', 'Muar', 'property', 'theft_other', 2023, 90],
         ]);
         $cards = app(Cards::class);
         $shown = $this->card('Batu Pahat', 100);
         $deals = fn (array $card, int $score) => collect(range(1, 100))->map(fn () => $cards->after($card, $score)['crimes'])->unique()->sort()->values()->all();
 
-        // Lower, of any type: up to 5 times fewer at first, then only up to 1.5 times from a score of 20.
+        // Lower: up to 5 times fewer at first, then only up to 1.5 times from a score of 20.
         Lottery::alwaysLose(function () use ($deals, $shown) {
             $this->assertSame([30, 80], $deals($shown, 0));
             $this->assertSame([80], $deals($shown, 20));
 
             // None lower: higher.
-            $this->assertSame([80, 100, 120, 140], $deals($this->card('Segamat', 30, 'theft_other'), 0));
+            $this->assertSame([80, 100, 140], $deals($this->card('Kulai', 30), 0));
         });
 
-        // Higher, of the same type, when there's one.
+        // Higher.
         Lottery::alwaysWin(function () use ($deals, $shown) {
             $this->assertSame([140, 400], $deals($shown, 0));
             $this->assertSame([140], $deals($shown, 20));
+            $this->assertSame([90], $deals($this->card('Kluang', 120, 'theft_other'), 0));
 
-            // None that close either way: any other count.
-            $this->assertSame([30, 80, 100, 120, 140, 400], $deals($this->card('Batu Pahat', 5000), 20));
+            // None that close either way: any other count of the crime.
+            $this->assertSame([30, 80, 100, 140, 400], $deals($this->card('Batu Pahat', 5000), 20));
         });
     }
 
@@ -281,14 +332,15 @@ class GameTest extends TestCase
     {
         $this->figures([
             ['Johor', 'Batu Pahat', 'assault', 'rape', 2023, 100],
+            ['Johor', 'Kluang', 'assault', 'rape', 2023, 60],
             ['Johor', 'Kluang', 'assault', 'murder', 2023, 50],
-            ['Johor', 'Muar', 'assault', 'causing_injury', 2023, 70],
+            ['Johor', 'Muar', 'assault', 'murder', 2023, 20],
         ]);
         $cards = app(Cards::class);
 
         $this->assertSame(['rape'], config('game.left_out'));
-        foreach (range(1, 10) as $deal) {
-            $this->assertNotSame('rape', $cards->first()['type']);
+        foreach (range(1, 10) as $round) {
+            $this->assertSame(['murder', 'murder'], array_column($cards->deal(0), 'type'));
         }
 
         config(['game.left_out' => ['rape', 'murder']]);
@@ -299,7 +351,7 @@ class GameTest extends TestCase
     {
         $this->figures([
             ['Johor', 'Kluang', 'property', 'break_in', 2023, 140],
-            ['Sabah', 'W.P. Labuan', 'property', 'theft_vehicle_motorcycle', 2022, 400],
+            ['Sabah', 'W.P. Labuan', 'property', 'break_in', 2022, 400],
         ]);
 
         $this->get('/public/game?lang=ms')->assertOk()
@@ -311,7 +363,8 @@ class GameTest extends TestCase
 
         $this->game();
         $this->postJson('/public/game/guess?lang=ms', ['token' => 'a-token', 'guess' => 'higher'])
-            ->assertJsonPath('next.type', 'Curi motosikal');
+            ->assertJsonPath('shown.type', 'Pecah rumah')
+            ->assertJsonPath('next.type', 'Pecah rumah');
 
         $this->postJson('/public/game/start?lang=ms', [])->assertJsonPath('errors.name.0', 'Taip nama anda untuk bermain.');
     }
