@@ -117,6 +117,7 @@ class GameTest extends TestCase
 
         $started = $this->postJson('/public/game/start', ['name' => '  Siti   Aminah '])->assertOk()
             ->assertJsonPath('score', 0)
+            ->assertJsonPath('ready', 3)
             ->assertJsonPath('seconds', 20)
             ->json();
 
@@ -196,6 +197,31 @@ class GameTest extends TestCase
         $right = $run->Next['crimes'] > $run->Current['crimes'] ? 'higher' : 'lower';
         $this->postJson('/public/game/guess', ['token' => 'a-token', 'guess' => $right])->assertOk()
             ->assertJsonPath('right', true)->assertJsonPath('answer', $run->Next['crimes'])->assertJsonPath('score', 2);
+    }
+
+    public function test_the_first_cards_come_after_a_countdown_and_their_time_starts_then(): void
+    {
+        $this->figures();
+        // On a whole second, as the database keeps the times.
+        $this->freezeSecond();
+
+        $this->get('/public/game')->assertSeeInOrder(['<section class="game-panel game-ready" data-game-ready hidden>', 'Get ready…', 'data-game-countdown'], false);
+
+        // Three seconds counting down, then twenty to answer and four more for the answer to arrive: 27 seconds.
+        $token = $this->postJson('/public/game/start', ['name' => 'Siti'])->assertOk()->json('token');
+        $run = GameRun::sole();
+        $this->assertTrue($run->AskedAt->equalTo(now()->addSeconds(3)));
+        $right = $run->Next['crimes'] > $run->Current['crimes'] ? 'higher' : 'lower';
+
+        $this->travel(27)->seconds();
+        $this->postJson('/public/game/guess', ['token' => $token, 'guess' => $right])->assertJsonPath('right', true);
+
+        // The cards after it come straight away, without one.
+        $run->refresh();
+        $this->assertTrue($run->AskedAt->equalTo(now()));
+        $right = $run->Next['crimes'] > $run->Current['crimes'] ? 'higher' : 'lower';
+        $this->travel(25)->seconds();
+        $this->postJson('/public/game/guess', ['token' => $token, 'guess' => $right])->assertJsonPath('late', true);
     }
 
     public function test_a_wrong_guess_ends_the_game_and_keeps_its_score(): void

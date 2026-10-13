@@ -72,7 +72,7 @@
     {{-- A few seconds to get ready for a round. --}}
     <section class="game-panel live-panel" data-live-part="ready" hidden>
         <p class="live-round" data-live="ready-round"></p>
-        <p class="live-countdown" data-live="countdown" aria-hidden="true"></p>
+        <p class="game-countdown" data-live="countdown" aria-hidden="true"></p>
         <p class="muted">{{ __('Get ready…') }}</p>
     </section>
 

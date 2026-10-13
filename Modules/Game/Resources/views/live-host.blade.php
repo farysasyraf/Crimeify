@@ -50,7 +50,7 @@
     {{-- A few seconds to get ready for a round. --}}
     <section class="game-panel live-panel" data-host-part="ready" hidden>
         <p class="live-round" data-host="ready-round"></p>
-        <p class="live-countdown" data-host="countdown" aria-hidden="true"></p>
+        <p class="game-countdown" data-host="countdown" aria-hidden="true"></p>
         <p class="muted">Get ready…</p>
     </section>
 

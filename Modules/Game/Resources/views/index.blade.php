@@ -63,6 +63,12 @@
             </form>
         </section>
 
+        {{-- A few seconds counting down before the first cards. --}}
+        <section class="game-panel game-ready" data-game-ready hidden>
+            <p class="muted">{{ __('Get ready…') }}</p>
+            <p class="game-countdown" data-game-countdown aria-hidden="true"></p>
+        </section>
+
         {{-- During a game: the score, the time left, and the two cards. --}}
         <section class="game-board" data-game-board hidden aria-label="Higher or Lower">
             <div class="game-status">

@@ -11,7 +11,6 @@
 .live-panel-icon { color: var(--primary); font-size: 44px; }
 .live-count { color: var(--accent-soft); font-weight: 600; }
 .live-round { color: var(--accent-soft); font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.live-countdown { color: var(--text); font-size: 6rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 
 /* The code, as typed on a phone and as shown on the big screen. */
 .live-code-field { font-size: 1.4rem !important; font-weight: 700; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
@@ -86,7 +85,6 @@
 
 @media (max-width: 720px) {
     .game-live-link { align-self: flex-start; }
-    .live-countdown { font-size: 4.5rem; }
     .live-code { font-size: 2.5rem; }
     .live-host-join { text-align: left; }
     .live-host .game-card { min-height: 0; }

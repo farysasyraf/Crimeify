@@ -1,8 +1,9 @@
 // Higher or Lower (GameController): starts a game with the name given, then shows the card with its count beside the
 // one to guess, of the same crime, with a clock running down. Higher, Lower, or the ↑ and ↓ keys send the guess; the
 // server says whether it was right and what the count was, which counts up on the card. Right, and the next round's two
-// cards come, of a crime chosen again; wrong, or out of time, and the game is over. The server keeps the cards and the score, so this only shows
-// them. The name is remembered in the browser for next time.
+// cards come, of a crime chosen again; wrong, or out of time, and the game is over. A game starts with a few seconds
+// counting down before its first cards, which the server times their answer from too. The server keeps the cards and
+// the score, so this only shows them. The name is remembered in the browser for next time.
 (() => {
     const game = document.querySelector('[data-game]');
 
@@ -64,7 +65,7 @@
     };
 
     const show = (name) => {
-        for (const section of ['intro', 'board', 'over']) {
+        for (const section of ['intro', 'ready', 'board', 'over']) {
             part(section).hidden = section !== name;
         }
     };
@@ -169,6 +170,26 @@
         requestAnimationFrame(step);
     };
 
+    // The seconds before the first cards, counting down. Resolves when they're up.
+    const countdown = (seconds) => new Promise((resolve) => {
+        const end = Date.now() + seconds * 1000;
+        show('ready');
+
+        const step = () => {
+            const left = Math.ceil((end - Date.now()) / 1000);
+
+            if (left <= 0) {
+                resolve();
+                return;
+            }
+
+            part('countdown').textContent = left;
+            setTimeout(step, 100);
+        };
+
+        step();
+    });
+
     const start = async () => {
         if (starting) {
             return;
@@ -191,8 +212,9 @@
             ({ token, shown, next } = started);
             waiting = false;
             part('score').textContent = started.score;
-            show('board');
             say('');
+            await countdown(started.ready);
+            show('board');
             deal(false);
         } catch (problem) {
             show('intro');

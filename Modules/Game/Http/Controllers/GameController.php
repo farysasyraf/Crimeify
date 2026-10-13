@@ -37,7 +37,7 @@ class GameController extends Controller
 
     /**
      * Start a game for the name given: the first round's two cards, the one shown with its count, and the one to guess
-     * without.
+     * without, and the seconds the page counts down before showing them, after which their time to answer starts.
      */
     public function start(Request $request): JsonResponse
     {
@@ -54,13 +54,15 @@ class GameController extends Controller
             'Score' => 0,
             'Current' => $first,
             'Next' => $next,
-            'AskedAt' => now(),
+            // Asked once the countdown is over, so it doesn't take from the time to answer.
+            'AskedAt' => now()->addSeconds(config('game.ready')),
             'StartedAt' => now(),
         ]);
 
         return response()->json([
             'token' => $run->Token,
             'score' => 0,
+            'ready' => config('game.ready'),
             'seconds' => config('game.seconds'),
             'shown' => $this->cards->face($first, withCount: true),
             'next' => $this->cards->face($next, withCount: false),

@@ -33,6 +33,11 @@ html:not(.js) .game-start { display: none; }
 .game-play { padding: 11px 22px; font-size: 1rem; font-weight: 600; }
 .game-note { margin: 14px 0 0; font-size: .8125rem; }
 
+/* A few seconds counting down before the first cards, and in a live game before each round's. */
+.game-ready { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; padding: 40px 24px; text-align: center; }
+.game-ready p { margin: 0; }
+.game-countdown { margin: 0; color: var(--text); font-size: 6rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+
 /* The score, the bar of time left, and the seconds, amber for the last few. */
 .game-status { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
 .game-score { margin: 0; color: var(--muted); font-weight: 600; white-space: nowrap; }
@@ -96,6 +101,7 @@ html:not(.js) .game-start { display: none; }
 
 @media (max-width: 720px) {
     .game-panel { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+    .game-countdown { font-size: 4.5rem; }
     .game-cards { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .game-vs { position: relative; z-index: 1; margin: -12px auto; }
     .game-card { min-height: 0; padding: 18px 20px; }

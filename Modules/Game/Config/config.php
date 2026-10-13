@@ -11,6 +11,9 @@ return [
     'seconds' => 20,
     'grace' => 4,
 
+    // Seconds counting down before a solo game's first cards. Their time to answer starts after it.
+    'ready' => 3,
+
     // Counts under this are left out, so a card with 1 crime doesn't give away that the next one is higher.
     'least' => 5,
 
