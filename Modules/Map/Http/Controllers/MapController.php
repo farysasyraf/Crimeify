@@ -91,8 +91,9 @@ class MapController extends Controller
             'territories' => $regions->where('territory', true)->values(),
             'boundaries' => versioned_asset(config('map.boundaries')),
             'years' => $years,
-            // The latest year, or with a police district or station to open, the latest with police district pins.
-            'selectedYear' => ($open ? max([0, ...array_intersect($years, StateCrime::districtYears())]) : 0) ?: end($years),
+            // The latest year with police district pins, as the dashboard opens at, which a district or station to open
+            // needs too.
+            'selectedYear' => StateCrime::defaultYear($years),
             'open' => $open,
             'share' => $share,
             'hasPopulation' => $this->hasPopulation(),
@@ -151,12 +152,12 @@ class MapController extends Controller
     /**
      * One year's crime figures for the map, as JSON: each police district's pin with its totals and crime types,
      * each region's and the country's totals, and the year before's totals to compare with. Takes ?year=, and
-     * gives the latest year for a missing or unknown one.
+     * gives the year the map opens at for a missing or unknown one (StateCrime::defaultYear).
      */
     public function crime(Request $request): JsonResponse
     {
         $years = $this->years();
-        $year = in_array($request->integer('year'), $years, true) ? $request->integer('year') : (end($years) ?: null);
+        $year = in_array($request->integer('year'), $years, true) ? $request->integer('year') : StateCrime::defaultYear($years);
         $previousYear = in_array($year - 1, $years, true) ? $year - 1 : null;
 
         // [State|District][Year][Category][Type] => number of crimes.

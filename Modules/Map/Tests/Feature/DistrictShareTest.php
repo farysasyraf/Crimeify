@@ -128,9 +128,9 @@ class DistrictShareTest extends TestCase
         $this->get("/map?station={$station->Id}")->assertOk()
             ->assertSee('data-open="'.e(json_encode(['kind' => 'station', 'region' => 'MY-01', 'id' => $station->Id, 'label' => 'IPD Batu Pahat'])).'"', false);
 
-        // One there isn't opens the map as usual, at the latest year.
+        // One there isn't opens the map as usual, at the latest year with pins.
         foreach (['/map?district=johor/nowhere', '/map?station=999', '/map?district[]=x'] as $address) {
-            $this->get($address)->assertOk()->assertDontSee('data-open', false)->assertSee('<option value="2024" selected>2024</option>', false);
+            $this->get($address)->assertOk()->assertDontSee('data-open', false)->assertSee('<option value="2023" selected>2023</option>', false);
         }
     }
 }

@@ -133,7 +133,7 @@ class StateCrimeTest extends TestCase
     {
         $this->importBoth();
 
-        $figures = $this->getJson('/public/map/crime')->assertOk()->json();
+        $figures = $this->getJson('/public/map/crime?year=2024')->assertOk()->json();
 
         // The latest year is by state: no pins, and each region's totals are its state's, compared with 2023's.
         $this->assertSame([2024, 2023, true], [$figures['year'], $figures['previousYear'], $figures['byState']]);
@@ -153,21 +153,23 @@ class StateCrimeTest extends TestCase
         // Credited to the police's crime index.
         $this->assertSame(['Crime by state: Royal Malaysia Police (PDRM), crime index', null], [$figures['credit'], $figures['about']]);
 
-        // 2023 is by police district, as before.
+        // 2023 is by police district, as before, and is what the map opens at and gives without a year: the latest with
+        // pins.
         $earlier = $this->getJson('/public/map/crime?year=2023')->json();
         $this->assertFalse($earlier['byState']);
         $this->assertSame(['Batu Pahat', 'W.P. Labuan'], array_column($earlier['districts'], 'name'));
         $this->assertSame(config('map.crime.credit'), $earlier['credit']);
+        $this->assertSame($earlier, $this->getJson('/public/map/crime')->json());
 
-        // The page offers 2024 first.
-        $this->get('/public/map')->assertSeeInOrder(['<option value="2024" selected>2024</option>', '<option value="2023" >2023</option>'], false);
+        // The page offers 2024 first, with 2023 chosen.
+        $this->get('/public/map')->assertSeeInOrder(['<option value="2024" >2024</option>', '<option value="2023" selected>2023</option>'], false);
     }
 
     public function test_the_dashboard_shows_a_year_by_state(): void
     {
         $this->importBoth();
 
-        $page = $this->get('/public/dashboard')->assertOk()
+        $page = $this->get('/public/dashboard?year=2024')->assertOk()
             ->assertSee("Crime in Malaysia in 2024, from the Royal Malaysia Police's figures for each state.")
             ->assertSee("2024's figures are by state, so Labuan's are in Sabah's and Putrajaya's are in Kuala Lumpur's.")
             ->assertSee("2024's figures by state give robbery as one type, where earlier years have its four kinds.")
@@ -189,11 +191,14 @@ class StateCrimeTest extends TestCase
         // Every year over the years, 2024 last.
         $this->assertSame([2023, 2024], $charts['trend']['years']);
 
-        // 2023 is by police district, as before, with the credit for 2024 still there for the chart over the years.
-        $this->get('/public/dashboard?year=2023')
-            ->assertSee("from the Royal Malaysia Police's figures for each police district.")
-            ->assertDontSee('figures are by state')
-            ->assertSee('For 2024, crime by state: Royal Malaysia Police (PDRM), crime index.');
+        // 2023 is by police district, as before, with the credit for 2024 still there for the chart over the years. It's
+        // what the dashboard opens at: the latest year with police district figures.
+        foreach (['/public/dashboard?year=2023', '/public/dashboard', '/public/dashboard?year=1999'] as $address) {
+            $this->get($address)
+                ->assertSee("Crime in Malaysia in 2023, from the Royal Malaysia Police's figures for each police district.")
+                ->assertDontSee('figures are by state')
+                ->assertSee('For 2024, crime by state: Royal Malaysia Police (PDRM), crime index.');
+        }
     }
 
     public function test_the_crime_data_page_edits_only_the_years_with_police_district_figures(): void

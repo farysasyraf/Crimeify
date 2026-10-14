@@ -87,6 +87,25 @@ class StateCrime
     }
 
     /**
+     * The year the dashboard and map open at, of the years there are figures for: the latest with police district
+     * figures, which have the most in them (pins, popups, rates for Labuan and Putrajaya), rather than a later year by
+     * state only. So 2023 while 2024 is by state, and 2024 by itself once data.gov.my has it by police district. The
+     * latest of all without any; none without figures.
+     *
+     * @param  list<int>  $years  oldest first
+     */
+    public static function defaultYear(array $years): ?int
+    {
+        if ($years === []) {
+            return null;
+        }
+
+        $byDistrict = array_intersect($years, self::districtYears());
+
+        return $byDistrict === [] ? end($years) : max($byDistrict);
+    }
+
+    /**
      * The years with figures by state only, and no police district's.
      *
      * @return list<int>

@@ -18,7 +18,8 @@ use Modules\Map\Support\StateCrime;
 class DashboardController extends Controller
 {
     /**
-     * One year's crime figures, the latest unless ?year= asks for another: cards with totals and how they
+     * One year's crime figures, the latest with police district figures (StateCrime::defaultYear) unless ?year= asks
+     * for another: cards with totals and how they
      * compare with the year before, then charts of every year's totals, each state's and each crime type's.
      */
     public function index(Request $request): View
@@ -47,7 +48,7 @@ class DashboardController extends Controller
             return view('dashboard::index', $page + ['years' => []]);
         }
 
-        $year = in_array($request->integer('year'), $years, true) ? $request->integer('year') : end($years);
+        $year = in_array($request->integer('year'), $years, true) ? $request->integer('year') : StateCrime::defaultYear($years);
         $previousYear = in_array($year - 1, $years, true) ? $year - 1 : null;
         $national = $this->national();
         // A year data.gov.my has no police district figures for, with the police's crime index by state (StateCrime).
