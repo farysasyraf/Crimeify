@@ -294,8 +294,10 @@ class GameTest extends TestCase
             $this->assertSame($shown['crimes'] === 100 ? 60 : 100, $next['crimes']);
         }
 
-        // Nothing to play with when every count is the same.
+        // Nothing to play with when every count is the same, once the deck is read again, as after new figures.
         CrimeStat::where('Crimes', 60)->update(['Crimes' => 100]);
+        $this->assertTrue($cards->ready());
+        $cards->forget();
         $this->assertFalse($cards->ready());
         $this->assertNull($cards->deal(0));
         $this->assertNull($cards->after($this->card('Batu Pahat', 100), 0));
@@ -330,6 +332,7 @@ class GameTest extends TestCase
 
         // With only armed gang robbery left, there's nothing to play with.
         CrimeStat::where('Type', '!=', 'robbery_gang_armed')->delete();
+        $cards->forget();
         $this->assertFalse($cards->ready());
         $this->assertNull($cards->deal(0));
     }

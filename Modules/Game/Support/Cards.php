@@ -2,9 +2,11 @@
 
 namespace Modules\Game\Support;
 
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Lottery;
 use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;
@@ -14,8 +16,20 @@ use Modules\Map\Support\CrimeData;
 // dbo.CrimeStats, so only the years with police district figures, not those by state (StateCrime). Each round deals two
 // cards of one crime type, chosen at random each round, so every guess compares like with like. A card is kept with its
 // game as an array: state, district, category, type, year and crimes.
+//
+// The cards are dealt from the deck(): every card each crime type has, read from dbo.CrimeStats once and kept for a few
+// minutes (config('game.deck')), rather than from the table each time: dealing reads it several ways, and on a small
+// database 25 players dealing at once kept it fully busy. New figures reach the game when the deck is next read, or at
+// once after forget().
 class Cards
 {
+    /**
+     * The deck as read this request, by its key().
+     *
+     * @var array<string, array{types: list<array{string, string}>, cards: array<string, list<array{string, string, int, int}>>}>
+     */
+    private array $deck = [];
+
     /**
      * A round's two cards: the first(), shown with its count, and the one to guess after() it, of the same crime type.
      * None when there are no cards to play with.
@@ -60,16 +74,12 @@ class Cards
         }
 
         [$category, $type] = Arr::random($types);
-        $ofType = fn () => $this->pool()->where('Category', $category)->where('Type', $type);
+        $ofType = $this->cardsOf($category, $type);
+        [$lowest, $highest] = [min(array_column($ofType, 3)), max(array_column($ofType, 3))];
+        $between = array_filter($ofType, fn (array $card) => $card[3] > $lowest && $card[3] < $highest);
 
-        $row = $ofType()
-            ->where('Crimes', '>', $ofType()->min('Crimes'))
-            ->where('Crimes', '<', $ofType()->max('Crimes'))
-            ->inRandomOrder()->first()
-            // A type with only two counts has none between them.
-            ?? $ofType()->inRandomOrder()->first();
-
-        return $row ? $this->card($row) : null;
+        // A type with only two counts has none between them.
+        return $this->card($category, $type, Arr::random($between ?: $ofType));
     }
 
     /**
@@ -86,21 +96,29 @@ class Cards
         $crimes = $shown['crimes'];
         $times = $this->closeness($score);
         $higher = Lottery::odds(1, 2)->choose();
-        $toward = fn (bool $up) => fn (Builder $query) => $up
-            ? $query->whereBetween('Crimes', [$crimes + 1, max($crimes + 1, (int) floor($crimes * $times))])
-            : $query->whereBetween('Crimes', [(int) ceil($crimes / $times), $crimes - 1]);
+        $toward = fn (bool $up) => fn (array $card) => $up
+            ? $card[3] >= $crimes + 1 && $card[3] <= max($crimes + 1, (int) floor($crimes * $times))
+            : $card[3] >= (int) ceil($crimes / $times) && $card[3] <= $crimes - 1;
+        $others = array_filter($this->cardsOf($shown['category'], $shown['type']), fn (array $card) => $card[3] !== $crimes);
 
-        foreach ([$toward($higher), $toward(! $higher), fn (Builder $query) => $query] as $narrow) {
-            $query = $this->pool()->where('Category', $shown['category'])->where('Type', $shown['type'])->where('Crimes', '!=', $crimes);
-            $narrow($query);
-            $row = $query->inRandomOrder()->first();
+        foreach ([$toward($higher), $toward(! $higher), fn () => true] as $narrow) {
+            $candidates = array_filter($others, $narrow);
 
-            if ($row) {
-                return $this->card($row);
+            if ($candidates !== []) {
+                return $this->card($shown['category'], $shown['type'], Arr::random($candidates));
             }
         }
 
         return null;
+    }
+
+    /**
+     * Read the deck from dbo.CrimeStats again when it's next needed, as after new figures.
+     */
+    public function forget(): void
+    {
+        $this->deck = [];
+        $this->store()->forget($this->key());
     }
 
     /**
@@ -154,14 +172,55 @@ class Cards
      */
     private function types(): array
     {
-        return $this->pool()
-            ->select('Category', 'Type')
-            ->groupBy('Category', 'Type')
-            ->havingRaw('COUNT(DISTINCT Crimes) >= ?', [config('game.fewest_counts')])
-            ->get()
-            ->map(fn (CrimeStat $row) => [$row->Category, $row->Type])
-            ->values()
-            ->all();
+        return $this->deck()['types'];
+    }
+
+    /**
+     * A crime type's cards in the pool, each as [state, district, year, crimes].
+     *
+     * @return list<array{string, string, int, int}>
+     */
+    private function cardsOf(string $category, string $type): array
+    {
+        return $this->deck()['cards']["{$category}/{$type}"] ?? [];
+    }
+
+    /**
+     * Every card in the pool(), by crime type, and the types() a round can be dealt, read once and kept for
+     * config('game.deck.keep') seconds. Kept for the settings that decide them, so changing those takes effect at once.
+     *
+     * @return array{types: list<array{string, string}>, cards: array<string, list<array{string, string, int, int}>>}
+     */
+    private function deck(): array
+    {
+        // Once a request, as a deal reads it several times.
+        return $this->deck[$this->key()] ??= $this->store()->remember($this->key(), config('game.deck.keep'), function () {
+            $cards = [];
+            foreach ($this->pool()->get(['State', 'District', 'Category', 'Type', 'Year', 'Crimes']) as $row) {
+                $cards["{$row->Category}/{$row->Type}"][] = [$row->State, $row->District, (int) $row->Year, (int) $row->Crimes];
+            }
+
+            $types = [];
+            foreach ($cards as $key => $ofType) {
+                if (count(array_unique(array_column($ofType, 3))) >= config('game.fewest_counts')) {
+                    $types[] = explode('/', $key, 2);
+                }
+            }
+
+            return ['types' => $types, 'cards' => $cards];
+        });
+    }
+
+    private function key(): string
+    {
+        return 'game.deck.'.md5(json_encode([
+            config('game.least'), config('game.left_out'), config('game.fewest_counts'), config('map.crime.types'),
+        ]));
+    }
+
+    private function store(): Repository
+    {
+        return Cache::store(config('game.deck.store'));
     }
 
     /**
@@ -181,17 +240,13 @@ class Cards
     }
 
     /**
+     * @param  array{string, string, int, int}  $card
      * @return array{state: string, district: string, category: string, type: string, year: int, crimes: int}
      */
-    private function card(CrimeStat $row): array
+    private function card(string $category, string $type, array $card): array
     {
-        return [
-            'state' => $row->State,
-            'district' => $row->District,
-            'category' => $row->Category,
-            'type' => $row->Type,
-            'year' => $row->Year,
-            'crimes' => $row->Crimes,
-        ];
+        [$state, $district, $year, $crimes] = $card;
+
+        return compact('state', 'district', 'category', 'type', 'year', 'crimes');
     }
 }

@@ -35,6 +35,14 @@ return [
     // of 5 or more, isn't.
     'fewest_counts' => 10,
 
+    // The cards are dealt from a deck read from dbo.CrimeStats once and kept in `store` for `keep` seconds, so dealing
+    // doesn't read the table each time; new figures reach the game within that time. The file store, as the site runs as
+    // one instance (DEPLOY.md); tests use the array store (phpunit.xml).
+    'deck' => [
+        'store' => env('GAME_DECK_STORE', 'file'),
+        'keep' => 600,
+    ],
+
     // Each card's Material icon, by its crime type, or failing that its category, as the dashboard's cards have them.
     'icons' => [
         'assault' => 'personal_injury',
