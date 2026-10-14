@@ -232,5 +232,26 @@
     "You've answered this round already.": "Anda sudah menjawab pusingan ini.",
     "This round isn't taking answers now.": "Pusingan ini tidak menerima jawapan sekarang.",
     "This game is no longer there.": "Permainan ini sudah tiada.",
-    "You're not in this game. Join it with its code.": "Anda bukan pemain dalam permainan ini. Sertai dengan kodnya."
+    "You're not in this game. Join it with its code.": "Anda bukan pemain dalam permainan ini. Sertai dengan kodnya.",
+
+    "Games": "Permainan",
+    "Games with Malaysia's crime figures, to play on your own or with a room.": "Permainan dengan angka jenayah Malaysia, untuk dimainkan sendirian atau beramai-ramai.",
+    "Which police district had more crime? Two cards of the same crime, one count hidden: guess whether it's higher or lower.": "Daerah polis mana yang mencatat lebih banyak jenayah? Dua kad bagi jenayah yang sama, satu bilangan tersembunyi: teka sama ada ia lebih tinggi atau lebih rendah.",
+    "Play": "Main",
+    "On your own": "Sendirian",
+    "A point for each right guess, :seconds seconds a card. One wrong guess ends the game.": "Satu mata bagi setiap tekaan yang betul, :seconds saat bagi setiap kad. Satu tekaan salah menamatkan permainan.",
+    "Live, with a room": "Secara langsung, beramai-ramai",
+    "Everyone plays the same rounds on their phone, and the sooner a right answer, the more points.": "Semua orang bermain pusingan yang sama di telefon masing-masing, dan makin cepat jawapan betul, makin banyak mata.",
+    "Real figures": "Angka sebenar",
+    "Every count is a police district's, from the Royal Malaysia Police's figures.": "Setiap bilangan ialah bagi sebuah daerah polis, daripada angka Polis Diraja Malaysia.",
+    "Playing with a room? Type the code on the big screen and your name, and play the same rounds as everyone at once.": "Bermain beramai-ramai? Taip kod pada skrin besar dan nama anda, dan mainkan pusingan yang sama serentak dengan semua orang.",
+    "Join with a code": "Sertai dengan kod",
+    "1. The big screen": "1. Skrin besar",
+    "The host shows the game on a projector or in a meeting, with its code.": "Hos memaparkan permainan pada projektor atau dalam mesyuarat, bersama kodnya.",
+    "2. Your phone": "2. Telefon anda",
+    "Type the code and your name, then wait for the host to start.": "Taip kod dan nama anda, kemudian tunggu hos memulakan permainan.",
+    "3. Be quick": "3. Cepat",
+    "A right answer scores up to :points points: the sooner, the more.": "Jawapan betul mendapat sehingga :points mata: makin cepat, makin banyak.",
+    "More games coming soon": "Lebih banyak permainan akan datang",
+    "More games with Malaysia's crime figures are on the way. Check back soon.": "Lebih banyak permainan dengan angka jenayah Malaysia sedang disediakan. Kembali lagi nanti."
 }

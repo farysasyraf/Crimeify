@@ -1,0 +1,118 @@
+/* The Games page (library.js), as a games console's home screen: the chosen game's backdrop fills the page, under a row
+   of tiles with the chosen one larger, outlined in white and named, then its title, what it is, its buttons, and a few
+   cards about it. Each backdrop is the doodles (doodles.svg, in --doodles) under a glow in the game's colours, darker
+   on the left and at the bottom, where the words are. Without JavaScript, every game is listed one after the other. */
+.library { position: relative; flex: 1; display: flex; overflow: hidden; background: #0c0d10; isolation: isolate; }
+.library-art {
+    position: absolute; inset: 0; z-index: 0; opacity: 0; transition: opacity .45s ease;
+    background: var(--doodles) 0 0 / 420px, #0c0d10;
+}
+.library-art.is-shown { opacity: 1; }
+.library-art-higher-or-lower {
+    background:
+        radial-gradient(55% 65% at 74% 36%, rgba(89, 172, 81, .26), transparent 62%),
+        radial-gradient(45% 55% at 90% 84%, rgba(199, 85, 85, .24), transparent 62%),
+        var(--doodles) 0 0 / 420px, #0c0d10;
+}
+.library-art-live {
+    background: radial-gradient(60% 70% at 76% 40%, rgba(58, 170, 242, .24), transparent 62%), var(--doodles) 0 0 / 420px, #0c0d10;
+}
+.library-art-soon {
+    background: radial-gradient(55% 65% at 76% 40%, rgba(179, 157, 219, .16), transparent 62%), var(--doodles) 0 0 / 420px, #0c0d10;
+}
+.library::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(12, 13, 16, .82), rgba(12, 13, 16, .3) 48%, transparent 72%),
+        linear-gradient(0deg, rgba(12, 13, 16, .85), transparent 38%);
+}
+.library-inner {
+    position: relative; z-index: 2; display: flex; flex-direction: column; gap: 12px;
+    width: 100%; max-width: 1320px; margin: 0 auto; padding: 28px 24px 40px;
+}
+
+/* The tiles. The chosen one is larger and outlined, with its name under it; the others' names are there for screen
+   readers. */
+.library-tiles {
+    display: flex; align-items: flex-start; gap: 14px; margin: 0; padding: 6px 6px 44px; list-style: none;
+    overflow-x: auto; scrollbar-width: none;
+}
+.library-tiles::-webkit-scrollbar { display: none; }
+.library-tiles li { flex: none; }
+.library-tile {
+    position: relative; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 18px;
+    background: rgba(255, 255, 255, .08); color: var(--text); box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+    transition: width .2s ease, height .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.library-tile:hover { background: rgba(255, 255, 255, .13); text-decoration: none; }
+.library-tile:focus-visible { outline: 3px solid var(--focus); outline-offset: 5px; }
+.library-tile img { display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.library-tile .material-icon { color: var(--muted); font-size: 40px; transition: font-size .2s ease; }
+.library-tile.is-selected { width: 148px; height: 148px; box-shadow: 0 0 0 3px #fff, 0 18px 40px rgba(0, 0, 0, .55); }
+.library-tile.is-selected .material-icon { color: var(--text); font-size: 60px; }
+.library-tile-name {
+    position: absolute; top: 100%; left: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+    white-space: nowrap;
+}
+.library-tile.is-selected .library-tile-name {
+    top: calc(100% + 14px); width: auto; height: auto; overflow: visible; clip-path: none;
+    color: var(--text); font-size: 1.2rem; font-weight: 600;
+}
+
+/* The chosen game: its title, what it is and its buttons, with a round of it or its icon beside them. */
+.js .library-game { display: none; }
+.js .library-game.is-shown { display: block; animation: library-in .35s ease-out; }
+.library-game + .library-game { margin-top: 48px; }
+.js .library-game + .library-game { margin-top: 0; }
+@keyframes library-in { from { opacity: 0; transform: translateY(8px); } }
+.library-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 24px 48px; min-height: 330px; }
+.library-title { margin: 0 0 18px; line-height: 0; }
+.library-title img { width: auto; height: 170px; }
+.library-heading { margin: 0 0 14px; font-size: 3rem; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
+.library-text { max-width: 520px; margin: 0 0 24px; color: #d3dae1; font-size: 1.05rem; }
+.library-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.library-play { padding: 12px 28px; font-size: 1.05rem; font-weight: 700; }
+.library-more { padding: 12px 20px; background: rgba(255, 255, 255, .1); backdrop-filter: blur(6px); }
+.library-more:hover { background: rgba(255, 255, 255, .16); }
+.library-glyph { justify-self: center; color: rgba(255, 255, 255, .14); font-size: 220px; }
+
+/* A round of Higher or Lower, the two cards tilted towards each other. */
+.library-sample { position: relative; display: flex; align-items: center; justify-content: center; gap: 30px; min-height: 320px; }
+.library-sample .game-card { flex: none; width: 230px; min-height: 260px; }
+.library-sample .game-card:first-child { transform: rotate(-6deg) translateY(14px); }
+.library-sample .game-card + .game-card { transform: rotate(5deg) translateY(-14px); background: #26292e; }
+.library-sample .game-card-district { font-size: 1.35rem; font-weight: 700; }
+.library-sample .game-card-count strong { font-size: 2.5rem; }
+.library-sample .game-vs { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+/* A few cards about the chosen game. */
+.library-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 28px 0 0; padding: 0; list-style: none; }
+.library-card {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; gap: 4px 14px; padding: 18px;
+    border: 1px solid rgba(255, 255, 255, .08); border-radius: 18px; background: rgba(35, 37, 41, .72); backdrop-filter: blur(10px);
+}
+.library-card .material-icon {
+    grid-row: span 2; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px;
+    background: var(--nav-active-bg); color: var(--primary); font-size: 24px;
+}
+.library-card h3 { margin: 0; font-size: 1rem; }
+.library-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+
+@media (max-width: 900px) {
+    .library-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+    .library-sample { display: none; }
+    .library-glyph { display: none; }
+    .library-cards { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+    .library-inner { padding: 20px 16px 32px; }
+    .library-tile { width: 72px; height: 72px; border-radius: 14px; }
+    .library-tile.is-selected { width: 112px; height: 112px; }
+    .library-tile .material-icon { font-size: 32px; }
+    .library-tile.is-selected .material-icon { font-size: 46px; }
+    .library-title img { height: 120px; }
+    .library-heading { font-size: 2.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .library-art, .library-tile, .library-tile .material-icon { transition: none; }
+    .js .library-game.is-shown { animation: none; }
+}

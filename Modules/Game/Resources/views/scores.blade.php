@@ -16,11 +16,11 @@
     <div>
         <h1>Game scores</h1>
         <p class="muted">
-            Higher or Lower, which anyone can play without logging in at <a href="{{ route('public.game') }}">{{ route('public.game') }}</a>.
+            Higher or Lower, which anyone can play without logging in at <a href="{{ route('public.game.higher-or-lower') }}">{{ route('public.game.higher-or-lower') }}</a>.
             Only administrators see the scores.
         </p>
     </div>
-    <a class="btn btn-primary" href="{{ route('public.game') }}" target="_blank" rel="noopener">
+    <a class="btn btn-primary" href="{{ route('public.game.higher-or-lower') }}" target="_blank" rel="noopener">
         <span class="material-icon btn-icon" aria-hidden="true">sports_esports</span>Open the game
     </a>
 </div>
@@ -77,7 +77,7 @@
             @if ($filtered)
                 No games between these dates.
             @else
-                No games yet. Share <a href="{{ route('public.game') }}">{{ route('public.game') }}</a> with your colleagues to start.
+                No games yet. Share <a href="{{ route('public.game.higher-or-lower') }}">{{ route('public.game.higher-or-lower') }}</a> with your colleagues to start.
             @endif
         </p>
     @else

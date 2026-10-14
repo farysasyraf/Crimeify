@@ -21,7 +21,7 @@
         @include('game::_title')
         <p class="muted">{{ __('A live game: everyone plays the same rounds at once, and the fastest right answers score the most.') }}</p>
     </div>
-    <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
+    <a class="btn btn-outline game-live-link" href="{{ route('public.game.higher-or-lower') }}">
         <span class="material-icon" aria-hidden="true">person</span>{{ __('Play on your own') }}
     </a>
 </div>

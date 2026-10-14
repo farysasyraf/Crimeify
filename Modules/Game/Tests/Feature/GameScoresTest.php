@@ -45,7 +45,7 @@ class GameScoresTest extends TestCase
         $this->get('/game-scores')->assertOk()
             ->assertSee('<h1>Game scores</h1>', false)
             ->assertSee($this->sideLink('Game scores', 'page', 'emoji_events'), false)
-            ->assertSee('<a class="btn btn-primary" href="'.route('public.game').'" target="_blank" rel="noopener">', false)
+            ->assertSee('<a class="btn btn-primary" href="'.route('public.game.higher-or-lower').'" target="_blank" rel="noopener">', false)
             ->assertSee('No games yet. Share');
     }
 

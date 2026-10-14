@@ -69,7 +69,7 @@ class GameTest extends TestCase
     {
         $this->figures();
 
-        $this->get('/public/game')->assertOk()
+        $this->get('/public/game/higher-or-lower')->assertOk()
             ->assertSee('<title>Higher or Lower · '.config('app.name').'</title>', false)
             // The title as drawn, with the heading's text.
             ->assertSee('<h1 class="game-title">', false)
@@ -102,7 +102,7 @@ class GameTest extends TestCase
 
     public function test_with_no_figures_the_game_says_so(): void
     {
-        $this->get('/public/game')->assertOk()
+        $this->get('/public/game/higher-or-lower')->assertOk()
             ->assertSee('There are no crime figures to play with yet.')
             ->assertDontSee('data-game-start', false);
 
@@ -205,7 +205,7 @@ class GameTest extends TestCase
         // On a whole second, as the database keeps the times.
         $this->freezeSecond();
 
-        $this->get('/public/game')->assertSeeInOrder(['<section class="game-panel game-ready" data-game-ready hidden>', 'Get ready…', 'data-game-countdown'], false);
+        $this->get('/public/game/higher-or-lower')->assertSeeInOrder(['<section class="game-panel game-ready" data-game-ready hidden>', 'Get ready…', 'data-game-countdown'], false);
 
         // Three seconds counting down, then twenty to answer and four more for the answer to arrive: 27 seconds.
         $token = $this->postJson('/public/game/start', ['name' => 'Siti'])->assertOk()->json('token');
@@ -396,7 +396,7 @@ class GameTest extends TestCase
             ['Sabah', 'W.P. Labuan', 'property', 'break_in', 2022, 400],
         ]);
 
-        $this->get('/public/game?lang=ms')->assertOk()
+        $this->get('/public/game/higher-or-lower?lang=ms')->assertOk()
             // The game's name stays in English, as its title is drawn.
             ->assertSee('<title>Higher or Lower · '.config('app.name').'</title>', false)
             ->assertSee('<img src="'.versioned_asset('modules/game/title.svg').'" alt="Higher or Lower" lang="en" width="4375" height="2368" />', false)
