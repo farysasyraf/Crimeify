@@ -9,9 +9,10 @@ use Modules\Game\Http\Controllers\LivePlayController;
 
 // Playing a live game on a phone, for everyone without logging in (LivePlayController): joining with the code, then
 // checking where the game is up to and answering, as the player the X-Player and X-Player-Token headers say. Joining
-// and answering are limited as the public pages are; the checks read what LiveGames keeps rather than the database.
+// is limited by IP address and answering by player too (RouteServiceProvider::limits()), set for a room of players
+// sharing one address; the checks read what LiveGames keeps rather than the database.
 Route::prefix('game/live')->name('game.live.')->group(function () {
-    Route::middleware('throttle:30,1')->post('join', [LivePlayController::class, 'join'])->name('join');
+    Route::middleware('throttle:live-join')->post('join', [LivePlayController::class, 'join'])->name('join');
     Route::get('{game}', [LivePlayController::class, 'state'])->whereNumber('game')->name('state');
-    Route::middleware('throttle:120,1')->post('{game}/answer', [LivePlayController::class, 'answer'])->whereNumber('game')->name('answer');
+    Route::middleware('throttle:live-answer')->post('{game}/answer', [LivePlayController::class, 'answer'])->whereNumber('game')->name('answer');
 });

@@ -87,4 +87,18 @@ return [
 
     // The longest name a player can give.
     'name_length' => 40,
+
+    // How many times a minute the games can be used, counted apart from the rest of the public pages. Colleagues on one
+    // Wi-Fi share one IP address, so what's counted by address is set for a room of them: page loads (`pages`), games
+    // started (`starts`), live games joined (`joins`), and every guess and answer from the address together (`room`).
+    // Each player is also counted on their own: a solo game's guesses by game (`guesses`), a live game's answers by
+    // player (`answers`), plenty for one person, so no one's tries use up anyone else's.
+    'limits' => [
+        'pages' => 600,
+        'starts' => 300,
+        'joins' => 120,
+        'room' => 3000,
+        'guesses' => 90,
+        'answers' => 30,
+    ],
 ];
