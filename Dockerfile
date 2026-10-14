@@ -37,6 +37,16 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/php.ini "$PHP_INI_DIR/conf.d/zz-crimeify.ini"
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
+# Each Apache worker keeps its database connection between requests (ODBC connection pooling, off by default on
+# Linux, unlike Windows), rather than opening a new encrypted connection to SQL Server for every request: on a one-core
+# server that took longer than the request itself, so 25 phones checking a live game each second swamped it. An idle
+# pooled connection closes after 2 minutes. The build stops if the driver's settings aren't where expected.
+RUN if grep -q '^\[ODBC\]' /etc/odbcinst.ini; then sed -i '/^\[ODBC\]/a Pooling=Yes' /etc/odbcinst.ini; \
+        else printf '[ODBC]\nPooling=Yes\n\n' | cat - /etc/odbcinst.ini > /tmp/odbcinst.ini && mv /tmp/odbcinst.ini /etc/odbcinst.ini; fi \
+    && sed -i '/^\[ODBC Driver 18 for SQL Server\]/a CPTimeout=120' /etc/odbcinst.ini \
+    && grep -q '^Pooling=Yes' /etc/odbcinst.ini && grep -q '^CPTimeout=120' /etc/odbcinst.ini \
+    && cat /etc/odbcinst.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /var/www/html
