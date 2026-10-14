@@ -1,0 +1,75 @@
+/* DistrictGuessr (districtguessr.js), on top of game.css's panels, countdown and timer: the district to find over a dark
+   map of Malaysia's states (Leaflet, without a street map), the player's blue pin and the district's green one with a
+   dashed line between, then how far off it was. */
+.game-title img.guessr-title { height: 92px; }
+
+.guessr-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 12px; }
+.guessr-prompt { margin: 0; font-size: 1.35rem; }
+.guessr-prompt strong { font-size: 1.6rem; font-weight: 800; letter-spacing: -.01em; }
+.guessr-place {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 8px; border-radius: 999px;
+    background: var(--nav-active-bg); color: var(--primary); font-weight: 600;
+}
+.guessr-place .material-icon { font-size: 18px; }
+.guessr-total { margin: 0 0 0 auto; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.guessr-total strong { margin-left: 6px; color: var(--text); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+
+/* The map: the states, dark, on darker sea, filling the width. */
+.guessr-map {
+    height: min(62vh, 560px); min-height: 320px; border: 1px solid rgba(255, 255, 255, .06); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; cursor: crosshair;
+}
+.guessr-map.leaflet-container { background: #0e1013; font: inherit; }
+.guessr-map .leaflet-control-attribution { background: rgba(14, 16, 19, .8); color: var(--muted); font-size: .7rem; }
+.guessr-map .leaflet-control-attribution a { color: var(--accent-soft); }
+.guessr-map .leaflet-bar a { background: var(--raised); color: var(--text); border-color: var(--border); }
+.guessr-map .leaflet-bar a:hover { background: var(--raised-hover); }
+.guessr-map .leaflet-marker-draggable { cursor: grab; }
+
+/* The pins: the player's blue, the district's green, each with its point at the place. */
+.guessr-pin { display: grid; place-items: center; }
+.guessr-pin .material-icon { font-size: 40px; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6)); }
+.guessr-pin-guess .material-icon { color: var(--primary); }
+.guessr-pin-answer .material-icon { color: #7fd8a4; }
+
+/* Over the map's foot, at the right: how far off the pin was, and Confirm or Next district, so they're always in view.
+   Above the map's own controls, and clear of its credit. */
+.guessr-stage { position: relative; }
+.guessr-foot {
+    position: absolute; right: 14px; bottom: 30px; z-index: 1000; display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: flex-end; gap: 10px 18px; max-width: calc(100% - 28px); padding: 8px 8px 8px 18px;
+    border: 1px solid rgba(255, 255, 255, .08); border-radius: 18px; background: rgba(14, 16, 19, .82); backdrop-filter: blur(8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+}
+.guessr-result { margin: 0; color: var(--muted); font-size: 1.05rem; font-weight: 700; }
+.guessr-result:empty { display: none; }
+.guessr-foot:has(.guessr-result:empty) { padding-left: 8px; }
+.guessr-result.is-right { color: #7fd8a4; }
+.guessr-result.is-near { color: #f5c26b; }
+.guessr-result.is-wrong { color: var(--danger); }
+.guessr.is-hurrying .game-timer-bar { background: var(--game-hurry); }
+.guessr.is-hurrying .game-seconds { color: var(--game-hurry); }
+
+/* After a game: every district, where it is, how far off the pin was, and its points. */
+.guessr-rounds { width: 100%; max-width: 560px; margin: 4px 0 8px; padding: 0; list-style: none; counter-reset: round; text-align: left; }
+.guessr-rounds li {
+    display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; align-items: baseline; gap: 2px 12px;
+    padding: 8px 12px; border-radius: 12px; counter-increment: round;
+}
+.guessr-rounds li:nth-child(odd) { background: rgba(255, 255, 255, .03); }
+.guessr-rounds li::before { content: counter(round); color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.guessr-round-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guessr-round-place { grid-column: 2; grid-row: 2; color: var(--muted); font-size: .8125rem; }
+.guessr-round-km { grid-column: 3; grid-row: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+.guessr-round-points { grid-column: 4; grid-row: 1; min-width: 52px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 600px) {
+    .game-title img.guessr-title { height: 64px; }
+    .guessr-prompt { font-size: 1.1rem; }
+    .guessr-prompt strong { font-size: 1.3rem; }
+    .guessr-total { margin-left: 0; }
+    .guessr-map { height: 56vh; }
+    .guessr-foot { left: 10px; right: 10px; bottom: 26px; max-width: none; justify-content: center; padding: 10px; }
+    .guessr-result { width: 100%; text-align: center; }
+    .guessr-foot .btn { width: 100%; justify-content: center; }
+}

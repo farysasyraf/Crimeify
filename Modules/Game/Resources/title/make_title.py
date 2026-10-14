@@ -1,13 +1,17 @@
-"""Draws Higher or Lower's title, public/modules/game/title.svg, shown in both languages: two words stacked in
-Montserrat Black, the top one green with its first letter's stem rising into an up arrow, the bottom one red with its
-last letter's stem, or for an R its leg, dropping into a down arrow. Only needed again to change the words, the colours
-or the arrows; the page uses the SVG file.
+"""Draws the games' titles in public/modules/game, shown in both languages:
 
-Montserrat is under the SIL Open Font License 1.1 (public/modules/game/Montserrat-OFL.txt): download the variable font
-from https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf, then, with fonttools and
-uharfbuzz installed (pip install fonttools uharfbuzz):
+- title.svg, Higher or Lower's: two words stacked in Montserrat Black, the top one green with its first letter's stem
+  rising into an up arrow, the bottom one red with its last letter's stem, or for an R its leg, dropping into a down
+  arrow;
+- title-districtguessr.svg, DistrictGuessr's: DISTRICT over GUESSR in blue, beside a map pin as tall as both (Material
+  Icons Round, which the app serves from public/fonts, Apache License 2.0).
 
-    python make_title.py Montserrat[wght].ttf ../../../../public/modules/game
+Only needed again to change the words, the colours or the arrows; the pages use the SVG files. Montserrat is under the
+SIL Open Font License 1.1 (public/modules/game/Montserrat-OFL.txt): download the variable font from
+https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf, then, with fonttools, brotli and
+uharfbuzz installed (pip install fonttools brotli uharfbuzz), from the project's folder:
+
+    python Modules/Game/Resources/title/make_title.py Montserrat[wght].ttf public/modules/game
 """
 import io
 import sys
@@ -20,7 +24,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 
-GREEN, RED = '#59ac51', '#c75555'
+GREEN, RED, LIGHT, BLUE = '#59ac51', '#c75555', '#eef2f6', '#3aaaf2'
 
 font_path, out_dir = sys.argv[1], sys.argv[2]
 
@@ -163,4 +167,36 @@ def title(top, bottom, top_stroke, bottom_stroke, label, out):
     print(f'{out}: {width:.0f} x {height:.0f}')
 
 
+def wordmark(top, bottom, label, out):
+    """Two words stacked in Montserrat Black, the top one light and the bottom one blue, after a blue map pin as tall as
+    both."""
+    icons = TTFont('public/fonts/material-icons-round.woff2').getGlyphSet()
+    bounds = BoundsPen(icons)
+    icons['location_on'].draw(bounds)
+    x_min, y_min, x_max, y_max = bounds.bounds
+    gap = cap * 0.14
+    height = cap * 2 + gap
+    scale = height / (y_max - y_min)
+    pin = SVGPathPen(icons)
+    icons['location_on'].draw(TransformPen(pin, (scale, 0, 0, -scale, -x_min * scale, y_max * scale)))
+
+    left = (x_max - x_min) * scale + cap * 0.22
+    top_path, _, top_width, _ = set_word(top, left, cap)
+    bottom_path, _, bottom_width, _ = set_word(bottom, left, height)
+    width = left + max(top_width, bottom_width)
+
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height:.0f}" role="img" aria-label="{label}">\n'
+        f'<!-- {label}, drawn by Modules/Game/Resources/title/make_title.py: lettering in Montserrat Black, SIL Open '
+        'Font License 1.1 (Montserrat-OFL.txt); the pin, Material Icons Round (Apache License 2.0). -->\n'
+        f'<g fill="{BLUE}"><path d="{pin.getCommands()}"/><path d="{bottom_path}"/></g>\n'
+        f'<g fill="{LIGHT}"><path d="{top_path}"/></g>\n'
+        '</svg>\n'
+    )
+    with open(f'{out_dir}/{out}', 'w', encoding='utf-8', newline='\n') as file:
+        file.write(svg)
+    print(f'{out}: {width:.0f} x {height:.0f}')
+
+
 title('HIGHER', 'LOWER', 'left', 'leg', 'Higher or Lower', 'title.svg')
+wordmark('DISTRICT', 'GUESSR', 'DistrictGuessr', 'title-districtguessr.svg')

@@ -45,8 +45,8 @@ class GameScoresTest extends TestCase
         $this->get('/game-scores')->assertOk()
             ->assertSee('<h1>Game scores</h1>', false)
             ->assertSee($this->sideLink('Game scores', 'page', 'emoji_events'), false)
-            ->assertSee('<a class="btn btn-primary" href="'.route('public.game.higher-or-lower').'" target="_blank" rel="noopener">', false)
-            ->assertSee('No games yet. Share');
+            ->assertSee('<a class="btn btn-primary" href="'.route('public.game').'" target="_blank" rel="noopener">', false)
+            ->assertSee('No games of Higher or Lower yet. Share the Games page');
     }
 
     public function test_only_admin_sees_the_scores(): void
@@ -77,7 +77,7 @@ class GameScoresTest extends TestCase
 
         $this->get('/game-scores')->assertOk()
             ->assertSee('4 players, 5 games.')
-            ->assertSee('Leaderboard <span class="scores-period">All games</span>', false)
+            ->assertSee('Higher or Lower leaderboard <span class="scores-period">All games</span>', false)
             ->assertSeeInOrder([
                 '<span class="scores-rank">1</span>', 'siti', '<td class="scores-score">9</td>', '<td>2</td>', '2 min 5 s', '06 Oct 2026, 09:02',
                 '<span class="scores-rank">2</span>', 'Ali', '<td class="scores-score">9</td>', '<td>1</td>', '30 s',
@@ -97,7 +97,7 @@ class GameScoresTest extends TestCase
 
         $this->get('/game-scores?from=2026-10-01&to=2026-10-31')->assertOk()
             ->assertSee('value="2026-10-01"', false)
-            ->assertSee('Leaderboard <span class="scores-period">1 Oct 2026 to 31 Oct 2026</span>', false)
+            ->assertSee('Higher or Lower leaderboard <span class="scores-period">1 Oct 2026 to 31 Oct 2026</span>', false)
             ->assertSee('2 players, 2 games.')
             ->assertSeeInOrder(['Bob', 'Ali'])
             ->assertDontSee('Siti')

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// A live game of Higher or Lower, stored in dbo.LiveGames: its code, who hosts it, its rounds' cards, and where it's
-// up to. LiveGames (Support) plays it.
+// A live game, of Higher or Lower or DistrictGuessr (Game, its key on the Games page), stored in dbo.LiveGames: its
+// code, who hosts it, its rounds (Cards: two cards a round, or a district), and where it's up to. LiveGames (Support)
+// plays it.
 #[Table(name: 'LiveGames', key: 'Id', timestamps: false)]
-#[Fillable(['Code', 'HostId', 'HostName', 'Rounds', 'Seconds', 'Cards', 'Status', 'Round', 'OpensAt', 'ClosesAt', 'CreatedAt', 'FinishedAt'])]
+#[Fillable(['Game', 'Code', 'HostId', 'HostName', 'Rounds', 'Seconds', 'Cards', 'Status', 'Round', 'OpensAt', 'ClosesAt', 'CreatedAt', 'FinishedAt'])]
 class LiveGame extends Model
 {
     public const Lobby = 'lobby';

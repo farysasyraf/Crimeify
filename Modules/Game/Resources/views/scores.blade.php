@@ -8,20 +8,20 @@
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/scores.css') }}" />
 @endpush
 
-{{-- Higher or Lower's scores, for administrators only: hosting a live game, each player's best solo game between the
-     dates chosen, best first, to choose the winner from, then the winners chosen so far, then the live games. The game
-     itself is public, at /public/game. --}}
+{{-- The games' scores, for administrators only: hosting a live game, of either game; for the game chosen, each
+     player's best game between the dates chosen, best first, to choose the winner from; then the winners chosen so far,
+     from every game; then the live games. The games themselves are public, on the Games page (/public/game). --}}
 @section('content')
 <div class="page-head">
     <div>
         <h1>Game scores</h1>
         <p class="muted">
-            Higher or Lower, which anyone can play without logging in at <a href="{{ route('public.game.higher-or-lower') }}">{{ route('public.game.higher-or-lower') }}</a>.
+            The games, which anyone can play without logging in on the Games page, <a href="{{ route('public.game') }}">{{ route('public.game') }}</a>.
             Only administrators see the scores.
         </p>
     </div>
-    <a class="btn btn-primary" href="{{ route('public.game.higher-or-lower') }}" target="_blank" rel="noopener">
-        <span class="material-icon btn-icon" aria-hidden="true">sports_esports</span>Open the game
+    <a class="btn btn-primary" href="{{ route('public.game') }}" target="_blank" rel="noopener">
+        <span class="material-icon btn-icon" aria-hidden="true">sports_esports</span>Open the Games page
     </a>
 </div>
 
@@ -31,13 +31,21 @@
         <h2 id="host-heading">Host a live game</h2>
         <p class="muted">
             Like a quiz night: put its big screen on a projector or share it in a meeting, and everyone joins with its
-            code on their phone. Each round shows everyone the same two cards, and the sooner a right answer, the more
-            points. Its leaderboard shows at the end.
+            code on their phone. Each round shows everyone the same two cards, or the same district to pin on the map,
+            and the sooner the answer, the more points. Its leaderboard shows at the end.
         </p>
     </div>
     <form method="post" action="{{ page_url('game-scores/store-live') }}" class="scores-filters scores-live-form"
         data-confirm="Are you sure you want to host a live game now?" data-confirm-kind="save">
         @csrf
+        <div>
+            <label for="live-game">Game</label>
+            <select id="live-game" name="game">
+                @foreach ($games as $key => $each)
+                    <option value="{{ $key }}" @selected($key === old('game', $game))>{{ $each['name'] }}</option>
+                @endforeach
+            </select>
+        </div>
         <div>
             <label for="live-rounds">Rounds</label>
             <select id="live-rounds" name="rounds">
@@ -53,7 +61,19 @@
 </section>
 
 <section class="card scores-board" aria-labelledby="leaderboard-heading">
+    {{-- Each game's leaderboard, one at a time, keeping the dates chosen. --}}
+    <nav class="scores-games" aria-label="Games">
+        @foreach ($games as $key => $each)
+            @php $current = $key === $game; @endphp
+            <a href="{{ page_url('game-scores', array_filter(['game' => $key === array_key_first($games) ? null : $key, 'from' => $from, 'to' => $to])) }}"
+                @class(['scores-game', 'is-current' => $current]) aria-current="{{ $current ? 'page' : 'false' }}">{{ $each['name'] }}</a>
+        @endforeach
+    </nav>
+
     <form method="get" action="{{ page_url('game-scores') }}" class="scores-filters">
+        @if ($game !== array_key_first($games))
+            <input type="hidden" name="game" value="{{ $game }}" />
+        @endif
         <div>
             <label for="scores-from">Games from</label>
             <input type="date" id="scores-from" name="from" value="{{ $from }}" />
@@ -65,19 +85,19 @@
         <div class="scores-filter-actions">
             <button type="submit" class="btn">Show</button>
             @if ($filtered)
-                <a class="btn btn-ghost" href="{{ page_url('game-scores') }}">Clear</a>
+                <a class="btn btn-ghost" href="{{ page_url('game-scores', $game === array_key_first($games) ? [] : ['game' => $game]) }}">Clear</a>
             @endif
         </div>
     </form>
 
-    <h2 id="leaderboard-heading">Leaderboard <span class="scores-period">{{ $periodText }}</span></h2>
+    <h2 id="leaderboard-heading">{{ $gameName }} leaderboard <span class="scores-period">{{ $periodText }}</span></h2>
 
     @if ($players->isEmpty())
         <p class="scores-empty muted">
             @if ($filtered)
                 No games between these dates.
             @else
-                No games yet. Share <a href="{{ route('public.game.higher-or-lower') }}">{{ route('public.game.higher-or-lower') }}</a> with your colleagues to start.
+                No games of {{ $gameName }} yet. Share the Games page, <a href="{{ route('public.game') }}">{{ route('public.game') }}</a>, with your colleagues to start.
             @endif
         </p>
     @else
@@ -118,6 +138,7 @@
                                     <form method="post" action="{{ page_url('game-scores/store-winner') }}"
                                         data-confirm="Are you sure you want to choose {{ $run->PlayerName }} as the winner, with a score of {{ $run->Score }}?" data-confirm-kind="save">
                                         @csrf
+                                        <input type="hidden" name="game" value="{{ $game }}" />
                                         <input type="hidden" name="run" value="{{ $run->Id }}" />
                                         @if ($from)<input type="hidden" name="from" value="{{ $from }}" />@endif
                                         @if ($to)<input type="hidden" name="to" value="{{ $to }}" />@endif
@@ -143,6 +164,7 @@
                 <thead>
                     <tr>
                         <th>Player</th>
+                        <th>Game</th>
                         <th>Score</th>
                         <th>From the games</th>
                         <th>Chosen by</th>
@@ -154,6 +176,7 @@
                     @foreach ($winners as $winner)
                         <tr>
                             <td><span class="material-icon scores-trophy" aria-hidden="true">emoji_events</span>{{ $winner->PlayerName }}</td>
+                            <td class="nowrap">{{ $games[$winner->Game]['name'] ?? $winner->Game }}</td>
                             <td class="scores-score">{{ $winner->Score }}</td>
                             <td>{{ $winner->period() }}</td>
                             <td>{{ $winner->ChosenByName }}</td>
@@ -163,6 +186,7 @@
                                     data-confirm="Are you sure you want to take {{ $winner->PlayerName }} off the winners?" data-confirm-kind="delete">
                                     @csrf
                                     @method('DELETE')
+                                    @if ($game !== array_key_first($games))<input type="hidden" name="game" value="{{ $game }}" />@endif
                                     @if ($from)<input type="hidden" name="from" value="{{ $from }}" />@endif
                                     @if ($to)<input type="hidden" name="to" value="{{ $to }}" />@endif
                                     <button type="submit" class="btn btn-sm btn-danger-ghost">Remove</button>
@@ -188,6 +212,7 @@
                 <thead>
                     <tr>
                         <th>Code</th>
+                        <th>Game</th>
                         <th>Hosted</th>
                         <th>Rounds</th>
                         <th>Players</th>
@@ -200,6 +225,7 @@
                         @php $top = $live->Status === LiveGame::Finished ? $live->players->first() : null; @endphp
                         <tr>
                             <td class="nowrap scores-score">{{ $live->spacedCode() }}</td>
+                            <td class="nowrap">{{ $games[$live->Game]['name'] ?? $live->Game }}</td>
                             <td class="nowrap muted">{{ $live->CreatedAt->format('d M Y, H:i') }} <span class="scores-host">by {{ $live->HostName }}</span></td>
                             <td>
                                 @if ($live->Status === LiveGame::Lobby)

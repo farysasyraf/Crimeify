@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
-// A player chosen as the winner on the Game scores page, stored in dbo.GameWinners, with the dates of the games they
+// A player chosen as the winner on the Game scores page, stored in dbo.GameWinners, with their game (its key on the
+// Games page) and its Id in that game's table (GameRunId), and the dates of the games they
 // were chosen from.
 #[Table(name: 'GameWinners', key: 'Id', timestamps: false)]
-#[Fillable(['GameRunId', 'PlayerName', 'Score', 'FromDate', 'ToDate', 'ChosenById', 'ChosenByName', 'ChosenAt'])]
+#[Fillable(['Game', 'GameRunId', 'PlayerName', 'Score', 'FromDate', 'ToDate', 'ChosenById', 'ChosenByName', 'ChosenAt'])]
 class GameWinner extends Model
 {
     /**

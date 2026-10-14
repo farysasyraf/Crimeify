@@ -383,6 +383,132 @@ class LiveGameTest extends TestCase
         $this->get('/public/game/live?lang=ms')->assertOk()->assertSee('data-language="?lang=ms"', false)->assertSee('Kod permainan');
     }
 
+    /**
+     * A game of DistrictGuessr hosted by an administrator, with three police districts to find: Batu Pahat, Kuantan and
+     * Kota Bharu.
+     */
+    private function hostedGuessr(int $rounds = 3): LiveGame
+    {
+        foreach ([['Johor', 'Batu Pahat', 'MY-01', 1.85, 102.93], ['Pahang', 'Kuantan', 'MY-06', 3.81, 103.33], ['Kelantan', 'Kota Bharu', 'MY-03', 6.13, 102.24]] as [$state, $name, $region, $lat, $lng]) {
+            PoliceDistrict::create(['State' => $state, 'Name' => $name, 'Region' => $region, 'Latitude' => $lat, 'Longitude' => $lng]);
+        }
+        $this->signIn();
+        $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'rounds' => $rounds])->assertRedirect();
+
+        return LiveGame::query()->latest('Id')->firstOrFail();
+    }
+
+    /**
+     * A pin on the map for the round being played, a degree north of where the district is for each $off.
+     *
+     * @param  array{player: int, token: string}  $player
+     */
+    private function pin(LiveGame $game, array $player, int $off = 0): TestResponse
+    {
+        $game->refresh();
+        $district = $game->Cards[$game->Round - 1];
+
+        return $this->withHeaders(['X-Player' => $player['player'], 'X-Player-Token' => $player['token']])
+            ->postJson("/api/game/live/{$game->Id}/answer", ['round' => $game->Round, 'lat' => $district['lat'] + $off, 'lng' => $district['lng']]);
+    }
+
+    public function test_an_administrator_hosts_a_live_game_of_districtguessr(): void
+    {
+        $game = $this->hostedGuessr();
+
+        $this->assertSame(['districtguessr', LiveGame::Lobby, 3, 40], [$game->Game, $game->Status, $game->Rounds, $game->Seconds]);
+        $this->assertCount(3, collect($game->Cards)->pluck('name')->unique());
+        $this->assertSame(['name', 'state', 'place', 'lat', 'lng'], array_keys($game->Cards[0]));
+
+        $this->get('/game-scores')->assertOk()
+            ->assertSeeInOrder(['<select id="live-game" name="game">', '<option value="higher-or-lower"', 'Higher or Lower', '<option value="districtguessr"', 'DistrictGuessr'], false)
+            ->assertSeeInOrder(['Live games', $game->spacedCode(), 'DistrictGuessr', '3, not started'], false);
+
+        // Its big screen has the map, and the game's title.
+        $this->get("/game-scores/live/{$game->Id}")->assertOk()
+            ->assertSee('alt="DistrictGuessr" lang="en"', false)
+            ->assertSee('data-boundaries="'.versioned_asset(config('map.boundaries')).'"', false)
+            ->assertSee(versioned_asset('modules/game/guessr-map.js'), false)
+            ->assertSeeInOrder(['3 rounds of', '40 seconds each, and', 'the closer the pin, and the sooner, the more points.'])
+            ->assertDontSee('data-game-card', false);
+
+        // Only the games there are, and only with enough districts for the rounds.
+        $this->post('/game-scores/store-live', ['game' => 'made-up', 'rounds' => 3])->assertSessionHasErrors('game');
+        $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'rounds' => 4])->assertRedirect('/game-scores')
+            ->assertSessionHas('status', 'error');
+        $this->assertSame(1, LiveGame::count());
+    }
+
+    public function test_districtguessr_rounds_take_pins_and_score_their_distance_and_speed(): void
+    {
+        $game = $this->hostedGuessr();
+        $players = collect(['Siti', 'Ali', 'Chong', 'Devi'])->mapWithKeys(fn (string $name) => [$name => $this->join($game, $name)]);
+
+        // Everyone sees the district and its state, but not where it is until the answer.
+        $this->host($game, 'next')->assertJson(['game' => 'districtguessr', 'phase' => 'ready', 'round' => 1, 'seconds' => 40]);
+        $district = $game->fresh()->Cards[0];
+        $this->check($game, $players['Siti'])
+            ->assertJson(['game' => 'districtguessr', 'phase' => 'ready', 'district' => ['name' => $district['name'], 'place' => $district['place']], 'pin' => null])
+            ->assertJsonMissingPath('district.lat')->assertJsonMissingPath('answer')->assertJsonMissingPath('cards');
+        $this->pin($game, $players['Siti'])->assertStatus(409);
+
+        $this->travel(3)->seconds();
+        $this->host($game)->assertJson(['phase' => 'question', 'district' => ['name' => $district['name']]])->assertJsonMissingPath('answer');
+
+        // Right on it, straight away: all the points.
+        $this->pin($game, $players['Siti'])->assertOk()->assertExactJson(['received' => true]);
+        $this->check($game, $players['Siti'])->assertJson(['phase' => 'question', 'guess' => 'pin', 'pin' => ['lat' => $district['lat'], 'lng' => $district['lng']]]);
+
+        // A pin's a latitude and longitude, not a guess.
+        $this->answer($game, $players['Ali'], 'higher')->assertUnprocessable()->assertJsonValidationErrors(['lat', 'lng']);
+
+        // A degree off (111.2 km: 336 points) halfway through the time: an eighth fewer. Right on it at the last moment:
+        // a quarter fewer. After it, too late.
+        $this->travel(20)->seconds();
+        $this->pin($game, $players['Ali'], off: 1)->assertOk();
+        $this->travel(20)->seconds();
+        $this->pin($game, $players['Chong'])->assertOk();
+        $this->travel(1001)->milliseconds();
+        $this->pin($game, $players['Devi'])->assertStatus(409);
+
+        $this->assertSame(
+            ['Siti' => 1000, 'Ali' => 294, 'Chong' => 750, 'Devi' => 0],
+            $game->players()->orderBy('Id')->pluck('Score', 'PlayerName')->all(),
+        );
+
+        $answer = ['lat' => $district['lat'], 'lng' => $district['lng']];
+        $this->check($game, $players['Ali'])->assertJson([
+            'phase' => 'reveal', 'answer' => $answer, 'result' => ['correct' => true, 'points' => 294, 'km' => 111.2], 'score' => 294, 'rank' => 3,
+        ]);
+        $this->check($game, $players['Devi'])->assertJson(['phase' => 'reveal', 'answer' => $answer, 'result' => null, 'pin' => null, 'rank' => 4]);
+
+        // The big screen: where it is, and everyone's pins, closest first.
+        $reveal = $this->host($game)->assertJson([
+            'phase' => 'reveal', 'answer' => $answer, 'last' => false,
+            'leaderboard' => [['name' => 'Siti', 'score' => 1000], ['name' => 'Chong', 'score' => 750], ['name' => 'Ali', 'score' => 294]],
+        ])->assertJsonMissingPath('said')->json();
+        $this->assertSame([['Chong', 0.0, 750], ['Siti', 0.0, 1000], ['Ali', 111.2, 294]], array_map(fn (array $pin) => [$pin['name'], (float) $pin['km'], $pin['points']], $reveal['pins']));
+        $this->assertEqualsWithDelta($district['lat'] + 1, $reveal['pins'][2]['lat'], 0.00001);
+
+        // The next round's district.
+        $this->host($game, 'next')->assertJson(['phase' => 'ready', 'round' => 2, 'district' => ['name' => $game->fresh()->Cards[1]['name']]]);
+    }
+
+    public function test_the_phone_page_is_ready_for_either_game(): void
+    {
+        $this->get('/public/game/live')->assertOk()
+            ->assertSee('<title>Live game · '.config('app.name').'</title>', false)
+            ->assertSee('<h1 data-live-game="none">Join a live game</h1>', false)
+            ->assertSee('<div data-live-game="higher-or-lower" hidden>', false)
+            ->assertSee('<div data-live-game="districtguessr" hidden>', false)
+            ->assertSee('data-boundaries="'.versioned_asset(config('map.boundaries')).'"', false)
+            ->assertSee('The sooner you confirm, the more of them you keep: 75% at the last moment.');
+
+        $this->get('/public/game/live?lang=ms')->assertOk()
+            ->assertSee('<title>Permainan langsung · '.config('app.name').'</title>', false)
+            ->assertSee('75% pada saat terakhir');
+    }
+
     public function test_a_phones_check_reads_what_is_kept_rather_than_the_database(): void
     {
         $game = $this->hosted();

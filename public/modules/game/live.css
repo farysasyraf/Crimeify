@@ -1,5 +1,6 @@
-/* Live games (live.js on the players' phones, live-host.js on the big screen), on top of game.css's cards and panels:
-   the code, the players as they join, the countdown to each round, how a player did, the leaderboard, and the podium.
+/* Live games (live.js on the players' phones, live-host.js on the big screen), on top of game.css's cards and panels
+   and, in DistrictGuessr, districtguessr.css's map: the code, the players as they join, the countdown to each round,
+   how a player did, the leaderboard, and the podium.
    The big screen is wider, and its type larger, to read from across a room. */
 .game-live-link { align-self: center; }
 
@@ -16,9 +17,14 @@
 .live-code-field { font-size: 1.4rem !important; font-weight: 700; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
 .live-code { margin: 0; color: var(--text); font-size: 3.25rem; font-weight: 800; line-height: 1; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 
-/* How the player did, or where the round is up to, over the cards. */
+/* How to play the game joined, under the lobby's welcome. */
+.live-rules { max-width: 480px; margin: 10px 0 0; padding-left: 22px; color: var(--muted); line-height: 1.5; text-align: left; }
+.live-rules li + li { margin-top: 4px; }
+
+/* How the player did, or where the round is up to, over the cards or the map. */
 .live-note { margin: 0 0 14px; color: var(--muted); font-weight: 600; text-align: center; }
 .live-note.is-right { color: var(--game-right); font-size: 1.15rem; }
+.live-note.is-near { color: #f5c26b; font-size: 1.15rem; }
 .live-note.is-wrong { color: var(--game-wrong); }
 .live-standing { margin: 14px 0 0; color: var(--accent-soft); font-weight: 600; text-align: center; }
 .live-place { color: var(--accent-soft); font-size: 1.15rem; font-weight: 700; }
@@ -64,6 +70,22 @@
 .live-host .game-card-count strong { font-size: 3.5rem; }
 .live-host .live-note { font-size: 1.35rem; color: var(--text); }
 .live-host-top { display: grid; justify-items: center; margin-top: 18px; }
+
+/* DistrictGuessr on the big screen: the district larger, the map taller, and at the answer the top 5 beside it, and the
+   3 closest pins' names. */
+.live-host .guessr-prompt { font-size: 1.6rem; }
+.live-host .guessr-prompt strong { font-size: 2.2rem; }
+.live-host .guessr-map { height: min(62vh, 640px); cursor: default; }
+.live-host-play.is-split { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 24px; align-items: start; }
+.live-host-play.is-split .live-host-top { margin-top: 52px; }
+.live-host-tip.leaflet-tooltip {
+    padding: 4px 10px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 999px; background: rgba(14, 16, 19, .9);
+    color: var(--text); font: inherit; font-size: .95rem; font-weight: 700; box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
+}
+.live-host-tip.leaflet-tooltip-right { margin-left: 14px; }
+.live-host-tip.leaflet-tooltip-left { margin-left: -14px; }
+.live-host-tip.leaflet-tooltip-right::before { border-right-color: rgba(14, 16, 19, .9); }
+.live-host-tip.leaflet-tooltip-left::before { border-left-color: rgba(14, 16, 19, .9); }
 .live-host-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
 .live-host-foot { display: flex; justify-content: center; margin-top: 24px; }
 
@@ -83,6 +105,10 @@
 .is-top-2 .live-podium-rank { color: #d3dae1; }
 .is-top-3 .live-podium-rank { color: #e0a77a; }
 
+@media (max-width: 900px) {
+    .live-host-play.is-split { grid-template-columns: minmax(0, 1fr); }
+    .live-host-play.is-split .live-host-top { margin-top: 0; }
+}
 @media (max-width: 720px) {
     .game-live-link { align-self: flex-start; }
     .live-code { font-size: 2.5rem; }

@@ -1,8 +1,9 @@
-// A live game of Higher or Lower on a phone (LivePlayController, LiveGames): joins with the code on the big screen and a
-// name, then checks where the game is up to about every second and shows it: waiting for the host, a few seconds to get
-// ready, the round's two cards with Higher and Lower until its time is up, then its answer with the player's points and
-// place, and at the end the top 10. Each round opens on the server's clock, worked out from each check, so every phone
-// shows the cards at the same moment. The game and the player are remembered in the tab, so reloading keeps them in it.
+// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower or DistrictGuessr: joins with the code on
+// the big screen and a name, then checks where the game is up to about every second and shows it: waiting for the host,
+// a few seconds to get ready, the round until its time is up (two cards with Higher and Lower, or a district to pin on
+// the map, guessr-map.js, and Confirm), then its answer with the player's points and place, and at the end the top 10.
+// Each round opens on the server's clock, worked out from each check, so every phone shows it at the same moment. The
+// game and the player are remembered in the tab, so reloading keeps them in it.
 (() => {
     const live = document.querySelector('[data-live]');
 
@@ -23,15 +24,23 @@
     let view = null;
     let offset = 0;
     let checking = null;
-    // The round whose cards are showing, the one whose answer is, this player's guess ({ round, guess }), and an
-    // answer on its way.
+    // The round showing, the one whose answer is, this player's answer ({ round, guess }, the guess 'pin' in
+    // DistrictGuessr), and an answer on its way.
     let dealt = null;
     let revealed = null;
     let guessed = null;
     let sending = false;
+    // DistrictGuessr's map: the states' outlines, fetched once the game's known, the map once drawn ({ map, malaysia }),
+    // the player's pin and the answer's marks, and the round's map once it's set out, for the answer to wait for.
+    let outlines = null;
+    let drawing = null;
+    let pin = null;
+    let marks = [];
+    let placed = Promise.resolve();
 
     const serverNow = () => Date.now() + offset;
     const answered = () => guessed !== null && view !== null && guessed.round === view.round;
+    const pins = () => view?.game === 'districtguessr';
 
     const keep = (value) => {
         try {
@@ -90,11 +99,18 @@
         }
     };
 
+    // What's only for one game: its title, how to play it, and its round. Before joining, the page's own title.
+    const showGame = (game) => {
+        for (const element of document.querySelectorAll('[data-live-game]')) {
+            element.hidden = element.dataset.liveGame !== (game ?? 'none');
+        }
+    };
+
     const say = (name, text, kind = '') => {
         const element = slot(name);
         element.textContent = text;
         element.hidden = text === '';
-        element.className = element.className.replace(/ ?is-(right|wrong)/g, '') + (kind ? ` is-${kind}` : '');
+        element.className = element.className.replace(/ ?is-(right|near|wrong)/g, '') + (kind ? ` is-${kind}` : '');
     };
 
     const joinError = (message) => {
@@ -108,6 +124,7 @@
         clearTimeout(checking);
         me = view = dealt = revealed = guessed = null;
         keep(null);
+        showGame(null);
         show('join');
         joinError(message);
     };
@@ -140,6 +157,11 @@
 
     const render = (state) => {
         view = state;
+        showGame(state.game);
+
+        if (pins()) {
+            outlines ??= GuessrMap.load(live.dataset.boundaries);
+        }
 
         if (state.guess) {
             // As after reloading the page mid-round.
@@ -186,17 +208,8 @@
         return element;
     };
 
-    // The round's cards, once each round.
-    const deal = () => {
-        show('round');
-
-        if (dealt === view.round) {
-            return;
-        }
-
-        dealt = view.round;
-        slot('round').textContent = t('Round :round of :rounds', { round: view.round, rounds: view.rounds });
-
+    // Higher or Lower's two cards.
+    const dealCards = () => {
         const versus = document.createElement('span');
         versus.className = 'game-vs';
         versus.setAttribute('aria-hidden', 'true');
@@ -211,25 +224,121 @@
         }
 
         slot('cards').replaceChildren(first, versus, second);
-        say('standing', '');
+    };
 
-        if (answered()) {
-            lock(guessed.guess);
-            say('note', t('Locked in: :guess. Waiting for the others…', { guess: guessed.guess === 'higher' ? t('Higher') : t('Lower') }));
+    // A pin where the player tapped, or the pin moved there, while the round takes answers.
+    const drop = (map, latlng) => {
+        const now = serverNow();
+
+        if (!pins() || answered() || sending || revealed === view.round || now < view.opensAt - 500 || now > view.closesAt) {
+            return;
+        }
+
+        if (pin) {
+            pin.setLatLng(latlng);
         } else {
-            say('note', '');
-            second.querySelector('[data-guess="higher"]').focus({ preventScroll: true });
+            pin = L.marker(latlng, { icon: GuessrMap.pin('guess'), draggable: true, keyboard: false }).addTo(map);
+        }
+
+        slot('confirm').disabled = false;
+    };
+
+    // DistrictGuessr's district, and the map, cleared and framed, with the pin already confirmed, as after reloading.
+    const setOut = () => {
+        const round = view.round;
+        const mine = view.pin;
+
+        slot('district').textContent = view.district.name;
+        slot('region').textContent = view.district.place;
+        slot('foot').hidden = false;
+        slot('confirm').disabled = true;
+
+        drawing ??= GuessrMap.draw(slot('map'), outlines ?? GuessrMap.load(live.dataset.boundaries)).then((drawn) => {
+            drawn.map.on('click', (event) => drop(drawn.map, event.latlng));
+            return drawn;
+        });
+
+        placed = drawing.then(({ map, malaysia }) => {
+            if (dealt !== round) {
+                return;
+            }
+
+            [pin, ...marks].forEach((layer) => layer?.remove());
+            pin = mine ? L.marker([mine.lat, mine.lng], { icon: GuessrMap.pin('guess'), keyboard: false }).addTo(map) : null;
+            marks = [];
+            map.invalidateSize();
+            map.fitBounds(malaysia, { paddingTopLeft: [12, 12], paddingBottomRight: [12, 90] });
+        });
+
+        // The whole map in view, with Confirm, as on a phone, where the title takes the top of the screen.
+        if (slot('map').getBoundingClientRect().bottom > window.innerHeight) {
+            part('round').scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' });
         }
     };
 
+    // The answer as it shows while waiting for the others.
+    const lockedIn = (guess) => (guess === 'pin'
+        ? t('Pinned. Waiting for the others…')
+        : t('Locked in: :guess. Waiting for the others…', { guess: guess === 'higher' ? t('Higher') : t('Lower') }));
+
+    // The round, once each round.
+    const deal = () => {
+        show('round');
+
+        if (dealt === view.round) {
+            return;
+        }
+
+        dealt = view.round;
+        slot('round').textContent = t('Round :round of :rounds', { round: view.round, rounds: view.rounds });
+        say('standing', '');
+
+        if (pins()) {
+            setOut();
+        } else {
+            dealCards();
+        }
+
+        if (answered()) {
+            lock(guessed.guess);
+            say('note', lockedIn(guessed.guess));
+        } else {
+            say('note', '');
+            slot('cards').querySelector('[data-guess="higher"]')?.focus({ preventScroll: true });
+        }
+    };
+
+    // No more answering: the buttons, or the pin and Confirm, which goes.
     const lock = (guess = null) => {
+        if (pins()) {
+            pin?.dragging?.disable();
+            slot('confirm').disabled = true;
+            slot('foot').hidden = true;
+            return;
+        }
+
         slot('cards').querySelectorAll('[data-guess]').forEach((button) => {
             button.disabled = true;
             button.classList.toggle('is-chosen', button.dataset.guess === guess);
         });
     };
 
-    // The time left to answer, to a tenth of a second, and getting ready before it.
+    const unlock = () => {
+        if (pins()) {
+            pin?.dragging?.enable();
+            slot('confirm').disabled = pin === null;
+            slot('foot').hidden = false;
+            return;
+        }
+
+        slot('cards').querySelectorAll('[data-guess]').forEach((button) => {
+            button.disabled = false;
+            button.classList.remove('is-chosen');
+        });
+    };
+
+    // The time left to answer, to a tenth of a second, and getting ready before it. When it's up, a pin dropped but not
+    // confirmed counts as it is.
     const tick = () => {
         if (!view || !['ready', 'question'].includes(view.phase)) {
             return;
@@ -251,34 +360,40 @@
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
         live.classList.toggle('is-hurrying', left > 0 && left <= 3000);
 
-        if (left === 0 && !answered()) {
+        if (left > 0 || answered() || sending) {
+            return;
+        }
+
+        if (pins() && pin && now <= view.closesAt + 1000) {
+            answer('pin', true);
+        } else {
             lock();
             say('note', t("Time's up. The answer's coming…"));
         }
     };
 
-    const answer = async (guess) => {
+    // The answer: higher or lower, or the pin, as it is when the time's up.
+    const answer = async (guess, late = false) => {
         const now = serverNow();
+        const at = guess === 'pin' ? pin?.getLatLng() : null;
 
-        if (sending || answered() || !view || view.phase === 'reveal' || now < view.opensAt - 500 || now > view.closesAt) {
+        if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at)
+            || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
             return;
         }
 
         sending = true;
         guessed = { round: view.round, guess };
         lock(guess);
-        say('note', t('Locked in: :guess. Waiting for the others…', { guess: guess === 'higher' ? t('Higher') : t('Lower') }));
+        say('note', lockedIn(guess));
 
         try {
-            await request(`/${me.game}/answer`, { round: view.round, guess });
+            await request(`/${me.game}/answer`, { round: view.round, ...(at ? { lat: at.lat, lng: at.lng } : { guess }) });
         } catch (problem) {
             // Not taken, unless the round has stopped taking answers or already has this one.
             if (problem.status !== 409) {
                 guessed = null;
-                slot('cards').querySelectorAll('[data-guess]').forEach((button) => {
-                    button.disabled = false;
-                    button.classList.remove('is-chosen');
-                });
+                unlock();
             }
 
             say('note', problem.message, 'wrong');
@@ -307,21 +422,8 @@
         requestAnimationFrame(step);
     };
 
-    // The round's answer, once: the count that was hidden, how this player did, and their points and place.
-    const reveal = (state) => {
-        deal();
-        say('standing', t('Your points: :score · Place :rank of :count', { score: number.format(state.score), rank: state.rank, count: state.players }));
-
-        if (revealed === state.round) {
-            return;
-        }
-
-        revealed = state.round;
-        live.classList.remove('is-hurrying');
-        slot('seconds').textContent = 0;
-        slot('bar').style.transform = 'scaleX(0)';
-        lock(answered() ? guessed.guess : null);
-
+    // Higher or Lower's answer: the count that was hidden, and whether the player was right.
+    const showCount = (state) => {
         const next = slot('cards').querySelector('.game-card-next');
         next.querySelector('[data-card="guess"]').hidden = true;
         next.querySelector('[data-card="count"]').hidden = false;
@@ -337,6 +439,62 @@
             say('note', t('Right! +:points points', { points: number.format(result.points) }), 'right');
         } else {
             say('note', t('Wrong: it was :answer.', { answer: was }), 'wrong');
+        }
+    };
+
+    // DistrictGuessr's answer: where the district is, with a dashed line from the player's pin, how far off it was and
+    // its points.
+    const showPlace = (state) => {
+        const result = state.result;
+        slot('foot').hidden = true;
+
+        if (result === null) {
+            say('note', t("Time's up, with no pin: it's here."), 'wrong');
+        } else {
+            const said = tn(result.points, ':km km away · :points point', ':km km away · :points points', { km: GuessrMap.km(result.km), points: number.format(result.points) });
+            say('note', said, result.points >= 500 ? 'right' : 'near');
+        }
+
+        placed = placed.then(() => drawing).then(({ map }) => {
+            const answer = L.latLng(state.answer.lat, state.answer.lng);
+            const at = state.pin ? L.latLng(state.pin.lat, state.pin.lng) : null;
+
+            // Only the pin that counted.
+            if (!at) {
+                pin?.remove();
+                pin = null;
+            }
+
+            marks.push(L.marker(answer, { icon: GuessrMap.pin('answer'), keyboard: false, interactive: false }).addTo(map));
+
+            if (at) {
+                marks.push(GuessrMap.line(at, answer).addTo(map));
+                map.fitBounds(L.latLngBounds([at, answer]), { padding: [50, 50], maxZoom: 9 });
+            } else {
+                map.setView(answer, 7);
+            }
+        });
+    };
+
+    // The round's answer, once, and how this player did, with their points and place.
+    const reveal = (state) => {
+        deal();
+        say('standing', t('Your points: :score · Place :rank of :count', { score: number.format(state.score), rank: state.rank, count: state.players }));
+
+        if (revealed === state.round) {
+            return;
+        }
+
+        revealed = state.round;
+        live.classList.remove('is-hurrying');
+        slot('seconds').textContent = 0;
+        slot('bar').style.transform = 'scaleX(0)';
+        lock(answered() ? guessed.guess : null);
+
+        if (pins()) {
+            showPlace(state);
+        } else {
+            showCount(state);
         }
     };
 
@@ -411,11 +569,19 @@
         }
     });
 
-    // ↑ for higher and ↓ for lower, while the round's cards wait for an answer.
-    document.addEventListener('keydown', (event) => {
-        const guess = { ArrowUp: 'higher', ArrowDown: 'lower' }[event.key];
+    slot('confirm').addEventListener('click', () => answer('pin'));
 
-        if (!guess || part('round').hidden || answered() || event.altKey || event.ctrlKey || event.metaKey) {
+    // ↑ for higher and ↓ for lower, while the round's cards wait for an answer; Enter confirms the pin.
+    document.addEventListener('keydown', (event) => {
+        if (part('round').hidden || answered() || event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+
+        const guess = pins()
+            ? (event.key === 'Enter' && !slot('confirm').disabled && !event.target.closest?.('a, button, input') ? 'pin' : null)
+            : { ArrowUp: 'higher', ArrowDown: 'lower' }[event.key];
+
+        if (!guess) {
             return;
         }
 

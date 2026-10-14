@@ -1,8 +1,9 @@
 // A live game's big screen (LiveGameController): checks where the game is up to about every second and shows it for the
-// room: the players as they join, a few seconds to get ready for each round, its cards with the time left and how many
-// have answered, then its answer, how many said higher and lower, and the top 5, and at the end the podium and everyone.
-// Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the server's
-// clock, worked out from each check, as on the players' phones.
+// room: the players as they join, a few seconds to get ready for each round, its cards or its district on the map
+// (guessr-map.js) with the time left and how many have answered, then its answer (how many said higher and lower, or
+// where the district is and everyone's pins, the 3 closest named) and the top 5, and at the end the podium and
+// everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
+// server's clock, worked out from each check, as on the players' phones.
 (() => {
     const host = document.querySelector('[data-live-host]');
 
@@ -24,6 +25,13 @@
     let dealt = null;
     let revealed = null;
     let busy = false;
+    // DistrictGuessr's map, once drawn ({ map, malaysia }), what the answer puts on it, and the round's map once it's set
+    // out, for the answer to wait for.
+    const pins = host.dataset.boundaries !== undefined;
+    const outlines = pins ? GuessrMap.load(host.dataset.boundaries) : null;
+    let drawing = null;
+    let marks = [];
+    let placed = Promise.resolve();
 
     const serverNow = () => Date.now() + offset;
 
@@ -145,7 +153,36 @@
         dealt = view.round;
         slot('round').textContent = `Round ${view.round} of ${view.rounds}`;
         slot('top-panel').hidden = true;
+        slot('play').classList.remove('is-split');
 
+        if (pins) {
+            setOut();
+        } else {
+            dealCards();
+        }
+    };
+
+    // DistrictGuessr's district, and the map, cleared and framed.
+    const setOut = () => {
+        const round = view.round;
+        slot('district').textContent = view.district.name;
+        slot('region').textContent = view.district.place;
+
+        drawing ??= GuessrMap.draw(slot('map'), outlines);
+        placed = drawing.then(({ map, malaysia }) => {
+            if (dealt !== round) {
+                return;
+            }
+
+            marks.forEach((layer) => layer.remove());
+            marks = [];
+            map.invalidateSize();
+            map.fitBounds(malaysia, { padding: [16, 16] });
+        });
+    };
+
+    // Higher or Lower's two cards, the second's count a question mark.
+    const dealCards = () => {
         const versus = document.createElement('span');
         versus.className = 'game-vs';
         versus.setAttribute('aria-hidden', 'true');
@@ -183,7 +220,7 @@
         slot('seconds').textContent = Math.ceil(left / 1000);
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
         host.classList.toggle('is-hurrying', left > 0 && left <= 3000);
-        slot('note').textContent = `${view.answered} of ${view.players} answered`;
+        slot('note').textContent = `${view.answered} of ${view.players} ${pins ? 'pinned' : 'answered'}`;
         part('round').querySelector('[data-host-action="close"]').hidden = false;
         part('round').querySelector('[data-host-action="next"]').hidden = true;
     };
@@ -223,7 +260,60 @@
         }));
     };
 
-    // The round's answer, once: the count that was hidden, how many said which, and the top 5.
+    // Higher or Lower's answer: the count that was hidden, and how many said which.
+    const showCount = (state) => {
+        const next = slot('cards').querySelector('.game-card-next');
+        next.classList.add('is-right');
+        countUp(next.querySelector('[data-card="crimes"]'), state.answer);
+
+        slot('note').textContent = `It was ${state.right}! ${state.said.higher} said higher, ${state.said.lower} said lower.`;
+    };
+
+    // DistrictGuessr's answer: where the district is, and everyone's pins, closest first, the 3 closest in gold, silver
+    // and bronze with their names and how far off they were. Framed on the district and those 3; the map beside the
+    // top 5.
+    const showPins = (state) => {
+        const closest = state.pins[0];
+        slot('note').textContent = closest
+            ? `It's here! Closest: ${closest.name}, ${GuessrMap.km(closest.km)} km away.`
+            : "It's here. No one pinned it.";
+        slot('play').classList.toggle('is-split', state.leaderboard.length > 0);
+
+        placed = placed.then(() => drawing).then(({ map }) => {
+            const answer = L.latLng(state.answer.lat, state.answer.lng);
+            const framed = [answer];
+
+            // The farthest first, so the closest are drawn on top.
+            [...state.pins].reverse().forEach((pin, index) => {
+                const place = state.pins.length - index;
+                const at = L.latLng(pin.lat, pin.lng);
+                const dot = L.circleMarker(at, {
+                    radius: place <= 3 ? 9 : 6,
+                    color: '#0e1013',
+                    weight: 2,
+                    fillColor: ['#f5c26b', '#d3dae1', '#e0a77a'][place - 1] ?? '#3aaaf2',
+                    fillOpacity: 0.95,
+                    interactive: false,
+                }).addTo(map);
+
+                if (place <= 3) {
+                    // To the right of the dot, or on the map's right half, to its left.
+                    dot.bindTooltip(`${place}. ${pin.name} · ${GuessrMap.km(pin.km)} km`, {
+                        permanent: true, direction: 'auto', className: 'live-host-tip',
+                    });
+                    framed.push(at);
+                }
+
+                marks.push(dot);
+            });
+
+            marks.push(L.marker(answer, { icon: GuessrMap.pin('answer'), keyboard: false, interactive: false }).addTo(map));
+            map.invalidateSize();
+            map.fitBounds(L.latLngBounds(framed), { padding: [60, 60], maxZoom: 8 });
+        });
+    };
+
+    // The round's answer, once, and the top 5.
     const reveal = (state) => {
         deal();
         host.classList.remove('is-hurrying');
@@ -238,14 +328,14 @@
         revealed = state.round;
         slot('seconds').textContent = 0;
         slot('bar').style.transform = 'scaleX(0)';
-
-        const next = slot('cards').querySelector('.game-card-next');
-        next.classList.add('is-right');
-        countUp(next.querySelector('[data-card="crimes"]'), state.answer);
-
-        slot('note').textContent = `It was ${state.right}! ${state.said.higher} said higher, ${state.said.lower} said lower.`;
         board(slot('top'), state.leaderboard);
         slot('top-panel').hidden = state.leaderboard.length === 0;
+
+        if (pins) {
+            showPins(state);
+        } else {
+            showCount(state);
+        }
     };
 
     // The end: the top 3 on the podium, second, first and third, and everyone under it.

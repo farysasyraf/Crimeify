@@ -67,7 +67,8 @@
                         @endif
                     </div>
 
-                    {{-- Beside it: for Higher or Lower, a round of it, from the figures; for the others, their icon. --}}
+                    {{-- Beside it: for Higher or Lower, a round of it, from the figures; for a game with one, its picture; for the
+                         others, their icon. --}}
                     @if ($game['key'] === 'higher-or-lower' && $sample)
                         <div class="library-sample" aria-hidden="true">
                             @foreach ($sample as $face)
@@ -83,6 +84,14 @@
                             @endforeach
                             <span class="game-vs">VS</span>
                         </div>
+                    @elseif (isset($game['picture']))
+                        <figure class="library-picture">
+                            <img src="{{ versioned_asset($game['picture']['image']) }}" alt=""
+                                width="{{ $game['picture']['width'] }}" height="{{ $game['picture']['height'] }}" />
+                            @isset($game['picture']['credit'])
+                                <figcaption>{{ $game['picture']['credit'] }}</figcaption>
+                            @endisset
+                        </figure>
                     @elseif (isset($game['tile']['icon']))
                         <span class="material-icon library-glyph" aria-hidden="true">{{ $game['tile']['big'] ?? $game['tile']['icon'] }}</span>
                     @endif

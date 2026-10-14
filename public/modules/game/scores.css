@@ -35,5 +35,12 @@
 .scores-live > div { flex: 1 1 360px; }
 .scores-live p { margin: 0; font-size: .9rem; }
 .scores-live-form { margin-bottom: 0; }
-.scores-live-form .select2-container { width: 96px !important; }
+.scores-live-form #live-game + .select2-container { width: 190px !important; }
+.scores-live-form #live-rounds + .select2-container { width: 96px !important; }
 .scores-host { display: block; font-size: .8125rem; }
+
+/* The games' leaderboards, one at a time: the chosen one's name a bright pill, as the public pages' links. */
+.scores-games { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.scores-game { padding: 7px 14px; border-radius: 999px; background: var(--raised); color: var(--text); font-weight: 600; }
+.scores-game:hover { background: var(--raised-hover); text-decoration: none; }
+.scores-game.is-current { background: var(--primary); color: var(--primary-text); }

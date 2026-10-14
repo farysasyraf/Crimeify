@@ -46,16 +46,20 @@ return [
         'theft_vehicle_lorry' => 'local_shipping',
     ],
 
-    // Live games, hosted from the Game scores page like a quiz night: everyone joins with the game's code on their
-    // phone, and each round shows everyone the same two cards at once, for config('game.seconds') to answer. A right
+    // Live games, hosted from the Game scores page like a quiz night, of Higher or Lower or DistrictGuessr: everyone
+    // joins with the game's code on their phone, and each round shows everyone the same two cards, or the same district,
+    // at once, for the game's seconds to answer (config('game.seconds') or config('game.districtguessr.seconds')). An
     // answer scores more the sooner it comes.
     'live' => [
         // The rounds a host can choose from, and the choice to start with.
         'rounds' => ['least' => 3, 'most' => 30, 'default' => 10],
-        // Seconds to get ready before each round's cards can be answered, so every phone shows them at the same moment.
+        // Seconds to get ready before each round can be answered, so every phone shows it at the same moment.
         'ready' => 3,
-        // A right answer's points: all of them straight away, half at the last moment.
+        // A right Higher or Lower answer's points. A DistrictGuessr pin's are its distance's (DistrictGuessr::points()).
         'points' => 1000,
+        // The share of an answer's points lost by answering at the last moment rather than straight away, by game: half
+        // in Higher or Lower; a quarter in DistrictGuessr, where how close the pin is counts most.
+        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25],
         // Seconds an answer may take to arrive after the round closes.
         'grace' => 1,
         // Hours a game can be joined for after it's made.
@@ -64,6 +68,21 @@ return [
         // they don't each read the database. The file store, as the site runs as one instance (DEPLOY.md).
         'store' => 'file',
         'keep' => 2,
+    ],
+
+    // DistrictGuessr: a police district's name and its state, to find on a map of Malaysia with only its states'
+    // outlines, so no town's name gives it away. The closer the pin to the district's (dbo.PoliceDistricts), the more
+    // points: all of them within `perfect` km, falling away by about a third every `scale` km after.
+    'districtguessr' => [
+        'rounds' => 10,
+        'seconds' => 40,
+        // Seconds more for a guess to arrive, then it counts as none.
+        'grace' => 4,
+        // Seconds counting down before the first district, as in Higher or Lower.
+        'ready' => 3,
+        'points' => 1000,
+        'perfect' => 2,
+        'scale' => 100,
     ],
 
     // The longest name a player can give.

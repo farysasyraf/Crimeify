@@ -123,6 +123,8 @@ class PublicLanguageTest extends TestCase
             'Modules/Game/Resources/views/_card.blade.php', 'Modules/Game/Http/Controllers/GameController.php',
             'Modules/Game/Http/Controllers/LivePlayController.php', 'Modules/Game/Entities/GameRun.php',
             'Modules/Game/Resources/views/library.blade.php', 'Modules/Game/Support/Library.php',
+            'Modules/Game/Resources/views/districtguessr.blade.php', 'Modules/Game/Http/Controllers/DistrictGuessrController.php',
+            'public/modules/game/districtguessr.js', 'public/modules/game/guessr-map.js',
             'public/modules/game/game.js', 'public/modules/game/live.js',
         ];
         $literal = '([\'"])((?:\\\\.|(?!\\1).)*)\\1';

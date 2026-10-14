@@ -13,12 +13,13 @@ use Modules\Game\Entities\LiveAnswer;
 use Modules\Game\Entities\LiveGame;
 use Modules\Game\Entities\LivePlayer;
 
-// Live games of Higher or Lower, like a quiz night: the host makes one with a number of rounds and shows its code on a
-// big screen, everyone joins with it on their phone, and the host starts it and moves it on round by round. Each round
-// shows everyone the same two cards of the same crime: first config('game.live.ready') seconds to get ready, so every
-// phone shows them at once, then config('game.seconds') to answer, then the answer and the scores, once the time's up
-// or everyone has answered. A right answer scores config('game.live.points') straight away, fewer the longer it takes,
-// down to half at the last moment; a wrong one, none.
+// Live games, like a quiz night, of Higher or Lower or DistrictGuessr: the host makes one with a number of rounds and
+// shows its code on a big screen, everyone joins with it on their phone, and the host starts it and moves it on round by
+// round. Each round shows everyone the same two cards of the same crime, or the same district to pin on the map: first
+// config('game.live.ready') seconds to get ready, so every phone shows it at once, then the game's seconds to answer,
+// then the answer and the scores, once the time's up or everyone has answered. A right card scores
+// config('game.live.points'), a pin its distance's points (DistrictGuessr::points()); either fewer the longer it took,
+// by up to the game's share in config('game.live.speed'). A wrong card scores none.
 //
 // The phones and the big screen check where the game is up to about every second. So they don't each read the
 // database, its state is kept in config('game.live.store') for a couple of seconds at a time (state()), and read again
@@ -35,33 +36,36 @@ class LiveGames
 
     public const Reveal = 'reveal';
 
-    public function __construct(private Cards $cards) {}
+    /**
+     * The games a live game can be, by their key on the Games page.
+     */
+    public const HigherOrLower = 'higher-or-lower';
+
+    public const DistrictGuessr = 'districtguessr';
+
+    public function __construct(private Cards $cards, private DistrictGuessr $guessr) {}
 
     /**
-     * Make a game for the host, with every round's cards dealt, getting closer round by round as the solo game does
-     * with its score. None when there are no cards to play with.
+     * Make a game of the game given for the host, with every round dealt: for Higher or Lower, its cards, getting
+     * closer round by round as the solo game does with its score; for DistrictGuessr, its districts. None when there's
+     * nothing to play with.
      */
-    public function create(User $host, int $rounds): ?LiveGame
+    public function create(User $host, int $rounds, string $game = self::HigherOrLower): ?LiveGame
     {
-        $cards = [];
+        $dealt = $game === self::DistrictGuessr ? $this->guessr->deal($rounds) : $this->pairs($rounds);
 
-        for ($round = 0; $round < $rounds; $round++) {
-            $pair = $this->cards->deal($round);
-
-            if ($pair === null) {
-                return null;
-            }
-
-            $cards[] = $pair;
+        if ($dealt === null) {
+            return null;
         }
 
         return LiveGame::create([
+            'Game' => $game,
             'Code' => $this->freeCode(),
             'HostId' => $host->Id,
             'HostName' => $host->Name,
             'Rounds' => $rounds,
-            'Seconds' => config('game.seconds'),
-            'Cards' => $cards,
+            'Seconds' => $game === self::DistrictGuessr ? config('game.districtguessr.seconds') : config('game.seconds'),
+            'Cards' => $dealt,
             'Status' => LiveGame::Lobby,
             'Round' => 0,
             'CreatedAt' => now(),
@@ -161,14 +165,16 @@ class LiveGames
     }
 
     /**
-     * A player's answer to the round given: whether it was right and its points. None when that round isn't taking
-     * answers: before its cards show, after its time, or when it isn't the round being played. Answering a round
-     * twice is a UniqueConstraintViolationException.
+     * A player's answer to the round given, as the game has it: for Higher or Lower, a guess ('higher' or 'lower'); for
+     * DistrictGuessr, a pin (lat and lng). Its points, whether it scored any, and for a pin, its kilometres off. None
+     * when that round isn't taking answers: before it shows, after its time, or when it isn't the round being played.
+     * Answering a round twice is a UniqueConstraintViolationException.
      *
      * @param  array<string, mixed>  $state
-     * @return array{correct: bool, points: int}|null
+     * @param  array{guess?: string, lat?: float, lng?: float}  $input
+     * @return array{correct: bool, points: int, km?: float}|null
      */
-    public function answer(array $state, int $player, int $round, string $guess): ?array
+    public function answer(array $state, int $player, int $round, array $input): ?array
     {
         $now = $this->now();
 
@@ -181,16 +187,23 @@ class LiveGames
 
         $taken = max(0, $now - $state['opensAt']);
         $allowed = $state['seconds'] * 1000;
-        $correct = $guess === $state['right'];
-        $points = $correct ? (int) round(config('game.live.points') * (1 - min($taken, $allowed) / $allowed / 2)) : 0;
+        $slow = config("game.live.speed.{$state['game']}") * min($taken, $allowed) / $allowed;
 
-        DB::transaction(function () use ($state, $player, $guess, $correct, $points, $taken) {
-            LiveAnswer::create([
+        if ($state['game'] === self::DistrictGuessr) {
+            $km = round(DistrictGuessr::km($input['lat'], $input['lng'], $state['answer']['lat'], $state['answer']['lng']), 1);
+            $points = (int) round(DistrictGuessr::points($km) * (1 - $slow));
+            $answer = ['Guess' => 'pin', 'Correct' => $points > 0, 'Lat' => $input['lat'], 'Lng' => $input['lng'], 'Km' => $km];
+        } else {
+            $correct = $input['guess'] === $state['right'];
+            $points = $correct ? (int) round(config('game.live.points') * (1 - $slow)) : 0;
+            $answer = ['Guess' => $input['guess'], 'Correct' => $correct];
+        }
+
+        DB::transaction(function () use ($state, $player, $answer, $points, $taken) {
+            LiveAnswer::create($answer + [
                 'LivePlayerId' => $player,
                 'LiveGameId' => $state['id'],
                 'Round' => $state['round'],
-                'Guess' => $guess,
-                'Correct' => $correct,
                 'Points' => $points,
                 'Milliseconds' => $taken,
                 'AnsweredAt' => now(),
@@ -202,14 +215,15 @@ class LiveGames
         });
         $this->changed($state['id']);
 
-        return ['correct' => $correct, 'points' => $points];
+        return ['correct' => $answer['Correct'], 'points' => $points] + (isset($km) ? ['km' => $km] : []);
     }
 
     /**
      * Where the game is up to, as the phones and the big screen read it, kept for config('game.live.keep') seconds:
-     * its round and when it opens and closes, its players and their scores, this round's answers, and its cards in
-     * both languages, with the count to guess and whether it's higher, which only the server sees until the answer.
-     * Fresh from the database when $fresh. None for a game that isn't there.
+     * which game it is, its round and when it opens and closes, its players and their scores, this round's answers,
+     * and its cards in both languages, with the count to guess and whether it's higher, or its district, with where it
+     * is: which only the server sees until the answer. Fresh from the database when $fresh. None for a game that isn't
+     * there.
      *
      * @return array<string, mixed>|null
      */
@@ -245,9 +259,10 @@ class LiveGames
     }
 
     /**
-     * What a player's phone shows: the phase, the round and its times, the cards in the player's language, whether
-     * they've answered; at the answer, the count that was hidden and how they did; their score and place, from the
-     * answer on (not while answering, which would give away who was right); and at the end, the top 10.
+     * What a player's phone shows: the phase, the round and its times, the cards in the player's language or the
+     * district, and whether they've answered (and where they pinned); at the answer, the count that was hidden or where
+     * the district is, and how they did; their score and place, from the answer on (not while answering, which would
+     * give away who was right); and at the end, the top 10.
      *
      * @param  array<string, mixed>  $state
      * @return array<string, mixed>
@@ -260,15 +275,19 @@ class LiveGames
         $me = collect($ranked)->firstWhere('id', $player);
         $mine = $state['answers'][$player] ?? null;
         $view = $this->common($state, $phase, $now) + ['name' => $me['name']];
+        $pins = $state['game'] === self::DistrictGuessr;
 
         if (in_array($phase, [self::Ready, self::Question, self::Reveal], true)) {
-            $view['cards'] = $state['cards'][$locale] ?? $state['cards']['en'];
+            $view += $pins
+                ? ['district' => $state['district'], 'pin' => $mine === null ? null : ['lat' => $mine['lat'], 'lng' => $mine['lng']]]
+                : ['cards' => $state['cards'][$locale] ?? $state['cards']['en']];
             $view['guess'] = $mine['guess'] ?? null;
         }
 
         if ($phase === self::Reveal) {
             $view['answer'] = $state['answer'];
-            $view['result'] = $mine === null ? null : ['correct' => $mine['correct'], 'points' => $mine['points']];
+            $view['result'] = $mine === null ? null : ['correct' => $mine['correct'], 'points' => $mine['points']]
+                + ($pins ? ['km' => $mine['km']] : []);
         }
 
         if ($phase !== self::Question) {
@@ -285,8 +304,8 @@ class LiveGames
 
     /**
      * What the big screen shows: the phase, the round and its times, the players by name while they join, how many
-     * have answered, the cards; at the answer, the count that was hidden, how many said higher and lower, and the top
-     * 5; and at the end, everyone.
+     * have answered, the cards or the district; at the answer, the count that was hidden and how many said higher and
+     * lower, or where the district is and everyone's pins, closest first; the top 5; and at the end, everyone.
      *
      * @param  array<string, mixed>  $state
      * @return array<string, mixed>
@@ -297,20 +316,37 @@ class LiveGames
         $phase = $this->phase($state, $now);
         $ranked = $this->ranked($state);
         $view = $this->common($state, $phase, $now) + ['answered' => count($state['answers'])];
+        $pins = $state['game'] === self::DistrictGuessr;
 
         if ($phase === LiveGame::Lobby) {
             $view['names'] = array_column($state['players'], 'name');
         }
 
         if (in_array($phase, [self::Ready, self::Question, self::Reveal], true)) {
-            $view['cards'] = $state['cards']['en'];
+            $view += $pins ? ['district' => $state['district']] : ['cards' => $state['cards']['en']];
         }
 
         if ($phase === self::Reveal) {
-            $guesses = array_count_values(array_column($state['answers'], 'guess'));
             $view['answer'] = $state['answer'];
-            $view['right'] = $state['right'];
-            $view['said'] = ['higher' => $guesses['higher'] ?? 0, 'lower' => $guesses['lower'] ?? 0];
+
+            if ($pins) {
+                $view['pins'] = collect($state['answers'])
+                    ->map(fn (array $answer, int $id) => [
+                        'name' => $state['players'][$id]['name'] ?? '',
+                        'lat' => $answer['lat'],
+                        'lng' => $answer['lng'],
+                        'km' => $answer['km'],
+                        'points' => $answer['points'],
+                    ])
+                    ->sortBy([['km', 'asc'], fn (array $a, array $b) => strcasecmp($a['name'], $b['name'])])
+                    ->values()
+                    ->all();
+            } else {
+                $guesses = array_count_values(array_column($state['answers'], 'guess'));
+                $view['right'] = $state['right'];
+                $view['said'] = ['higher' => $guesses['higher'] ?? 0, 'lower' => $guesses['lower'] ?? 0];
+            }
+
             $view['leaderboard'] = $this->board(array_slice($ranked, 0, 5));
             $view['last'] = $state['round'] >= $state['rounds'];
         }
@@ -361,6 +397,7 @@ class LiveGames
     private function common(array $state, string $phase, int $now): array
     {
         return [
+            'game' => $state['game'],
             'now' => $now,
             'phase' => $phase,
             'round' => $state['round'],
@@ -403,10 +440,11 @@ class LiveGames
 
         $players = LivePlayer::query()->where('LiveGameId', $id)->orderBy('Id')->get();
         $answers = $game->Round === 0 ? collect() : LiveAnswer::query()->where('LiveGameId', $id)->where('Round', $game->Round)->get();
-        [$shown, $next] = $game->Round === 0 ? [null, null] : $game->Cards[$game->Round - 1];
+        $dealt = $game->Round === 0 ? null : $game->Cards[$game->Round - 1];
 
         return [
             'id' => $game->Id,
+            'game' => $game->Game,
             'code' => $game->Code,
             'status' => $game->Status,
             'round' => $game->Round,
@@ -423,7 +461,25 @@ class LiveGames
                 'guess' => $answer->Guess,
                 'correct' => $answer->Correct,
                 'points' => $answer->Points,
+                'lat' => $answer->Lat,
+                'lng' => $answer->Lng,
+                'km' => $answer->Km,
             ]])->all(),
+        ] + ($game->Game === self::DistrictGuessr ? $this->district($dealt) : $this->pair($dealt));
+    }
+
+    /**
+     * A Higher or Lower round's part of the state: its cards in both languages, the count hidden on the second, and
+     * whether it's higher.
+     *
+     * @param  array{0: array<string, mixed>, 1: array<string, mixed>}|null  $pair
+     * @return array{cards: array<string, mixed>|null, answer: int|null, right: string|null}
+     */
+    private function pair(?array $pair): array
+    {
+        [$shown, $next] = $pair ?? [null, null];
+
+        return [
             'cards' => $shown === null ? null : collect(['en', 'ms'])->mapWithKeys(fn (string $locale) => [$locale => [
                 $this->cards->face($shown, withCount: true, locale: $locale),
                 $this->cards->face($next, withCount: false, locale: $locale),
@@ -431,6 +487,43 @@ class LiveGames
             'answer' => $next['crimes'] ?? null,
             'right' => $next === null ? null : ($next['crimes'] > $shown['crimes'] ? 'higher' : 'lower'),
         ];
+    }
+
+    /**
+     * A DistrictGuessr round's part of the state: the district's name and the region its pin is in, and where it is.
+     *
+     * @param  array{name: string, place: string, lat: float, lng: float}|null  $district
+     * @return array{district: array{name: string, place: string}|null, answer: array{lat: float, lng: float}|null}
+     */
+    private function district(?array $district): array
+    {
+        return [
+            'district' => $district === null ? null : ['name' => $district['name'], 'place' => $district['place']],
+            'answer' => $district === null ? null : ['lat' => $district['lat'], 'lng' => $district['lng']],
+        ];
+    }
+
+    /**
+     * Higher or Lower's cards for the rounds given, getting closer round by round as the solo game does with its score.
+     * None when there are no cards to play with.
+     *
+     * @return list<array<int, array<string, mixed>>>|null
+     */
+    private function pairs(int $rounds): ?array
+    {
+        $cards = [];
+
+        for ($round = 0; $round < $rounds; $round++) {
+            $pair = $this->cards->deal($round);
+
+            if ($pair === null) {
+                return null;
+            }
+
+            $cards[] = $pair;
+        }
+
+        return $cards;
     }
 
     /**

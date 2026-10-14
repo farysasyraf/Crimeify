@@ -1,8 +1,13 @@
-"""Draws the game library's art for Higher or Lower, in public/modules/game:
+"""Draws the Games page's art, in public/modules/game:
 
 - doodles.svg: a square of faint, outlined crime doodles (a police badge, a fingerprint, a magnifying glass, a lock,
   a motorbike…) that repeats seamlessly behind the library's games, in the style of a sticker-bombed backdrop;
-- tile-higher-or-lower.svg: the game's square tile, its title (title.svg) over the doodles and a green and red glow.
+- tile-higher-or-lower.svg: Higher or Lower's square tile, its title (title.svg) over the doodles and a green and red
+  glow;
+- map-districtguessr.svg: Malaysia's states (the Map module's malaysia-states.geojson, simplified), with a guess and
+  its answer, beside DistrictGuessr's title;
+- tile-districtguessr.svg: DistrictGuessr's tile, its title (title-districtguessr.svg) over that map, the doodles and a
+  blue glow.
 
 The doodles are Material Icons Round, which the app serves from public/fonts (Apache License 2.0, see
 material-icons-LICENSE.txt there), drawn as outlines. Only needed again to change the art; the pages use the SVG files.
@@ -10,6 +15,8 @@ With fonttools and brotli installed (pip install fonttools brotli), from the pro
 
     python Modules/Game/Resources/art/make_art.py
 """
+import json
+import math
 import random
 import re
 from pathlib import Path
@@ -63,9 +70,9 @@ def doodles():
             'vector-effect="non-scaling-stroke">' + ''.join(paths) + '</g>')
 
 
-def title():
-    """title.svg's width, height and drawing (its two coloured groups)."""
-    svg = (OUT / 'title.svg').read_text(encoding='utf-8')
+def title(name='title.svg'):
+    """A drawn title's width, height and drawing (its coloured groups), from make_title.py's SVG files."""
+    svg = (OUT / name).read_text(encoding='utf-8')
     width, height = (float(n) for n in re.search(r'viewBox="0 0 (\S+) (\S+)"', svg).groups())
     return width, height, ''.join(re.findall(r'<g fill="[^"]+">.*?</g>', svg, flags=re.S))
 
@@ -96,4 +103,109 @@ scale = tile * 0.8 / width
     f'<g transform="translate({(tile - width * scale) / 2:.1f} {(tile - height * scale) / 2:.1f}) scale({scale:.5f})">{drawing}</g>\n'
     '</svg>\n', encoding='utf-8', newline='\n')
 
-print('doodles.svg and tile-higher-or-lower.svg')
+
+
+def simplify(points, tolerance):
+    """A line's points with those it barely bends at left out (Ramer–Douglas–Peucker), so the outline stays small."""
+    if len(points) < 3:
+        return points
+    keep = [False] * len(points)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(points) - 1)]
+    while stack:
+        first, last = stack.pop()
+        (x1, y1), (x2, y2) = points[first], points[last]
+        length = math.hypot(x2 - x1, y2 - y1)
+        furthest, index = 0.0, None
+        for i in range(first + 1, last):
+            x, y = points[i]
+            # From the line between the ends, or for a closed outline, whose ends are the same point, from that point.
+            distance = abs((x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1)) / length if length else math.hypot(x - x1, y - y1)
+            if distance > furthest:
+                furthest, index = distance, i
+        if index is not None and furthest > tolerance:
+            keep[index] = True
+            stack += [(first, index), (index, last)]
+    return [point for point, kept in zip(points, keep) if kept]
+
+
+def malaysia(width):
+    """Malaysia's states as one SVG path, width wide, from the Map module's boundaries; its height; and a function from
+    a latitude and longitude to the drawing's x and y. Tiny islands are left out."""
+    states = json.loads((PUBLIC / 'modules/map/malaysia-states.geojson').read_text(encoding='utf-8'))['features']
+    rings = []
+    for state in states:
+        shape = state['geometry']
+        for polygon in shape['coordinates'] if shape['type'] == 'MultiPolygon' else [shape['coordinates']]:
+            rings.append(polygon[0])
+    lngs = [lng for ring in rings for lng, _ in ring]
+    lats = [lat for ring in rings for _, lat in ring]
+    scale = width / (max(lngs) - min(lngs))
+
+    def place(lat, lng):
+        return (lng - min(lngs)) * scale, (max(lats) - lat) * scale
+
+    path = []
+    for ring in rings:
+        points = simplify([place(lat, lng) for lng, lat in ring], tolerance=width / 1100)
+        xs, ys = [x for x, _ in points], [y for _, y in points]
+        if len(points) < 4 or (max(xs) - min(xs)) * (max(ys) - min(ys)) < (width / 300) ** 2:
+            continue
+        path.append('M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in points) + 'Z')
+    return ''.join(path), (max(lats) - min(lats)) * scale, place
+
+
+def pin(x, y, size, colour):
+    """A map pin (Material's location_on), its point at x, y."""
+    bounds = BoundsPen(glyphs)
+    glyphs['location_on'].draw(bounds)
+    x_min, y_min, x_max, y_max = bounds.bounds
+    scale = size / (y_max - y_min)
+    pen = SVGPathPen(glyphs)
+    glyphs['location_on'].draw(TransformPen(pen, (scale, 0, 0, -scale, x - (x_min + x_max) / 2 * scale, y + y_min * scale)))
+    return f'<path fill="{colour}" d="{pen.getCommands()}"/>'
+
+
+def guessed(place, size):
+    """A guess and the answer, as DistrictGuessr shows them: a blue pin some way off Batu Pahat's green one, joined by a
+    dashed line."""
+    answer = place(1.85748, 102.93981)
+    guess = place(2.72, 101.94)
+    return (f'<line x1="{guess[0]:.1f}" y1="{guess[1]:.1f}" x2="{answer[0]:.1f}" y2="{answer[1]:.1f}" stroke="#eef2f6" '
+            f'stroke-width="{size / 14:.1f}" stroke-dasharray="{size / 6:.1f} {size / 8:.1f}" stroke-linecap="round"/>'
+            + pin(*guess, size, '#3aaaf2') + pin(*answer, size, GREEN))
+
+
+BLUE = '#3aaaf2'
+
+# DistrictGuessr's picture beside its title on the Games page: Malaysia with a guess and its answer.
+picture = 900
+outline, outline_height, place = malaysia(picture)
+(OUT / 'map-districtguessr.svg').write_text(
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -40 {picture} {outline_height + 40:.0f}" role="img" aria-label="Malaysia">\n'
+    f'<!-- Malaysia\'s states, from public/modules/map/malaysia-states.geojson. {credit} -->\n'
+    f'<path d="{outline}" fill="#1a2028" fill-opacity="0.9" stroke="{BLUE}" stroke-opacity="0.55" stroke-width="1.4" '
+    'stroke-linejoin="round" vector-effect="non-scaling-stroke"/>\n'
+    f'{guessed(place, 54)}\n</svg>\n', encoding='utf-8', newline='\n')
+
+# DistrictGuessr's tile: its title over Malaysia, a guess and its answer, the doodles and a blue glow.
+width, height, drawing = title('title-districtguessr.svg')
+scale = tile * 0.76 / width
+outline, outline_height, place = malaysia(tile * 0.9)
+(OUT / 'tile-districtguessr.svg').write_text(
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {tile} {tile}" role="img" aria-label="DistrictGuessr">\n'
+    f'<!-- DistrictGuessr\'s tile. {credit} Title: title-districtguessr.svg. Map: malaysia-states.geojson. -->\n'
+    '<defs>\n'
+    f'<pattern id="doodles" width="{SIZE}" height="{SIZE}" patternUnits="userSpaceOnUse" patternTransform="scale(0.6)">{pattern}</pattern>\n'
+    f'<radialGradient id="blue" cx="0.5" cy="0.62" r="0.62"><stop offset="0" stop-color="{BLUE}" stop-opacity="0.3"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>\n'
+    '</defs>\n'
+    f'<rect width="{tile}" height="{tile}" fill="{BLACK}"/>\n'
+    f'<rect width="{tile}" height="{tile}" fill="url(#doodles)"/>\n'
+    f'<rect width="{tile}" height="{tile}" fill="url(#blue)"/>\n'
+    f'<g transform="translate({(tile - width * scale) / 2:.1f} {tile * 0.17:.1f}) scale({scale:.5f})">{drawing}</g>\n'
+    f'<g transform="translate({tile * 0.05:.1f} {tile * 0.6 - outline_height / 2:.1f})">'
+    f'<path d="{outline}" fill="#1a2028" stroke="{BLUE}" stroke-opacity="0.6" stroke-width="1.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'
+    f'{guessed(place, 40)}</g>\n'
+    '</svg>\n', encoding='utf-8', newline='\n')
+
+print('doodles.svg, tile-higher-or-lower.svg, map-districtguessr.svg and tile-districtguessr.svg')
