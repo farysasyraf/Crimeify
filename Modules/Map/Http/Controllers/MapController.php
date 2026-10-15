@@ -98,6 +98,9 @@ class MapController extends Controller
             'share' => $share,
             'hasPopulation' => $this->hasPopulation(),
             'stations' => $this->stations(),
+            // Every police district's pin, whatever the year, for "Near you" (nearby.js): which are nearest the visitor.
+            'pins' => $this->pins(),
+            'turf' => versioned_asset('vendor/turf/turf.min.js'),
             // The pins' figures come from MapController@crime: in the app, as "map/crime" added on the Routes page;
             // on the public map, from its own address in Routes/web.php.
             // On the public map, in the page's language, even where cookies aren't kept.
@@ -191,6 +194,8 @@ class MapController extends Controller
                 'types' => $this->types($figures[$place][$year]),
                 // Its own public address, to share, in the app too: whoever it's sent to may not have a login.
                 'share' => route('public.map.district', $district->path() + $this->language()),
+                // Its profile, for someone deciding where to live or stay (AreaController).
+                'profile' => route('public.areas.show', $district->path() + $this->language()),
             ];
         }
 
@@ -307,6 +312,29 @@ class MapController extends Controller
         } catch (QueryException) {
             // dbo.Populations isn't there until migrate runs.
             return false;
+        }
+    }
+
+    /**
+     * Each police district's pin, by name: its name, region, where it is, and its profile's address (AreaController).
+     *
+     * @return list<array{name: string, region: string, lat: float, lng: float, profile: string}>
+     */
+    private function pins(): array
+    {
+        try {
+            return PoliceDistrict::query()->orderBy('Name')->get()
+                ->map(fn (PoliceDistrict $district) => [
+                    'name' => $district->Name,
+                    'region' => $district->Region,
+                    'lat' => $district->Latitude,
+                    'lng' => $district->Longitude,
+                    'profile' => route('public.areas.show', $district->path() + $this->language()),
+                ])
+                ->all();
+        } catch (QueryException) {
+            // dbo.PoliceDistricts isn't there until migrate runs.
+            return [];
         }
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Map\Http\Controllers\AreaController;
 use Modules\Map\Http\Controllers\MapController;
 
 // The Map module's pages come from the Routes page (dbo.AppRoutes), as AMV's module pages come from its
@@ -25,4 +26,12 @@ Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
     Route::get('/public/map/{region}/{district}/preview.png', [MapController::class, 'districtPreview'])
         ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
         ->name('public.map.district.preview');
+
+    // "Check an area": a police district's profile, for someone deciding where to live or stay, and up to three side
+    // by side (AreaController).
+    Route::get('/public/areas', [AreaController::class, 'index'])->name('public.areas');
+    Route::get('/public/areas/compare', [AreaController::class, 'compare'])->name('public.areas.compare');
+    Route::get('/public/areas/{region}/{district}', [AreaController::class, 'show'])
+        ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
+        ->name('public.areas.show');
 });

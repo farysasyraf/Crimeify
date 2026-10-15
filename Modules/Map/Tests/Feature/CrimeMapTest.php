@@ -214,6 +214,7 @@ class CrimeMapTest extends TestCase
             ],
             // Its public address, to share, though this map is the app's.
             'share' => url('/public/map/johor/batu-pahat'),
+            'profile' => url('/public/areas/johor/batu-pahat'),
         ]);
 
         // Iskandar Puteri's year before is Nusajaya's; Kluang has no year before to compare with.

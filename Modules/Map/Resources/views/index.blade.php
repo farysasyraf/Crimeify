@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet/leaflet.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.Default.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/map/map.css') }}" />
 @endpush
 
@@ -103,6 +104,21 @@
             <button type="button" class="btn btn-sm" data-show-all hidden>{{ __('Show all of Malaysia') }}</button>
         </section>
 
+        {{-- "Near you" (map.js, nearby.js): the police districts and stations nearest the visitor, from their browser's
+             location, which stays in their browser. Shown once the script finds the browser can give one. --}}
+        @if ($pins !== [])
+            <section class="card near-card" aria-labelledby="near-heading" data-near hidden>
+                <h2 id="near-heading">{{ __('Near you') }}</h2>
+                <p class="muted near-intro">{{ __('Find the police districts and stations nearest to where you are.') }}</p>
+                <button type="button" class="btn btn-sm btn-primary near-button" data-near-button>
+                    <span class="material-icon" aria-hidden="true">my_location</span>{{ __('Use my location') }}
+                </button>
+                <p class="near-privacy">{{ __("Your location stays in your browser: it isn't sent to :app or kept.", ['app' => config('app.name')]) }}</p>
+                <div class="near-results" data-near-results aria-live="polite"></div>
+            </section>
+            <script type="application/json" data-district-pins>@json($pins)</script>
+        @endif
+
         {{-- Every region as a button; choosing one picks it on the map too. --}}
         <aside class="card state-picker" aria-label="{{ __('States and federal territories') }}">
             @foreach (['States' => $states, 'Federal territories' => $territories] as $heading => $regions)
@@ -163,6 +179,7 @@
     <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
         data-tile-url="{{ config('map.tiles.url') }}" data-tile-attribution="{{ config('map.tiles.attribution') }}" data-tile-max-zoom="{{ config('map.tiles.max_zoom') }}"
         @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
+        data-turf="{{ $turf }}"
         {{-- A police district or station to open, from a shared link or the command palette. --}}
         @if ($open) data-open="{{ json_encode($open) }}" @endif
         role="region" aria-label="{{ __("Map of Malaysia's states and police districts") }}">
@@ -173,6 +190,8 @@
 
 <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
 <script src="{{ versioned_asset('vendor/leaflet-markercluster/leaflet.markercluster.js') }}" defer></script>
+<script src="{{ versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.js') }}" defer></script>
+<script src="{{ versioned_asset('modules/map/nearby.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/map.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/station-finder.js') }}" defer></script>
 @endsection

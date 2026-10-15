@@ -22,6 +22,7 @@
         $pages = collect([
             ['route' => 'public.dashboard', 'label' => __('Dashboard'), 'icon' => 'dashboard'],
             ['route' => 'public.map', 'label' => __('Map'), 'icon' => 'map'],
+            ['route' => 'public.areas', 'label' => __('Areas'), 'icon' => 'travel_explore'],
             ['route' => 'public.game', 'label' => __('Games'), 'icon' => 'sports_esports'],
         ])->filter(fn (array $page) => Route::has($page['route']));
     @endphp

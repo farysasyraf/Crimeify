@@ -1,0 +1,146 @@
+/* "Check an area": a police district's profile and up to three side by side (AreaController), on dark rounded cards
+   like the dashboard's. Less crime is the good news, in green with ↓; more is red with ↑, so it's never colour alone.
+   The charts' colours were checked for colour blindness and contrast on these cards: the areas compared in blue,
+   orange and teal, and property and violent crime in blue and red. */
+.area-page {
+    --area-card: #232529;
+    --area-text: #eef2f6;
+    --area-soft: #b4bec8;
+    --area-rule: rgba(255, 255, 255, .08);
+    --area-track: rgba(255, 255, 255, .07);
+    --area-accent: #3aaaf2;
+    --area-down: #7fd8a4;
+    --area-up: #ff8f8a;
+    --area-1: #3987e5;
+    --area-2: #d95926;
+    --area-3: #199e70;
+    --area-property: #3987e5;
+    --area-assault: #e66767;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 20px;
+}
+.area-card {
+    min-width: 0; padding: 18px 20px 20px; border-radius: 20px;
+    background: var(--area-card); color: var(--area-text); box-shadow: 0 14px 36px rgba(16, 24, 40, .14);
+}
+.area-wide { grid-column: 1 / -1; }
+.area-card h2 { margin: 0 0 12px; font-size: 1rem; font-weight: 700; }
+.area-card-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 12px; }
+.area-card-head h2 { margin: 0; }
+.area-note { margin: 10px 0 0; color: var(--area-soft); font-size: .8125rem; }
+
+/* The page's heading, with where it's from above it and what to do next beside it. */
+.area-head { align-items: flex-end; }
+.area-kicker { margin: 0 0 4px; font-size: .875rem; }
+.area-kicker a { color: var(--accent-soft); font-weight: 600; }
+.area-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.area-actions .btn { display: inline-flex; align-items: center; gap: 6px; }
+
+/* What the figures say, in sentences. */
+.area-summary { margin: 0; padding-left: 20px; display: grid; gap: 8px; line-height: 1.55; }
+.area-summary li::marker { color: var(--area-accent); }
+
+/* The latest year's figures as tiles. */
+.area-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+/* Tinted with the app's blue, as the menu marks the page it's on: softly, so it doesn't read as a button. */
+.area-stat { padding: 14px 16px; border: 1px solid rgba(58, 170, 242, .22); border-radius: 14px; background: rgba(58, 170, 242, .16); }
+.area-stat dt { color: var(--area-soft); font-size: .8125rem; }
+.area-stat dd { margin: 4px 0 0; }
+.area-stat strong { display: block; font-size: 1.5rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.area-sub { color: var(--area-soft); font-size: .8125rem; }
+
+/* A change as a tag: down in green, up in red, each with its arrow. */
+.area-change { display: inline-flex; align-items: center; gap: 2px; padding: 2px 9px; border-radius: 999px; background: rgba(255, 255, 255, .06); color: var(--area-soft); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.area-change.is-down { background: rgba(127, 216, 164, .12); color: var(--area-down); }
+.area-change.is-up { background: rgba(255, 143, 138, .12); color: var(--area-up); }
+
+/* Legends: a swatch for each series, or the line the area's share is marked with. */
+.area-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--area-soft); font-size: .8125rem; }
+.area-legend li { display: flex; align-items: center; gap: 6px; }
+.area-swatch { flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--swatch); }
+.area-swatch-line { width: 14px; height: 0; border-radius: 0; border-top: 2px dashed var(--swatch); }
+.area-swatch-mark { width: 2px; height: 12px; border-radius: 1px; background: var(--area-text); }
+
+/* Chart.js fills its box, so the box sets the size. */
+.area-chart { position: relative; height: 280px; }
+
+/* Since the first year: the district's, its area's and Malaysia's change, each as a bar from nothing. */
+.area-trend { display: grid; gap: 10px; margin: 0; }
+.area-trend-row { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.area-trend-row dt { overflow-wrap: anywhere; font-size: .875rem; }
+.area-trend-row dd { display: contents; }
+.area-bar { height: 10px; border-radius: 999px; background: var(--area-track); overflow: hidden; }
+.area-bar-fill { display: block; height: 100%; width: calc(var(--size) * 1%); border-radius: 999px; background: var(--area-soft); }
+.area-bar-fill.is-down { background: var(--area-down); }
+.area-bar-fill.is-up { background: var(--area-up); }
+
+/* Crimes by type: each type's share here as a bar, with the area's share as a line across it. The rows share the
+   list's columns, so every bar is as long. */
+.area-mix { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto; gap: 10px 12px; margin: 0; padding: 0; list-style: none; font-size: .875rem; }
+.area-mix-row { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; }
+.area-mix-track { position: relative; height: 12px; border-radius: 4px; background: var(--area-track); }
+.area-mix-fill { position: absolute; inset: 0 auto 0 0; width: calc(var(--share) * 1%); border-radius: 4px; background: var(--swatch, var(--area-1)); }
+.area-mix-mark { position: absolute; top: -3px; bottom: -3px; left: calc(var(--share) * 1%); width: 2px; margin-left: -1px; border-radius: 1px; background: var(--area-text); }
+.area-mix-value { color: var(--area-soft); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.area-mix-value strong { color: var(--area-text); }
+/* Side by side: the type's name, then a thin bar for each area with its share. */
+.area-mix-group { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; row-gap: 4px; }
+.area-mix-label { grid-row: span var(--bars); }
+.area-mix-group .area-mix-track { height: 8px; }
+.area-mix-line { display: contents; }
+
+/* The police stations: each one's name, address and phone, and where it is. */
+.area-stations { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.area-station { padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .04); font-size: .875rem; }
+.area-station h3 { margin: 0 0 4px; font-size: .9375rem; }
+.area-station p { margin: 0 0 6px; color: var(--area-soft); }
+.area-station a { font-weight: 600; }
+
+/* What the figures are and aren't. */
+.area-about { color: var(--area-soft); font-size: .875rem; }
+.area-about ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+/* Choosing areas: up to three lists side by side, then the button. */
+.area-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 12px 16px; }
+.area-picker .field { margin: 0; min-width: 0; }
+.area-picker .btn { white-space: nowrap; }
+
+/* "Near you": the button, then the three police districts nearest the visitor and a link to see them side by side. */
+.area-near .near-button { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
+.area-near .near-button .material-icon { font-size: 18px; }
+.area-near .near-results:empty { display: none; }
+.area-near .near-results { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--area-rule); }
+.area-near .near-heading { margin: 0 0 6px; color: var(--accent-soft); font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.area-near .near-list { display: grid; gap: 6px; margin: 0 0 12px; padding-left: 20px; }
+.area-near .near-list a { font-weight: 600; }
+.area-near .near-problem { margin: 0; color: var(--danger); }
+
+/* Every police district by state, each state opening to its districts. */
+.area-browse { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 16px; }
+.area-browse details { border-bottom: 1px solid var(--area-rule); padding: 6px 0; }
+.area-browse summary { cursor: pointer; font-weight: 600; }
+.area-browse summary span { color: var(--area-soft); font-weight: 400; }
+.area-browse ul { margin: 6px 0 4px; padding-left: 18px; columns: 1; font-size: .875rem; }
+.area-browse li { margin: 2px 0; }
+
+/* Side by side: a column for each area, its name over it with its colour. */
+.area-table-wrap { overflow-x: auto; }
+.area-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.area-table th, .area-table td { padding: 10px 12px; border-bottom: 1px solid var(--area-rule); text-align: left; vertical-align: top; }
+.area-table thead th { color: var(--area-text); font-size: .9375rem; }
+.area-table thead th a { display: inline-flex; align-items: center; gap: 8px; color: inherit; }
+.area-table tbody th { color: var(--area-soft); font-weight: 500; }
+.area-table td strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.area-table tbody tr:last-child > * { border-bottom: 0; }
+
+@media (max-width: 999.98px) {
+    .area-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .area-picker { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+    .area-page { grid-template-columns: minmax(0, 1fr); }
+    .area-mix { grid-template-columns: minmax(0, 1fr) auto; }
+    .area-mix-row .area-mix-track { grid-column: 1 / -1; grid-row: 2; }
+    .area-mix-label { grid-column: 1 / -1; grid-row: auto; }
+    .area-trend-row { grid-template-columns: minmax(0, 1fr) auto; }
+    .area-trend-row .area-bar { grid-column: 1 / -1; grid-row: 2; }
+}

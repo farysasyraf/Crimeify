@@ -222,14 +222,46 @@
 .crime-share:focus-visible { outline: 2px solid var(--popup-accent); outline-offset: 1px; }
 .crime-share .material-icon { font-size: 16px; color: var(--popup-accent); }
 
-/* The enlarge button, over Leaflet's zoom buttons at the bottom right, and styled like them. */
-.map-enlarge button {
+/* The enlarge and "Show where I am" buttons, over Leaflet's zoom buttons at the bottom right, and styled like them. Where
+   the visitor is shown, the location button is blue, and pulses while the browser finds them. */
+:is(.map-enlarge, .map-locate) button {
     display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0;
     background: var(--surface); color: var(--text); cursor: pointer;
 }
-.map-enlarge button:hover { background: var(--raised); }
-.map-enlarge button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.map-enlarge .material-icon { font-size: 20px; }
+:is(.map-enlarge, .map-locate) button:hover { background: var(--raised); }
+:is(.map-enlarge, .map-locate) button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+:is(.map-enlarge, .map-locate) .material-icon { font-size: 20px; }
+.map-locate:is(.active, .following) button { color: var(--primary); }
+.map-locate.requesting .material-icon { animation: locate-pulse 1s ease-in-out infinite alternate; }
+@keyframes locate-pulse { to { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+    .map-locate.requesting .material-icon { animation: none; opacity: .6; }
+}
+
+/* "Near you": the button to use the visitor's location, then their state and the police districts nearest them, each
+   with how far, its links and its stations. */
+.near-card { padding: 16px 18px; }
+.near-card h2 { margin: 0 0 2px; font-size: 1.15rem; }
+.near-intro { margin: 0 0 12px; }
+.near-button { display: inline-flex; align-items: center; gap: 6px; }
+.near-button .material-icon { font-size: 18px; }
+.near-privacy { margin: 8px 0 0; color: var(--muted); font-size: .8125rem; }
+.near-results:empty { display: none; }
+.near-results { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.near-results p { margin: 0; }
+.near-where { font-weight: 600; }
+.near-where .muted { font-weight: 400; font-size: .875rem; }
+.near-heading { margin: 12px 0 6px; color: var(--accent-soft); font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.near-list { display: grid; gap: 10px; margin: 0; padding-left: 20px; }
+.near-list li::marker { color: var(--muted); }
+.near-district .muted { font-size: .875rem; }
+.near-links { font-size: .875rem; }
+.near-link { padding: 0; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.near-link:hover { text-decoration: underline; }
+.near-links a { font-weight: 600; }
+.near-stations { margin: 4px 0 0; padding-left: 16px; color: var(--muted); font-size: .8125rem; }
+.near-results .near-note { margin-top: 10px; color: var(--muted); font-size: .8125rem; }
+.near-problem { color: var(--danger); font-size: .875rem; }
 
 /* The enlarged map: a modal dialog filling the window but a margin, 16px on a phone up to 48px on a wide screen,
    over the page dimmed like the sidebar's backdrop. The page behind doesn't scroll meanwhile. */
@@ -324,8 +356,9 @@ html:has(.map-dialog[open]) { overflow: hidden; }
     .state-panel .crime-year { width: 180px; }
     .state-panel .crime-note { max-width: 320px; }
     .state-panel [data-show-all] { justify-self: end; align-self: end; }
-    .state-picker { order: 4; }
-    .station-finder { order: 5; padding: 18px 20px; }
+    .near-card { order: 4; padding: 18px 20px; }
+    .state-picker { order: 5; }
+    .station-finder { order: 6; padding: 18px 20px; }
     .station-finder-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
     .station-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .map-search { top: 12px; width: calc(100% - 24px); }

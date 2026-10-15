@@ -151,6 +151,8 @@
     }).observe(container);
 
     const layers = new Map();
+    // The states' boundaries as loaded, for which state a point is in ("Near you", below).
+    let boundaryData = null;
     let selected = null;
 
     // One year's figures from MapController@crime, once they've loaded.
@@ -297,6 +299,15 @@
         });
 
         share.append(whatsapp, copy);
+
+        // Its profile: how its crime has changed, which crimes are most common, and its stations.
+        if (district.profile) {
+            const profile = element('a', undefined, 'crime-share');
+            profile.href = district.profile;
+            profile.append(icon('travel_explore'), t('Area profile'));
+            share.append(profile);
+        }
+
         return share;
     };
 
@@ -559,6 +570,7 @@
             return response.json();
         })
         .then((boundaries) => {
+            boundaryData = boundaries;
             L.geoJSON(boundaries, {
                 style: (feature) => look(feature.properties.shapeISO),
                 onEachFeature: (feature, layer) => {
@@ -794,6 +806,161 @@
                 pick(place);
             }
         });
+    }
+
+    // "Near you" (nearby.js): with the browser's location, from the button in its card or the one over the map, the
+    // state the visitor is in, chosen as from the list, and the three police districts nearest them, each with its
+    // stations, its profile and its pin. Leaflet.Locate shows where they are and follows them as they move; the list
+    // is worked out again once they've moved a little. The location stays in the browser.
+    const near = document.querySelector('[data-near]');
+    const nearby = window.CrimeifyNearby;
+    const pinList = document.querySelector('[data-district-pins]');
+
+    if (near && nearby && pinList && L.control.locate && 'geolocation' in navigator) {
+        const pins = JSON.parse(pinList.textContent);
+        const results = near.querySelector('[data-near-results]');
+        // Where the list was last worked out for, so it isn't redone for every step.
+        let listedAt = null;
+
+        const say = (text, className = 'near-problem') => results.replaceChildren(element('p', text, className));
+
+        const link = (text, href, outside = false) => {
+            const anchor = element('a', text);
+            anchor.href = href;
+            if (outside) {
+                anchor.target = '_blank';
+                anchor.rel = 'noopener';
+            }
+            return anchor;
+        };
+
+        // A police district near the visitor: its name, how far, its state, its profile, its pin, and its stations.
+        const nearDistrict = (pin) => {
+            const item = element('li');
+            const head = element('p', undefined, 'near-district');
+            head.append(element('strong', pin.name), ' ', element('span', `${nearby.distance(pin.km)} · ${regionName(pin.region)}`, 'muted'));
+
+            const onMap = element('button', t('Show on the map'), 'near-link');
+            onMap.type = 'button';
+            onMap.addEventListener('click', () => {
+                // On a narrow screen the map is above the cards, out of view.
+                if (narrow.matches) {
+                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                go({ kind: 'district', region: pin.region, name: pin.name });
+            });
+            const links = element('p', undefined, 'near-links');
+            links.append(link(t('Area profile'), pin.profile), ' · ', onMap);
+            item.append(head, links);
+
+            const here = stations.filter((station) => station.region === pin.region && station.district === pin.name);
+            if (here.length > 0) {
+                const list = element('ul', undefined, 'near-stations');
+                for (const station of here) {
+                    const row = element('li');
+                    row.append(element('span', station.name));
+                    if (station.call) {
+                        row.append(' · ', link(station.phone, station.call));
+                    }
+                    row.append(' · ', link('Waze', station.waze, true));
+                    list.append(row);
+                }
+                item.append(list);
+            }
+
+            return item;
+        };
+
+        const list = (turf, latlng, accuracy) => {
+            const state = boundaryData ? nearby.within(turf, boundaryData, latlng.lat, latlng.lng) : null;
+            const code = state?.properties.shapeISO ?? null;
+            const where = element('p', code ? t("You're in :region.", { region: regionName(code) }) : t("You don't seem to be in Malaysia's states."), 'near-where');
+            if (accuracy) {
+                where.append(' ', element('span', t('Accurate to about :distance.', { distance: nearby.distance(accuracy / 1000) }), 'muted'));
+            }
+
+            const districts = element('ol', undefined, 'near-list');
+            districts.append(...nearby.nearest(turf, pins, latlng.lat, latlng.lng).map(nearDistrict));
+            results.replaceChildren(
+                where,
+                element('h3', t('Nearest police districts'), 'near-heading'),
+                districts,
+                element('p', t("In a straight line to each district's pin, mostly its police headquarters. Near a district's edge, the nearest pin may be a neighbouring district's."), 'near-note'),
+            );
+
+            // The first time, their state is chosen, as from the list, and the list brought into view.
+            if (listedAt === null) {
+                if (code && code !== selected) {
+                    select(code);
+                }
+                results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        };
+
+        // Following the app's look: blue for where they are, white round it.
+        const where = { color: '#3aaaf2', fillColor: '#3aaaf2', fillOpacity: 0.12, weight: 1.5 };
+        const dot = { color: '#ffffff', fillColor: '#3aaaf2', fillOpacity: 1, weight: 3, radius: 8 };
+
+        const locate = L.control.locate({
+            position: 'bottomright',
+            flyTo: true,
+            showCompass: false,
+            circleStyle: where,
+            followCircleStyle: where,
+            markerStyle: dot,
+            followMarkerStyle: dot,
+            locateOptions: { enableHighAccuracy: true, maxZoom: 12, watch: true, setView: false },
+            // The control's own icons are swapped for these, so the Material icon stays.
+            icon: 'locate-idle',
+            iconLoading: 'locate-waiting',
+            strings: {
+                title: t('Show where I am'),
+                metersUnit: t('metres'),
+                feetUnit: t('feet'),
+                popup: t('You are within {distance} {unit} of this point'),
+                outsideMapBoundsMsg: '',
+            },
+            // A button like the enlarge one, with a Material icon.
+            createButtonCallback: (container, options) => {
+                container.classList.add('map-locate');
+                const button = L.DomUtil.create('button', '', container);
+                button.type = 'button';
+                button.title = options.strings.title;
+                button.setAttribute('aria-label', options.strings.title);
+                const icon = L.DomUtil.create('span', 'material-icon leaflet-locate-icon', button);
+                icon.textContent = 'my_location';
+                icon.setAttribute('aria-hidden', 'true');
+                return { link: button, icon };
+            },
+            // In the card, rather than the control's alert boxes.
+            onLocationError: (error) => {
+                locate.stop();
+                say(nearby.problem(error));
+            },
+            onLocationOutsideMapBounds: (control) => {
+                control.stop();
+                say(t("You seem to be outside Malaysia, so there's nothing near you on this map."));
+            },
+        }).addTo(map);
+
+        map.on('locateactivate', () => {
+            if (listedAt === null) {
+                say(t('Finding where you are…'), 'muted');
+            }
+        });
+        map.on('locatedeactivate', () => { listedAt = null; });
+
+        map.on('locationfound', ({ latlng, accuracy }) => {
+            nearby.load(container.dataset.turf).then((turf) => {
+                if (listedAt === null || turf.distance(turf.point([listedAt.lng, listedAt.lat]), turf.point([latlng.lng, latlng.lat])) > 0.2) {
+                    list(turf, latlng, accuracy);
+                    listedAt = latlng;
+                }
+            }, () => say(t("Couldn't work out what's near you. Reload the page to try again.")));
+        });
+
+        near.querySelector('[data-near-button]').addEventListener('click', () => locate.start());
+        near.hidden = false;
     }
 
     // A police district or station given in the address, from a shared link or the command palette: the district's pin

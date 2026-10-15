@@ -258,6 +258,30 @@ The map also has a pin for each of Malaysia's 155 police districts, with its cri
 - **Addresses by name:** the address is the region's name and the district's, so it keeps working after `map:import-crime` loads the pins again with new Ids.
 - **Only the public site previews:** WhatsApp fetches the page and image itself, so they must be reachable from the internet over https, as staging is. On your own computer the links work, but WhatsApp shows no preview.
 
+**Check an area** (`/public/areas`, **Areas** along the top of the public pages): for someone deciding where to live or stay, a police district's facts and trends, and up to three side by side. It shows no safety score, which would hide how rough the figures are and could stigmatise whole communities.
+- **Choosing:** up to three police districts from lists by state, or one from the list of every district. One opens its profile (`/public/areas/johor/batu-pahat`), and two or three open side by side (`/public/areas/compare?areas[]=johor/batu-pahat&areas[]=selangor/kajang`). A district's map popup links to its profile, and the profile links back to its pin.
+- **A profile:**
+  - **What the figures say:** sentences made by fixed rules (`Modules/Map/Support/AreaProfile.php`), each traceable to a figure. They give the latest year and its change, the change since 2016 beside the state's and Malaysia's ("That's a smaller fall than across Johor"), the most common crimes, and a crime at least 5 points more common there than across the state.
+  - **The figures:** the latest year's figures, a chart of each year's violent and property crime, and the changes since 2016 as bars.
+  - **Crimes by type:** each type's share, with the state's share marked.
+  - **Police stations:** the district's stations, with phone, Google Maps and Waze.
+  - **Sharing:** a shared link previews like the district's map link.
+- **Side by side:** a table of the latest year, a chart with each area's crime against its first year (100 in 2016, so a big and a small district compare fairly) and Malaysia's dashed, and each type's share in each area. Each area keeps its colour throughout: blue, orange and teal, chosen to stay distinct with colour blindness and on the dark cards.
+- **Its "state":** a district's region, as the map counts it. Labuan and Putrajaya are regions of one district each, so they're compared with the state the data files them under, Sabah and Kuala Lumpur.
+- **What the figures aren't**, said on every page: crimes reported to the police, for a whole police district, and not per person, as police districts' populations aren't published. That's why the pages compare changes and the mix of crimes rather than counts.
+- **Code:** `Modules/Map/Http/Controllers/AreaController.php`, the views in `Modules/Map/Resources/views/areas/`, and `public/modules/map/areas.js` and `areas.css`. The charts use Chart.js, as the dashboard does, each with its figures in a table for screen readers.
+
+**Near you:** on the map and on Check an area, **Use my location** finds what's near the visitor, from their browser's location.
+- **On the map:** the "Near you" card shows the visitor's state, and the map chooses it. It lists the three nearest police districts, each with its distance, its stations (phone and Waze), its **Area profile** and **Show on the map**. The location button over the map, with the zoom buttons, does the same. **Leaflet.Locate** shows where the visitor is, with a circle for how accurate that is, and follows them as they move; the list is worked out again once they've moved 200 m.
+- **On Check an area:** the three nearest police districts, each linked to its profile, and **Compare these three** to see them side by side.
+- **How it's worked out:** in the visitor's browser, with **Turf.js**: which state's boundary the location is in, and the straight-line distance to each police district's pin. The location isn't sent to the server or kept, and the page says so.
+- **Approximate:** police districts' boundaries aren't published, so "nearest" means the nearest pin, which is mostly the district's police headquarters. Near a district's edge, that can be a neighbouring district's, and the page says that too.
+- **When there's no location:** if the visitor refuses, the browser can't find them, or the page isn't https, the card says why, in the page's language, instead of the library's alert boxes. Browsers only give a location to https pages, or to localhost. Without a browser that can give one, the card stays hidden.
+- **Files:**
+  - `public/vendor/leaflet-locatecontrol` holds Leaflet.Locate 0.90.1, and `public/vendor/turf` holds Turf.js 7.4.0, both MIT licence, with their `LICENSE` files.
+  - Turf is large (550 KB), so it's loaded only the first time someone asks for their location.
+  - `public/modules/map/nearby.js` does the working out for both pages. `map.js` and `areas-near.js` use it.
+
 The **Crime data** page (`/crime-data`, under **Dev Module › Crime data** in the menu) is where administrators edit those figures.
 - **Who can open it:** only users with the ADMIN role, as its routes (`crime-data`, `crime-data/download`, and one for each of saving, adding, deleting and uploading) are set on Manage routes. The server checks this, so typing the address doesn't get anyone else in: they get a "Not allowed" page. Each can be opened to other roles there on its own; opening the page alone lets people look but not change anything.
 - **The list** shows 10 figures a page, or 50, 100 or all of them, chosen in **Rows per page**, as DataTables' `pageLength` and `lengthMenu` (`[[10, 50, 100, -1], [10, 50, 100, "All"]]`), which are `PageLength` and `LengthMenu` in `CrimeDataController`. The pages are numbered, as in DataTables. The list is paged on the server rather than with DataTables, so only a page's figures are sent and every count on it can be edited. All 14,880 figures at once is a page of about 21 MB, so choose a state or year first. **Save changes** sends only the changed counts; if PHP drops some of a long list's values on the way (its `max_input_vars`, 1,000 here), nothing is saved and the page says so.
