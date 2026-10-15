@@ -57,12 +57,13 @@
 </div>
 
 <div class="map-stage">
-    {{-- A state, police district or police station by name (map.js), which needs JavaScript, as the map does. --}}
-    <form class="map-search" role="search" data-map-search data-map-cover="top" hidden>
+    {{-- A state, police district or police station by name (map.js), which needs JavaScript, as the map does, and places
+         and addresses from the server (PlaceSearch). --}}
+    <form class="map-search" role="search" data-map-search data-map-cover="top" data-places="{{ route('public.places') }}" data-places-about="{{ config('map.places.about') }}" hidden>
         <span class="material-icon map-search-pin" aria-hidden="true">location_on</span>
         <label for="map-search" class="visually-hidden">{{ __('Search the map') }}</label>
         <input type="search" id="map-search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="map-search-results"
-            autocomplete="off" spellcheck="false" placeholder="{{ __('Search a state, police district or station') }}" />
+            autocomplete="off" spellcheck="false" placeholder="{{ __('Search a place, police district or station') }}" />
         <button type="submit" class="map-search-go" aria-label="{{ __('Search') }}"><span class="material-icon" aria-hidden="true">search</span></button>
         <ul class="map-search-results" id="map-search-results" role="listbox" aria-label="{{ __('Search the map') }}" hidden></ul>
         <p class="map-search-none" aria-live="polite" data-map-search-none></p>
@@ -114,6 +115,7 @@
                     <span class="material-icon" aria-hidden="true">my_location</span>{{ __('Use my location') }}
                 </button>
                 <p class="near-privacy">{{ __("Your location stays in your browser: it isn't sent to :app or kept.", ['app' => config('app.name')]) }}</p>
+                <p class="near-hint">{{ __('Or search a place or address in the box over the map.') }}</p>
                 <div class="near-results" data-near-results aria-live="polite"></div>
             </section>
             <script type="application/json" data-district-pins>@json($pins)</script>

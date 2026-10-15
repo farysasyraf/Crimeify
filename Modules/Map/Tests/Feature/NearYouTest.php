@@ -69,6 +69,9 @@ class NearYouTest extends TestCase
         $page = $this->get('/public/areas?lang=ms')->assertOk()
             ->assertSee('data-turf="'.versioned_asset('vendor/turf/turf.min.js').'" data-compare="'.url('/public/areas/compare?lang=ms').'" hidden', false)
             ->assertSee('Guna lokasi saya')
+            // Or a place or address, found by the server.
+            ->assertSee('<form class="near-search" data-place-search data-places="'.route('public.places').'">', false)
+            ->assertSee('Atau tempat atau alamat')
             ->assertSeeInOrder([
                 '<script src="'.versioned_asset('modules/map/nearby.js').'" defer></script>',
                 '<script src="'.versioned_asset('modules/map/areas-near.js').'" defer></script>',

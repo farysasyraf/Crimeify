@@ -697,8 +697,26 @@
         stationChoice.closest('.station-finder')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
+    // A place or address found by name (PlaceSearch): marked on the map, which goes to it, with the police districts
+    // nearest it in "Near you", below, once that's set up.
+    let nearPlace = null;
+    let placeMarker = null;
+
+    const goToPlace = (place) => {
+        placeMarker?.remove();
+        // White with a dark ring, which shows on any shade, and named, unlike the blue dot of where the visitor is.
+        placeMarker = L.circleMarker([place.lat, place.lng], { radius: 9, color: '#16171a', weight: 3, fillColor: '#ffffff', fillOpacity: 1 })
+            .bindTooltip(place.name, { permanent: true, direction: 'top', offset: [0, -10] })
+            .addTo(map);
+        const at = L.latLng(place.lat, place.lng);
+        map.flyToBounds(L.latLngBounds(at, at), { ...uncovered(), maxZoom: 13, duration: 0.8 });
+        nearPlace?.(place);
+    };
+
     const go = (place) => {
-        if (place.kind === 'state') {
+        if (place.kind === 'place') {
+            goToPlace(place);
+        } else if (place.kind === 'state') {
             select(place.region, { zoom: true });
         } else if (place.kind === 'district') {
             select(place.region);
@@ -739,16 +757,54 @@
         };
 
         const pick = (place) => {
-            input.value = place.kind === 'state' ? place.name : `${place.name}, ${regionName(place.region)}`;
+            input.value = place.kind === 'state' ? place.name : `${place.name}, ${place.kind === 'place' ? place.about : regionName(place.region)}`;
             none.textContent = '';
             close();
             go(place);
         };
 
+        // Places and addresses by name from the server (PlaceSearch), after the page's own matches: asked a moment after
+        // typing stops, from three letters, and kept for what was typed, so going back to it doesn't ask again.
+        const placesUrl = search.dataset.places;
+        const placesFor = new Map();
+        let placeTimer = null;
+        let placeRequest = null;
+        let placesCredited = false;
+
+        const askPlaces = (text) => {
+            placeRequest?.abort();
+            placeRequest = new AbortController();
+            const url = new URL(placesUrl, window.location.href);
+            url.searchParams.set('q', text);
+
+            fetch(url, { headers: { Accept: 'application/json' }, signal: placeRequest.signal })
+                .then((response) => (response.ok ? response.json() : { places: [], error: true }))
+                .catch((problem) => (problem.name === 'AbortError' ? null : { places: [], error: true }))
+                .then((answer) => {
+                    if (!answer) {
+                        return;
+                    }
+                    placesFor.set(text, answer);
+                    // Photon's, credited on the map once its places are shown.
+                    if (!placesCredited && answer.places.length > 0) {
+                        const source = element('a', t('Search: Photon by komoot'));
+                        source.href = search.dataset.placesAbout;
+                        map.attributionControl.addAttribution(source.outerHTML);
+                        placesCredited = true;
+                    }
+                    if (input.value.trim() === text && document.activeElement === input) {
+                        suggest();
+                    }
+                });
+        };
+
         const suggest = () => {
-            found = find(input.value);
+            const text = input.value.trim();
+            const asked = placesFor.get(text);
+            const places = (asked?.places ?? []).map((place) => ({ ...place, kind: 'place' }));
+            found = [...find(input.value), ...places];
             list.replaceChildren(...found.map((place, index) => {
-                const option = element('li');
+                const option = element('li', undefined, place.kind === 'place' ? 'map-search-place' : undefined);
                 option.id = `map-search-option-${index}`;
                 option.setAttribute('role', 'option');
                 option.append(element('span', place.name, 'map-search-name'), element('span', place.about, 'map-search-kind'));
@@ -757,13 +813,25 @@
             }));
             list.hidden = found.length === 0;
             input.setAttribute('aria-expanded', String(found.length > 0));
-            none.textContent = found.length > 0 ? '' : t('No matches for “:text”', { text: input.value.trim() });
+
+            // Nothing yet: still asking, or asking didn't work, or there's nothing.
+            const waiting = placesUrl && text.length >= 3 && !asked;
+            none.textContent = found.length > 0 ? ''
+                : waiting ? t('Searching places…')
+                    : asked?.error ? t("Places can't be searched just now. Try again in a moment.")
+                        : t('No matches for “:text”', { text });
             mark(-1);
         };
 
         input.addEventListener('input', () => {
-            if (input.value.trim()) {
+            const text = input.value.trim();
+            clearTimeout(placeTimer);
+
+            if (text) {
                 suggest();
+                if (placesUrl && text.length >= 3 && !placesFor.has(text)) {
+                    placeTimer = setTimeout(() => askPlaces(text), 300);
+                }
             } else {
                 none.textContent = '';
                 close();
@@ -808,17 +876,19 @@
         });
     }
 
-    // "Near you" (nearby.js): with the browser's location, from the button in its card or the one over the map, the
-    // state the visitor is in, chosen as from the list, and the three police districts nearest them, each with its
-    // stations, its profile and its pin. Leaflet.Locate shows where they are and follows them as they move; the list
-    // is worked out again once they've moved a little. The location stays in the browser.
+    // "Near you" (nearby.js): with the browser's location, from the button in its card or the one over the map, or a
+    // place found with the search, the state it's in, chosen as from the list, and the three police districts nearest
+    // it, each with its stations, its profile and its pin. Leaflet.Locate shows where the visitor is and follows them
+    // as they move; the list is worked out again once they've moved a little. The location stays in the browser.
+    // Without a browser that can give one, the card is for places only.
     const near = document.querySelector('[data-near]');
     const nearby = window.CrimeifyNearby;
     const pinList = document.querySelector('[data-district-pins]');
 
-    if (near && nearby && pinList && L.control.locate && 'geolocation' in navigator) {
+    if (near && nearby && pinList) {
         const pins = JSON.parse(pinList.textContent);
         const results = near.querySelector('[data-near-results]');
+        const heading = near.querySelector('#near-heading');
         // Where the list was last worked out for, so it isn't redone for every step.
         let listedAt = null;
 
@@ -871,10 +941,18 @@
             return item;
         };
 
-        const list = (turf, latlng, accuracy) => {
+        // For where the visitor is, or with place, a place found with the search.
+        const list = (turf, latlng, { accuracy = null, place = null } = {}) => {
             const state = boundaryData ? nearby.within(turf, boundaryData, latlng.lat, latlng.lng) : null;
             const code = state?.properties.shapeISO ?? null;
-            const where = element('p', code ? t("You're in :region.", { region: regionName(code) }) : t("You don't seem to be in Malaysia's states."), 'near-where');
+            heading.textContent = place ? t('Near :place', { place: place.name }) : t('Near you');
+
+            const where = element('p', undefined, 'near-where');
+            if (place) {
+                where.append(place.name, ' ', element('span', place.about, 'muted'));
+            } else {
+                where.textContent = code ? t("You're in :region.", { region: regionName(code) }) : t("You don't seem to be in Malaysia's states.");
+            }
             if (accuracy) {
                 where.append(' ', element('span', t('Accurate to about :distance.', { distance: nearby.distance(accuracy / 1000) }), 'muted'));
             }
@@ -888,8 +966,8 @@
                 element('p', t("In a straight line to each district's pin, mostly its police headquarters. Near a district's edge, the nearest pin may be a neighbouring district's."), 'near-note'),
             );
 
-            // The first time, their state is chosen, as from the list, and the list brought into view.
-            if (listedAt === null) {
+            // The first time, or for a place, the state is chosen, as from the list, and the list brought into view.
+            if (listedAt === null || place) {
                 if (code && code !== selected) {
                     select(code);
                 }
@@ -897,70 +975,81 @@
             }
         };
 
-        // Following the app's look: blue for where they are, white round it.
-        const where = { color: '#3aaaf2', fillColor: '#3aaaf2', fillOpacity: 0.12, weight: 1.5 };
-        const dot = { color: '#ffffff', fillColor: '#3aaaf2', fillOpacity: 1, weight: 3, radius: 8 };
-
-        const locate = L.control.locate({
-            position: 'bottomright',
-            flyTo: true,
-            showCompass: false,
-            circleStyle: where,
-            followCircleStyle: where,
-            markerStyle: dot,
-            followMarkerStyle: dot,
-            locateOptions: { enableHighAccuracy: true, maxZoom: 12, watch: true, setView: false },
-            // The control's own icons are swapped for these, so the Material icon stays.
-            icon: 'locate-idle',
-            iconLoading: 'locate-waiting',
-            strings: {
-                title: t('Show where I am'),
-                metersUnit: t('metres'),
-                feetUnit: t('feet'),
-                popup: t('You are within {distance} {unit} of this point'),
-                outsideMapBoundsMsg: '',
-            },
-            // A button like the enlarge one, with a Material icon.
-            createButtonCallback: (container, options) => {
-                container.classList.add('map-locate');
-                const button = L.DomUtil.create('button', '', container);
-                button.type = 'button';
-                button.title = options.strings.title;
-                button.setAttribute('aria-label', options.strings.title);
-                const icon = L.DomUtil.create('span', 'material-icon leaflet-locate-icon', button);
-                icon.textContent = 'my_location';
-                icon.setAttribute('aria-hidden', 'true');
-                return { link: button, icon };
-            },
-            // In the card, rather than the control's alert boxes.
-            onLocationError: (error) => {
-                locate.stop();
-                say(nearby.problem(error));
-            },
-            onLocationOutsideMapBounds: (control) => {
-                control.stop();
-                say(t("You seem to be outside Malaysia, so there's nothing near you on this map."));
-            },
-        }).addTo(map);
-
-        map.on('locateactivate', () => {
-            if (listedAt === null) {
-                say(t('Finding where you are…'), 'muted');
-            }
-        });
-        map.on('locatedeactivate', () => { listedAt = null; });
-
-        map.on('locationfound', ({ latlng, accuracy }) => {
-            nearby.load(container.dataset.turf).then((turf) => {
-                if (listedAt === null || turf.distance(turf.point([listedAt.lng, listedAt.lat]), turf.point([latlng.lng, latlng.lat])) > 0.2) {
-                    list(turf, latlng, accuracy);
-                    listedAt = latlng;
-                }
-            }, () => say(t("Couldn't work out what's near you. Reload the page to try again.")));
-        });
-
-        near.querySelector('[data-near-button]').addEventListener('click', () => locate.start());
+        nearPlace = (place) => nearby.load(container.dataset.turf).then(
+            (turf) => list(turf, L.latLng(place.lat, place.lng), { place }),
+            () => say(t("Couldn't work out what's near you. Reload the page to try again.")),
+        );
         near.hidden = false;
+
+        // Where the visitor is, where the browser can give it.
+        if (!L.control.locate || !('geolocation' in navigator)) {
+            near.querySelector('[data-near-button]').hidden = true;
+            near.querySelector('.near-privacy').hidden = true;
+        } else {
+            // Following the app's look: blue for where they are, white round it.
+            const where = { color: '#3aaaf2', fillColor: '#3aaaf2', fillOpacity: 0.12, weight: 1.5 };
+            const dot = { color: '#ffffff', fillColor: '#3aaaf2', fillOpacity: 1, weight: 3, radius: 8 };
+
+            const locate = L.control.locate({
+                position: 'bottomright',
+                flyTo: true,
+                showCompass: false,
+                circleStyle: where,
+                followCircleStyle: where,
+                markerStyle: dot,
+                followMarkerStyle: dot,
+                locateOptions: { enableHighAccuracy: true, maxZoom: 12, watch: true, setView: false },
+                // The control's own icons are swapped for these, so the Material icon stays.
+                icon: 'locate-idle',
+                iconLoading: 'locate-waiting',
+                strings: {
+                    title: t('Show where I am'),
+                    metersUnit: t('metres'),
+                    feetUnit: t('feet'),
+                    popup: t('You are within {distance} {unit} of this point'),
+                    outsideMapBoundsMsg: '',
+                },
+                // A button like the enlarge one, with a Material icon.
+                createButtonCallback: (container, options) => {
+                    container.classList.add('map-locate');
+                    const button = L.DomUtil.create('button', '', container);
+                    button.type = 'button';
+                    button.title = options.strings.title;
+                    button.setAttribute('aria-label', options.strings.title);
+                    const icon = L.DomUtil.create('span', 'material-icon leaflet-locate-icon', button);
+                    icon.textContent = 'my_location';
+                    icon.setAttribute('aria-hidden', 'true');
+                    return { link: button, icon };
+                },
+                // In the card, rather than the control's alert boxes.
+                onLocationError: (error) => {
+                    locate.stop();
+                    say(nearby.problem(error));
+                },
+                onLocationOutsideMapBounds: (control) => {
+                    control.stop();
+                    say(t("You seem to be outside Malaysia, so there's nothing near you on this map."));
+                },
+            }).addTo(map);
+
+            map.on('locateactivate', () => {
+                if (listedAt === null) {
+                    say(t('Finding where you are…'), 'muted');
+                }
+            });
+            map.on('locatedeactivate', () => { listedAt = null; });
+
+            map.on('locationfound', ({ latlng, accuracy }) => {
+                nearby.load(container.dataset.turf).then((turf) => {
+                    if (listedAt === null || turf.distance(turf.point([listedAt.lng, listedAt.lat]), turf.point([latlng.lng, latlng.lat])) > 0.2) {
+                        list(turf, latlng, { accuracy });
+                        listedAt = latlng;
+                    }
+                }, () => say(t("Couldn't work out what's near you. Reload the page to try again.")));
+            });
+
+            near.querySelector('[data-near-button]').addEventListener('click', () => locate.start());
+        }
     }
 
     // A police district or station given in the address, from a shared link or the command palette: the district's pin

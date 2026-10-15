@@ -96,7 +96,6 @@
     "Boundaries": "Sempadan",
 
     "Search the map": "Cari di peta",
-    "Search a state, police district or station": "Cari negeri, daerah polis atau balai polis",
     "Search": "Cari",
     "Police district in :region": "Daerah polis di :region",
     "Police station in :district, :region": "Balai polis di :district, :region",
@@ -347,7 +346,6 @@
 
     "Near you": "Berhampiran anda",
     "Find the police districts and stations nearest to where you are.": "Cari daerah polis dan balai polis yang paling hampir dengan lokasi anda.",
-    "Find the police districts nearest to where you are.": "Cari daerah polis yang paling hampir dengan lokasi anda.",
     "Use my location": "Guna lokasi saya",
     "Your location stays in your browser: it isn't sent to :app or kept.": "Lokasi anda kekal dalam pelayar anda: ia tidak dihantar kepada :app atau disimpan.",
     "Your location can only be used on a secure (https) page.": "Lokasi anda hanya boleh digunakan pada halaman yang selamat (https).",
@@ -367,5 +365,17 @@
     "metres": "meter",
     "feet": "kaki",
     "You are within {distance} {unit} of this point": "Anda berada dalam lingkungan {distance} {unit} dari titik ini",
-    "You seem to be outside Malaysia, so there's nothing near you on this map.": "Anda nampaknya berada di luar Malaysia, jadi tiada apa-apa berhampiran anda di peta ini."
+    "You seem to be outside Malaysia, so there's nothing near you on this map.": "Anda nampaknya berada di luar Malaysia, jadi tiada apa-apa berhampiran anda di peta ini.",
+
+    "Search a place, police district or station": "Cari tempat, daerah polis atau balai polis",
+    "Or search a place or address in the box over the map.": "Atau cari tempat atau alamat dalam kotak di atas peta.",
+    "Nearest police districts to :place": "Daerah polis terdekat dengan :place",
+    "Searching places…": "Mencari tempat…",
+    "Places can't be searched just now. Try again in a moment.": "Tempat tidak dapat dicari sekarang. Cuba lagi sebentar lagi.",
+    "No places found for “:text”.": "Tiada tempat ditemui untuk “:text”.",
+    "Find the police districts nearest to where you are, or to a place.": "Cari daerah polis yang paling hampir dengan lokasi anda, atau dengan sesuatu tempat.",
+    "Or a place or address": "Atau tempat atau alamat",
+    "Like Taman Melawati, Jalan Ampang or 47500": "Seperti Taman Melawati, Jalan Ampang atau 47500",
+    "Search: Photon by komoot": "Carian: Photon oleh komoot",
+    "Near :place": "Berhampiran :place"
 }

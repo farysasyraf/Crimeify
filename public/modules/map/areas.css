@@ -113,6 +113,17 @@
 .area-near .near-list { display: grid; gap: 6px; margin: 0 0 12px; padding-left: 20px; }
 .area-near .near-list a { font-weight: 600; }
 .area-near .near-problem { margin: 0; color: var(--danger); }
+.area-near .near-button[hidden], .near-places[hidden] { display: none; }
+.near-search { margin-top: 14px; }
+.near-search label { display: block; margin-bottom: 4px; color: var(--area-soft); font-size: .875rem; font-weight: 500; }
+.near-search-row { display: flex; gap: 8px; max-width: 520px; }
+.near-search-row input { flex: 1; min-width: 0; }
+.near-places { display: grid; gap: 4px; margin: 10px 0 0; padding: 0; list-style: none; max-width: 520px; }
+.near-places button { display: grid; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; background: var(--area-track); color: var(--area-text); font: inherit; text-align: left; cursor: pointer; }
+.near-places button:hover { background: rgba(255, 255, 255, .12); }
+.near-places button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.near-places strong { font-weight: 600; }
+.near-places span { color: var(--area-soft); font-size: .8125rem; }
 
 /* Every police district by state, each state opening to its districts. */
 .area-browse { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 16px; }

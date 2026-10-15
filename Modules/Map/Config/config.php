@@ -106,6 +106,14 @@ return [
         'about' => 'https://open.dosm.gov.my/data-catalogue/population_state',
     ],
 
+    // Places and addresses by name, for the map's search and Check an area (PlaceSearch): Photon, komoot's search of
+    // OpenStreetMap's places, whose public server may be asked as someone types, within fair use.
+    'places' => [
+        'source' => env('MAP_PLACES_URL', 'https://photon.komoot.io/api/'),
+        // Credited on the map with a link here, once its places are shown.
+        'about' => 'https://photon.komoot.io',
+    ],
+
     // The police stations "php artisan map:import-stations" starts dbo.PoliceStations with, in this module (see
     // police-stations-LICENSE.txt). The Police stations page keeps them up to date after that.
     'stations' => 'Database/data/police-stations.csv',

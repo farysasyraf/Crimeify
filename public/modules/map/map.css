@@ -57,6 +57,8 @@
 .map-search-results li { display: grid; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
 .map-search-results li:hover, .map-search-results li[aria-selected="true"] { background: var(--raised); }
 .map-search-name { font-weight: 600; overflow-wrap: anywhere; }
+/* Places from the server after the page's own matches, with a rule between. */
+.map-search-results li:not(.map-search-place) + .map-search-place { margin-top: 6px; border-top-left-radius: 0; border-top-right-radius: 0; box-shadow: 0 -7px 0 -6px rgba(255, 255, 255, .1); }
 .map-search-kind { color: var(--muted); font-size: .8125rem; }
 .map-search-none { padding: 10px 16px; color: var(--muted); font-size: .9rem; }
 .map-search-none:empty { display: none; }
@@ -244,8 +246,10 @@
 .near-card h2 { margin: 0 0 2px; font-size: 1.15rem; }
 .near-intro { margin: 0 0 12px; }
 .near-button { display: inline-flex; align-items: center; gap: 6px; }
+.near-button[hidden] { display: none; }
 .near-button .material-icon { font-size: 18px; }
-.near-privacy { margin: 8px 0 0; color: var(--muted); font-size: .8125rem; }
+.near-privacy, .near-hint { margin: 8px 0 0; color: var(--muted); font-size: .8125rem; }
+.near-privacy[hidden] { display: none; }
 .near-results:empty { display: none; }
 .near-results { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .08); }
 .near-results p { margin: 0; }

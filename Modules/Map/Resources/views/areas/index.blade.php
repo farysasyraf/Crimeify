@@ -31,11 +31,20 @@
         @if ($pins !== [])
             <section class="area-card area-wide area-near" aria-labelledby="area-near-heading" data-near data-turf="{{ $turf }}" data-compare="{{ route('public.areas.compare', $language) }}" hidden>
                 <h2 id="area-near-heading">{{ __('Near you') }}</h2>
-                <p class="area-sub">{{ __('Find the police districts nearest to where you are.') }}</p>
+                <p class="area-sub">{{ __('Find the police districts nearest to where you are, or to a place.') }}</p>
                 <button type="button" class="btn btn-sm btn-primary near-button" data-near-button>
                     <span class="material-icon" aria-hidden="true">my_location</span>{{ __('Use my location') }}
                 </button>
-                <p class="area-note">{{ __("Your location stays in your browser: it isn't sent to :app or kept.", ['app' => config('app.name')]) }}</p>
+                <p class="area-note" data-near-privacy>{{ __("Your location stays in your browser: it isn't sent to :app or kept.", ['app' => config('app.name')]) }}</p>
+                {{-- Or a place or address, found by the server (PlaceSearch). --}}
+                <form class="near-search" data-place-search data-places="{{ route('public.places') }}">
+                    <label for="near-place">{{ __('Or a place or address') }}</label>
+                    <div class="near-search-row">
+                        <input type="search" id="near-place" name="q" minlength="3" maxlength="100" required autocomplete="off" placeholder="{{ __('Like Taman Melawati, Jalan Ampang or 47500') }}" />
+                        <button type="submit" class="btn btn-sm">{{ __('Search') }}</button>
+                    </div>
+                </form>
+                <ul class="near-places" data-place-results hidden></ul>
                 <div class="near-results" data-near-results aria-live="polite"></div>
                 <script type="application/json" data-district-pins>@json($pins)</script>
             </section>

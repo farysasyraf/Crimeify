@@ -110,10 +110,10 @@ class MapPageTest extends TestCase
         $page->assertSeeInOrder([
             '<div class="page-head visually-hidden">', '<h1>Crime Visualization Map</h1>', '</div>',
             '<div class="map-stage">',
-            '<form class="map-search" role="search" data-map-search data-map-cover="top" hidden>',
+            '<form class="map-search" role="search" data-map-search data-map-cover="top" data-places="'.route('public.places').'" data-places-about="https://photon.komoot.io" hidden>',
             '<label for="map-search" class="visually-hidden">Search the map</label>',
             '<input type="search" id="map-search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="map-search-results"',
-            'placeholder="Search a state, police district or station"',
+            'placeholder="Search a place, police district or station"',
             '<button type="submit" class="map-search-go" aria-label="Search">',
             '<ul class="map-search-results" id="map-search-results" role="listbox" aria-label="Search the map" hidden></ul>',
             '</form>',

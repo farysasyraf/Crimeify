@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Map\Http\Controllers\AreaController;
 use Modules\Map\Http\Controllers\MapController;
+use Modules\Map\Http\Controllers\PlaceController;
 
 // The Map module's pages come from the Routes page (dbo.AppRoutes), as AMV's module pages come from its
 // route rows in t3012menu: each one names this module's controller, like MapController or CrimeDataController, and
@@ -26,6 +27,10 @@ Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
     Route::get('/public/map/{region}/{district}/preview.png', [MapController::class, 'districtPreview'])
         ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
         ->name('public.map.district.preview');
+
+    // Places and addresses in Malaysia by name, for the map's search and Check an area (PlaceSearch). Asked as someone
+    // types, a moment after they stop, and each search is kept a week.
+    Route::get('/public/places', [PlaceController::class, 'search'])->name('public.places');
 
     // "Check an area": a police district's profile, for someone deciding where to live or stay, and up to three side
     // by side (AreaController).
