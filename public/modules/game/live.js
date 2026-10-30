@@ -161,6 +161,9 @@
 
         if (pins()) {
             outlines ??= GuessrMap.load(live.dataset.boundaries);
+            slot('level-rule').textContent = state.difficulty === 'easy'
+                ? t("This game is on Easy: the map zooms into each district's state.")
+                : t('This game is on Hard: the whole of Malaysia.');
         }
 
         if (state.guess) {
@@ -243,10 +246,13 @@
         slot('confirm').disabled = false;
     };
 
-    // DistrictGuessr's district, and the map, cleared and framed, with the pin already confirmed, as after reloading.
+    // DistrictGuessr's district, and the map, cleared and framed (on Easy, zoomed into the district's state), with the
+    // pin already confirmed, as after reloading.
     const setOut = () => {
         const round = view.round;
         const mine = view.pin;
+        const region = view.district.region;
+        const easy = view.difficulty === 'easy';
 
         slot('district').textContent = view.district.name;
         slot('region').textContent = view.district.place;
@@ -258,7 +264,9 @@
             return drawn;
         });
 
-        placed = drawing.then(({ map, malaysia }) => {
+        placed = drawing.then((drawn) => {
+            const { map } = drawn;
+
             if (dealt !== round) {
                 return;
             }
@@ -267,12 +275,14 @@
             pin = mine ? L.marker([mine.lat, mine.lng], { icon: GuessrMap.pin('guess'), keyboard: false }).addTo(map) : null;
             marks = [];
             map.invalidateSize();
-            map.fitBounds(malaysia, { paddingTopLeft: [12, 12], paddingBottomRight: [12, 90] });
+            GuessrMap.frame(drawn, region, easy, { paddingTopLeft: [12, 12], paddingBottomRight: [12, 90] });
         });
 
-        // The whole map in view, with Confirm, as on a phone, where the title takes the top of the screen.
+        // The whole map in view, with Confirm, as on a phone, where the title takes the top of the screen: the round from
+        // its timer down, just under the bar along the top, which stays in place.
         if (slot('map').getBoundingClientRect().bottom > window.innerHeight) {
-            part('round').scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' });
+            const bar = document.querySelector('.public-topbar')?.getBoundingClientRect().bottom ?? 0;
+            window.scrollTo({ top: window.scrollY + part('round').getBoundingClientRect().top - bar - 8, behavior: calm ? 'auto' : 'smooth' });
         }
     };
 
@@ -290,7 +300,8 @@
         }
 
         dealt = view.round;
-        slot('round').textContent = t('Round :round of :rounds', { round: view.round, rounds: view.rounds });
+        slot('round').textContent = t('Round :round of :rounds', { round: view.round, rounds: view.rounds })
+            + (pins() ? ` · ${view.difficulty === 'easy' ? t('Easy') : t('Hard')}` : '');
         say('standing', '');
 
         if (pins()) {

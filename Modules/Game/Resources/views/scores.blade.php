@@ -41,9 +41,17 @@
         <div>
             <label for="live-game">Game</label>
             <select id="live-game" name="game">
-                @foreach ($games as $key => $each)
-                    <option value="{{ $key }}" @selected($key === old('game', $game))>{{ $each['name'] }}</option>
+                @foreach ($liveKinds as $key => $name)
+                    <option value="{{ $key }}" @selected($key === old('game', $liveKind))>{{ $name }}</option>
                 @endforeach
+            </select>
+        </div>
+        {{-- DistrictGuessr's level for everyone: Easy zooms each phone's map into the district's state. --}}
+        <div>
+            <label for="live-difficulty">Level <span class="scores-level-note">(DistrictGuessr)</span></label>
+            <select id="live-difficulty" name="difficulty">
+                <option value="easy" @selected(old('difficulty', $liveDifficulty) === 'easy')>Easy</option>
+                <option value="hard" @selected(old('difficulty', $liveDifficulty) === 'hard')>Hard</option>
             </select>
         </div>
         <div>
@@ -225,7 +233,7 @@
                         @php $top = $live->Status === LiveGame::Finished ? $live->players->first() : null; @endphp
                         <tr>
                             <td class="nowrap scores-score">{{ $live->spacedCode() }}</td>
-                            <td class="nowrap">{{ $games[$live->Game]['name'] ?? $live->Game }}</td>
+                            <td class="nowrap">{{ $live->gameName() }}</td>
                             <td class="nowrap muted">{{ $live->CreatedAt->format('d M Y, H:i') }} <span class="scores-host">by {{ $live->HostName }}</span></td>
                             <td>
                                 @if ($live->Status === LiveGame::Lobby)

@@ -56,6 +56,9 @@
             On a phone, open <strong>{{ $join }}</strong> and type the code above. {{ $game->Rounds }} rounds of
             {{ $game->Seconds }} seconds each, and
             {{ $pins ? 'the closer the pin, and the sooner, the more points.' : 'the sooner a right answer, the more points.' }}
+            @if ($pins)
+                {{ $easy ? 'On Easy: each map zooms into the district\'s state.' : 'On Hard: the whole of Malaysia.' }}
+            @endif
         </p>
         <ul class="live-names" data-host="names"></ul>
         <p class="live-count" data-host="players"></p>

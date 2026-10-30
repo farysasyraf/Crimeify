@@ -9,10 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Game\Entities\LiveGame;
+use Modules\Game\Support\DistrictGuessr;
 use Modules\Game\Support\LiveGames;
 
-// Hosting a live game of Higher or Lower or DistrictGuessr (LiveGames): made from the Game scores page with the game and
-// the number of rounds, then run from its big screen, for everyone in the room to see, which shows the code to join
+// Hosting a live game of Higher or Lower or DistrictGuessr (LiveGames): made from the Game scores page with the game,
+// the number of rounds and, for DistrictGuessr, the level, then run from its big screen, for everyone in the room to see, which shows the code to join
 // with, then each round's cards or district and its answer, and at the end the leaderboard. The screen checks the game about every second (state()) and its buttons
 // move it on. Its routes are on the Routes page, with Game scores', for ADMIN to start with.
 class LiveGameController extends Controller
@@ -20,21 +21,24 @@ class LiveGameController extends Controller
     public function __construct(private LiveGames $live) {}
 
     /**
-     * Make a game of the game and with the rounds chosen, and open its big screen. Higher or Lower when no game is given.
+     * Make a game of the game and with the rounds chosen, and for DistrictGuessr the level, and open its big screen.
+     * Higher or Lower when no game is given, and Hard when no level is.
      */
     public function store(Request $request): RedirectResponse
     {
         $rounds = config('game.live.rounds');
         $request->validate([
-            'game' => ['nullable', 'string', Rule::in(array_keys(GameScoreController::Games))],
+            'game' => ['nullable', 'string', Rule::in(array_keys(LiveGames::Kinds))],
+            'difficulty' => ['nullable', Rule::in(DistrictGuessr::Levels)],
             'rounds' => ['required', 'integer', "between:{$rounds['least']},{$rounds['most']}"],
         ], [
             'game.in' => 'Choose a game to host.',
+            'difficulty.in' => 'Choose Easy or Hard.',
             'rounds.between' => 'A live game can have :min to :max rounds.',
         ]);
 
         $kind = $request->input('game') ?? LiveGames::HigherOrLower;
-        $game = $this->live->create($request->user(), $request->integer('rounds'), $kind);
+        $game = $this->live->create($request->user(), $request->integer('rounds'), $kind, $request->input('difficulty') ?? DistrictGuessr::Hard);
 
         if ($game === null) {
             return redirect(page_url('game-scores'))
@@ -55,6 +59,7 @@ class LiveGameController extends Controller
         return view('game::live-host', [
             'game' => $liveGame,
             'pins' => $liveGame->Game === LiveGames::DistrictGuessr,
+            'easy' => $liveGame->Game === LiveGames::DistrictGuessr && $liveGame->Difficulty === DistrictGuessr::Easy,
             'boundaries' => versioned_asset(config('map.boundaries')),
             'joinUrl' => route('public.game.live'),
             'urls' => [

@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
-// One game of DistrictGuessr, stored in dbo.GuessrRuns: who played it, its score, its districts and its guesses.
-// DistrictGuessr (Support) plays it.
+// One game of DistrictGuessr, stored in dbo.GuessrRuns: who played it, at which level (Difficulty: DistrictGuessr::Easy
+// or Hard), its score, its districts and its guesses. DistrictGuessr (Support) plays it.
 #[Table(name: 'GuessrRuns', key: 'Id', timestamps: false)]
-#[Fillable(['Token', 'PlayerName', 'PlayerKey', 'Score', 'Districts', 'Guesses', 'AskedAt', 'ScoredAt', 'StartedAt', 'EndedAt'])]
+#[Fillable(['Token', 'PlayerName', 'PlayerKey', 'Difficulty', 'Score', 'Districts', 'Guesses', 'AskedAt', 'ScoredAt', 'StartedAt', 'EndedAt'])]
 #[Hidden(['Token'])]
 class GuessrRun extends Model
 {

@@ -83,6 +83,8 @@
             <li>{{ __('A right guess scores up to :points points: the sooner, the more.', ['points' => number_format(config('game.live.points'))]) }}</li>
         </ol>
         <ol class="live-rules" data-live-game="districtguessr" hidden>
+            {{-- The game's level, as the host chose it (live.js). --}}
+            <li data-live="level-rule"></li>
             <li>{{ __('Each round names a police district and its state: find it on the map.') }}</li>
             <li>{{ __('Tap the map to drop your pin, move it if you like, then press Confirm. :seconds seconds a district.', ['seconds' => $guessr['seconds']]) }}</li>
             <li>{{ __('Up to :points points a district, all of them within :km km: the closer, the more.', ['points' => number_format($guessr['points']), 'km' => $guessr['perfect']]) }}</li>

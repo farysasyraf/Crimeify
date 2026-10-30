@@ -13,24 +13,29 @@ use Modules\Game\Entities\GameRun;
 use Modules\Game\Entities\GameWinner;
 use Modules\Game\Entities\GuessrRun;
 use Modules\Game\Entities\LiveGame;
+use Modules\Game\Support\DistrictGuessr;
+use Modules\Game\Support\LiveGames;
 
 // The Game scores page, where administrators see how everyone did at the games and choose the winner: for the game
 // chosen (?game=, Higher or Lower to start with), each player's best score from the games played between the dates
 // chosen, best first; then the winners chosen so far, from every game. A player is everyone who gave the same name,
-// whatever its capitals. Live games of Higher or Lower are hosted from here too (Host a live game, LiveGameController),
-// and listed under the winners. Its routes are on the Routes page, for ADMIN to start with: the games are public, but
+// whatever its capitals. DistrictGuessr's two levels are two leaderboards. Live games are hosted from here too (Host a
+// live game, LiveGameController), and listed under the winners. Its routes are on the Routes page, for ADMIN to start with: the games are public, but
 // their scores aren't.
 class GameScoreController extends Controller
 {
     /**
-     * The games with scores here, by their key on the Games page: their name, and the model of their games, each with
-     * PlayerName, PlayerKey, Score, StartedAt and ScoredAt (when it last scored), and secondsToScore().
+     * The leaderboards here, by key (the game's key on the Games page, and for DistrictGuessr Easy, with -easy): their
+     * name, the model of their games, each with PlayerName, PlayerKey, Score, StartedAt and ScoredAt (when it last
+     * scored), and secondsToScore(), and for DistrictGuessr the level its games were played at, as each is ranked on
+     * its own. A winner keeps the key of the board they were chosen from (GameWinner::Game).
      *
-     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun>}>
+     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun>, difficulty?: string}>
      */
     public const Games = [
         'higher-or-lower' => ['name' => 'Higher or Lower', 'model' => GameRun::class],
-        'districtguessr' => ['name' => 'DistrictGuessr', 'model' => GuessrRun::class],
+        'districtguessr-easy' => ['name' => 'DistrictGuessr Easy', 'model' => GuessrRun::class, 'difficulty' => DistrictGuessr::Easy],
+        'districtguessr' => ['name' => 'DistrictGuessr Hard', 'model' => GuessrRun::class, 'difficulty' => DistrictGuessr::Hard],
     ];
 
     /**
@@ -71,6 +76,10 @@ class GameScoreController extends Controller
             // This game's winning games, by Id.
             'winningRuns' => $winners->where('Game', $game)->pluck('GameRunId')->filter()->flip(),
             'rounds' => config('game.live.rounds'),
+            // What a live game can be, and DistrictGuessr's levels, to start with the board being looked at.
+            'liveKinds' => LiveGames::Kinds,
+            'liveKind' => str_starts_with($game, LiveGames::DistrictGuessr) ? LiveGames::DistrictGuessr : LiveGames::HigherOrLower,
+            'liveDifficulty' => self::Games[$game]['difficulty'] ?? DistrictGuessr::Easy,
             // The newest live games, each with its players, most points first, for its winner.
             'liveGames' => LiveGame::query()
                 ->with(['players' => fn ($query) => $query->orderByDesc('Score')->orderBy('PlayerName')])
@@ -87,8 +96,9 @@ class GameScoreController extends Controller
     {
         $game = $this->game($request);
         $model = self::Games[$game]['model'];
+        $difficulty = self::Games[$game]['difficulty'] ?? null;
         $request->validate([
-            'run' => ['required', 'integer', Rule::exists((new $model)->getTable(), 'Id')],
+            'run' => ['required', 'integer', Rule::exists((new $model)->getTable(), 'Id')->when($difficulty, fn ($rule) => $rule->where('Difficulty', $difficulty))],
         ]);
 
         $period = $this->period($request);
@@ -171,6 +181,7 @@ class GameScoreController extends Controller
     private function games(string $game, array $period): Builder
     {
         return self::Games[$game]['model']::query()
+            ->when(self::Games[$game]['difficulty'] ?? null, fn ($query, string $difficulty) => $query->where('Difficulty', $difficulty))
             ->when($period['from'], fn ($query, string $from) => $query->where('StartedAt', '>=', Carbon::parse($from)->startOfDay()))
             ->when($period['to'], fn ($query, string $to) => $query->where('StartedAt', '<', Carbon::parse($to)->addDay()->startOfDay()));
     }

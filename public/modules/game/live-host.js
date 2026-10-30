@@ -151,7 +151,7 @@
         }
 
         dealt = view.round;
-        slot('round').textContent = `Round ${view.round} of ${view.rounds}`;
+        slot('round').textContent = `Round ${view.round} of ${view.rounds}${pins ? ` · ${view.difficulty === 'easy' ? 'Easy' : 'Hard'}` : ''}`;
         slot('top-panel').hidden = true;
         slot('play').classList.remove('is-split');
 
@@ -162,22 +162,25 @@
         }
     };
 
-    // DistrictGuessr's district, and the map, cleared and framed.
+    // DistrictGuessr's district, and the map, cleared and framed: on Easy, zoomed into the district's state, as on the
+    // phones.
     const setOut = () => {
         const round = view.round;
+        const region = view.district.region;
+        const easy = view.difficulty === 'easy';
         slot('district').textContent = view.district.name;
         slot('region').textContent = view.district.place;
 
         drawing ??= GuessrMap.draw(slot('map'), outlines);
-        placed = drawing.then(({ map, malaysia }) => {
+        placed = drawing.then((drawn) => {
             if (dealt !== round) {
                 return;
             }
 
             marks.forEach((layer) => layer.remove());
             marks = [];
-            map.invalidateSize();
-            map.fitBounds(malaysia, { padding: [16, 16] });
+            drawn.map.invalidateSize();
+            GuessrMap.frame(drawn, region, easy, { padding: [16, 16] });
         });
     };
 

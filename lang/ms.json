@@ -377,5 +377,14 @@
     "Or a place or address": "Atau tempat atau alamat",
     "Like Taman Melawati, Jalan Ampang or 47500": "Seperti Taman Melawati, Jalan Ampang atau 47500",
     "Search: Photon by komoot": "Carian: Photon oleh komoot",
-    "Near :place": "Berhampiran :place"
+    "Near :place": "Berhampiran :place",
+
+    "Easy zooms the map into the district's state; Hard shows the whole of Malaysia. Each level is ranked on its own.": "Mudah mengezum peta ke negeri daerah itu; Sukar menunjukkan seluruh Malaysia. Setiap tahap disenaraikan berasingan.",
+    "Level": "Tahap",
+    "Easy": "Mudah",
+    "Hard": "Sukar",
+    "Zoomed into the state": "Dizum ke negeri",
+    "All of Malaysia": "Seluruh Malaysia",
+    "This game is on Easy: the map zooms into each district's state.": "Permainan ini pada tahap Mudah: peta dizum ke negeri setiap daerah.",
+    "This game is on Hard: the whole of Malaysia.": "Permainan ini pada tahap Sukar: seluruh Malaysia."
 }

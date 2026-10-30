@@ -43,14 +43,19 @@ class LiveGames
 
     public const DistrictGuessr = 'districtguessr';
 
+    /**
+     * Their names, as the host chooses one on Game scores.
+     */
+    public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr'];
+
     public function __construct(private Cards $cards, private DistrictGuessr $guessr) {}
 
     /**
      * Make a game of the game given for the host, with every round dealt: for Higher or Lower, its cards, getting
-     * closer round by round as the solo game does with its score; for DistrictGuessr, its districts. None when there's
-     * nothing to play with.
+     * closer round by round as the solo game does with its score; for DistrictGuessr, its districts, at the level given
+     * (DistrictGuessr::Easy or Hard). None when there's nothing to play with.
      */
-    public function create(User $host, int $rounds, string $game = self::HigherOrLower): ?LiveGame
+    public function create(User $host, int $rounds, string $game = self::HigherOrLower, string $difficulty = DistrictGuessr::Hard): ?LiveGame
     {
         $dealt = $game === self::DistrictGuessr ? $this->guessr->deal($rounds) : $this->pairs($rounds);
 
@@ -60,6 +65,7 @@ class LiveGames
 
         return LiveGame::create([
             'Game' => $game,
+            'Difficulty' => $game === self::DistrictGuessr ? $difficulty : DistrictGuessr::Hard,
             'Code' => $this->freeCode(),
             'HostId' => $host->Id,
             'HostName' => $host->Name,
@@ -398,6 +404,7 @@ class LiveGames
     {
         return [
             'game' => $state['game'],
+            'difficulty' => $state['difficulty'] ?? DistrictGuessr::Hard,
             'now' => $now,
             'phase' => $phase,
             'round' => $state['round'],
@@ -445,6 +452,7 @@ class LiveGames
         return [
             'id' => $game->Id,
             'game' => $game->Game,
+            'difficulty' => $game->Difficulty ?? DistrictGuessr::Hard,
             'code' => $game->Code,
             'status' => $game->Status,
             'round' => $game->Round,
@@ -490,15 +498,16 @@ class LiveGames
     }
 
     /**
-     * A DistrictGuessr round's part of the state: the district's name and the region its pin is in, and where it is.
+     * A DistrictGuessr round's part of the state: the district's name and the region its pin is in, with the region's
+     * code for Easy's zoom, and where it is.
      *
-     * @param  array{name: string, place: string, lat: float, lng: float}|null  $district
-     * @return array{district: array{name: string, place: string}|null, answer: array{lat: float, lng: float}|null}
+     * @param  array{name: string, place: string, region?: string, lat: float, lng: float}|null  $district
+     * @return array{district: array{name: string, place: string, region: string|null}|null, answer: array{lat: float, lng: float}|null}
      */
     private function district(?array $district): array
     {
         return [
-            'district' => $district === null ? null : ['name' => $district['name'], 'place' => $district['place']],
+            'district' => $district === null ? null : ['name' => $district['name'], 'place' => $district['place'], 'region' => $district['region'] ?? null],
             'answer' => $district === null ? null : ['lat' => $district['lat'], 'lng' => $district['lng']],
         ];
     }

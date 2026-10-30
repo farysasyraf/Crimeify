@@ -13,11 +13,21 @@ use Modules\Map\Entities\PoliceDistrict;
 class DistrictGuessr
 {
     /**
+     * The levels: Easy zooms the map into the district's state as it's asked (the state's ISO code, its region, comes
+     * with it); Hard shows the whole of Malaysia. Each is ranked on its own on Game scores.
+     */
+    public const Easy = 'easy';
+
+    public const Hard = 'hard';
+
+    public const Levels = [self::Easy, self::Hard];
+
+    /**
      * A game's districts, as many as its rounds (a solo game's, or the number given, for a live one): name, state, the
-     * region its pin is in (for the hint), latitude and longitude. None when there aren't enough, as until
-     * "php artisan map:import-crime" has run.
+     * region its pin is in (for the hint, and its code, like MY-08, for Easy's zoom), latitude and longitude. None when
+     * there aren't enough, as until "php artisan map:import-crime" has run.
      *
-     * @return list<array{name: string, state: string, place: string, lat: float, lng: float}>|null
+     * @return list<array{name: string, state: string, place: string, region: string, lat: float, lng: float}>|null
      */
     public function deal(?int $rounds = null): ?array
     {
@@ -34,6 +44,7 @@ class DistrictGuessr
             'name' => $district->Name,
             'state' => $district->State,
             'place' => $district->regionName(),
+            'region' => $district->Region,
             'lat' => $district->Latitude,
             'lng' => $district->Longitude,
         ])->values()->all();
@@ -52,17 +63,18 @@ class DistrictGuessr
     }
 
     /**
-     * What the page shows of a game's district while it's being guessed: its name and the region its pin is in, not
-     * where.
+     * What the page shows of a game's district while it's being guessed: its name and the region its pin is in, and
+     * that region's code, for Easy's zoom; not where.
      *
-     * @return array{round: int, name: string, place: string}
+     * @return array{round: int, name: string, place: string, region: string|null}
      */
     public function asked(GuessrRun $run): array
     {
         $round = $run->round();
         $district = $run->Districts[$round - 1];
 
-        return ['round' => $round, 'name' => $district['name'], 'place' => $district['place']];
+        // Games started before the levels have no region kept.
+        return ['round' => $round, 'name' => $district['name'], 'place' => $district['place'], 'region' => $district['region'] ?? null];
     }
 
     /**

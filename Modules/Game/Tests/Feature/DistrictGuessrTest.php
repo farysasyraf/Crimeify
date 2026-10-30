@@ -218,7 +218,7 @@ class DistrictGuessrTest extends TestCase
             ->assertDontSee('Muthu');
 
         $this->get('/game-scores?game=districtguessr')->assertOk()
-            ->assertSee('DistrictGuessr leaderboard')
+            ->assertSee('DistrictGuessr Hard leaderboard')
             ->assertSee('<input type="hidden" name="game" value="districtguessr" />', false)
             ->assertSeeInOrder(['Muthu', '<td class="scores-score">7420</td>', '4 min'], false)
             ->assertDontSee('Ali');
@@ -235,6 +235,51 @@ class DistrictGuessrTest extends TestCase
 
         // Only a game of the game chosen.
         $this->post('/game-scores/store-winner', ['game' => 'districtguessr', 'run' => 999])->assertSessionHasErrors('run');
+    }
+
+    public function test_a_game_is_played_on_easy_or_hard(): void
+    {
+        $this->districts();
+
+        // Easy to start with, on the page; the level chosen goes with the game, with each district's region code.
+        $this->get('/public/game/districtguessr')->assertOk()
+            ->assertSeeInOrder(['<legend>Level</legend>', 'name="difficulty" value="easy" checked', 'Easy', 'Zoomed into the state', 'name="difficulty" value="hard"', 'Hard', 'All of Malaysia'], false)
+            ->assertSee('Easy zooms the map into the district&#039;s state; Hard shows the whole of Malaysia. Each level is ranked on its own.', false);
+
+        $this->postJson('/public/game/districtguessr/start', ['name' => 'Siti', 'difficulty' => 'easy'])->assertOk()
+            ->assertJson(['difficulty' => 'easy', 'district' => ['round' => 1, 'place' => 'Johor', 'region' => 'MY-01']]);
+        $this->assertSame('easy', GuessrRun::sole()->Difficulty);
+
+        // Hard when none is given, as from a page from before the levels; only the two.
+        $this->postJson('/public/game/districtguessr/start', ['name' => 'Ali'])->assertOk()->assertJsonPath('difficulty', 'hard');
+        $this->postJson('/public/game/districtguessr/start', ['name' => 'Chong', 'difficulty' => 'medium'])->assertUnprocessable()->assertJsonValidationErrors('difficulty');
+        $this->assertSame(['Siti' => 'easy', 'Ali' => 'hard'], GuessrRun::query()->orderBy('Id')->pluck('Difficulty', 'PlayerName')->all());
+    }
+
+    public function test_easy_and_hard_have_their_own_leaderboards_and_winners(): void
+    {
+        $this->districts();
+        $this->signIn();
+        $started = now()->subHour();
+        $game = fn (string $name, string $difficulty, int $score) => GuessrRun::create([
+            'Token' => "token-{$name}", 'PlayerName' => $name, 'PlayerKey' => strtolower($name), 'Difficulty' => $difficulty, 'Score' => $score,
+            'Districts' => [], 'Guesses' => [], 'ScoredAt' => $started, 'StartedAt' => $started, 'EndedAt' => $started,
+        ]);
+        $easy = $game('Siti', 'easy', 9100);
+        $hard = $game('Ali', 'hard', 6200);
+
+        $this->get('/game-scores')->assertOk()
+            ->assertSeeInOrder(['aria-label="Games"', 'Higher or Lower', 'DistrictGuessr Easy', 'DistrictGuessr Hard'], false);
+        $this->get('/game-scores?game=districtguessr-easy')->assertOk()
+            ->assertSee('DistrictGuessr Easy leaderboard')->assertSee('Siti')->assertDontSee('Ali');
+        $this->get('/game-scores?game=districtguessr')->assertOk()
+            ->assertSee('DistrictGuessr Hard leaderboard')->assertSee('Ali')->assertDontSee('Siti');
+
+        // A winner only from the board's own level.
+        $this->post('/game-scores/store-winner', ['game' => 'districtguessr-easy', 'run' => $hard->Id])->assertSessionHasErrors('run');
+        $this->post('/game-scores/store-winner', ['game' => 'districtguessr-easy', 'run' => $easy->Id])->assertRedirect(route('game-scores', ['game' => 'districtguessr-easy']));
+        $this->assertSame(['districtguessr-easy', $easy->Id], [GameWinner::sole()->Game, GameWinner::sole()->GameRunId]);
+        $this->get('/game-scores')->assertSeeInOrder(['id="winners-heading"', 'Siti', 'DistrictGuessr Easy', '9100'], false);
     }
 
     public function test_the_game_comes_in_bahasa_melayu_under_the_same_name(): void

@@ -3,6 +3,17 @@
    dashed line between, then how far off it was. */
 .game-title img.guessr-title { height: 92px; }
 
+/* The level, two choices side by side, the chosen one outlined. */
+.guessr-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 0; margin: 0 0 14px; padding: 0; border: 0; }
+.guessr-levels legend { margin-bottom: 6px; padding: 0; color: var(--muted); font-size: .875rem; font-weight: 500; }
+.guessr-level { position: relative; display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
+.guessr-level input { position: absolute; opacity: 0; pointer-events: none; }
+.guessr-level-name { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.guessr-level-name .material-icon { color: var(--primary); font-size: 18px; }
+.guessr-level-note { color: var(--muted); font-size: .8125rem; }
+.guessr-level:has(input:checked) { border-color: var(--primary); background: var(--nav-active-bg); }
+.guessr-level:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 1px; }
+
 .guessr-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 12px; }
 .guessr-prompt { margin: 0; font-size: 1.35rem; }
 .guessr-prompt strong { font-size: 1.6rem; font-weight: 800; letter-spacing: -.01em; }

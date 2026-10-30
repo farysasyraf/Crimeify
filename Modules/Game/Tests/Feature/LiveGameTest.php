@@ -387,13 +387,13 @@ class LiveGameTest extends TestCase
      * A game of DistrictGuessr hosted by an administrator, with three police districts to find: Batu Pahat, Kuantan and
      * Kota Bharu.
      */
-    private function hostedGuessr(int $rounds = 3): LiveGame
+    private function hostedGuessr(int $rounds = 3, ?string $difficulty = null): LiveGame
     {
         foreach ([['Johor', 'Batu Pahat', 'MY-01', 1.85, 102.93], ['Pahang', 'Kuantan', 'MY-06', 3.81, 103.33], ['Kelantan', 'Kota Bharu', 'MY-03', 6.13, 102.24]] as [$state, $name, $region, $lat, $lng]) {
             PoliceDistrict::create(['State' => $state, 'Name' => $name, 'Region' => $region, 'Latitude' => $lat, 'Longitude' => $lng]);
         }
         $this->signIn();
-        $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'rounds' => $rounds])->assertRedirect();
+        $this->post('/game-scores/store-live', array_filter(['game' => 'districtguessr', 'difficulty' => $difficulty, 'rounds' => $rounds]))->assertRedirect();
 
         return LiveGame::query()->latest('Id')->firstOrFail();
     }
@@ -416,13 +416,15 @@ class LiveGameTest extends TestCase
     {
         $game = $this->hostedGuessr();
 
-        $this->assertSame(['districtguessr', LiveGame::Lobby, 3, 40], [$game->Game, $game->Status, $game->Rounds, $game->Seconds]);
+        // Hard when no level is given.
+        $this->assertSame(['districtguessr', 'hard', LiveGame::Lobby, 3, 40], [$game->Game, $game->Difficulty, $game->Status, $game->Rounds, $game->Seconds]);
         $this->assertCount(3, collect($game->Cards)->pluck('name')->unique());
-        $this->assertSame(['name', 'state', 'place', 'lat', 'lng'], array_keys($game->Cards[0]));
+        $this->assertSame(['name', 'state', 'place', 'region', 'lat', 'lng'], array_keys($game->Cards[0]));
 
         $this->get('/game-scores')->assertOk()
             ->assertSeeInOrder(['<select id="live-game" name="game">', '<option value="higher-or-lower"', 'Higher or Lower', '<option value="districtguessr"', 'DistrictGuessr'], false)
-            ->assertSeeInOrder(['Live games', $game->spacedCode(), 'DistrictGuessr', '3, not started'], false);
+            ->assertSeeInOrder(['<select id="live-difficulty" name="difficulty">', '<option value="easy"', 'Easy', '<option value="hard"', 'Hard'], false)
+            ->assertSeeInOrder(['Live games', $game->spacedCode(), 'DistrictGuessr (Hard)', '3, not started'], false);
 
         // Its big screen has the map, and the game's title.
         $this->get("/game-scores/live/{$game->Id}")->assertOk()
@@ -436,6 +438,27 @@ class LiveGameTest extends TestCase
         $this->post('/game-scores/store-live', ['game' => 'made-up', 'rounds' => 3])->assertSessionHasErrors('game');
         $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'rounds' => 4])->assertRedirect('/game-scores')
             ->assertSessionHas('status', 'error');
+        $this->assertSame(1, LiveGame::count());
+    }
+
+    public function test_the_host_plays_districtguessr_on_easy_for_everyone(): void
+    {
+        $game = $this->hostedGuessr(difficulty: 'easy');
+        $this->assertSame('easy', $game->Difficulty);
+        $siti = $this->join($game, 'Siti');
+
+        // The big screen and every phone know the level, and each district's region, to zoom into its state.
+        $this->get("/game-scores/live/{$game->Id}")->assertSee('On Easy: each map zooms into the district&#039;s state.', false);
+        $this->check($game, $siti)->assertJson(['phase' => 'lobby', 'difficulty' => 'easy']);
+        $this->host($game, 'next');
+        $district = $game->fresh()->Cards[0];
+        $this->check($game, $siti)->assertJson(['difficulty' => 'easy', 'district' => ['name' => $district['name'], 'region' => $district['region']]]);
+        $this->host($game)->assertJson(['difficulty' => 'easy', 'district' => ['region' => $district['region']]]);
+        $this->get('/game-scores')->assertSeeInOrder(['Live games', $game->spacedCode(), 'DistrictGuessr (Easy)'], false);
+
+        // Only Easy or Hard; and a level means nothing to Higher or Lower.
+        $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'difficulty' => 'medium', 'rounds' => 3])->assertSessionHasErrors('difficulty');
+        $this->post('/game-scores/store-live', ['game' => 'higher-or-lower', 'difficulty' => 'easy', 'rounds' => 3]);
         $this->assertSame(1, LiveGame::count());
     }
 

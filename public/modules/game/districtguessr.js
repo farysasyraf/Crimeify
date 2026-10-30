@@ -1,8 +1,9 @@
-// DistrictGuessr (DistrictGuessrController): starts a game with the name given, then after a short countdown asks for a
-// police district on a map of Malaysia with only its states' outlines (guessr-map.js). A tap drops a pin, which can be dragged or tapped elsewhere, and Confirm sends it; the server says how
-// far off it was, its points, and where the district is, shown with a dashed line from the pin. Next district asks for
-// the next; after the last, every district's points. When the time runs out, the pin counts as it is, or none. The
-// name is remembered in the browser, as in Higher or Lower.
+// DistrictGuessr (DistrictGuessrController): starts a game with the name and level given, then after a short countdown
+// asks for a police district on a map of Malaysia with only its states' outlines (guessr-map.js): on Easy, zoomed into
+// the district's state, lit up; on Hard, the whole of Malaysia. A tap drops a pin, which can be dragged or tapped
+// elsewhere, and Confirm sends it; the server says how far off it was, its points, and where the district is, shown with
+// a dashed line from the pin. Next district asks for the next; after the last, every district's points. When the time
+// runs out, the pin counts as it is, or none. The name and level are remembered in the browser.
 (() => {
     const game = document.querySelector('[data-guessr]');
 
@@ -20,18 +21,20 @@
     const number = new Intl.NumberFormat('en-MY');
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const nameKey = 'crimeify.game.name';
+    const levelKey = 'crimeify.guessr.level';
 
     // The states' outlines, fetched as the page loads, so the map is ready when the game starts.
     const boundaries = GuessrMap.load(game.dataset.boundaries);
 
-    // The game, the district being guessed (none between its guess and the next), the map and what's on it, the clock,
-    // and a request on its way.
+    // The game and its level, the district being guessed (none between its guess and the next), the map and what's on
+    // it, the clock, and a request on its way.
     let token = null;
+    let level = 'easy';
     let district = null;
     let score = 0;
     let summary = null;
+    let drawn = null;
     let map = null;
-    let malaysia = null;
     let pin = null;
     let marks = [];
     let clock = null;
@@ -39,8 +42,12 @@
 
     try {
         form.elements.name.value = localStorage.getItem(nameKey) ?? '';
+        const kept = localStorage.getItem(levelKey);
+        if (kept === 'easy' || kept === 'hard') {
+            form.elements.difficulty.value = kept;
+        }
     } catch {
-        // Without the browser's storage, the name is typed each time.
+        // Without the browser's storage, the name is typed and the level chosen each time.
     }
 
     // Send to the game, as JSON. A problem comes back as an Error with what to tell the player.
@@ -85,12 +92,13 @@
             return;
         }
 
-        ({ map, malaysia } = await GuessrMap.draw(slot('map'), boundaries));
+        drawn = await GuessrMap.draw(slot('map'), boundaries);
+        ({ map } = drawn);
         map.on('click', (event) => drop(event.latlng));
     };
 
-    // Malaysia, clear of the bar over the map's foot.
-    const frame = () => map.fitBounds(malaysia, { paddingTopLeft: [12, 12], paddingBottomRight: [12, 90] });
+    // The district's state on Easy, or Malaysia, clear of the bar over the map's foot.
+    const frame = () => GuessrMap.frame(drawn, district?.region, level === 'easy', { paddingTopLeft: [12, 12], paddingBottomRight: [12, 90] });
 
     // A pin where the player tapped, or the pin moved there, while a district waits for its guess.
     const drop = (latlng) => {
@@ -150,7 +158,7 @@
         district = asked;
         clear();
         frame();
-        slot('round').textContent = t('Round :round of :rounds', { round: asked.round, rounds });
+        slot('round').textContent = `${t('Round :round of :rounds', { round: asked.round, rounds })} · ${level === 'easy' ? t('Easy') : t('Hard')}`;
         slot('district').textContent = asked.name;
         slot('place').textContent = asked.place;
         slot('result').textContent = '';
@@ -159,9 +167,11 @@
         button('confirm').disabled = true;
         button('next').hidden = true;
 
-        // The whole map in view, with its buttons, as on a phone, where the title takes the top of the screen.
+        // The whole map in view, with its buttons, as on a phone, where the title takes the top of the screen: the round
+        // from its timer down, just under the bar along the top, which stays in place.
         if (slot('map').parentElement.getBoundingClientRect().bottom > window.innerHeight) {
-            part('round').scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' });
+            const bar = document.querySelector('.public-topbar')?.getBoundingClientRect().bottom ?? 0;
+            window.scrollTo({ top: window.scrollY + part('round').getBoundingClientRect().top - bar - 8, behavior: calm ? 'auto' : 'smooth' });
         }
 
         startClock();
@@ -198,15 +208,17 @@
         busy = true;
 
         try {
-            const started = await post(game.dataset.start, { name });
+            const started = await post(game.dataset.start, { name, difficulty: form.elements.difficulty.value });
 
             try {
                 localStorage.setItem(nameKey, name);
+                localStorage.setItem(levelKey, started.difficulty);
             } catch {
                 // Not remembered, then.
             }
 
             token = started.token;
+            level = started.difficulty;
             score = 0;
             summary = null;
             slot('score').textContent = 0;

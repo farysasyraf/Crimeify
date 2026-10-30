@@ -14,7 +14,8 @@ use Modules\Game\Entities\GuessrRun;
 use Modules\Game\Support\DistrictGuessr;
 
 // DistrictGuessr, for everyone without logging in (/public/game/districtguessr): a police district's name and its state,
-// to find on a map of Malaysia with only its states' outlines, ten times. The page draws the game (districtguessr.js);
+// to find on a map of Malaysia with only its states' outlines, ten times, on Easy (the map zooms into the state) or
+// Hard (the whole of Malaysia). The page draws the game (districtguessr.js);
 // start(), guess() and next() play it, and the server keeps the districts and the score, so where a district is never
 // reaches the browser before its guess, and the score can't be made up. Only administrators see the scores, on the Game
 // scores page.
@@ -48,17 +49,20 @@ class DistrictGuessrController extends Controller
     }
 
     /**
-     * Start a game for the name given: its first district, to find once the countdown is over, when its time starts.
+     * Start a game for the name given, at the level chosen (Hard if none): its first district, to find once the
+     * countdown is over, when its time starts.
      */
     public function start(Request $request): JsonResponse
     {
         $name = GameRun::validName($request);
+        $request->validate(['difficulty' => ['nullable', 'in:'.implode(',', DistrictGuessr::Levels)]]);
         $districts = $this->guessr->deal() ?? abort(503, __('There are no police districts to play with yet.'));
 
         $run = GuessrRun::create([
             'Token' => Str::random(48),
             'PlayerName' => $name,
             'PlayerKey' => GameRun::keyFor($name),
+            'Difficulty' => $request->input('difficulty') ?? DistrictGuessr::Hard,
             'Score' => 0,
             'Districts' => $districts,
             'Guesses' => [],
@@ -69,6 +73,7 @@ class DistrictGuessrController extends Controller
 
         return response()->json([
             'token' => $run->Token,
+            'difficulty' => $run->Difficulty,
             'rounds' => config('game.districtguessr.rounds'),
             'seconds' => config('game.districtguessr.seconds'),
             'ready' => config('game.districtguessr.ready'),

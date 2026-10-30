@@ -52,10 +52,25 @@
                     <li>{{ __('Tap the map to drop your pin, move it if you like, then press Confirm. :seconds seconds a district.', ['seconds' => $seconds]) }}</li>
                     <li>{{ __('Up to :points points a district, all of them within :km km: the closer, the more.', ['points' => number_format($points), 'km' => $perfect]) }}</li>
                     <li>{{ __(':rounds districts a game.', ['rounds' => $rounds]) }}</li>
+                    <li>{{ __('Easy zooms the map into the district\'s state; Hard shows the whole of Malaysia. Each level is ranked on its own.') }}</li>
                 </ol>
             </div>
             <form class="game-start" data-guessr-start novalidate>
                 @csrf
+                {{-- The level, Easy to start with; the browser remembers the last one played. --}}
+                <fieldset class="guessr-levels">
+                    <legend>{{ __('Level') }}</legend>
+                    <label class="guessr-level">
+                        <input type="radio" name="difficulty" value="easy" checked />
+                        <span class="guessr-level-name"><span class="material-icon" aria-hidden="true">zoom_in_map</span>{{ __('Easy') }}</span>
+                        <span class="guessr-level-note">{{ __('Zoomed into the state') }}</span>
+                    </label>
+                    <label class="guessr-level">
+                        <input type="radio" name="difficulty" value="hard" />
+                        <span class="guessr-level-name"><span class="material-icon" aria-hidden="true">public</span>{{ __('Hard') }}</span>
+                        <span class="guessr-level-note">{{ __('All of Malaysia') }}</span>
+                    </label>
+                </fieldset>
                 <div class="field">
                     <label for="guessr-name">{{ __('Your name') }}</label>
                     <input type="text" id="guessr-name" name="name" maxlength="{{ $nameLength }}" autocomplete="name" required aria-describedby="guessr-name-note" />
