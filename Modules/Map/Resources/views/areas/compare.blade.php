@@ -164,9 +164,14 @@
         </section>
     @endif
 
+    @if (collect($livings)->filter()->isNotEmpty())
+        @include('map::areas._living-compare')
+    @endif
+
     @include('map::areas._about')
 </div>
 
+<script src="{{ versioned_asset('modules/map/areas-motion.js') }}" defer></script>
 <script src="{{ versioned_asset('vendor/chartjs/chart.umd.min.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/areas.js') }}" defer></script>
 @endsection

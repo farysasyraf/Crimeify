@@ -1,0 +1,3373 @@
+state,district,measure,year,value
+Johor,All,electricity,2022,100
+Johor,All,electricity,2024,100
+Johor,All,expenditure_mean,2022,5342
+Johor,All,expenditure_mean,2024,5927
+Johor,All,income_median,2022,6879
+Johor,All,income_median,2024,7712
+Johor,All,piped_water,2022,99.6
+Johor,All,piped_water,2024,99.8
+Johor,All,poverty,2022,4.6
+Johor,All,poverty,2024,2.5
+Johor,All,sanitation,2022,100
+Johor,All,sanitation,2024,100
+Johor,All,unemployment,2023,2.6
+Johor,All,unemployment,2024,2.3
+Johor,Batu Pahat,electricity,2022,100
+Johor,Batu Pahat,electricity,2024,100
+Johor,Batu Pahat,expenditure_mean,2022,4570
+Johor,Batu Pahat,expenditure_mean,2024,5153
+Johor,Batu Pahat,income_median,2022,6347
+Johor,Batu Pahat,income_median,2024,7555
+Johor,Batu Pahat,piped_water,2022,100
+Johor,Batu Pahat,piped_water,2024,100
+Johor,Batu Pahat,poverty,2022,5.1
+Johor,Batu Pahat,poverty,2024,2.4
+Johor,Batu Pahat,sanitation,2022,100
+Johor,Batu Pahat,sanitation,2024,100
+Johor,Batu Pahat,schools_primary,2024,144
+Johor,Batu Pahat,schools_primary,2025,144
+Johor,Batu Pahat,schools_secondary,2024,31
+Johor,Batu Pahat,schools_secondary,2025,31
+Johor,Batu Pahat,schools_tertiary,2024,1
+Johor,Batu Pahat,schools_tertiary,2025,1
+Johor,Batu Pahat,unemployment,2023,1.4
+Johor,Batu Pahat,unemployment,2024,1.3
+Johor,Johor Bahru,electricity,2022,100
+Johor,Johor Bahru,electricity,2024,100
+Johor,Johor Bahru,expenditure_mean,2022,6139
+Johor,Johor Bahru,expenditure_mean,2024,6764
+Johor,Johor Bahru,income_median,2022,8232
+Johor,Johor Bahru,income_median,2024,8977
+Johor,Johor Bahru,piped_water,2022,100
+Johor,Johor Bahru,piped_water,2024,99.99
+Johor,Johor Bahru,poverty,2022,3.7
+Johor,Johor Bahru,poverty,2024,1.9
+Johor,Johor Bahru,sanitation,2022,100
+Johor,Johor Bahru,sanitation,2024,100
+Johor,Johor Bahru,schools_primary,2024,184
+Johor,Johor Bahru,schools_primary,2025,184
+Johor,Johor Bahru,schools_secondary,2024,87
+Johor,Johor Bahru,schools_secondary,2025,87
+Johor,Johor Bahru,schools_tertiary,2024,1
+Johor,Johor Bahru,schools_tertiary,2025,1
+Johor,Johor Bahru,unemployment,2023,2.9
+Johor,Johor Bahru,unemployment,2024,2.7
+Johor,Kluang,electricity,2022,100
+Johor,Kluang,electricity,2024,100
+Johor,Kluang,expenditure_mean,2022,4399
+Johor,Kluang,expenditure_mean,2024,4748
+Johor,Kluang,income_median,2022,5204
+Johor,Kluang,income_median,2024,6158
+Johor,Kluang,piped_water,2022,99.7
+Johor,Kluang,piped_water,2024,98.73
+Johor,Kluang,poverty,2022,7.2
+Johor,Kluang,poverty,2024,5.7
+Johor,Kluang,sanitation,2022,100
+Johor,Kluang,sanitation,2024,100
+Johor,Kluang,schools_primary,2024,88
+Johor,Kluang,schools_primary,2025,88
+Johor,Kluang,schools_secondary,2024,29
+Johor,Kluang,schools_secondary,2025,29
+Johor,Kluang,schools_tertiary,2024,0
+Johor,Kluang,schools_tertiary,2025,0
+Johor,Kluang,unemployment,2023,3.2
+Johor,Kluang,unemployment,2024,2.8
+Johor,Kota Tinggi,electricity,2022,100
+Johor,Kota Tinggi,electricity,2024,100
+Johor,Kota Tinggi,expenditure_mean,2022,4498
+Johor,Kota Tinggi,expenditure_mean,2024,4949
+Johor,Kota Tinggi,income_median,2022,6227
+Johor,Kota Tinggi,income_median,2024,6284
+Johor,Kota Tinggi,piped_water,2022,100
+Johor,Kota Tinggi,piped_water,2024,99.83
+Johor,Kota Tinggi,poverty,2022,5
+Johor,Kota Tinggi,poverty,2024,4.2
+Johor,Kota Tinggi,sanitation,2022,99.85
+Johor,Kota Tinggi,sanitation,2024,100
+Johor,Kota Tinggi,schools_primary,2024,83
+Johor,Kota Tinggi,schools_primary,2025,83
+Johor,Kota Tinggi,schools_secondary,2024,27
+Johor,Kota Tinggi,schools_secondary,2025,27
+Johor,Kota Tinggi,schools_tertiary,2024,0
+Johor,Kota Tinggi,schools_tertiary,2025,0
+Johor,Kota Tinggi,unemployment,2023,2.8
+Johor,Kota Tinggi,unemployment,2024,2.4
+Johor,Kulai,electricity,2022,100
+Johor,Kulai,electricity,2024,100
+Johor,Kulai,expenditure_mean,2022,5646
+Johor,Kulai,expenditure_mean,2024,6254
+Johor,Kulai,income_median,2022,7460
+Johor,Kulai,income_median,2024,8406
+Johor,Kulai,piped_water,2022,100
+Johor,Kulai,piped_water,2024,100
+Johor,Kulai,poverty,2022,0.4
+Johor,Kulai,poverty,2024,0.1
+Johor,Kulai,sanitation,2022,100
+Johor,Kulai,sanitation,2024,100
+Johor,Kulai,schools_primary,2024,37
+Johor,Kulai,schools_primary,2025,37
+Johor,Kulai,schools_secondary,2024,14
+Johor,Kulai,schools_secondary,2025,14
+Johor,Kulai,schools_tertiary,2024,0
+Johor,Kulai,schools_tertiary,2025,0
+Johor,Kulai,unemployment,2023,2.6
+Johor,Kulai,unemployment,2024,2.3
+Johor,Mersing,electricity,2022,100
+Johor,Mersing,electricity,2024,100
+Johor,Mersing,expenditure_mean,2022,4032
+Johor,Mersing,expenditure_mean,2024,4274
+Johor,Mersing,income_median,2022,4445
+Johor,Mersing,income_median,2024,5335
+Johor,Mersing,piped_water,2022,83.5
+Johor,Mersing,piped_water,2024,95.39
+Johor,Mersing,poverty,2022,12.7
+Johor,Mersing,poverty,2024,6.7
+Johor,Mersing,sanitation,2022,100
+Johor,Mersing,sanitation,2024,100
+Johor,Mersing,schools_primary,2024,38
+Johor,Mersing,schools_primary,2025,38
+Johor,Mersing,schools_secondary,2024,10
+Johor,Mersing,schools_secondary,2025,10
+Johor,Mersing,schools_tertiary,2024,0
+Johor,Mersing,schools_tertiary,2025,0
+Johor,Mersing,unemployment,2023,2.4
+Johor,Mersing,unemployment,2024,2
+Johor,Muar,electricity,2022,100
+Johor,Muar,electricity,2024,100
+Johor,Muar,expenditure_mean,2022,4740
+Johor,Muar,expenditure_mean,2024,5541
+Johor,Muar,income_median,2022,5724
+Johor,Muar,income_median,2024,7334
+Johor,Muar,piped_water,2022,100
+Johor,Muar,piped_water,2024,100
+Johor,Muar,poverty,2022,6.1
+Johor,Muar,poverty,2024,2.1
+Johor,Muar,sanitation,2022,100
+Johor,Muar,sanitation,2024,100
+Johor,Muar,schools_primary,2024,103
+Johor,Muar,schools_primary,2025,103
+Johor,Muar,schools_secondary,2024,27
+Johor,Muar,schools_secondary,2025,28
+Johor,Muar,schools_tertiary,2024,0
+Johor,Muar,schools_tertiary,2025,0
+Johor,Muar,unemployment,2023,1.8
+Johor,Muar,unemployment,2024,1.6
+Johor,Pontian,electricity,2022,100
+Johor,Pontian,electricity,2024,100
+Johor,Pontian,expenditure_mean,2022,4535
+Johor,Pontian,expenditure_mean,2024,4856
+Johor,Pontian,income_median,2022,5616
+Johor,Pontian,income_median,2024,5685
+Johor,Pontian,piped_water,2022,100
+Johor,Pontian,piped_water,2024,100
+Johor,Pontian,poverty,2022,5.1
+Johor,Pontian,poverty,2024,2
+Johor,Pontian,sanitation,2022,100
+Johor,Pontian,sanitation,2024,100
+Johor,Pontian,schools_primary,2024,82
+Johor,Pontian,schools_primary,2025,82
+Johor,Pontian,schools_secondary,2024,18
+Johor,Pontian,schools_secondary,2025,18
+Johor,Pontian,schools_tertiary,2024,0
+Johor,Pontian,schools_tertiary,2025,0
+Johor,Pontian,unemployment,2023,2.9
+Johor,Pontian,unemployment,2024,2.5
+Johor,Segamat,electricity,2022,100
+Johor,Segamat,electricity,2024,100
+Johor,Segamat,expenditure_mean,2022,4426
+Johor,Segamat,expenditure_mean,2024,4870
+Johor,Segamat,income_median,2022,5318
+Johor,Segamat,income_median,2024,6451
+Johor,Segamat,piped_water,2022,98.7
+Johor,Segamat,piped_water,2024,99.54
+Johor,Segamat,poverty,2022,7.4
+Johor,Segamat,poverty,2024,3.1
+Johor,Segamat,sanitation,2022,100
+Johor,Segamat,sanitation,2024,100
+Johor,Segamat,schools_primary,2024,85
+Johor,Segamat,schools_primary,2025,85
+Johor,Segamat,schools_secondary,2024,26
+Johor,Segamat,schools_secondary,2025,26
+Johor,Segamat,schools_tertiary,2024,0
+Johor,Segamat,schools_tertiary,2025,0
+Johor,Segamat,unemployment,2023,2.9
+Johor,Segamat,unemployment,2024,2.5
+Johor,Tangkak,electricity,2022,100
+Johor,Tangkak,electricity,2024,100
+Johor,Tangkak,expenditure_mean,2022,4198
+Johor,Tangkak,expenditure_mean,2024,4673
+Johor,Tangkak,income_median,2022,5622
+Johor,Tangkak,income_median,2024,6374
+Johor,Tangkak,piped_water,2022,100
+Johor,Tangkak,piped_water,2024,100
+Johor,Tangkak,poverty,2022,6.9
+Johor,Tangkak,poverty,2024,4
+Johor,Tangkak,sanitation,2022,100
+Johor,Tangkak,sanitation,2024,100
+Johor,Tangkak,schools_primary,2024,65
+Johor,Tangkak,schools_primary,2025,65
+Johor,Tangkak,schools_secondary,2024,16
+Johor,Tangkak,schools_secondary,2025,16
+Johor,Tangkak,schools_tertiary,2024,0
+Johor,Tangkak,schools_tertiary,2025,0
+Johor,Tangkak,unemployment,2023,1.9
+Johor,Tangkak,unemployment,2024,1.7
+Kedah,All,electricity,2022,100
+Kedah,All,electricity,2024,100
+Kedah,All,expenditure_mean,2022,3765
+Kedah,All,expenditure_mean,2024,4028
+Kedah,All,income_median,2022,4402
+Kedah,All,income_median,2024,4895
+Kedah,All,piped_water,2022,99.6
+Kedah,All,piped_water,2024,99.6
+Kedah,All,poverty,2022,9
+Kedah,All,poverty,2024,8.4
+Kedah,All,sanitation,2022,100
+Kedah,All,sanitation,2024,100
+Kedah,All,unemployment,2023,2.9
+Kedah,All,unemployment,2024,2.5
+Kedah,Baling,electricity,2022,100
+Kedah,Baling,electricity,2024,100
+Kedah,Baling,expenditure_mean,2022,2732
+Kedah,Baling,expenditure_mean,2024,3041
+Kedah,Baling,income_median,2022,3400
+Kedah,Baling,income_median,2024,3367
+Kedah,Baling,piped_water,2022,95.1
+Kedah,Baling,piped_water,2024,96.01
+Kedah,Baling,poverty,2022,14.4
+Kedah,Baling,poverty,2024,14.7
+Kedah,Baling,sanitation,2022,100
+Kedah,Baling,sanitation,2024,100
+Kedah,Baling,schools_primary,2024,61
+Kedah,Baling,schools_primary,2025,61
+Kedah,Baling,schools_secondary,2024,16
+Kedah,Baling,schools_secondary,2025,16
+Kedah,Baling,schools_tertiary,2024,0
+Kedah,Baling,schools_tertiary,2025,0
+Kedah,Baling,unemployment,2023,2.2
+Kedah,Baling,unemployment,2024,1.8
+Kedah,Bandar Baharu,electricity,2022,100
+Kedah,Bandar Baharu,electricity,2024,100
+Kedah,Bandar Baharu,expenditure_mean,2022,2751
+Kedah,Bandar Baharu,expenditure_mean,2024,3006
+Kedah,Bandar Baharu,income_median,2022,3922
+Kedah,Bandar Baharu,income_median,2024,4310
+Kedah,Bandar Baharu,piped_water,2022,100
+Kedah,Bandar Baharu,piped_water,2024,100
+Kedah,Bandar Baharu,poverty,2022,3.9
+Kedah,Bandar Baharu,poverty,2024,5.8
+Kedah,Bandar Baharu,sanitation,2022,100
+Kedah,Bandar Baharu,sanitation,2024,100
+Kedah,Bandar Baharu,schools_primary,2024,23
+Kedah,Bandar Baharu,schools_primary,2025,23
+Kedah,Bandar Baharu,schools_secondary,2024,6
+Kedah,Bandar Baharu,schools_secondary,2025,6
+Kedah,Bandar Baharu,schools_tertiary,2024,0
+Kedah,Bandar Baharu,schools_tertiary,2025,0
+Kedah,Bandar Baharu,unemployment,2023,3
+Kedah,Bandar Baharu,unemployment,2024,2.5
+Kedah,Kota Setar,electricity,2022,100
+Kedah,Kota Setar,electricity,2024,100
+Kedah,Kota Setar,expenditure_mean,2022,4253
+Kedah,Kota Setar,expenditure_mean,2024,4495
+Kedah,Kota Setar,income_median,2022,4751
+Kedah,Kota Setar,income_median,2024,5208
+Kedah,Kota Setar,piped_water,2022,100
+Kedah,Kota Setar,piped_water,2024,100
+Kedah,Kota Setar,poverty,2022,5.1
+Kedah,Kota Setar,poverty,2024,5.5
+Kedah,Kota Setar,sanitation,2022,100
+Kedah,Kota Setar,sanitation,2024,100
+Kedah,Kota Setar,schools_primary,2024,88
+Kedah,Kota Setar,schools_primary,2025,88
+Kedah,Kota Setar,schools_secondary,2024,37
+Kedah,Kota Setar,schools_secondary,2025,37
+Kedah,Kota Setar,schools_tertiary,2024,0
+Kedah,Kota Setar,schools_tertiary,2025,0
+Kedah,Kota Setar,unemployment,2023,3.7
+Kedah,Kota Setar,unemployment,2024,3.2
+Kedah,Kuala Muda,electricity,2022,100
+Kedah,Kuala Muda,electricity,2024,100
+Kedah,Kuala Muda,expenditure_mean,2022,3840
+Kedah,Kuala Muda,expenditure_mean,2024,3869
+Kedah,Kuala Muda,income_median,2022,4200
+Kedah,Kuala Muda,income_median,2024,4953
+Kedah,Kuala Muda,piped_water,2022,99.9
+Kedah,Kuala Muda,piped_water,2024,99.9
+Kedah,Kuala Muda,poverty,2022,13.8
+Kedah,Kuala Muda,poverty,2024,11.8
+Kedah,Kuala Muda,sanitation,2022,99.9
+Kedah,Kuala Muda,sanitation,2024,100
+Kedah,Kuala Muda,schools_primary,2024,107
+Kedah,Kuala Muda,schools_primary,2025,107
+Kedah,Kuala Muda,schools_secondary,2024,37
+Kedah,Kuala Muda,schools_secondary,2025,37
+Kedah,Kuala Muda,schools_tertiary,2024,0
+Kedah,Kuala Muda,schools_tertiary,2025,0
+Kedah,Kuala Muda,unemployment,2023,2.5
+Kedah,Kuala Muda,unemployment,2024,2.2
+Kedah,Kubang Pasu,electricity,2022,100
+Kedah,Kubang Pasu,electricity,2024,100
+Kedah,Kubang Pasu,expenditure_mean,2022,4062
+Kedah,Kubang Pasu,expenditure_mean,2024,4478
+Kedah,Kubang Pasu,income_median,2022,5201
+Kedah,Kubang Pasu,income_median,2024,5312
+Kedah,Kubang Pasu,piped_water,2022,99.9
+Kedah,Kubang Pasu,piped_water,2024,100
+Kedah,Kubang Pasu,poverty,2022,3.3
+Kedah,Kubang Pasu,poverty,2024,4
+Kedah,Kubang Pasu,sanitation,2022,100
+Kedah,Kubang Pasu,sanitation,2024,100
+Kedah,Kubang Pasu,schools_primary,2024,58
+Kedah,Kubang Pasu,schools_primary,2025,58
+Kedah,Kubang Pasu,schools_secondary,2024,25
+Kedah,Kubang Pasu,schools_secondary,2025,25
+Kedah,Kubang Pasu,schools_tertiary,2024,1
+Kedah,Kubang Pasu,schools_tertiary,2025,1
+Kedah,Kubang Pasu,unemployment,2023,2.7
+Kedah,Kubang Pasu,unemployment,2024,2.4
+Kedah,Kulim,electricity,2022,100
+Kedah,Kulim,electricity,2024,100
+Kedah,Kulim,expenditure_mean,2022,3647
+Kedah,Kulim,expenditure_mean,2024,4054
+Kedah,Kulim,income_median,2022,4498
+Kedah,Kulim,income_median,2024,5236
+Kedah,Kulim,piped_water,2022,100
+Kedah,Kulim,piped_water,2024,100
+Kedah,Kulim,poverty,2022,11.4
+Kedah,Kulim,poverty,2024,8.5
+Kedah,Kulim,sanitation,2022,100
+Kedah,Kulim,sanitation,2024,100
+Kedah,Kulim,schools_primary,2024,64
+Kedah,Kulim,schools_primary,2025,64
+Kedah,Kulim,schools_secondary,2024,26
+Kedah,Kulim,schools_secondary,2025,26
+Kedah,Kulim,schools_tertiary,2024,0
+Kedah,Kulim,schools_tertiary,2025,0
+Kedah,Kulim,unemployment,2023,2.2
+Kedah,Kulim,unemployment,2024,1.9
+Kedah,Langkawi,electricity,2022,100
+Kedah,Langkawi,electricity,2024,100
+Kedah,Langkawi,expenditure_mean,2022,3680
+Kedah,Langkawi,expenditure_mean,2024,4356
+Kedah,Langkawi,income_median,2022,5250
+Kedah,Langkawi,income_median,2024,5083
+Kedah,Langkawi,piped_water,2022,99.8
+Kedah,Langkawi,piped_water,2024,100
+Kedah,Langkawi,poverty,2022,5.7
+Kedah,Langkawi,poverty,2024,6
+Kedah,Langkawi,sanitation,2022,100
+Kedah,Langkawi,sanitation,2024,100
+Kedah,Langkawi,schools_primary,2024,21
+Kedah,Langkawi,schools_primary,2025,21
+Kedah,Langkawi,schools_secondary,2024,8
+Kedah,Langkawi,schools_secondary,2025,8
+Kedah,Langkawi,schools_tertiary,2024,0
+Kedah,Langkawi,schools_tertiary,2025,0
+Kedah,Langkawi,unemployment,2023,5.7
+Kedah,Langkawi,unemployment,2024,4.9
+Kedah,Padang Terap,electricity,2022,100
+Kedah,Padang Terap,electricity,2024,100
+Kedah,Padang Terap,expenditure_mean,2022,3751
+Kedah,Padang Terap,expenditure_mean,2024,3872
+Kedah,Padang Terap,income_median,2022,3902
+Kedah,Padang Terap,income_median,2024,3954
+Kedah,Padang Terap,piped_water,2022,100
+Kedah,Padang Terap,piped_water,2024,100
+Kedah,Padang Terap,poverty,2022,8.9
+Kedah,Padang Terap,poverty,2024,8
+Kedah,Padang Terap,sanitation,2022,100
+Kedah,Padang Terap,sanitation,2024,100
+Kedah,Padang Terap,schools_primary,2024,21
+Kedah,Padang Terap,schools_primary,2025,21
+Kedah,Padang Terap,schools_secondary,2024,9
+Kedah,Padang Terap,schools_secondary,2025,9
+Kedah,Padang Terap,schools_tertiary,2024,0
+Kedah,Padang Terap,schools_tertiary,2025,0
+Kedah,Padang Terap,unemployment,2023,3
+Kedah,Padang Terap,unemployment,2024,2.5
+Kedah,Pendang,electricity,2022,100
+Kedah,Pendang,electricity,2024,100
+Kedah,Pendang,expenditure_mean,2022,3562
+Kedah,Pendang,expenditure_mean,2024,3914
+Kedah,Pendang,income_median,2022,3801
+Kedah,Pendang,income_median,2024,4592
+Kedah,Pendang,piped_water,2022,100
+Kedah,Pendang,piped_water,2024,100
+Kedah,Pendang,poverty,2022,7.3
+Kedah,Pendang,poverty,2024,7.3
+Kedah,Pendang,sanitation,2022,100
+Kedah,Pendang,sanitation,2024,100
+Kedah,Pendang,schools_primary,2024,38
+Kedah,Pendang,schools_primary,2025,38
+Kedah,Pendang,schools_secondary,2024,14
+Kedah,Pendang,schools_secondary,2025,14
+Kedah,Pendang,schools_tertiary,2024,0
+Kedah,Pendang,schools_tertiary,2025,0
+Kedah,Pendang,unemployment,2023,4.2
+Kedah,Pendang,unemployment,2024,3.5
+Kedah,Pokok Sena,electricity,2022,100
+Kedah,Pokok Sena,electricity,2024,100
+Kedah,Pokok Sena,expenditure_mean,2022,4033
+Kedah,Pokok Sena,expenditure_mean,2024,4257
+Kedah,Pokok Sena,income_median,2022,4668
+Kedah,Pokok Sena,income_median,2024,5163
+Kedah,Pokok Sena,piped_water,2022,100
+Kedah,Pokok Sena,piped_water,2024,100
+Kedah,Pokok Sena,poverty,2022,7.2
+Kedah,Pokok Sena,poverty,2024,7.2
+Kedah,Pokok Sena,sanitation,2022,100
+Kedah,Pokok Sena,sanitation,2024,100
+Kedah,Pokok Sena,schools_primary,2024,16
+Kedah,Pokok Sena,schools_primary,2025,16
+Kedah,Pokok Sena,schools_secondary,2024,5
+Kedah,Pokok Sena,schools_secondary,2025,5
+Kedah,Pokok Sena,schools_tertiary,2024,0
+Kedah,Pokok Sena,schools_tertiary,2025,0
+Kedah,Pokok Sena,unemployment,2023,3
+Kedah,Pokok Sena,unemployment,2024,2.5
+Kedah,Sik,electricity,2022,100
+Kedah,Sik,electricity,2024,100
+Kedah,Sik,expenditure_mean,2022,3530
+Kedah,Sik,expenditure_mean,2024,3675
+Kedah,Sik,income_median,2022,3703
+Kedah,Sik,income_median,2024,4438
+Kedah,Sik,piped_water,2022,100
+Kedah,Sik,piped_water,2024,98.28
+Kedah,Sik,poverty,2022,4
+Kedah,Sik,poverty,2024,8.7
+Kedah,Sik,sanitation,2022,100
+Kedah,Sik,sanitation,2024,100
+Kedah,Sik,schools_primary,2024,23
+Kedah,Sik,schools_primary,2025,23
+Kedah,Sik,schools_secondary,2024,10
+Kedah,Sik,schools_secondary,2025,10
+Kedah,Sik,schools_tertiary,2024,0
+Kedah,Sik,schools_tertiary,2025,0
+Kedah,Sik,unemployment,2023,2.3
+Kedah,Sik,unemployment,2024,2
+Kedah,Yan,electricity,2022,100
+Kedah,Yan,electricity,2024,100
+Kedah,Yan,expenditure_mean,2022,3339
+Kedah,Yan,expenditure_mean,2024,3859
+Kedah,Yan,income_median,2022,4080
+Kedah,Yan,income_median,2024,4695
+Kedah,Yan,piped_water,2022,100
+Kedah,Yan,piped_water,2024,100
+Kedah,Yan,poverty,2022,6
+Kedah,Yan,poverty,2024,7.4
+Kedah,Yan,sanitation,2022,100
+Kedah,Yan,sanitation,2024,100
+Kedah,Yan,schools_primary,2024,28
+Kedah,Yan,schools_primary,2025,28
+Kedah,Yan,schools_secondary,2024,11
+Kedah,Yan,schools_secondary,2025,11
+Kedah,Yan,schools_tertiary,2024,0
+Kedah,Yan,schools_tertiary,2025,0
+Kedah,Yan,unemployment,2023,2.2
+Kedah,Yan,unemployment,2024,1.9
+Kelantan,All,electricity,2022,100
+Kelantan,All,electricity,2024,100
+Kelantan,All,expenditure_mean,2022,3505
+Kelantan,All,expenditure_mean,2024,3825
+Kelantan,All,income_median,2022,3614
+Kelantan,All,income_median,2024,4083
+Kelantan,All,piped_water,2022,70.2
+Kelantan,All,piped_water,2024,72.1
+Kelantan,All,poverty,2022,13.2
+Kelantan,All,poverty,2024,11.5
+Kelantan,All,sanitation,2022,99.8
+Kelantan,All,sanitation,2024,100
+Kelantan,All,unemployment,2023,3.5
+Kelantan,All,unemployment,2024,3.6
+Kelantan,Bachok,electricity,2022,100
+Kelantan,Bachok,electricity,2024,100
+Kelantan,Bachok,expenditure_mean,2022,3282
+Kelantan,Bachok,expenditure_mean,2024,3579
+Kelantan,Bachok,income_median,2022,3625
+Kelantan,Bachok,income_median,2024,4187
+Kelantan,Bachok,piped_water,2022,47.4
+Kelantan,Bachok,piped_water,2024,44.53
+Kelantan,Bachok,poverty,2022,12.1
+Kelantan,Bachok,poverty,2024,11.3
+Kelantan,Bachok,sanitation,2022,99.5
+Kelantan,Bachok,sanitation,2024,100
+Kelantan,Bachok,schools_primary,2024,34
+Kelantan,Bachok,schools_primary,2025,34
+Kelantan,Bachok,schools_secondary,2024,19
+Kelantan,Bachok,schools_secondary,2025,19
+Kelantan,Bachok,schools_tertiary,2024,0
+Kelantan,Bachok,schools_tertiary,2025,0
+Kelantan,Bachok,unemployment,2023,3.1
+Kelantan,Bachok,unemployment,2024,3.2
+Kelantan,Gua Musang,electricity,2022,100
+Kelantan,Gua Musang,electricity,2024,100
+Kelantan,Gua Musang,expenditure_mean,2022,3625
+Kelantan,Gua Musang,expenditure_mean,2024,3726
+Kelantan,Gua Musang,income_median,2022,3342
+Kelantan,Gua Musang,income_median,2024,3871
+Kelantan,Gua Musang,piped_water,2022,89.5
+Kelantan,Gua Musang,piped_water,2024,94.78
+Kelantan,Gua Musang,poverty,2022,18.5
+Kelantan,Gua Musang,poverty,2024,16.3
+Kelantan,Gua Musang,sanitation,2022,100
+Kelantan,Gua Musang,sanitation,2024,100
+Kelantan,Gua Musang,schools_primary,2024,34
+Kelantan,Gua Musang,schools_primary,2025,34
+Kelantan,Gua Musang,schools_secondary,2024,10
+Kelantan,Gua Musang,schools_secondary,2025,10
+Kelantan,Gua Musang,schools_tertiary,2024,0
+Kelantan,Gua Musang,schools_tertiary,2025,0
+Kelantan,Gua Musang,unemployment,2023,3.3
+Kelantan,Gua Musang,unemployment,2024,3.3
+Kelantan,Jeli,electricity,2022,100
+Kelantan,Jeli,electricity,2024,100
+Kelantan,Jeli,expenditure_mean,2022,2746
+Kelantan,Jeli,expenditure_mean,2024,3062
+Kelantan,Jeli,income_median,2022,2906
+Kelantan,Jeli,income_median,2024,3008
+Kelantan,Jeli,piped_water,2022,80.8
+Kelantan,Jeli,piped_water,2024,70.59
+Kelantan,Jeli,poverty,2022,11.3
+Kelantan,Jeli,poverty,2024,10.1
+Kelantan,Jeli,sanitation,2022,100
+Kelantan,Jeli,sanitation,2024,100
+Kelantan,Jeli,schools_primary,2024,15
+Kelantan,Jeli,schools_primary,2025,15
+Kelantan,Jeli,schools_secondary,2024,6
+Kelantan,Jeli,schools_secondary,2025,6
+Kelantan,Jeli,schools_tertiary,2024,0
+Kelantan,Jeli,schools_tertiary,2025,0
+Kelantan,Jeli,unemployment,2023,2.2
+Kelantan,Jeli,unemployment,2024,2.3
+Kelantan,Kecil Lojing,electricity,2022,100
+Kelantan,Kecil Lojing,electricity,2024,100
+Kelantan,Kecil Lojing,expenditure_mean,2022,2720
+Kelantan,Kecil Lojing,expenditure_mean,2024,2953
+Kelantan,Kecil Lojing,income_median,2022,2630
+Kelantan,Kecil Lojing,income_median,2024,3385
+Kelantan,Kecil Lojing,piped_water,2022,87.5
+Kelantan,Kecil Lojing,piped_water,2024,93.33
+Kelantan,Kecil Lojing,poverty,2022,43.8
+Kelantan,Kecil Lojing,poverty,2024,20
+Kelantan,Kecil Lojing,sanitation,2022,100
+Kelantan,Kecil Lojing,sanitation,2024,100
+Kelantan,Kecil Lojing,schools_primary,2024,5
+Kelantan,Kecil Lojing,schools_primary,2025,5
+Kelantan,Kecil Lojing,schools_tertiary,2024,0
+Kelantan,Kecil Lojing,schools_tertiary,2025,0
+Kelantan,Kecil Lojing,unemployment,2023,5.5
+Kelantan,Kecil Lojing,unemployment,2024,5.6
+Kelantan,Kota Bharu,electricity,2022,100
+Kelantan,Kota Bharu,electricity,2024,100
+Kelantan,Kota Bharu,expenditure_mean,2022,3886
+Kelantan,Kota Bharu,expenditure_mean,2024,4329
+Kelantan,Kota Bharu,income_median,2022,4330
+Kelantan,Kota Bharu,income_median,2024,4729
+Kelantan,Kota Bharu,piped_water,2022,68.4
+Kelantan,Kota Bharu,piped_water,2024,68.76
+Kelantan,Kota Bharu,poverty,2022,10.5
+Kelantan,Kota Bharu,poverty,2024,9.9
+Kelantan,Kota Bharu,sanitation,2022,99.6
+Kelantan,Kota Bharu,sanitation,2024,100
+Kelantan,Kota Bharu,schools_primary,2024,96
+Kelantan,Kota Bharu,schools_primary,2025,96
+Kelantan,Kota Bharu,schools_secondary,2024,48
+Kelantan,Kota Bharu,schools_secondary,2025,48
+Kelantan,Kota Bharu,schools_tertiary,2024,1
+Kelantan,Kota Bharu,schools_tertiary,2025,1
+Kelantan,Kota Bharu,unemployment,2023,4.4
+Kelantan,Kota Bharu,unemployment,2024,4.5
+Kelantan,Kuala Krai,electricity,2022,100
+Kelantan,Kuala Krai,electricity,2024,100
+Kelantan,Kuala Krai,expenditure_mean,2022,2853
+Kelantan,Kuala Krai,expenditure_mean,2024,2863
+Kelantan,Kuala Krai,income_median,2022,2763
+Kelantan,Kuala Krai,income_median,2024,2994
+Kelantan,Kuala Krai,piped_water,2022,70
+Kelantan,Kuala Krai,piped_water,2024,98.41
+Kelantan,Kuala Krai,poverty,2022,22.4
+Kelantan,Kuala Krai,poverty,2024,20.2
+Kelantan,Kuala Krai,sanitation,2022,100
+Kelantan,Kuala Krai,sanitation,2024,100
+Kelantan,Kuala Krai,schools_primary,2024,41
+Kelantan,Kuala Krai,schools_primary,2025,41
+Kelantan,Kuala Krai,schools_secondary,2024,13
+Kelantan,Kuala Krai,schools_secondary,2025,13
+Kelantan,Kuala Krai,schools_tertiary,2024,0
+Kelantan,Kuala Krai,schools_tertiary,2025,0
+Kelantan,Kuala Krai,unemployment,2023,2
+Kelantan,Kuala Krai,unemployment,2024,2.1
+Kelantan,Machang,electricity,2022,100
+Kelantan,Machang,electricity,2024,100
+Kelantan,Machang,expenditure_mean,2022,3267
+Kelantan,Machang,expenditure_mean,2024,3411
+Kelantan,Machang,income_median,2022,3429
+Kelantan,Machang,income_median,2024,4156
+Kelantan,Machang,piped_water,2022,68
+Kelantan,Machang,piped_water,2024,72.9
+Kelantan,Machang,poverty,2022,12
+Kelantan,Machang,poverty,2024,7.3
+Kelantan,Machang,sanitation,2022,100
+Kelantan,Machang,sanitation,2024,100
+Kelantan,Machang,schools_primary,2024,29
+Kelantan,Machang,schools_primary,2025,29
+Kelantan,Machang,schools_secondary,2024,10
+Kelantan,Machang,schools_secondary,2025,10
+Kelantan,Machang,schools_tertiary,2024,0
+Kelantan,Machang,schools_tertiary,2025,0
+Kelantan,Machang,unemployment,2023,4.8
+Kelantan,Machang,unemployment,2024,4.9
+Kelantan,Pasir Mas,electricity,2022,100
+Kelantan,Pasir Mas,electricity,2024,100
+Kelantan,Pasir Mas,expenditure_mean,2022,3225
+Kelantan,Pasir Mas,expenditure_mean,2024,3581
+Kelantan,Pasir Mas,income_median,2022,3508
+Kelantan,Pasir Mas,income_median,2024,3591
+Kelantan,Pasir Mas,piped_water,2022,80.3
+Kelantan,Pasir Mas,piped_water,2024,71.58
+Kelantan,Pasir Mas,poverty,2022,9
+Kelantan,Pasir Mas,poverty,2024,8.6
+Kelantan,Pasir Mas,sanitation,2022,100
+Kelantan,Pasir Mas,sanitation,2024,100
+Kelantan,Pasir Mas,schools_primary,2024,56
+Kelantan,Pasir Mas,schools_primary,2025,56
+Kelantan,Pasir Mas,schools_secondary,2024,25
+Kelantan,Pasir Mas,schools_secondary,2025,25
+Kelantan,Pasir Mas,schools_tertiary,2024,0
+Kelantan,Pasir Mas,schools_tertiary,2025,0
+Kelantan,Pasir Mas,unemployment,2023,3.7
+Kelantan,Pasir Mas,unemployment,2024,3.8
+Kelantan,Pasir Puteh,electricity,2022,100
+Kelantan,Pasir Puteh,electricity,2024,100
+Kelantan,Pasir Puteh,expenditure_mean,2022,3525
+Kelantan,Pasir Puteh,expenditure_mean,2024,3749
+Kelantan,Pasir Puteh,income_median,2022,3453
+Kelantan,Pasir Puteh,income_median,2024,4853
+Kelantan,Pasir Puteh,piped_water,2022,68.5
+Kelantan,Pasir Puteh,piped_water,2024,77.55
+Kelantan,Pasir Puteh,poverty,2022,15.9
+Kelantan,Pasir Puteh,poverty,2024,11.1
+Kelantan,Pasir Puteh,sanitation,2022,99.8
+Kelantan,Pasir Puteh,sanitation,2024,100
+Kelantan,Pasir Puteh,schools_primary,2024,39
+Kelantan,Pasir Puteh,schools_primary,2025,39
+Kelantan,Pasir Puteh,schools_secondary,2024,17
+Kelantan,Pasir Puteh,schools_secondary,2025,17
+Kelantan,Pasir Puteh,schools_tertiary,2024,0
+Kelantan,Pasir Puteh,schools_tertiary,2025,0
+Kelantan,Pasir Puteh,unemployment,2023,2.9
+Kelantan,Pasir Puteh,unemployment,2024,3
+Kelantan,Tanah Merah,electricity,2022,100
+Kelantan,Tanah Merah,electricity,2024,100
+Kelantan,Tanah Merah,expenditure_mean,2022,3247
+Kelantan,Tanah Merah,expenditure_mean,2024,3632
+Kelantan,Tanah Merah,income_median,2022,2991
+Kelantan,Tanah Merah,income_median,2024,3638
+Kelantan,Tanah Merah,piped_water,2022,70.7
+Kelantan,Tanah Merah,piped_water,2024,80.23
+Kelantan,Tanah Merah,poverty,2022,17.9
+Kelantan,Tanah Merah,poverty,2024,14.9
+Kelantan,Tanah Merah,sanitation,2022,99.8
+Kelantan,Tanah Merah,sanitation,2024,100
+Kelantan,Tanah Merah,schools_primary,2024,34
+Kelantan,Tanah Merah,schools_primary,2025,34
+Kelantan,Tanah Merah,schools_secondary,2024,16
+Kelantan,Tanah Merah,schools_secondary,2025,16
+Kelantan,Tanah Merah,schools_tertiary,2024,0
+Kelantan,Tanah Merah,schools_tertiary,2025,0
+Kelantan,Tanah Merah,unemployment,2023,2.1
+Kelantan,Tanah Merah,unemployment,2024,2.2
+Kelantan,Tumpat,electricity,2022,100
+Kelantan,Tumpat,electricity,2024,100
+Kelantan,Tumpat,expenditure_mean,2022,3831
+Kelantan,Tumpat,expenditure_mean,2024,4181
+Kelantan,Tumpat,income_median,2022,3749
+Kelantan,Tumpat,income_median,2024,3904
+Kelantan,Tumpat,piped_water,2022,70.8
+Kelantan,Tumpat,piped_water,2024,67.73
+Kelantan,Tumpat,poverty,2022,13.5
+Kelantan,Tumpat,poverty,2024,12.7
+Kelantan,Tumpat,sanitation,2022,100
+Kelantan,Tumpat,sanitation,2024,100
+Kelantan,Tumpat,schools_primary,2024,35
+Kelantan,Tumpat,schools_primary,2025,35
+Kelantan,Tumpat,schools_secondary,2024,13
+Kelantan,Tumpat,schools_secondary,2025,13
+Kelantan,Tumpat,schools_tertiary,2024,0
+Kelantan,Tumpat,schools_tertiary,2025,0
+Kelantan,Tumpat,unemployment,2023,2.5
+Kelantan,Tumpat,unemployment,2024,2.5
+Malaysia,All,income_median,2022,6338
+Malaysia,All,income_median,2024,7017
+Malaysia,All,poverty,2022,6.2
+Malaysia,All,poverty,2024,5.1
+Malaysia,All,unemployment,2023,3.4
+Malaysia,All,unemployment,2024,3.2
+Melaka,All,electricity,2022,100
+Melaka,All,electricity,2024,100
+Melaka,All,expenditure_mean,2022,5707
+Melaka,All,expenditure_mean,2024,6212
+Melaka,All,income_median,2022,6210
+Melaka,All,income_median,2024,6891
+Melaka,All,piped_water,2022,100
+Melaka,All,piped_water,2024,100
+Melaka,All,poverty,2022,4.2
+Melaka,All,poverty,2024,3
+Melaka,All,sanitation,2022,100
+Melaka,All,sanitation,2024,100
+Melaka,All,unemployment,2023,1.6
+Melaka,All,unemployment,2024,1.6
+Melaka,Alor Gajah,electricity,2022,100
+Melaka,Alor Gajah,electricity,2024,100
+Melaka,Alor Gajah,expenditure_mean,2022,5338
+Melaka,Alor Gajah,expenditure_mean,2024,5745
+Melaka,Alor Gajah,income_median,2022,5611
+Melaka,Alor Gajah,income_median,2024,6308
+Melaka,Alor Gajah,piped_water,2022,100
+Melaka,Alor Gajah,piped_water,2024,100
+Melaka,Alor Gajah,poverty,2022,4.8
+Melaka,Alor Gajah,poverty,2024,4.5
+Melaka,Alor Gajah,sanitation,2022,100
+Melaka,Alor Gajah,sanitation,2024,100
+Melaka,Alor Gajah,schools_primary,2024,77
+Melaka,Alor Gajah,schools_primary,2025,77
+Melaka,Alor Gajah,schools_secondary,2024,21
+Melaka,Alor Gajah,schools_secondary,2025,21
+Melaka,Alor Gajah,schools_tertiary,2024,1
+Melaka,Alor Gajah,schools_tertiary,2025,1
+Melaka,Alor Gajah,unemployment,2023,2.3
+Melaka,Alor Gajah,unemployment,2024,2.3
+Melaka,Jasin,electricity,2022,100
+Melaka,Jasin,electricity,2024,100
+Melaka,Jasin,expenditure_mean,2022,5005
+Melaka,Jasin,expenditure_mean,2024,5654
+Melaka,Jasin,income_median,2022,5895
+Melaka,Jasin,income_median,2024,6401
+Melaka,Jasin,piped_water,2022,100
+Melaka,Jasin,piped_water,2024,100
+Melaka,Jasin,poverty,2022,5.5
+Melaka,Jasin,poverty,2024,1.1
+Melaka,Jasin,sanitation,2022,100
+Melaka,Jasin,sanitation,2024,100
+Melaka,Jasin,schools_primary,2024,67
+Melaka,Jasin,schools_primary,2025,67
+Melaka,Jasin,schools_secondary,2024,18
+Melaka,Jasin,schools_secondary,2025,18
+Melaka,Jasin,schools_tertiary,2024,0
+Melaka,Jasin,schools_tertiary,2025,0
+Melaka,Jasin,unemployment,2023,1.2
+Melaka,Jasin,unemployment,2024,1.2
+Melaka,Melaka Tengah,electricity,2022,100
+Melaka,Melaka Tengah,electricity,2024,100
+Melaka,Melaka Tengah,expenditure_mean,2022,6015
+Melaka,Melaka Tengah,expenditure_mean,2024,6527
+Melaka,Melaka Tengah,income_median,2022,6557
+Melaka,Melaka Tengah,income_median,2024,7415
+Melaka,Melaka Tengah,piped_water,2022,100
+Melaka,Melaka Tengah,piped_water,2024,100
+Melaka,Melaka Tengah,poverty,2022,3.7
+Melaka,Melaka Tengah,poverty,2024,2.8
+Melaka,Melaka Tengah,sanitation,2022,100
+Melaka,Melaka Tengah,sanitation,2024,100
+Melaka,Melaka Tengah,schools_primary,2024,94
+Melaka,Melaka Tengah,schools_primary,2025,94
+Melaka,Melaka Tengah,schools_secondary,2024,40
+Melaka,Melaka Tengah,schools_secondary,2025,41
+Melaka,Melaka Tengah,schools_tertiary,2024,0
+Melaka,Melaka Tengah,schools_tertiary,2025,0
+Melaka,Melaka Tengah,unemployment,2023,1.4
+Melaka,Melaka Tengah,unemployment,2024,1.4
+Negeri Sembilan,All,electricity,2022,100
+Negeri Sembilan,All,electricity,2024,100
+Negeri Sembilan,All,expenditure_mean,2022,4678
+Negeri Sembilan,All,expenditure_mean,2024,5115
+Negeri Sembilan,All,income_median,2022,5226
+Negeri Sembilan,All,income_median,2024,5591
+Negeri Sembilan,All,piped_water,2022,99.8
+Negeri Sembilan,All,piped_water,2024,99.9
+Negeri Sembilan,All,poverty,2022,4.4
+Negeri Sembilan,All,poverty,2024,4
+Negeri Sembilan,All,sanitation,2022,100
+Negeri Sembilan,All,sanitation,2024,100
+Negeri Sembilan,All,unemployment,2023,3.2
+Negeri Sembilan,All,unemployment,2024,3.1
+Negeri Sembilan,Jelebu,electricity,2022,100
+Negeri Sembilan,Jelebu,electricity,2024,100
+Negeri Sembilan,Jelebu,expenditure_mean,2022,3457
+Negeri Sembilan,Jelebu,expenditure_mean,2024,3811
+Negeri Sembilan,Jelebu,income_median,2022,3636
+Negeri Sembilan,Jelebu,income_median,2024,3713
+Negeri Sembilan,Jelebu,piped_water,2022,95.1
+Negeri Sembilan,Jelebu,piped_water,2024,96.33
+Negeri Sembilan,Jelebu,poverty,2022,7.3
+Negeri Sembilan,Jelebu,poverty,2024,6.4
+Negeri Sembilan,Jelebu,sanitation,2022,100
+Negeri Sembilan,Jelebu,sanitation,2024,100
+Negeri Sembilan,Jelebu,schools_primary,2024,24
+Negeri Sembilan,Jelebu,schools_primary,2025,24
+Negeri Sembilan,Jelebu,schools_secondary,2024,8
+Negeri Sembilan,Jelebu,schools_secondary,2025,8
+Negeri Sembilan,Jelebu,schools_tertiary,2024,0
+Negeri Sembilan,Jelebu,schools_tertiary,2025,0
+Negeri Sembilan,Jelebu,unemployment,2023,3.5
+Negeri Sembilan,Jelebu,unemployment,2024,3.5
+Negeri Sembilan,Jempol,electricity,2022,100
+Negeri Sembilan,Jempol,electricity,2024,100
+Negeri Sembilan,Jempol,expenditure_mean,2022,3608
+Negeri Sembilan,Jempol,expenditure_mean,2024,4113
+Negeri Sembilan,Jempol,income_median,2022,3830
+Negeri Sembilan,Jempol,income_median,2024,4291
+Negeri Sembilan,Jempol,piped_water,2022,100
+Negeri Sembilan,Jempol,piped_water,2024,100
+Negeri Sembilan,Jempol,poverty,2022,8
+Negeri Sembilan,Jempol,poverty,2024,7.1
+Negeri Sembilan,Jempol,sanitation,2022,100
+Negeri Sembilan,Jempol,sanitation,2024,100
+Negeri Sembilan,Jempol,schools_primary,2024,50
+Negeri Sembilan,Jempol,schools_primary,2025,50
+Negeri Sembilan,Jempol,schools_secondary,2024,17
+Negeri Sembilan,Jempol,schools_secondary,2025,17
+Negeri Sembilan,Jempol,schools_tertiary,2024,0
+Negeri Sembilan,Jempol,schools_tertiary,2025,0
+Negeri Sembilan,Jempol,unemployment,2023,3.4
+Negeri Sembilan,Jempol,unemployment,2024,3.4
+Negeri Sembilan,Kuala Pilah,electricity,2022,100
+Negeri Sembilan,Kuala Pilah,electricity,2024,100
+Negeri Sembilan,Kuala Pilah,expenditure_mean,2022,3567
+Negeri Sembilan,Kuala Pilah,expenditure_mean,2024,3809
+Negeri Sembilan,Kuala Pilah,income_median,2022,3471
+Negeri Sembilan,Kuala Pilah,income_median,2024,3996
+Negeri Sembilan,Kuala Pilah,piped_water,2022,100
+Negeri Sembilan,Kuala Pilah,piped_water,2024,100
+Negeri Sembilan,Kuala Pilah,poverty,2022,6.8
+Negeri Sembilan,Kuala Pilah,poverty,2024,6.2
+Negeri Sembilan,Kuala Pilah,sanitation,2022,100
+Negeri Sembilan,Kuala Pilah,sanitation,2024,100
+Negeri Sembilan,Kuala Pilah,schools_primary,2024,47
+Negeri Sembilan,Kuala Pilah,schools_primary,2025,47
+Negeri Sembilan,Kuala Pilah,schools_secondary,2024,16
+Negeri Sembilan,Kuala Pilah,schools_secondary,2025,16
+Negeri Sembilan,Kuala Pilah,schools_tertiary,2024,0
+Negeri Sembilan,Kuala Pilah,schools_tertiary,2025,0
+Negeri Sembilan,Kuala Pilah,unemployment,2023,4.8
+Negeri Sembilan,Kuala Pilah,unemployment,2024,4.7
+Negeri Sembilan,Port Dickson,electricity,2022,100
+Negeri Sembilan,Port Dickson,electricity,2024,100
+Negeri Sembilan,Port Dickson,expenditure_mean,2022,4500
+Negeri Sembilan,Port Dickson,expenditure_mean,2024,4709
+Negeri Sembilan,Port Dickson,income_median,2022,4805
+Negeri Sembilan,Port Dickson,income_median,2024,5342
+Negeri Sembilan,Port Dickson,piped_water,2022,100
+Negeri Sembilan,Port Dickson,piped_water,2024,100
+Negeri Sembilan,Port Dickson,poverty,2022,4.9
+Negeri Sembilan,Port Dickson,poverty,2024,4.4
+Negeri Sembilan,Port Dickson,sanitation,2022,100
+Negeri Sembilan,Port Dickson,sanitation,2024,100
+Negeri Sembilan,Port Dickson,schools_primary,2024,50
+Negeri Sembilan,Port Dickson,schools_primary,2025,50
+Negeri Sembilan,Port Dickson,schools_secondary,2024,13
+Negeri Sembilan,Port Dickson,schools_secondary,2025,13
+Negeri Sembilan,Port Dickson,schools_tertiary,2024,0
+Negeri Sembilan,Port Dickson,schools_tertiary,2025,0
+Negeri Sembilan,Port Dickson,unemployment,2023,4.3
+Negeri Sembilan,Port Dickson,unemployment,2024,4.2
+Negeri Sembilan,Rembau,electricity,2022,100
+Negeri Sembilan,Rembau,electricity,2024,100
+Negeri Sembilan,Rembau,expenditure_mean,2022,3897
+Negeri Sembilan,Rembau,expenditure_mean,2024,4226
+Negeri Sembilan,Rembau,income_median,2022,4655
+Negeri Sembilan,Rembau,income_median,2024,4894
+Negeri Sembilan,Rembau,piped_water,2022,100
+Negeri Sembilan,Rembau,piped_water,2024,100
+Negeri Sembilan,Rembau,poverty,2022,3
+Negeri Sembilan,Rembau,poverty,2024,2.6
+Negeri Sembilan,Rembau,sanitation,2022,100
+Negeri Sembilan,Rembau,sanitation,2024,100
+Negeri Sembilan,Rembau,schools_primary,2024,30
+Negeri Sembilan,Rembau,schools_primary,2025,30
+Negeri Sembilan,Rembau,schools_secondary,2024,11
+Negeri Sembilan,Rembau,schools_secondary,2025,11
+Negeri Sembilan,Rembau,schools_tertiary,2024,0
+Negeri Sembilan,Rembau,schools_tertiary,2025,0
+Negeri Sembilan,Rembau,unemployment,2023,3.5
+Negeri Sembilan,Rembau,unemployment,2024,3.5
+Negeri Sembilan,Seremban,electricity,2022,100
+Negeri Sembilan,Seremban,electricity,2024,100
+Negeri Sembilan,Seremban,expenditure_mean,2022,5225
+Negeri Sembilan,Seremban,expenditure_mean,2024,5686
+Negeri Sembilan,Seremban,income_median,2022,6384
+Negeri Sembilan,Seremban,income_median,2024,6472
+Negeri Sembilan,Seremban,piped_water,2022,100
+Negeri Sembilan,Seremban,piped_water,2024,100
+Negeri Sembilan,Seremban,poverty,2022,3
+Negeri Sembilan,Seremban,poverty,2024,2.8
+Negeri Sembilan,Seremban,sanitation,2022,100
+Negeri Sembilan,Seremban,sanitation,2024,100
+Negeri Sembilan,Seremban,schools_primary,2024,113
+Negeri Sembilan,Seremban,schools_primary,2025,113
+Negeri Sembilan,Seremban,schools_secondary,2024,49
+Negeri Sembilan,Seremban,schools_secondary,2025,49
+Negeri Sembilan,Seremban,schools_tertiary,2024,1
+Negeri Sembilan,Seremban,schools_tertiary,2025,1
+Negeri Sembilan,Seremban,unemployment,2023,2.8
+Negeri Sembilan,Seremban,unemployment,2024,2.7
+Negeri Sembilan,Tampin,electricity,2022,100
+Negeri Sembilan,Tampin,electricity,2024,100
+Negeri Sembilan,Tampin,expenditure_mean,2022,3750
+Negeri Sembilan,Tampin,expenditure_mean,2024,4238
+Negeri Sembilan,Tampin,income_median,2022,4012
+Negeri Sembilan,Tampin,income_median,2024,4367
+Negeri Sembilan,Tampin,piped_water,2022,100
+Negeri Sembilan,Tampin,piped_water,2024,100
+Negeri Sembilan,Tampin,poverty,2022,7.3
+Negeri Sembilan,Tampin,poverty,2024,7
+Negeri Sembilan,Tampin,sanitation,2022,100
+Negeri Sembilan,Tampin,sanitation,2024,100
+Negeri Sembilan,Tampin,schools_primary,2024,39
+Negeri Sembilan,Tampin,schools_primary,2025,39
+Negeri Sembilan,Tampin,schools_secondary,2024,12
+Negeri Sembilan,Tampin,schools_secondary,2025,12
+Negeri Sembilan,Tampin,schools_tertiary,2024,0
+Negeri Sembilan,Tampin,schools_tertiary,2025,0
+Negeri Sembilan,Tampin,unemployment,2023,3.1
+Negeri Sembilan,Tampin,unemployment,2024,3
+Pahang,All,electricity,2022,99.51
+Pahang,All,electricity,2024,100
+Pahang,All,expenditure_mean,2022,4107
+Pahang,All,expenditure_mean,2024,4368
+Pahang,All,income_median,2022,4753
+Pahang,All,income_median,2024,4975
+Pahang,All,piped_water,2022,98.3
+Pahang,All,piped_water,2024,98.8
+Pahang,All,poverty,2022,6.3
+Pahang,All,poverty,2024,5.9
+Pahang,All,sanitation,2022,99.4
+Pahang,All,sanitation,2024,99.9
+Pahang,All,unemployment,2023,2
+Pahang,All,unemployment,2024,2
+Pahang,Bentong,electricity,2022,100
+Pahang,Bentong,electricity,2024,100
+Pahang,Bentong,expenditure_mean,2022,4386
+Pahang,Bentong,expenditure_mean,2024,4631
+Pahang,Bentong,income_median,2022,4691
+Pahang,Bentong,income_median,2024,5015
+Pahang,Bentong,piped_water,2022,98.9
+Pahang,Bentong,piped_water,2024,91.83
+Pahang,Bentong,poverty,2022,2.8
+Pahang,Bentong,poverty,2024,2
+Pahang,Bentong,sanitation,2022,100
+Pahang,Bentong,sanitation,2024,100
+Pahang,Bentong,schools_primary,2024,38
+Pahang,Bentong,schools_primary,2025,38
+Pahang,Bentong,schools_secondary,2024,18
+Pahang,Bentong,schools_secondary,2025,18
+Pahang,Bentong,schools_tertiary,2024,0
+Pahang,Bentong,schools_tertiary,2025,0
+Pahang,Bentong,unemployment,2023,1.5
+Pahang,Bentong,unemployment,2024,1.5
+Pahang,Bera,electricity,2022,100
+Pahang,Bera,electricity,2024,100
+Pahang,Bera,expenditure_mean,2022,3453
+Pahang,Bera,expenditure_mean,2024,3548
+Pahang,Bera,income_median,2022,3866
+Pahang,Bera,income_median,2024,4269
+Pahang,Bera,piped_water,2022,98.7
+Pahang,Bera,piped_water,2024,100
+Pahang,Bera,poverty,2022,8.5
+Pahang,Bera,poverty,2024,9
+Pahang,Bera,sanitation,2022,100
+Pahang,Bera,sanitation,2024,99.4
+Pahang,Bera,schools_primary,2024,41
+Pahang,Bera,schools_primary,2025,41
+Pahang,Bera,schools_secondary,2024,10
+Pahang,Bera,schools_secondary,2025,10
+Pahang,Bera,schools_tertiary,2024,0
+Pahang,Bera,schools_tertiary,2025,0
+Pahang,Bera,unemployment,2023,2.8
+Pahang,Bera,unemployment,2024,2.8
+Pahang,Cameron Highlands,electricity,2022,100
+Pahang,Cameron Highlands,electricity,2024,100
+Pahang,Cameron Highlands,expenditure_mean,2022,4229
+Pahang,Cameron Highlands,expenditure_mean,2024,4672
+Pahang,Cameron Highlands,income_median,2022,5221
+Pahang,Cameron Highlands,income_median,2024,5655
+Pahang,Cameron Highlands,piped_water,2022,94.5
+Pahang,Cameron Highlands,piped_water,2024,90.82
+Pahang,Cameron Highlands,poverty,2022,1.9
+Pahang,Cameron Highlands,poverty,2024,5
+Pahang,Cameron Highlands,sanitation,2022,100
+Pahang,Cameron Highlands,sanitation,2024,100
+Pahang,Cameron Highlands,schools_primary,2024,25
+Pahang,Cameron Highlands,schools_primary,2025,25
+Pahang,Cameron Highlands,schools_secondary,2024,3
+Pahang,Cameron Highlands,schools_secondary,2025,3
+Pahang,Cameron Highlands,schools_tertiary,2024,0
+Pahang,Cameron Highlands,schools_tertiary,2025,0
+Pahang,Cameron Highlands,unemployment,2023,1.5
+Pahang,Cameron Highlands,unemployment,2024,1.5
+Pahang,Jerantut,electricity,2022,100
+Pahang,Jerantut,electricity,2024,100
+Pahang,Jerantut,expenditure_mean,2022,3326
+Pahang,Jerantut,expenditure_mean,2024,3732
+Pahang,Jerantut,income_median,2022,3781
+Pahang,Jerantut,income_median,2024,4231
+Pahang,Jerantut,piped_water,2022,97.4
+Pahang,Jerantut,piped_water,2024,100
+Pahang,Jerantut,poverty,2022,8.6
+Pahang,Jerantut,poverty,2024,8.8
+Pahang,Jerantut,sanitation,2022,100
+Pahang,Jerantut,sanitation,2024,100
+Pahang,Jerantut,schools_primary,2024,47
+Pahang,Jerantut,schools_primary,2025,47
+Pahang,Jerantut,schools_secondary,2024,15
+Pahang,Jerantut,schools_secondary,2025,15
+Pahang,Jerantut,schools_tertiary,2024,0
+Pahang,Jerantut,schools_tertiary,2025,0
+Pahang,Jerantut,unemployment,2023,2.8
+Pahang,Jerantut,unemployment,2024,2.8
+Pahang,Kuantan,electricity,2022,100
+Pahang,Kuantan,electricity,2024,100
+Pahang,Kuantan,expenditure_mean,2022,4724
+Pahang,Kuantan,expenditure_mean,2024,4969
+Pahang,Kuantan,income_median,2022,5926
+Pahang,Kuantan,income_median,2024,5520
+Pahang,Kuantan,piped_water,2022,99.9
+Pahang,Kuantan,piped_water,2024,100
+Pahang,Kuantan,poverty,2022,4.1
+Pahang,Kuantan,poverty,2024,3.7
+Pahang,Kuantan,sanitation,2022,100
+Pahang,Kuantan,sanitation,2024,100
+Pahang,Kuantan,schools_primary,2024,87
+Pahang,Kuantan,schools_primary,2025,87
+Pahang,Kuantan,schools_secondary,2024,48
+Pahang,Kuantan,schools_secondary,2025,48
+Pahang,Kuantan,schools_tertiary,2024,1
+Pahang,Kuantan,schools_tertiary,2025,1
+Pahang,Kuantan,unemployment,2023,1.9
+Pahang,Kuantan,unemployment,2024,1.9
+Pahang,Lipis,electricity,2022,93.5
+Pahang,Lipis,electricity,2024,100
+Pahang,Lipis,expenditure_mean,2022,4016
+Pahang,Lipis,expenditure_mean,2024,4278
+Pahang,Lipis,income_median,2022,4115
+Pahang,Lipis,income_median,2024,4611
+Pahang,Lipis,piped_water,2022,84.3
+Pahang,Lipis,piped_water,2024,91.35
+Pahang,Lipis,poverty,2022,9.2
+Pahang,Lipis,poverty,2024,9.2
+Pahang,Lipis,sanitation,2022,91.1
+Pahang,Lipis,sanitation,2024,98.9
+Pahang,Lipis,schools_primary,2024,53
+Pahang,Lipis,schools_primary,2025,53
+Pahang,Lipis,schools_secondary,2024,16
+Pahang,Lipis,schools_secondary,2025,16
+Pahang,Lipis,schools_tertiary,2024,0
+Pahang,Lipis,schools_tertiary,2025,0
+Pahang,Lipis,unemployment,2023,1.2
+Pahang,Lipis,unemployment,2024,1.2
+Pahang,Maran,electricity,2022,100
+Pahang,Maran,electricity,2024,100
+Pahang,Maran,expenditure_mean,2022,3586
+Pahang,Maran,expenditure_mean,2024,3764
+Pahang,Maran,income_median,2022,4319
+Pahang,Maran,income_median,2024,4470
+Pahang,Maran,piped_water,2022,100
+Pahang,Maran,piped_water,2024,100
+Pahang,Maran,poverty,2022,8.8
+Pahang,Maran,poverty,2024,7.9
+Pahang,Maran,sanitation,2022,100
+Pahang,Maran,sanitation,2024,100
+Pahang,Maran,schools_primary,2024,52
+Pahang,Maran,schools_primary,2025,52
+Pahang,Maran,schools_secondary,2024,19
+Pahang,Maran,schools_secondary,2025,19
+Pahang,Maran,schools_tertiary,2024,0
+Pahang,Maran,schools_tertiary,2025,0
+Pahang,Maran,unemployment,2023,1.8
+Pahang,Maran,unemployment,2024,1.8
+Pahang,Pekan,electricity,2022,100
+Pahang,Pekan,electricity,2024,100
+Pahang,Pekan,expenditure_mean,2022,3429
+Pahang,Pekan,expenditure_mean,2024,3799
+Pahang,Pekan,income_median,2022,4053
+Pahang,Pekan,income_median,2024,4344
+Pahang,Pekan,piped_water,2022,96.7
+Pahang,Pekan,piped_water,2024,99.51
+Pahang,Pekan,poverty,2022,11.6
+Pahang,Pekan,poverty,2024,10.9
+Pahang,Pekan,sanitation,2022,100
+Pahang,Pekan,sanitation,2024,100
+Pahang,Pekan,schools_primary,2024,47
+Pahang,Pekan,schools_primary,2025,47
+Pahang,Pekan,schools_secondary,2024,16
+Pahang,Pekan,schools_secondary,2025,16
+Pahang,Pekan,schools_tertiary,2024,0
+Pahang,Pekan,schools_tertiary,2025,0
+Pahang,Pekan,unemployment,2023,2
+Pahang,Pekan,unemployment,2024,2
+Pahang,Raub,electricity,2022,100
+Pahang,Raub,electricity,2024,100
+Pahang,Raub,expenditure_mean,2022,4247
+Pahang,Raub,expenditure_mean,2024,4675
+Pahang,Raub,income_median,2022,4375
+Pahang,Raub,income_median,2024,4427
+Pahang,Raub,piped_water,2022,100
+Pahang,Raub,piped_water,2024,100
+Pahang,Raub,poverty,2022,2.3
+Pahang,Raub,poverty,2024,3.4
+Pahang,Raub,sanitation,2022,100
+Pahang,Raub,sanitation,2024,100
+Pahang,Raub,schools_primary,2024,43
+Pahang,Raub,schools_primary,2025,43
+Pahang,Raub,schools_secondary,2024,12
+Pahang,Raub,schools_secondary,2025,12
+Pahang,Raub,schools_tertiary,2024,0
+Pahang,Raub,schools_tertiary,2025,0
+Pahang,Raub,unemployment,2023,2.6
+Pahang,Raub,unemployment,2024,2.6
+Pahang,Rompin,electricity,2022,97.8
+Pahang,Rompin,electricity,2024,100
+Pahang,Rompin,expenditure_mean,2022,3695
+Pahang,Rompin,expenditure_mean,2024,3966
+Pahang,Rompin,income_median,2022,4148
+Pahang,Rompin,income_median,2024,4760
+Pahang,Rompin,piped_water,2022,97
+Pahang,Rompin,piped_water,2024,100
+Pahang,Rompin,poverty,2022,12
+Pahang,Rompin,poverty,2024,8.2
+Pahang,Rompin,sanitation,2022,98.3
+Pahang,Rompin,sanitation,2024,100
+Pahang,Rompin,schools_primary,2024,42
+Pahang,Rompin,schools_primary,2025,42
+Pahang,Rompin,schools_secondary,2024,20
+Pahang,Rompin,schools_secondary,2025,20
+Pahang,Rompin,schools_tertiary,2024,0
+Pahang,Rompin,schools_tertiary,2025,0
+Pahang,Rompin,unemployment,2023,1.9
+Pahang,Rompin,unemployment,2024,1.9
+Pahang,Temerloh,electricity,2022,100
+Pahang,Temerloh,electricity,2024,100
+Pahang,Temerloh,expenditure_mean,2022,3580
+Pahang,Temerloh,expenditure_mean,2024,3684
+Pahang,Temerloh,income_median,2022,4283
+Pahang,Temerloh,income_median,2024,4595
+Pahang,Temerloh,piped_water,2022,100
+Pahang,Temerloh,piped_water,2024,99.64
+Pahang,Temerloh,poverty,2022,6.6
+Pahang,Temerloh,poverty,2024,6.2
+Pahang,Temerloh,sanitation,2022,100
+Pahang,Temerloh,sanitation,2024,100
+Pahang,Temerloh,schools_primary,2024,66
+Pahang,Temerloh,schools_primary,2025,66
+Pahang,Temerloh,schools_secondary,2024,21
+Pahang,Temerloh,schools_secondary,2025,22
+Pahang,Temerloh,schools_tertiary,2024,0
+Pahang,Temerloh,schools_tertiary,2025,0
+Pahang,Temerloh,unemployment,2023,2.5
+Pahang,Temerloh,unemployment,2024,2.5
+Perak,All,electricity,2022,100
+Perak,All,electricity,2024,100
+Perak,All,expenditure_mean,2022,3903
+Perak,All,expenditure_mean,2024,4232
+Perak,All,income_median,2022,4494
+Perak,All,income_median,2024,4687
+Perak,All,piped_water,2022,99.2
+Perak,All,piped_water,2024,99.4
+Perak,All,poverty,2022,7.5
+Perak,All,poverty,2024,6.9
+Perak,All,sanitation,2022,100
+Perak,All,sanitation,2024,100
+Perak,All,unemployment,2023,3.9
+Perak,All,unemployment,2024,3.6
+Perak,Bagan Datuk,electricity,2022,100
+Perak,Bagan Datuk,electricity,2024,100
+Perak,Bagan Datuk,expenditure_mean,2022,3150
+Perak,Bagan Datuk,expenditure_mean,2024,3543
+Perak,Bagan Datuk,income_median,2022,4076
+Perak,Bagan Datuk,income_median,2024,4134
+Perak,Bagan Datuk,piped_water,2022,100
+Perak,Bagan Datuk,piped_water,2024,100
+Perak,Bagan Datuk,poverty,2022,12.4
+Perak,Bagan Datuk,poverty,2024,11.5
+Perak,Bagan Datuk,sanitation,2022,100
+Perak,Bagan Datuk,sanitation,2024,100
+Perak,Bagan Datuk,schools_primary,2024,58
+Perak,Bagan Datuk,schools_primary,2025,58
+Perak,Bagan Datuk,schools_secondary,2024,10
+Perak,Bagan Datuk,schools_secondary,2025,10
+Perak,Bagan Datuk,schools_tertiary,2024,0
+Perak,Bagan Datuk,schools_tertiary,2025,0
+Perak,Bagan Datuk,unemployment,2023,5.9
+Perak,Bagan Datuk,unemployment,2024,5
+Perak,Batang Padang,electricity,2022,100
+Perak,Batang Padang,electricity,2024,100
+Perak,Batang Padang,expenditure_mean,2022,3710
+Perak,Batang Padang,expenditure_mean,2024,3722
+Perak,Batang Padang,income_median,2022,3953
+Perak,Batang Padang,income_median,2024,4339
+Perak,Batang Padang,piped_water,2022,94.9
+Perak,Batang Padang,piped_water,2024,100
+Perak,Batang Padang,poverty,2022,13.3
+Perak,Batang Padang,poverty,2024,11.5
+Perak,Batang Padang,sanitation,2022,100
+Perak,Batang Padang,sanitation,2024,100
+Perak,Batang Padang,schools_primary,2024,66
+Perak,Batang Padang,schools_primary,2025,66
+Perak,Batang Padang,schools_secondary,2024,16
+Perak,Batang Padang,schools_secondary,2025,16
+Perak,Batang Padang,schools_tertiary,2024,0
+Perak,Batang Padang,schools_tertiary,2025,0
+Perak,Batang Padang,unemployment,2023,6.3
+Perak,Batang Padang,unemployment,2024,5.9
+Perak,Hilir Perak,electricity,2022,100
+Perak,Hilir Perak,electricity,2024,100
+Perak,Hilir Perak,expenditure_mean,2022,3386
+Perak,Hilir Perak,expenditure_mean,2024,3711
+Perak,Hilir Perak,income_median,2022,4199
+Perak,Hilir Perak,income_median,2024,4347
+Perak,Hilir Perak,piped_water,2022,100
+Perak,Hilir Perak,piped_water,2024,100
+Perak,Hilir Perak,poverty,2022,14.8
+Perak,Hilir Perak,poverty,2024,12.3
+Perak,Hilir Perak,sanitation,2022,100
+Perak,Hilir Perak,sanitation,2024,100
+Perak,Hilir Perak,schools_primary,2024,55
+Perak,Hilir Perak,schools_primary,2025,55
+Perak,Hilir Perak,schools_secondary,2024,15
+Perak,Hilir Perak,schools_secondary,2025,15
+Perak,Hilir Perak,schools_tertiary,2024,0
+Perak,Hilir Perak,schools_tertiary,2025,0
+Perak,Hilir Perak,unemployment,2023,7.7
+Perak,Hilir Perak,unemployment,2024,7.4
+Perak,Hulu Perak,electricity,2022,100
+Perak,Hulu Perak,electricity,2024,100
+Perak,Hulu Perak,expenditure_mean,2022,2889
+Perak,Hulu Perak,expenditure_mean,2024,3270
+Perak,Hulu Perak,income_median,2022,3467
+Perak,Hulu Perak,income_median,2024,3701
+Perak,Hulu Perak,piped_water,2022,95.4
+Perak,Hulu Perak,piped_water,2024,100
+Perak,Hulu Perak,poverty,2022,16.3
+Perak,Hulu Perak,poverty,2024,13.3
+Perak,Hulu Perak,sanitation,2022,100
+Perak,Hulu Perak,sanitation,2024,100
+Perak,Hulu Perak,schools_primary,2024,56
+Perak,Hulu Perak,schools_primary,2025,56
+Perak,Hulu Perak,schools_secondary,2024,14
+Perak,Hulu Perak,schools_secondary,2025,14
+Perak,Hulu Perak,schools_tertiary,2024,0
+Perak,Hulu Perak,schools_tertiary,2025,0
+Perak,Hulu Perak,unemployment,2023,6.1
+Perak,Hulu Perak,unemployment,2024,5.4
+Perak,Kampar,electricity,2022,100
+Perak,Kampar,electricity,2024,100
+Perak,Kampar,expenditure_mean,2022,3276
+Perak,Kampar,expenditure_mean,2024,3753
+Perak,Kampar,income_median,2022,4347
+Perak,Kampar,income_median,2024,4538
+Perak,Kampar,piped_water,2022,98.7
+Perak,Kampar,piped_water,2024,99.67
+Perak,Kampar,poverty,2022,4.7
+Perak,Kampar,poverty,2024,4.5
+Perak,Kampar,sanitation,2022,100
+Perak,Kampar,sanitation,2024,100
+Perak,Kampar,schools_primary,2024,37
+Perak,Kampar,schools_primary,2025,37
+Perak,Kampar,schools_secondary,2024,9
+Perak,Kampar,schools_secondary,2025,9
+Perak,Kampar,schools_tertiary,2024,0
+Perak,Kampar,schools_tertiary,2025,0
+Perak,Kampar,unemployment,2023,4.7
+Perak,Kampar,unemployment,2024,4.4
+Perak,Kerian,electricity,2022,100
+Perak,Kerian,electricity,2024,100
+Perak,Kerian,expenditure_mean,2022,3615
+Perak,Kerian,expenditure_mean,2024,3807
+Perak,Kerian,income_median,2022,3996
+Perak,Kerian,income_median,2024,4554
+Perak,Kerian,piped_water,2022,100
+Perak,Kerian,piped_water,2024,100
+Perak,Kerian,poverty,2022,8.7
+Perak,Kerian,poverty,2024,7.3
+Perak,Kerian,sanitation,2022,100
+Perak,Kerian,sanitation,2024,100
+Perak,Kerian,schools_primary,2024,69
+Perak,Kerian,schools_primary,2025,69
+Perak,Kerian,schools_secondary,2024,22
+Perak,Kerian,schools_secondary,2025,22
+Perak,Kerian,schools_tertiary,2024,0
+Perak,Kerian,schools_tertiary,2025,0
+Perak,Kerian,unemployment,2023,4.4
+Perak,Kerian,unemployment,2024,4.2
+Perak,Kinta,electricity,2022,100
+Perak,Kinta,electricity,2024,100
+Perak,Kinta,expenditure_mean,2022,4383
+Perak,Kinta,expenditure_mean,2024,4648
+Perak,Kinta,income_median,2022,5037
+Perak,Kinta,income_median,2024,5136
+Perak,Kinta,piped_water,2022,100
+Perak,Kinta,piped_water,2024,100
+Perak,Kinta,poverty,2022,3.8
+Perak,Kinta,poverty,2024,3.8
+Perak,Kinta,sanitation,2022,100
+Perak,Kinta,sanitation,2024,100
+Perak,Kinta,schools_primary,2024,140
+Perak,Kinta,schools_primary,2025,140
+Perak,Kinta,schools_secondary,2024,60
+Perak,Kinta,schools_secondary,2025,60
+Perak,Kinta,schools_tertiary,2024,0
+Perak,Kinta,schools_tertiary,2025,0
+Perak,Kinta,unemployment,2023,2.8
+Perak,Kinta,unemployment,2024,2.6
+Perak,Kuala Kangsar,electricity,2022,100
+Perak,Kuala Kangsar,electricity,2024,100
+Perak,Kuala Kangsar,expenditure_mean,2022,3488
+Perak,Kuala Kangsar,expenditure_mean,2024,4005
+Perak,Kuala Kangsar,income_median,2022,3813
+Perak,Kuala Kangsar,income_median,2024,3977
+Perak,Kuala Kangsar,piped_water,2022,99.6
+Perak,Kuala Kangsar,piped_water,2024,100
+Perak,Kuala Kangsar,poverty,2022,13
+Perak,Kuala Kangsar,poverty,2024,11.3
+Perak,Kuala Kangsar,sanitation,2022,100
+Perak,Kuala Kangsar,sanitation,2024,100
+Perak,Kuala Kangsar,schools_primary,2024,90
+Perak,Kuala Kangsar,schools_primary,2025,90
+Perak,Kuala Kangsar,schools_secondary,2024,24
+Perak,Kuala Kangsar,schools_secondary,2025,24
+Perak,Kuala Kangsar,schools_tertiary,2024,0
+Perak,Kuala Kangsar,schools_tertiary,2025,0
+Perak,Kuala Kangsar,unemployment,2023,4.6
+Perak,Kuala Kangsar,unemployment,2024,4.3
+Perak,Larut Dan Matang,electricity,2022,100
+Perak,Larut Dan Matang,electricity,2024,100
+Perak,Larut Dan Matang,expenditure_mean,2022,3798
+Perak,Larut Dan Matang,expenditure_mean,2024,4174
+Perak,Larut Dan Matang,income_median,2022,4029
+Perak,Larut Dan Matang,income_median,2024,4843
+Perak,Larut Dan Matang,piped_water,2022,97.6
+Perak,Larut Dan Matang,piped_water,2024,95.25
+Perak,Larut Dan Matang,poverty,2022,9.2
+Perak,Larut Dan Matang,poverty,2024,9
+Perak,Larut Dan Matang,sanitation,2022,100
+Perak,Larut Dan Matang,sanitation,2024,100
+Perak,Larut Dan Matang,schools_primary,2024,111
+Perak,Larut Dan Matang,schools_primary,2025,111
+Perak,Larut Dan Matang,schools_secondary,2024,36
+Perak,Larut Dan Matang,schools_secondary,2025,36
+Perak,Larut Dan Matang,schools_tertiary,2024,0
+Perak,Larut Dan Matang,schools_tertiary,2025,0
+Perak,Larut Dan Matang,unemployment,2023,3.1
+Perak,Larut Dan Matang,unemployment,2024,2.8
+Perak,Manjung,electricity,2022,100
+Perak,Manjung,electricity,2024,100
+Perak,Manjung,expenditure_mean,2022,3912
+Perak,Manjung,expenditure_mean,2024,4387
+Perak,Manjung,income_median,2022,5135
+Perak,Manjung,income_median,2024,5380
+Perak,Manjung,piped_water,2022,100
+Perak,Manjung,piped_water,2024,100
+Perak,Manjung,poverty,2022,3.8
+Perak,Manjung,poverty,2024,3.9
+Perak,Manjung,sanitation,2022,100
+Perak,Manjung,sanitation,2024,100
+Perak,Manjung,schools_primary,2024,81
+Perak,Manjung,schools_primary,2025,81
+Perak,Manjung,schools_secondary,2024,21
+Perak,Manjung,schools_secondary,2025,21
+Perak,Manjung,schools_tertiary,2024,0
+Perak,Manjung,schools_tertiary,2025,0
+Perak,Manjung,unemployment,2023,3.4
+Perak,Manjung,unemployment,2024,3.1
+Perak,Muallim,electricity,2022,100
+Perak,Muallim,electricity,2024,100
+Perak,Muallim,expenditure_mean,2022,4374
+Perak,Muallim,expenditure_mean,2024,4517
+Perak,Muallim,income_median,2022,5015
+Perak,Muallim,income_median,2024,4856
+Perak,Muallim,piped_water,2022,100
+Perak,Muallim,piped_water,2024,100
+Perak,Muallim,poverty,2022,9.2
+Perak,Muallim,poverty,2024,7.7
+Perak,Muallim,sanitation,2022,100
+Perak,Muallim,sanitation,2024,100
+Perak,Muallim,schools_primary,2024,31
+Perak,Muallim,schools_primary,2025,31
+Perak,Muallim,schools_secondary,2024,9
+Perak,Muallim,schools_secondary,2025,9
+Perak,Muallim,schools_tertiary,2024,1
+Perak,Muallim,schools_tertiary,2025,1
+Perak,Muallim,unemployment,2023,4.3
+Perak,Muallim,unemployment,2024,4
+Perak,Perak Tengah,electricity,2022,100
+Perak,Perak Tengah,electricity,2024,100
+Perak,Perak Tengah,expenditure_mean,2022,3744
+Perak,Perak Tengah,expenditure_mean,2024,3956
+Perak,Perak Tengah,income_median,2022,4564
+Perak,Perak Tengah,income_median,2024,4685
+Perak,Perak Tengah,piped_water,2022,100
+Perak,Perak Tengah,piped_water,2024,100
+Perak,Perak Tengah,poverty,2022,11.1
+Perak,Perak Tengah,poverty,2024,10.2
+Perak,Perak Tengah,sanitation,2022,100
+Perak,Perak Tengah,sanitation,2024,100
+Perak,Perak Tengah,schools_primary,2024,58
+Perak,Perak Tengah,schools_primary,2025,58
+Perak,Perak Tengah,schools_secondary,2024,17
+Perak,Perak Tengah,schools_secondary,2025,17
+Perak,Perak Tengah,schools_tertiary,2024,0
+Perak,Perak Tengah,schools_tertiary,2025,0
+Perak,Perak Tengah,unemployment,2023,4.3
+Perak,Perak Tengah,unemployment,2024,3.8
+Perak,Selama,electricity,2022,100
+Perak,Selama,electricity,2024,100
+Perak,Selama,expenditure_mean,2022,3150
+Perak,Selama,expenditure_mean,2024,3779
+Perak,Selama,income_median,2022,3673
+Perak,Selama,income_median,2024,3827
+Perak,Selama,piped_water,2022,96.8
+Perak,Selama,piped_water,2024,91.67
+Perak,Selama,poverty,2022,5.3
+Perak,Selama,poverty,2024,10.4
+Perak,Selama,sanitation,2022,100
+Perak,Selama,sanitation,2024,100
+Perak,Selama,unemployment,2023,9
+Perak,Selama,unemployment,2024,8.9
+Perlis,All,expenditure_mean,2022,3834
+Perlis,All,expenditure_mean,2024,4084
+Perlis,All,income_median,2022,4713
+Perlis,All,income_median,2024,4950
+Perlis,All,poverty,2022,4
+Perlis,All,poverty,2024,3.6
+Perlis,All,unemployment,2023,4.4
+Perlis,All,unemployment,2024,4.1
+Perlis,Perlis,electricity,2022,100
+Perlis,Perlis,electricity,2024,100
+Perlis,Perlis,expenditure_mean,2022,3834
+Perlis,Perlis,expenditure_mean,2024,4084
+Perlis,Perlis,income_median,2022,4713
+Perlis,Perlis,income_median,2024,4950
+Perlis,Perlis,piped_water,2022,100
+Perlis,Perlis,piped_water,2024,100
+Perlis,Perlis,poverty,2022,4
+Perlis,Perlis,poverty,2024,3.6
+Perlis,Perlis,sanitation,2022,100
+Perlis,Perlis,sanitation,2024,100
+Perlis,Perlis,schools_primary,2024,74
+Perlis,Perlis,schools_primary,2025,74
+Perlis,Perlis,schools_secondary,2024,30
+Perlis,Perlis,schools_secondary,2025,30
+Perlis,Perlis,schools_tertiary,2024,1
+Perlis,Perlis,schools_tertiary,2025,1
+Perlis,Perlis,unemployment,2023,4.4
+Perlis,Perlis,unemployment,2024,4.1
+Pulau Pinang,All,electricity,2022,100
+Pulau Pinang,All,electricity,2024,100
+Pulau Pinang,All,expenditure_mean,2022,5322
+Pulau Pinang,All,expenditure_mean,2024,5850
+Pulau Pinang,All,income_median,2022,6502
+Pulau Pinang,All,income_median,2024,7386
+Pulau Pinang,All,piped_water,2022,100
+Pulau Pinang,All,piped_water,2024,100
+Pulau Pinang,All,poverty,2022,2
+Pulau Pinang,All,poverty,2024,1.9
+Pulau Pinang,All,sanitation,2022,100
+Pulau Pinang,All,sanitation,2024,100
+Pulau Pinang,All,unemployment,2023,2.2
+Pulau Pinang,All,unemployment,2024,2
+Pulau Pinang,Barat Daya,electricity,2022,100
+Pulau Pinang,Barat Daya,electricity,2024,100
+Pulau Pinang,Barat Daya,expenditure_mean,2022,6003
+Pulau Pinang,Barat Daya,expenditure_mean,2024,6222
+Pulau Pinang,Barat Daya,income_median,2022,7247
+Pulau Pinang,Barat Daya,income_median,2024,8919
+Pulau Pinang,Barat Daya,piped_water,2022,100
+Pulau Pinang,Barat Daya,piped_water,2024,100
+Pulau Pinang,Barat Daya,poverty,2022,1.4
+Pulau Pinang,Barat Daya,poverty,2024,0.4
+Pulau Pinang,Barat Daya,sanitation,2022,100
+Pulau Pinang,Barat Daya,sanitation,2024,100
+Pulau Pinang,Barat Daya,schools_primary,2024,39
+Pulau Pinang,Barat Daya,schools_primary,2025,39
+Pulau Pinang,Barat Daya,schools_secondary,2024,12
+Pulau Pinang,Barat Daya,schools_secondary,2025,12
+Pulau Pinang,Barat Daya,schools_tertiary,2024,0
+Pulau Pinang,Barat Daya,schools_tertiary,2025,0
+Pulau Pinang,Barat Daya,unemployment,2023,1.1
+Pulau Pinang,Barat Daya,unemployment,2024,0.9
+Pulau Pinang,Seberang Perai Selatan,electricity,2022,100
+Pulau Pinang,Seberang Perai Selatan,electricity,2024,100
+Pulau Pinang,Seberang Perai Selatan,expenditure_mean,2022,4665
+Pulau Pinang,Seberang Perai Selatan,expenditure_mean,2024,5391
+Pulau Pinang,Seberang Perai Selatan,income_median,2022,6231
+Pulau Pinang,Seberang Perai Selatan,income_median,2024,6822
+Pulau Pinang,Seberang Perai Selatan,piped_water,2022,100
+Pulau Pinang,Seberang Perai Selatan,piped_water,2024,100
+Pulau Pinang,Seberang Perai Selatan,poverty,2022,3.1
+Pulau Pinang,Seberang Perai Selatan,poverty,2024,3
+Pulau Pinang,Seberang Perai Selatan,sanitation,2022,100
+Pulau Pinang,Seberang Perai Selatan,sanitation,2024,100
+Pulau Pinang,Seberang Perai Selatan,schools_primary,2024,39
+Pulau Pinang,Seberang Perai Selatan,schools_primary,2025,39
+Pulau Pinang,Seberang Perai Selatan,schools_secondary,2024,17
+Pulau Pinang,Seberang Perai Selatan,schools_secondary,2025,17
+Pulau Pinang,Seberang Perai Selatan,schools_tertiary,2024,0
+Pulau Pinang,Seberang Perai Selatan,schools_tertiary,2025,0
+Pulau Pinang,Seberang Perai Selatan,unemployment,2023,3.3
+Pulau Pinang,Seberang Perai Selatan,unemployment,2024,3
+Pulau Pinang,Seberang Perai Tengah,electricity,2022,99.9
+Pulau Pinang,Seberang Perai Tengah,electricity,2024,100
+Pulau Pinang,Seberang Perai Tengah,expenditure_mean,2022,5008
+Pulau Pinang,Seberang Perai Tengah,expenditure_mean,2024,5419
+Pulau Pinang,Seberang Perai Tengah,income_median,2022,6220
+Pulau Pinang,Seberang Perai Tengah,income_median,2024,6892
+Pulau Pinang,Seberang Perai Tengah,piped_water,2022,99.9
+Pulau Pinang,Seberang Perai Tengah,piped_water,2024,100
+Pulau Pinang,Seberang Perai Tengah,poverty,2022,2.4
+Pulau Pinang,Seberang Perai Tengah,poverty,2024,2.8
+Pulau Pinang,Seberang Perai Tengah,sanitation,2022,100
+Pulau Pinang,Seberang Perai Tengah,sanitation,2024,100
+Pulau Pinang,Seberang Perai Tengah,schools_primary,2024,55
+Pulau Pinang,Seberang Perai Tengah,schools_primary,2025,55
+Pulau Pinang,Seberang Perai Tengah,schools_secondary,2024,31
+Pulau Pinang,Seberang Perai Tengah,schools_secondary,2025,31
+Pulau Pinang,Seberang Perai Tengah,schools_tertiary,2024,0
+Pulau Pinang,Seberang Perai Tengah,schools_tertiary,2025,0
+Pulau Pinang,Seberang Perai Tengah,unemployment,2023,2.1
+Pulau Pinang,Seberang Perai Tengah,unemployment,2024,1.9
+Pulau Pinang,Seberang Perai Utara,electricity,2022,100
+Pulau Pinang,Seberang Perai Utara,electricity,2024,100
+Pulau Pinang,Seberang Perai Utara,expenditure_mean,2022,4432
+Pulau Pinang,Seberang Perai Utara,expenditure_mean,2024,5232
+Pulau Pinang,Seberang Perai Utara,income_median,2022,6103
+Pulau Pinang,Seberang Perai Utara,income_median,2024,6810
+Pulau Pinang,Seberang Perai Utara,piped_water,2022,100
+Pulau Pinang,Seberang Perai Utara,piped_water,2024,100
+Pulau Pinang,Seberang Perai Utara,poverty,2022,3.7
+Pulau Pinang,Seberang Perai Utara,poverty,2024,3.9
+Pulau Pinang,Seberang Perai Utara,sanitation,2022,100
+Pulau Pinang,Seberang Perai Utara,sanitation,2024,100
+Pulau Pinang,Seberang Perai Utara,schools_primary,2024,65
+Pulau Pinang,Seberang Perai Utara,schools_primary,2025,65
+Pulau Pinang,Seberang Perai Utara,schools_secondary,2024,32
+Pulau Pinang,Seberang Perai Utara,schools_secondary,2025,32
+Pulau Pinang,Seberang Perai Utara,schools_tertiary,2024,0
+Pulau Pinang,Seberang Perai Utara,schools_tertiary,2025,0
+Pulau Pinang,Seberang Perai Utara,unemployment,2023,3
+Pulau Pinang,Seberang Perai Utara,unemployment,2024,2.7
+Pulau Pinang,Timur Laut,electricity,2022,100
+Pulau Pinang,Timur Laut,electricity,2024,100
+Pulau Pinang,Timur Laut,expenditure_mean,2022,5890
+Pulau Pinang,Timur Laut,expenditure_mean,2024,6416
+Pulau Pinang,Timur Laut,income_median,2022,6714
+Pulau Pinang,Timur Laut,income_median,2024,7745
+Pulau Pinang,Timur Laut,piped_water,2022,100
+Pulau Pinang,Timur Laut,piped_water,2024,100
+Pulau Pinang,Timur Laut,poverty,2022,0.7
+Pulau Pinang,Timur Laut,poverty,2024,0.4
+Pulau Pinang,Timur Laut,sanitation,2022,100
+Pulau Pinang,Timur Laut,sanitation,2024,100
+Pulau Pinang,Timur Laut,schools_primary,2024,71
+Pulau Pinang,Timur Laut,schools_primary,2025,71
+Pulau Pinang,Timur Laut,schools_secondary,2024,35
+Pulau Pinang,Timur Laut,schools_secondary,2025,35
+Pulau Pinang,Timur Laut,schools_tertiary,2024,1
+Pulau Pinang,Timur Laut,schools_tertiary,2025,1
+Pulau Pinang,Timur Laut,unemployment,2023,2
+Pulau Pinang,Timur Laut,unemployment,2024,1.8
+Sabah,All,electricity,2022,99.03
+Sabah,All,electricity,2024,99.2
+Sabah,All,expenditure_mean,2022,3342
+Sabah,All,expenditure_mean,2024,3547
+Sabah,All,income_median,2022,4577
+Sabah,All,income_median,2024,4890
+Sabah,All,piped_water,2022,87.6
+Sabah,All,piped_water,2024,89.2
+Sabah,All,poverty,2022,19.7
+Sabah,All,poverty,2024,17.7
+Sabah,All,sanitation,2022,98.8
+Sabah,All,sanitation,2024,99.2
+Sabah,All,unemployment,2023,7.5
+Sabah,All,unemployment,2024,7.6
+Sabah,Beaufort,electricity,2022,99.7
+Sabah,Beaufort,electricity,2024,100
+Sabah,Beaufort,expenditure_mean,2022,3141
+Sabah,Beaufort,expenditure_mean,2024,3545
+Sabah,Beaufort,income_median,2022,4018
+Sabah,Beaufort,income_median,2024,4070
+Sabah,Beaufort,piped_water,2022,89.8
+Sabah,Beaufort,piped_water,2024,94.14
+Sabah,Beaufort,poverty,2022,19.8
+Sabah,Beaufort,poverty,2024,20.4
+Sabah,Beaufort,sanitation,2022,100
+Sabah,Beaufort,sanitation,2024,100
+Sabah,Beaufort,schools_primary,2024,56
+Sabah,Beaufort,schools_primary,2025,56
+Sabah,Beaufort,schools_secondary,2024,12
+Sabah,Beaufort,schools_secondary,2025,12
+Sabah,Beaufort,schools_tertiary,2024,0
+Sabah,Beaufort,schools_tertiary,2025,0
+Sabah,Beaufort,unemployment,2023,9.3
+Sabah,Beaufort,unemployment,2024,9.4
+Sabah,Beluran,electricity,2022,83.4
+Sabah,Beluran,electricity,2024,82.95
+Sabah,Beluran,expenditure_mean,2022,2301
+Sabah,Beluran,expenditure_mean,2024,2750
+Sabah,Beluran,income_median,2022,3131
+Sabah,Beluran,income_median,2024,4436
+Sabah,Beluran,piped_water,2022,63.6
+Sabah,Beluran,piped_water,2024,79.55
+Sabah,Beluran,poverty,2022,37.7
+Sabah,Beluran,poverty,2024,33
+Sabah,Beluran,sanitation,2022,95.7
+Sabah,Beluran,sanitation,2024,100
+Sabah,Beluran,schools_primary,2024,47
+Sabah,Beluran,schools_primary,2025,47
+Sabah,Beluran,schools_secondary,2024,6
+Sabah,Beluran,schools_secondary,2025,6
+Sabah,Beluran,schools_tertiary,2024,0
+Sabah,Beluran,schools_tertiary,2025,0
+Sabah,Beluran,unemployment,2023,8.5
+Sabah,Beluran,unemployment,2024,8.6
+Sabah,Kalabakan,electricity,2024,96.43
+Sabah,Kalabakan,expenditure_mean,2022,2019
+Sabah,Kalabakan,expenditure_mean,2024,2257
+Sabah,Kalabakan,income_median,2022,3931
+Sabah,Kalabakan,income_median,2024,3304
+Sabah,Kalabakan,piped_water,2024,84.52
+Sabah,Kalabakan,poverty,2022,33.3
+Sabah,Kalabakan,poverty,2024,26.8
+Sabah,Kalabakan,sanitation,2022,100
+Sabah,Kalabakan,sanitation,2024,100
+Sabah,Kalabakan,unemployment,2023,9
+Sabah,Kalabakan,unemployment,2024,9.1
+Sabah,Keningau,electricity,2022,99.8
+Sabah,Keningau,electricity,2024,99.32
+Sabah,Keningau,expenditure_mean,2022,3478
+Sabah,Keningau,expenditure_mean,2024,3542
+Sabah,Keningau,income_median,2022,4502
+Sabah,Keningau,income_median,2024,4801
+Sabah,Keningau,piped_water,2022,84.8
+Sabah,Keningau,piped_water,2024,86.26
+Sabah,Keningau,poverty,2022,18.8
+Sabah,Keningau,poverty,2024,12.8
+Sabah,Keningau,sanitation,2022,99.78
+Sabah,Keningau,sanitation,2024,99.66
+Sabah,Keningau,schools_primary,2024,70
+Sabah,Keningau,schools_primary,2025,70
+Sabah,Keningau,schools_secondary,2024,12
+Sabah,Keningau,schools_secondary,2025,12
+Sabah,Keningau,schools_tertiary,2024,0
+Sabah,Keningau,schools_tertiary,2025,0
+Sabah,Keningau,unemployment,2023,8.5
+Sabah,Keningau,unemployment,2024,8.7
+Sabah,Kinabatangan,electricity,2022,91.1
+Sabah,Kinabatangan,electricity,2024,100
+Sabah,Kinabatangan,expenditure_mean,2022,2394
+Sabah,Kinabatangan,expenditure_mean,2024,2482
+Sabah,Kinabatangan,income_median,2022,4162
+Sabah,Kinabatangan,income_median,2024,4897
+Sabah,Kinabatangan,piped_water,2022,78.7
+Sabah,Kinabatangan,piped_water,2024,75.33
+Sabah,Kinabatangan,poverty,2022,28.9
+Sabah,Kinabatangan,poverty,2024,26.7
+Sabah,Kinabatangan,sanitation,2022,100
+Sabah,Kinabatangan,sanitation,2024,100
+Sabah,Kinabatangan,schools_primary,2024,31
+Sabah,Kinabatangan,schools_primary,2025,31
+Sabah,Kinabatangan,schools_secondary,2024,4
+Sabah,Kinabatangan,schools_secondary,2025,4
+Sabah,Kinabatangan,schools_tertiary,2024,0
+Sabah,Kinabatangan,schools_tertiary,2025,0
+Sabah,Kinabatangan,unemployment,2023,8.2
+Sabah,Kinabatangan,unemployment,2024,8.2
+Sabah,Kota Belud,electricity,2022,100
+Sabah,Kota Belud,electricity,2024,100
+Sabah,Kota Belud,expenditure_mean,2022,2791
+Sabah,Kota Belud,expenditure_mean,2024,2920
+Sabah,Kota Belud,income_median,2022,3429
+Sabah,Kota Belud,income_median,2024,3512
+Sabah,Kota Belud,piped_water,2022,72.7
+Sabah,Kota Belud,piped_water,2024,80.33
+Sabah,Kota Belud,poverty,2022,27.8
+Sabah,Kota Belud,poverty,2024,26.1
+Sabah,Kota Belud,sanitation,2022,100
+Sabah,Kota Belud,sanitation,2024,99.45
+Sabah,Kota Belud,schools_primary,2024,57
+Sabah,Kota Belud,schools_primary,2025,57
+Sabah,Kota Belud,schools_secondary,2024,9
+Sabah,Kota Belud,schools_secondary,2025,9
+Sabah,Kota Belud,schools_tertiary,2024,0
+Sabah,Kota Belud,schools_tertiary,2025,0
+Sabah,Kota Belud,unemployment,2023,8.7
+Sabah,Kota Belud,unemployment,2024,8.7
+Sabah,Kota Kinabalu,electricity,2022,99.8
+Sabah,Kota Kinabalu,electricity,2024,100
+Sabah,Kota Kinabalu,expenditure_mean,2022,4427
+Sabah,Kota Kinabalu,expenditure_mean,2024,4726
+Sabah,Kota Kinabalu,income_median,2022,5957
+Sabah,Kota Kinabalu,income_median,2024,5896
+Sabah,Kota Kinabalu,piped_water,2022,93.9
+Sabah,Kota Kinabalu,piped_water,2024,96.19
+Sabah,Kota Kinabalu,poverty,2022,10.3
+Sabah,Kota Kinabalu,poverty,2024,12
+Sabah,Kota Kinabalu,sanitation,2022,99.62
+Sabah,Kota Kinabalu,sanitation,2024,99.01
+Sabah,Kota Kinabalu,schools_primary,2024,58
+Sabah,Kota Kinabalu,schools_primary,2025,58
+Sabah,Kota Kinabalu,schools_secondary,2024,24
+Sabah,Kota Kinabalu,schools_secondary,2025,24
+Sabah,Kota Kinabalu,schools_tertiary,2024,1
+Sabah,Kota Kinabalu,schools_tertiary,2025,1
+Sabah,Kota Kinabalu,unemployment,2023,5.7
+Sabah,Kota Kinabalu,unemployment,2024,5.9
+Sabah,Kota Marudu,electricity,2022,99.6
+Sabah,Kota Marudu,electricity,2024,100
+Sabah,Kota Marudu,expenditure_mean,2022,2951
+Sabah,Kota Marudu,expenditure_mean,2024,3466
+Sabah,Kota Marudu,income_median,2022,2677
+Sabah,Kota Marudu,income_median,2024,2877
+Sabah,Kota Marudu,piped_water,2022,81.6
+Sabah,Kota Marudu,piped_water,2024,74.74
+Sabah,Kota Marudu,poverty,2022,49.9
+Sabah,Kota Marudu,poverty,2024,40
+Sabah,Kota Marudu,sanitation,2022,99.14
+Sabah,Kota Marudu,sanitation,2024,98.89
+Sabah,Kota Marudu,schools_primary,2024,33
+Sabah,Kota Marudu,schools_primary,2025,33
+Sabah,Kota Marudu,schools_secondary,2024,7
+Sabah,Kota Marudu,schools_secondary,2025,7
+Sabah,Kota Marudu,schools_tertiary,2024,0
+Sabah,Kota Marudu,schools_tertiary,2025,0
+Sabah,Kota Marudu,unemployment,2023,8.5
+Sabah,Kota Marudu,unemployment,2024,8.7
+Sabah,Kuala Penyu,electricity,2022,100
+Sabah,Kuala Penyu,electricity,2024,100
+Sabah,Kuala Penyu,expenditure_mean,2022,2777
+Sabah,Kuala Penyu,expenditure_mean,2024,2826
+Sabah,Kuala Penyu,income_median,2022,3487
+Sabah,Kuala Penyu,income_median,2024,3733
+Sabah,Kuala Penyu,piped_water,2022,97.1
+Sabah,Kuala Penyu,piped_water,2024,100
+Sabah,Kuala Penyu,poverty,2022,17.6
+Sabah,Kuala Penyu,poverty,2024,14.3
+Sabah,Kuala Penyu,sanitation,2022,100
+Sabah,Kuala Penyu,sanitation,2024,100
+Sabah,Kuala Penyu,schools_primary,2024,26
+Sabah,Kuala Penyu,schools_primary,2025,26
+Sabah,Kuala Penyu,schools_secondary,2024,4
+Sabah,Kuala Penyu,schools_secondary,2025,4
+Sabah,Kuala Penyu,schools_tertiary,2024,0
+Sabah,Kuala Penyu,schools_tertiary,2025,0
+Sabah,Kuala Penyu,unemployment,2023,9
+Sabah,Kuala Penyu,unemployment,2024,9
+Sabah,Kudat,electricity,2022,96.4
+Sabah,Kudat,electricity,2024,100
+Sabah,Kudat,expenditure_mean,2022,3080
+Sabah,Kudat,expenditure_mean,2024,3206
+Sabah,Kudat,income_median,2022,2994
+Sabah,Kudat,income_median,2024,3249
+Sabah,Kudat,piped_water,2022,91
+Sabah,Kudat,piped_water,2024,95.31
+Sabah,Kudat,poverty,2022,34.7
+Sabah,Kudat,poverty,2024,35.3
+Sabah,Kudat,sanitation,2022,100
+Sabah,Kudat,sanitation,2024,99.41
+Sabah,Kudat,schools_primary,2024,58
+Sabah,Kudat,schools_primary,2025,58
+Sabah,Kudat,schools_secondary,2024,12
+Sabah,Kudat,schools_secondary,2025,12
+Sabah,Kudat,schools_tertiary,2024,0
+Sabah,Kudat,schools_tertiary,2025,0
+Sabah,Kudat,unemployment,2023,9.1
+Sabah,Kudat,unemployment,2024,9.4
+Sabah,Kunak,electricity,2022,97
+Sabah,Kunak,electricity,2024,100
+Sabah,Kunak,expenditure_mean,2022,2755
+Sabah,Kunak,expenditure_mean,2024,2797
+Sabah,Kunak,income_median,2022,4480
+Sabah,Kunak,income_median,2024,4539
+Sabah,Kunak,piped_water,2022,95.5
+Sabah,Kunak,piped_water,2024,89.08
+Sabah,Kunak,poverty,2022,25.4
+Sabah,Kunak,poverty,2024,29.2
+Sabah,Kunak,sanitation,2022,95.9
+Sabah,Kunak,sanitation,2024,96.86
+Sabah,Kunak,schools_primary,2024,15
+Sabah,Kunak,schools_primary,2025,15
+Sabah,Kunak,schools_secondary,2024,3
+Sabah,Kunak,schools_secondary,2025,3
+Sabah,Kunak,schools_tertiary,2024,0
+Sabah,Kunak,schools_tertiary,2025,0
+Sabah,Kunak,unemployment,2023,8.2
+Sabah,Kunak,unemployment,2024,8.4
+Sabah,Lahad Datu,electricity,2022,99.5
+Sabah,Lahad Datu,electricity,2024,99.75
+Sabah,Lahad Datu,expenditure_mean,2022,3346
+Sabah,Lahad Datu,expenditure_mean,2024,3571
+Sabah,Lahad Datu,income_median,2022,4457
+Sabah,Lahad Datu,income_median,2024,5526
+Sabah,Lahad Datu,piped_water,2022,90.5
+Sabah,Lahad Datu,piped_water,2024,89.66
+Sabah,Lahad Datu,poverty,2022,23.5
+Sabah,Lahad Datu,poverty,2024,13.6
+Sabah,Lahad Datu,sanitation,2022,93.78
+Sabah,Lahad Datu,sanitation,2024,99.06
+Sabah,Lahad Datu,schools_primary,2024,43
+Sabah,Lahad Datu,schools_primary,2025,43
+Sabah,Lahad Datu,schools_secondary,2024,10
+Sabah,Lahad Datu,schools_secondary,2025,10
+Sabah,Lahad Datu,schools_tertiary,2024,0
+Sabah,Lahad Datu,schools_tertiary,2025,0
+Sabah,Lahad Datu,unemployment,2023,7.5
+Sabah,Lahad Datu,unemployment,2024,7.5
+Sabah,Membakut,electricity,2024,100
+Sabah,Membakut,expenditure_mean,2024,3075
+Sabah,Membakut,income_median,2024,4037
+Sabah,Membakut,piped_water,2024,91.15
+Sabah,Membakut,poverty,2024,27.4
+Sabah,Nabawan,electricity,2022,95.8
+Sabah,Nabawan,electricity,2024,100
+Sabah,Nabawan,expenditure_mean,2022,3228
+Sabah,Nabawan,expenditure_mean,2024,3553
+Sabah,Nabawan,income_median,2022,4110
+Sabah,Nabawan,income_median,2024,4361
+Sabah,Nabawan,piped_water,2022,68.8
+Sabah,Nabawan,piped_water,2024,63.49
+Sabah,Nabawan,poverty,2022,27.1
+Sabah,Nabawan,poverty,2024,25.4
+Sabah,Nabawan,sanitation,2022,100
+Sabah,Nabawan,sanitation,2024,100
+Sabah,Nabawan,schools_primary,2024,29
+Sabah,Nabawan,schools_primary,2025,29
+Sabah,Nabawan,schools_secondary,2024,3
+Sabah,Nabawan,schools_secondary,2025,3
+Sabah,Nabawan,schools_tertiary,2024,0
+Sabah,Nabawan,schools_tertiary,2025,0
+Sabah,Nabawan,unemployment,2023,10.7
+Sabah,Nabawan,unemployment,2024,10.7
+Sabah,Papar,electricity,2022,99.8
+Sabah,Papar,electricity,2024,100
+Sabah,Papar,expenditure_mean,2022,3494
+Sabah,Papar,expenditure_mean,2024,3613
+Sabah,Papar,income_median,2022,4871
+Sabah,Papar,income_median,2024,5177
+Sabah,Papar,piped_water,2022,95.6
+Sabah,Papar,piped_water,2024,97.7
+Sabah,Papar,poverty,2022,16.2
+Sabah,Papar,poverty,2024,12
+Sabah,Papar,sanitation,2022,100
+Sabah,Papar,sanitation,2024,100
+Sabah,Papar,schools_primary,2024,49
+Sabah,Papar,schools_primary,2025,49
+Sabah,Papar,schools_secondary,2024,11
+Sabah,Papar,schools_secondary,2025,11
+Sabah,Papar,schools_tertiary,2024,0
+Sabah,Papar,schools_tertiary,2025,0
+Sabah,Papar,unemployment,2023,8.3
+Sabah,Papar,unemployment,2024,8.3
+Sabah,Penampang,electricity,2022,99.3
+Sabah,Penampang,electricity,2024,100
+Sabah,Penampang,expenditure_mean,2022,4194
+Sabah,Penampang,expenditure_mean,2024,4234
+Sabah,Penampang,income_median,2022,6265
+Sabah,Penampang,income_median,2024,6090
+Sabah,Penampang,piped_water,2022,97
+Sabah,Penampang,piped_water,2024,98.01
+Sabah,Penampang,poverty,2022,6.7
+Sabah,Penampang,poverty,2024,5.7
+Sabah,Penampang,sanitation,2022,100
+Sabah,Penampang,sanitation,2024,100
+Sabah,Penampang,schools_primary,2024,27
+Sabah,Penampang,schools_primary,2025,27
+Sabah,Penampang,schools_secondary,2024,6
+Sabah,Penampang,schools_secondary,2025,6
+Sabah,Penampang,schools_tertiary,2024,0
+Sabah,Penampang,schools_tertiary,2025,0
+Sabah,Penampang,unemployment,2023,5.8
+Sabah,Penampang,unemployment,2024,5.8
+Sabah,Pitas,electricity,2022,98.2
+Sabah,Pitas,electricity,2024,86.96
+Sabah,Pitas,expenditure_mean,2022,2562
+Sabah,Pitas,expenditure_mean,2024,3472
+Sabah,Pitas,income_median,2022,2329
+Sabah,Pitas,income_median,2024,2785
+Sabah,Pitas,piped_water,2022,76.6
+Sabah,Pitas,piped_water,2024,60.87
+Sabah,Pitas,poverty,2022,52.7
+Sabah,Pitas,poverty,2024,50
+Sabah,Pitas,sanitation,2022,100
+Sabah,Pitas,sanitation,2024,98.91
+Sabah,Pitas,schools_primary,2024,31
+Sabah,Pitas,schools_primary,2025,31
+Sabah,Pitas,schools_secondary,2024,6
+Sabah,Pitas,schools_secondary,2025,6
+Sabah,Pitas,schools_tertiary,2024,0
+Sabah,Pitas,schools_tertiary,2025,0
+Sabah,Pitas,unemployment,2023,9.4
+Sabah,Pitas,unemployment,2024,9.6
+Sabah,Putatan,electricity,2022,100
+Sabah,Putatan,electricity,2024,100
+Sabah,Putatan,expenditure_mean,2022,4047
+Sabah,Putatan,expenditure_mean,2024,4188
+Sabah,Putatan,income_median,2022,5699
+Sabah,Putatan,income_median,2024,6563
+Sabah,Putatan,piped_water,2022,96.8
+Sabah,Putatan,piped_water,2024,93.79
+Sabah,Putatan,poverty,2022,12.9
+Sabah,Putatan,poverty,2024,6.9
+Sabah,Putatan,sanitation,2022,100
+Sabah,Putatan,sanitation,2024,100
+Sabah,Putatan,schools_primary,2024,1
+Sabah,Putatan,schools_primary,2025,1
+Sabah,Putatan,schools_secondary,2024,1
+Sabah,Putatan,schools_secondary,2025,1
+Sabah,Putatan,schools_tertiary,2024,0
+Sabah,Putatan,schools_tertiary,2025,0
+Sabah,Putatan,unemployment,2023,6
+Sabah,Putatan,unemployment,2024,6.1
+Sabah,Ranau,electricity,2022,94.7
+Sabah,Ranau,electricity,2024,95.86
+Sabah,Ranau,expenditure_mean,2022,2894
+Sabah,Ranau,expenditure_mean,2024,2905
+Sabah,Ranau,income_median,2022,4058
+Sabah,Ranau,income_median,2024,3470
+Sabah,Ranau,piped_water,2022,47.4
+Sabah,Ranau,piped_water,2024,46.48
+Sabah,Ranau,poverty,2022,25.4
+Sabah,Ranau,poverty,2024,23.5
+Sabah,Ranau,sanitation,2022,99.04
+Sabah,Ranau,sanitation,2024,100
+Sabah,Ranau,schools_primary,2024,71
+Sabah,Ranau,schools_primary,2025,71
+Sabah,Ranau,schools_secondary,2024,11
+Sabah,Ranau,schools_secondary,2025,11
+Sabah,Ranau,schools_tertiary,2024,0
+Sabah,Ranau,schools_tertiary,2025,0
+Sabah,Ranau,unemployment,2023,9.1
+Sabah,Ranau,unemployment,2024,9.3
+Sabah,Sandakan,electricity,2022,99.5
+Sabah,Sandakan,electricity,2024,100
+Sabah,Sandakan,expenditure_mean,2022,3315
+Sabah,Sandakan,expenditure_mean,2024,3677
+Sabah,Sandakan,income_median,2022,4828
+Sabah,Sandakan,income_median,2024,5314
+Sabah,Sandakan,piped_water,2022,97
+Sabah,Sandakan,piped_water,2024,96.74
+Sabah,Sandakan,poverty,2022,17.7
+Sabah,Sandakan,poverty,2024,15.2
+Sabah,Sandakan,sanitation,2022,99.93
+Sabah,Sandakan,sanitation,2024,100
+Sabah,Sandakan,schools_primary,2024,65
+Sabah,Sandakan,schools_primary,2025,65
+Sabah,Sandakan,schools_secondary,2024,22
+Sabah,Sandakan,schools_secondary,2025,22
+Sabah,Sandakan,schools_tertiary,2024,0
+Sabah,Sandakan,schools_tertiary,2025,0
+Sabah,Sandakan,unemployment,2023,6.9
+Sabah,Sandakan,unemployment,2024,6.8
+Sabah,Semporna,electricity,2022,100
+Sabah,Semporna,electricity,2024,98.91
+Sabah,Semporna,expenditure_mean,2022,2466
+Sabah,Semporna,expenditure_mean,2024,2567
+Sabah,Semporna,income_median,2022,4093
+Sabah,Semporna,income_median,2024,4059
+Sabah,Semporna,piped_water,2022,71.8
+Sabah,Semporna,piped_water,2024,70.19
+Sabah,Semporna,poverty,2022,28
+Sabah,Semporna,poverty,2024,30.4
+Sabah,Semporna,sanitation,2022,84.15
+Sabah,Semporna,sanitation,2024,91.29
+Sabah,Semporna,schools_primary,2024,41
+Sabah,Semporna,schools_primary,2025,41
+Sabah,Semporna,schools_secondary,2024,9
+Sabah,Semporna,schools_secondary,2025,9
+Sabah,Semporna,schools_tertiary,2024,0
+Sabah,Semporna,schools_tertiary,2025,0
+Sabah,Semporna,unemployment,2023,8.4
+Sabah,Semporna,unemployment,2024,8.4
+Sabah,Sipitang,electricity,2022,100
+Sabah,Sipitang,electricity,2024,95.63
+Sabah,Sipitang,expenditure_mean,2022,3093
+Sabah,Sipitang,expenditure_mean,2024,3341
+Sabah,Sipitang,income_median,2022,4182
+Sabah,Sipitang,income_median,2024,4606
+Sabah,Sipitang,piped_water,2022,93.7
+Sabah,Sipitang,piped_water,2024,95.59
+Sabah,Sipitang,poverty,2022,22.1
+Sabah,Sipitang,poverty,2024,15.3
+Sabah,Sipitang,sanitation,2022,99.37
+Sabah,Sipitang,sanitation,2024,100
+Sabah,Sipitang,schools_primary,2024,25
+Sabah,Sipitang,schools_primary,2025,25
+Sabah,Sipitang,schools_secondary,2024,4
+Sabah,Sipitang,schools_secondary,2025,4
+Sabah,Sipitang,schools_tertiary,2024,0
+Sabah,Sipitang,schools_tertiary,2025,0
+Sabah,Sipitang,unemployment,2023,8.5
+Sabah,Sipitang,unemployment,2024,8.7
+Sabah,Tambunan,electricity,2022,100
+Sabah,Tambunan,electricity,2024,100
+Sabah,Tambunan,expenditure_mean,2022,3278
+Sabah,Tambunan,expenditure_mean,2024,3508
+Sabah,Tambunan,income_median,2022,4055
+Sabah,Tambunan,income_median,2024,4854
+Sabah,Tambunan,piped_water,2022,74.4
+Sabah,Tambunan,piped_water,2024,72.22
+Sabah,Tambunan,poverty,2022,9
+Sabah,Tambunan,poverty,2024,8.3
+Sabah,Tambunan,sanitation,2022,99.25
+Sabah,Tambunan,sanitation,2024,98.61
+Sabah,Tambunan,schools_primary,2024,29
+Sabah,Tambunan,schools_primary,2025,29
+Sabah,Tambunan,schools_secondary,2024,4
+Sabah,Tambunan,schools_secondary,2025,4
+Sabah,Tambunan,schools_tertiary,2024,0
+Sabah,Tambunan,schools_tertiary,2025,0
+Sabah,Tambunan,unemployment,2023,9
+Sabah,Tambunan,unemployment,2024,9
+Sabah,Tawau,electricity,2022,99.9
+Sabah,Tawau,electricity,2024,100
+Sabah,Tawau,expenditure_mean,2022,3118
+Sabah,Tawau,expenditure_mean,2024,3182
+Sabah,Tawau,income_median,2022,4783
+Sabah,Tawau,income_median,2024,4852
+Sabah,Tawau,piped_water,2022,98.4
+Sabah,Tawau,piped_water,2024,99.17
+Sabah,Tawau,poverty,2022,14.4
+Sabah,Tawau,poverty,2024,13.2
+Sabah,Tawau,sanitation,2022,99.07
+Sabah,Tawau,sanitation,2024,98.73
+Sabah,Tawau,schools_primary,2024,61
+Sabah,Tawau,schools_primary,2025,61
+Sabah,Tawau,schools_secondary,2024,22
+Sabah,Tawau,schools_secondary,2025,22
+Sabah,Tawau,schools_tertiary,2024,0
+Sabah,Tawau,schools_tertiary,2025,0
+Sabah,Tawau,unemployment,2023,7
+Sabah,Tawau,unemployment,2024,7.1
+Sabah,Telupid,electricity,2022,100
+Sabah,Telupid,electricity,2024,100
+Sabah,Telupid,expenditure_mean,2022,2538
+Sabah,Telupid,expenditure_mean,2024,2659
+Sabah,Telupid,income_median,2022,3953
+Sabah,Telupid,income_median,2024,4489
+Sabah,Telupid,piped_water,2022,80
+Sabah,Telupid,piped_water,2024,80.49
+Sabah,Telupid,poverty,2022,20.8
+Sabah,Telupid,poverty,2024,22
+Sabah,Telupid,sanitation,2022,100
+Sabah,Telupid,sanitation,2024,100
+Sabah,Telupid,schools_primary,2024,7
+Sabah,Telupid,schools_primary,2025,7
+Sabah,Telupid,schools_secondary,2024,2
+Sabah,Telupid,schools_secondary,2025,2
+Sabah,Telupid,schools_tertiary,2024,0
+Sabah,Telupid,schools_tertiary,2025,0
+Sabah,Telupid,unemployment,2023,9.1
+Sabah,Telupid,unemployment,2024,9.3
+Sabah,Tenom,electricity,2022,100
+Sabah,Tenom,electricity,2024,100
+Sabah,Tenom,expenditure_mean,2022,3267
+Sabah,Tenom,expenditure_mean,2024,3504
+Sabah,Tenom,income_median,2022,4045
+Sabah,Tenom,income_median,2024,4161
+Sabah,Tenom,piped_water,2022,50.9
+Sabah,Tenom,piped_water,2024,63.12
+Sabah,Tenom,poverty,2022,15.8
+Sabah,Tenom,poverty,2024,12.1
+Sabah,Tenom,sanitation,2022,100
+Sabah,Tenom,sanitation,2024,100
+Sabah,Tenom,schools_primary,2024,46
+Sabah,Tenom,schools_primary,2025,46
+Sabah,Tenom,schools_secondary,2024,6
+Sabah,Tenom,schools_secondary,2025,6
+Sabah,Tenom,schools_tertiary,2024,0
+Sabah,Tenom,schools_tertiary,2025,0
+Sabah,Tenom,unemployment,2023,10.9
+Sabah,Tenom,unemployment,2024,11.1
+Sabah,Tongod,electricity,2022,95.8
+Sabah,Tongod,electricity,2024,100
+Sabah,Tongod,expenditure_mean,2022,2445
+Sabah,Tongod,expenditure_mean,2024,2465
+Sabah,Tongod,income_median,2022,2856
+Sabah,Tongod,income_median,2024,3470
+Sabah,Tongod,piped_water,2022,53.4
+Sabah,Tongod,piped_water,2024,53.39
+Sabah,Tongod,poverty,2022,50.8
+Sabah,Tongod,poverty,2024,41.5
+Sabah,Tongod,sanitation,2022,99.15
+Sabah,Tongod,sanitation,2024,100
+Sabah,Tongod,schools_primary,2024,24
+Sabah,Tongod,schools_primary,2025,24
+Sabah,Tongod,schools_secondary,2024,3
+Sabah,Tongod,schools_secondary,2025,3
+Sabah,Tongod,schools_tertiary,2024,0
+Sabah,Tongod,schools_tertiary,2025,0
+Sabah,Tongod,unemployment,2023,9.4
+Sabah,Tongod,unemployment,2024,9.7
+Sabah,Tuaran,electricity,2022,100
+Sabah,Tuaran,electricity,2024,100
+Sabah,Tuaran,expenditure_mean,2022,3133
+Sabah,Tuaran,expenditure_mean,2024,3185
+Sabah,Tuaran,income_median,2022,3921
+Sabah,Tuaran,income_median,2024,4277
+Sabah,Tuaran,piped_water,2022,76.5
+Sabah,Tuaran,piped_water,2024,88.4
+Sabah,Tuaran,poverty,2022,25.8
+Sabah,Tuaran,poverty,2024,23.7
+Sabah,Tuaran,sanitation,2022,100
+Sabah,Tuaran,sanitation,2024,99.67
+Sabah,Tuaran,schools_primary,2024,75
+Sabah,Tuaran,schools_primary,2025,75
+Sabah,Tuaran,schools_secondary,2024,10
+Sabah,Tuaran,schools_secondary,2025,10
+Sabah,Tuaran,schools_tertiary,2024,0
+Sabah,Tuaran,schools_tertiary,2025,0
+Sabah,Tuaran,unemployment,2023,8.7
+Sabah,Tuaran,unemployment,2024,8.8
+Sarawak,All,electricity,2022,97.8
+Sarawak,All,electricity,2024,99.1
+Sarawak,All,expenditure_mean,2022,3915
+Sarawak,All,expenditure_mean,2024,4281
+Sarawak,All,income_median,2022,4978
+Sarawak,All,income_median,2024,5504
+Sarawak,All,piped_water,2022,90
+Sarawak,All,piped_water,2024,92.7
+Sarawak,All,poverty,2022,10.8
+Sarawak,All,poverty,2024,8.4
+Sarawak,All,sanitation,2022,100
+Sarawak,All,sanitation,2024,100
+Sarawak,All,unemployment,2023,3.4
+Sarawak,All,unemployment,2024,3.4
+Sarawak,Asajaya,electricity,2022,100
+Sarawak,Asajaya,electricity,2024,100
+Sarawak,Asajaya,expenditure_mean,2022,3039
+Sarawak,Asajaya,expenditure_mean,2024,3598
+Sarawak,Asajaya,income_median,2022,3929
+Sarawak,Asajaya,income_median,2024,4447
+Sarawak,Asajaya,piped_water,2022,100
+Sarawak,Asajaya,piped_water,2024,100
+Sarawak,Asajaya,poverty,2022,17.9
+Sarawak,Asajaya,poverty,2024,14
+Sarawak,Asajaya,sanitation,2022,100
+Sarawak,Asajaya,sanitation,2024,100
+Sarawak,Asajaya,schools_primary,2024,27
+Sarawak,Asajaya,schools_primary,2025,27
+Sarawak,Asajaya,schools_secondary,2024,5
+Sarawak,Asajaya,schools_secondary,2025,5
+Sarawak,Asajaya,schools_tertiary,2024,0
+Sarawak,Asajaya,schools_tertiary,2025,0
+Sarawak,Asajaya,unemployment,2023,2.5
+Sarawak,Asajaya,unemployment,2024,2.2
+Sarawak,Bau,electricity,2022,100
+Sarawak,Bau,electricity,2024,100
+Sarawak,Bau,expenditure_mean,2022,3581
+Sarawak,Bau,expenditure_mean,2024,3965
+Sarawak,Bau,income_median,2022,4735
+Sarawak,Bau,income_median,2024,4885
+Sarawak,Bau,piped_water,2022,92.1
+Sarawak,Bau,piped_water,2024,94.52
+Sarawak,Bau,poverty,2022,8.3
+Sarawak,Bau,poverty,2024,6.2
+Sarawak,Bau,sanitation,2022,100
+Sarawak,Bau,sanitation,2024,100
+Sarawak,Bau,schools_primary,2024,40
+Sarawak,Bau,schools_primary,2025,40
+Sarawak,Bau,schools_secondary,2024,4
+Sarawak,Bau,schools_secondary,2025,4
+Sarawak,Bau,schools_tertiary,2024,0
+Sarawak,Bau,schools_tertiary,2025,0
+Sarawak,Bau,unemployment,2023,3.2
+Sarawak,Bau,unemployment,2024,2.9
+Sarawak,Belaga,electricity,2022,91.8
+Sarawak,Belaga,electricity,2024,90.91
+Sarawak,Belaga,expenditure_mean,2022,2224
+Sarawak,Belaga,expenditure_mean,2024,2757
+Sarawak,Belaga,income_median,2022,3587
+Sarawak,Belaga,income_median,2024,3977
+Sarawak,Belaga,piped_water,2022,48.5
+Sarawak,Belaga,piped_water,2024,81.82
+Sarawak,Belaga,poverty,2022,19.5
+Sarawak,Belaga,poverty,2024,13.6
+Sarawak,Belaga,sanitation,2022,100
+Sarawak,Belaga,sanitation,2024,100
+Sarawak,Belaga,schools_primary,2024,12
+Sarawak,Belaga,schools_primary,2025,12
+Sarawak,Belaga,schools_secondary,2024,2
+Sarawak,Belaga,schools_secondary,2025,2
+Sarawak,Belaga,schools_tertiary,2024,0
+Sarawak,Belaga,schools_tertiary,2025,0
+Sarawak,Belaga,unemployment,2023,6.3
+Sarawak,Belaga,unemployment,2024,5.9
+Sarawak,Beluru,electricity,2022,100
+Sarawak,Beluru,electricity,2024,100
+Sarawak,Beluru,expenditure_mean,2022,2386
+Sarawak,Beluru,expenditure_mean,2024,2844
+Sarawak,Beluru,income_median,2022,4164
+Sarawak,Beluru,income_median,2024,4346
+Sarawak,Beluru,piped_water,2022,90.5
+Sarawak,Beluru,piped_water,2024,100
+Sarawak,Beluru,poverty,2022,13.7
+Sarawak,Beluru,poverty,2024,10.1
+Sarawak,Beluru,sanitation,2022,100
+Sarawak,Beluru,sanitation,2024,100
+Sarawak,Beluru,unemployment,2023,1.5
+Sarawak,Beluru,unemployment,2024,1.6
+Sarawak,Betong,electricity,2022,100
+Sarawak,Betong,electricity,2024,100
+Sarawak,Betong,expenditure_mean,2022,2849
+Sarawak,Betong,expenditure_mean,2024,2877
+Sarawak,Betong,income_median,2022,3685
+Sarawak,Betong,income_median,2024,4074
+Sarawak,Betong,piped_water,2022,95.8
+Sarawak,Betong,piped_water,2024,95.65
+Sarawak,Betong,poverty,2022,9.8
+Sarawak,Betong,poverty,2024,7.6
+Sarawak,Betong,sanitation,2022,100
+Sarawak,Betong,sanitation,2024,100
+Sarawak,Betong,schools_primary,2024,46
+Sarawak,Betong,schools_primary,2025,46
+Sarawak,Betong,schools_secondary,2024,8
+Sarawak,Betong,schools_secondary,2025,8
+Sarawak,Betong,schools_tertiary,2024,0
+Sarawak,Betong,schools_tertiary,2025,0
+Sarawak,Betong,unemployment,2023,1.7
+Sarawak,Betong,unemployment,2024,1.9
+Sarawak,Bintulu,electricity,2022,98.1
+Sarawak,Bintulu,electricity,2024,99.47
+Sarawak,Bintulu,expenditure_mean,2022,4990
+Sarawak,Bintulu,expenditure_mean,2024,5073
+Sarawak,Bintulu,income_median,2022,8567
+Sarawak,Bintulu,income_median,2024,8317
+Sarawak,Bintulu,piped_water,2022,96.8
+Sarawak,Bintulu,piped_water,2024,95.11
+Sarawak,Bintulu,poverty,2022,3.5
+Sarawak,Bintulu,poverty,2024,3.7
+Sarawak,Bintulu,sanitation,2022,100
+Sarawak,Bintulu,sanitation,2024,100
+Sarawak,Bintulu,schools_primary,2024,31
+Sarawak,Bintulu,schools_primary,2025,31
+Sarawak,Bintulu,schools_secondary,2024,7
+Sarawak,Bintulu,schools_secondary,2025,7
+Sarawak,Bintulu,schools_tertiary,2024,0
+Sarawak,Bintulu,schools_tertiary,2025,0
+Sarawak,Bintulu,unemployment,2023,2.4
+Sarawak,Bintulu,unemployment,2024,2.2
+Sarawak,Bukit Mabong,electricity,2022,40.2
+Sarawak,Bukit Mabong,electricity,2024,54.17
+Sarawak,Bukit Mabong,expenditure_mean,2022,2853
+Sarawak,Bukit Mabong,expenditure_mean,2024,3363
+Sarawak,Bukit Mabong,income_median,2022,2948
+Sarawak,Bukit Mabong,income_median,2024,2589
+Sarawak,Bukit Mabong,piped_water,2022,21.6
+Sarawak,Bukit Mabong,piped_water,2024,25
+Sarawak,Bukit Mabong,poverty,2022,8.2
+Sarawak,Bukit Mabong,poverty,2024,6.3
+Sarawak,Bukit Mabong,sanitation,2022,100
+Sarawak,Bukit Mabong,sanitation,2024,100
+Sarawak,Bukit Mabong,unemployment,2023,2.6
+Sarawak,Bukit Mabong,unemployment,2024,2.8
+Sarawak,Dalat,electricity,2022,97.2
+Sarawak,Dalat,electricity,2024,98.55
+Sarawak,Dalat,expenditure_mean,2022,3044
+Sarawak,Dalat,expenditure_mean,2024,3079
+Sarawak,Dalat,income_median,2022,4057
+Sarawak,Dalat,income_median,2024,4614
+Sarawak,Dalat,piped_water,2022,89.7
+Sarawak,Dalat,piped_water,2024,98.55
+Sarawak,Dalat,poverty,2022,11.1
+Sarawak,Dalat,poverty,2024,10.1
+Sarawak,Dalat,sanitation,2022,100
+Sarawak,Dalat,sanitation,2024,100
+Sarawak,Dalat,schools_primary,2024,25
+Sarawak,Dalat,schools_primary,2025,25
+Sarawak,Dalat,schools_secondary,2024,4
+Sarawak,Dalat,schools_secondary,2025,4
+Sarawak,Dalat,schools_tertiary,2024,0
+Sarawak,Dalat,schools_tertiary,2025,0
+Sarawak,Dalat,unemployment,2023,3
+Sarawak,Dalat,unemployment,2024,2.3
+Sarawak,Daro,electricity,2022,97.5
+Sarawak,Daro,electricity,2024,96.43
+Sarawak,Daro,expenditure_mean,2022,2997
+Sarawak,Daro,expenditure_mean,2024,3076
+Sarawak,Daro,income_median,2022,3373
+Sarawak,Daro,income_median,2024,3806
+Sarawak,Daro,piped_water,2022,83
+Sarawak,Daro,piped_water,2024,71.43
+Sarawak,Daro,poverty,2022,32.5
+Sarawak,Daro,poverty,2024,26.8
+Sarawak,Daro,sanitation,2022,100
+Sarawak,Daro,sanitation,2024,100
+Sarawak,Daro,schools_primary,2024,41
+Sarawak,Daro,schools_primary,2025,41
+Sarawak,Daro,schools_secondary,2024,3
+Sarawak,Daro,schools_secondary,2025,3
+Sarawak,Daro,schools_tertiary,2024,0
+Sarawak,Daro,schools_tertiary,2025,0
+Sarawak,Daro,unemployment,2023,4.5
+Sarawak,Daro,unemployment,2024,3.8
+Sarawak,Gedong,electricity,2024,100
+Sarawak,Gedong,expenditure_mean,2024,2950
+Sarawak,Gedong,income_median,2024,3329
+Sarawak,Gedong,piped_water,2024,72.37
+Sarawak,Gedong,poverty,2024,16.7
+Sarawak,Julau,electricity,2022,93.6
+Sarawak,Julau,electricity,2024,100
+Sarawak,Julau,expenditure_mean,2022,2842
+Sarawak,Julau,expenditure_mean,2024,3401
+Sarawak,Julau,income_median,2022,2652
+Sarawak,Julau,income_median,2024,3264
+Sarawak,Julau,piped_water,2022,46.8
+Sarawak,Julau,piped_water,2024,51.9
+Sarawak,Julau,poverty,2022,31.2
+Sarawak,Julau,poverty,2024,26.6
+Sarawak,Julau,sanitation,2022,100
+Sarawak,Julau,sanitation,2024,100
+Sarawak,Julau,schools_primary,2024,34
+Sarawak,Julau,schools_primary,2025,34
+Sarawak,Julau,schools_secondary,2024,3
+Sarawak,Julau,schools_secondary,2025,3
+Sarawak,Julau,schools_tertiary,2024,0
+Sarawak,Julau,schools_tertiary,2025,0
+Sarawak,Julau,unemployment,2023,3.5
+Sarawak,Julau,unemployment,2024,3
+Sarawak,Kabong,electricity,2022,100
+Sarawak,Kabong,electricity,2024,100
+Sarawak,Kabong,expenditure_mean,2022,3215
+Sarawak,Kabong,expenditure_mean,2024,3225
+Sarawak,Kabong,income_median,2022,3500
+Sarawak,Kabong,income_median,2024,3407
+Sarawak,Kabong,piped_water,2022,82.8
+Sarawak,Kabong,piped_water,2024,81.82
+Sarawak,Kabong,poverty,2022,8.6
+Sarawak,Kabong,poverty,2024,4.5
+Sarawak,Kabong,sanitation,2022,100
+Sarawak,Kabong,sanitation,2024,100
+Sarawak,Kabong,schools_primary,2024,4
+Sarawak,Kabong,schools_primary,2025,4
+Sarawak,Kabong,schools_secondary,2024,1
+Sarawak,Kabong,schools_secondary,2025,1
+Sarawak,Kabong,schools_tertiary,2024,0
+Sarawak,Kabong,schools_tertiary,2025,0
+Sarawak,Kabong,unemployment,2023,1.9
+Sarawak,Kabong,unemployment,2024,2
+Sarawak,Kanowit,electricity,2022,93.7
+Sarawak,Kanowit,electricity,2024,100
+Sarawak,Kanowit,expenditure_mean,2022,2940
+Sarawak,Kanowit,expenditure_mean,2024,3240
+Sarawak,Kanowit,income_median,2022,2648
+Sarawak,Kanowit,income_median,2024,3511
+Sarawak,Kanowit,piped_water,2022,77.8
+Sarawak,Kanowit,piped_water,2024,100
+Sarawak,Kanowit,poverty,2022,24.9
+Sarawak,Kanowit,poverty,2024,21.8
+Sarawak,Kanowit,sanitation,2022,100
+Sarawak,Kanowit,sanitation,2024,100
+Sarawak,Kanowit,schools_primary,2024,35
+Sarawak,Kanowit,schools_primary,2025,35
+Sarawak,Kanowit,schools_secondary,2024,3
+Sarawak,Kanowit,schools_secondary,2025,3
+Sarawak,Kanowit,schools_tertiary,2024,0
+Sarawak,Kanowit,schools_tertiary,2025,0
+Sarawak,Kanowit,unemployment,2023,5.8
+Sarawak,Kanowit,unemployment,2024,5.3
+Sarawak,Kapit,electricity,2022,88.8
+Sarawak,Kapit,electricity,2024,86.64
+Sarawak,Kapit,expenditure_mean,2022,3315
+Sarawak,Kapit,expenditure_mean,2024,3683
+Sarawak,Kapit,income_median,2022,2902
+Sarawak,Kapit,income_median,2024,3259
+Sarawak,Kapit,piped_water,2022,57.3
+Sarawak,Kapit,piped_water,2024,61.84
+Sarawak,Kapit,poverty,2022,20.6
+Sarawak,Kapit,poverty,2024,15.5
+Sarawak,Kapit,sanitation,2022,100
+Sarawak,Kapit,sanitation,2024,100
+Sarawak,Kapit,schools_primary,2024,46
+Sarawak,Kapit,schools_primary,2025,46
+Sarawak,Kapit,schools_secondary,2024,4
+Sarawak,Kapit,schools_secondary,2025,4
+Sarawak,Kapit,schools_tertiary,2024,0
+Sarawak,Kapit,schools_tertiary,2025,0
+Sarawak,Kapit,unemployment,2023,4.4
+Sarawak,Kapit,unemployment,2024,4.2
+Sarawak,Kuching,electricity,2022,100
+Sarawak,Kuching,electricity,2024,100
+Sarawak,Kuching,expenditure_mean,2022,4687
+Sarawak,Kuching,expenditure_mean,2024,5184
+Sarawak,Kuching,income_median,2022,5968
+Sarawak,Kuching,income_median,2024,6741
+Sarawak,Kuching,piped_water,2022,99.5
+Sarawak,Kuching,piped_water,2024,99.4
+Sarawak,Kuching,poverty,2022,9.1
+Sarawak,Kuching,poverty,2024,7.7
+Sarawak,Kuching,sanitation,2022,100
+Sarawak,Kuching,sanitation,2024,100
+Sarawak,Kuching,schools_primary,2024,146
+Sarawak,Kuching,schools_primary,2025,146
+Sarawak,Kuching,schools_secondary,2024,41
+Sarawak,Kuching,schools_secondary,2025,41
+Sarawak,Kuching,schools_tertiary,2024,1
+Sarawak,Kuching,schools_tertiary,2025,1
+Sarawak,Kuching,unemployment,2023,2.9
+Sarawak,Kuching,unemployment,2024,2.8
+Sarawak,Lawas,electricity,2022,100
+Sarawak,Lawas,electricity,2024,96.63
+Sarawak,Lawas,expenditure_mean,2022,2934
+Sarawak,Lawas,expenditure_mean,2024,3241
+Sarawak,Lawas,income_median,2022,3183
+Sarawak,Lawas,income_median,2024,3929
+Sarawak,Lawas,piped_water,2022,65
+Sarawak,Lawas,piped_water,2024,75.28
+Sarawak,Lawas,poverty,2022,18.1
+Sarawak,Lawas,poverty,2024,14.6
+Sarawak,Lawas,sanitation,2022,100
+Sarawak,Lawas,sanitation,2024,100
+Sarawak,Lawas,schools_primary,2024,31
+Sarawak,Lawas,schools_primary,2025,31
+Sarawak,Lawas,schools_secondary,2024,4
+Sarawak,Lawas,schools_secondary,2025,4
+Sarawak,Lawas,schools_tertiary,2024,0
+Sarawak,Lawas,schools_tertiary,2025,0
+Sarawak,Lawas,unemployment,2023,4.9
+Sarawak,Lawas,unemployment,2024,4.6
+Sarawak,Limbang,electricity,2022,98.4
+Sarawak,Limbang,electricity,2024,100
+Sarawak,Limbang,expenditure_mean,2022,3184
+Sarawak,Limbang,expenditure_mean,2024,3457
+Sarawak,Limbang,income_median,2022,4023
+Sarawak,Limbang,income_median,2024,4060
+Sarawak,Limbang,piped_water,2022,87.6
+Sarawak,Limbang,piped_water,2024,90.58
+Sarawak,Limbang,poverty,2022,14.6
+Sarawak,Limbang,poverty,2024,14.4
+Sarawak,Limbang,sanitation,2022,100
+Sarawak,Limbang,sanitation,2024,100
+Sarawak,Limbang,schools_primary,2024,35
+Sarawak,Limbang,schools_primary,2025,35
+Sarawak,Limbang,schools_secondary,2024,5
+Sarawak,Limbang,schools_secondary,2025,5
+Sarawak,Limbang,schools_tertiary,2024,0
+Sarawak,Limbang,schools_tertiary,2025,0
+Sarawak,Limbang,unemployment,2023,2.8
+Sarawak,Limbang,unemployment,2024,2.7
+Sarawak,Lingga,electricity,2024,100
+Sarawak,Lingga,expenditure_mean,2024,2412
+Sarawak,Lingga,income_median,2024,2999
+Sarawak,Lingga,piped_water,2024,100
+Sarawak,Lingga,poverty,2024,6.3
+Sarawak,Lubok Antu,electricity,2022,95.1
+Sarawak,Lubok Antu,electricity,2024,100
+Sarawak,Lubok Antu,expenditure_mean,2022,3178
+Sarawak,Lubok Antu,expenditure_mean,2024,3564
+Sarawak,Lubok Antu,income_median,2022,3548
+Sarawak,Lubok Antu,income_median,2024,4169
+Sarawak,Lubok Antu,piped_water,2022,90.1
+Sarawak,Lubok Antu,piped_water,2024,88.41
+Sarawak,Lubok Antu,poverty,2022,14.8
+Sarawak,Lubok Antu,poverty,2024,13
+Sarawak,Lubok Antu,sanitation,2022,100
+Sarawak,Lubok Antu,sanitation,2024,100
+Sarawak,Lubok Antu,schools_primary,2024,28
+Sarawak,Lubok Antu,schools_primary,2025,28
+Sarawak,Lubok Antu,schools_secondary,2024,2
+Sarawak,Lubok Antu,schools_secondary,2025,2
+Sarawak,Lubok Antu,schools_tertiary,2024,0
+Sarawak,Lubok Antu,schools_tertiary,2025,0
+Sarawak,Lubok Antu,unemployment,2023,2.6
+Sarawak,Lubok Antu,unemployment,2024,2.1
+Sarawak,Lundu,electricity,2022,100
+Sarawak,Lundu,electricity,2024,100
+Sarawak,Lundu,expenditure_mean,2022,3161
+Sarawak,Lundu,expenditure_mean,2024,3370
+Sarawak,Lundu,income_median,2022,3692
+Sarawak,Lundu,income_median,2024,3918
+Sarawak,Lundu,piped_water,2022,63.6
+Sarawak,Lundu,piped_water,2024,63.44
+Sarawak,Lundu,poverty,2022,13.1
+Sarawak,Lundu,poverty,2024,12.9
+Sarawak,Lundu,sanitation,2022,100
+Sarawak,Lundu,sanitation,2024,100
+Sarawak,Lundu,schools_primary,2024,31
+Sarawak,Lundu,schools_primary,2025,31
+Sarawak,Lundu,schools_secondary,2024,3
+Sarawak,Lundu,schools_secondary,2025,3
+Sarawak,Lundu,schools_tertiary,2024,0
+Sarawak,Lundu,schools_tertiary,2025,0
+Sarawak,Lundu,unemployment,2023,2.5
+Sarawak,Lundu,unemployment,2024,2.7
+Sarawak,Maradong,electricity,2022,99.5
+Sarawak,Maradong,electricity,2024,100
+Sarawak,Maradong,expenditure_mean,2022,2674
+Sarawak,Maradong,expenditure_mean,2024,2864
+Sarawak,Maradong,income_median,2022,3259
+Sarawak,Maradong,income_median,2024,3472
+Sarawak,Maradong,piped_water,2022,96.7
+Sarawak,Maradong,piped_water,2024,96.3
+Sarawak,Maradong,poverty,2022,19.5
+Sarawak,Maradong,poverty,2024,16.9
+Sarawak,Maradong,sanitation,2022,100
+Sarawak,Maradong,sanitation,2024,99.38
+Sarawak,Maradong,schools_primary,2024,33
+Sarawak,Maradong,schools_primary,2025,33
+Sarawak,Maradong,schools_secondary,2024,4
+Sarawak,Maradong,schools_secondary,2025,4
+Sarawak,Maradong,schools_tertiary,2024,0
+Sarawak,Maradong,schools_tertiary,2025,0
+Sarawak,Maradong,unemployment,2023,5.5
+Sarawak,Maradong,unemployment,2024,5.1
+Sarawak,Marudi,electricity,2022,95.7
+Sarawak,Marudi,electricity,2024,94.94
+Sarawak,Marudi,expenditure_mean,2022,2557
+Sarawak,Marudi,expenditure_mean,2024,2705
+Sarawak,Marudi,income_median,2022,4234
+Sarawak,Marudi,income_median,2024,4519
+Sarawak,Marudi,piped_water,2022,47.4
+Sarawak,Marudi,piped_water,2024,74.05
+Sarawak,Marudi,poverty,2022,12.9
+Sarawak,Marudi,poverty,2024,4.4
+Sarawak,Marudi,sanitation,2022,99.52
+Sarawak,Marudi,sanitation,2024,100
+Sarawak,Marudi,schools_primary,2024,76
+Sarawak,Marudi,schools_primary,2025,76
+Sarawak,Marudi,schools_secondary,2024,9
+Sarawak,Marudi,schools_secondary,2025,9
+Sarawak,Marudi,schools_tertiary,2024,0
+Sarawak,Marudi,schools_tertiary,2025,0
+Sarawak,Marudi,unemployment,2023,1.7
+Sarawak,Marudi,unemployment,2024,2.1
+Sarawak,Matu,electricity,2022,93.8
+Sarawak,Matu,electricity,2024,100
+Sarawak,Matu,expenditure_mean,2022,2811
+Sarawak,Matu,expenditure_mean,2024,2992
+Sarawak,Matu,income_median,2022,3354
+Sarawak,Matu,income_median,2024,3891
+Sarawak,Matu,piped_water,2022,87.7
+Sarawak,Matu,piped_water,2024,92.05
+Sarawak,Matu,poverty,2022,20.8
+Sarawak,Matu,poverty,2024,9.1
+Sarawak,Matu,sanitation,2022,100
+Sarawak,Matu,sanitation,2024,100
+Sarawak,Matu,unemployment,2023,3.1
+Sarawak,Matu,unemployment,2024,2.5
+Sarawak,Miri,electricity,2022,96.3
+Sarawak,Miri,electricity,2024,99.91
+Sarawak,Miri,expenditure_mean,2022,4333
+Sarawak,Miri,expenditure_mean,2024,4609
+Sarawak,Miri,income_median,2022,6449
+Sarawak,Miri,income_median,2024,6600
+Sarawak,Miri,piped_water,2022,98.5
+Sarawak,Miri,piped_water,2024,99.38
+Sarawak,Miri,poverty,2022,6.3
+Sarawak,Miri,poverty,2024,3.8
+Sarawak,Miri,sanitation,2022,99.91
+Sarawak,Miri,sanitation,2024,100
+Sarawak,Miri,schools_primary,2024,55
+Sarawak,Miri,schools_primary,2025,55
+Sarawak,Miri,schools_secondary,2024,18
+Sarawak,Miri,schools_secondary,2025,18
+Sarawak,Miri,schools_tertiary,2024,0
+Sarawak,Miri,schools_tertiary,2025,0
+Sarawak,Miri,unemployment,2023,2.6
+Sarawak,Miri,unemployment,2024,2.7
+Sarawak,Mukah,electricity,2022,100
+Sarawak,Mukah,electricity,2024,100
+Sarawak,Mukah,expenditure_mean,2022,3615
+Sarawak,Mukah,expenditure_mean,2024,3650
+Sarawak,Mukah,income_median,2022,4623
+Sarawak,Mukah,income_median,2024,5169
+Sarawak,Mukah,piped_water,2022,88.5
+Sarawak,Mukah,piped_water,2024,96.07
+Sarawak,Mukah,poverty,2022,14
+Sarawak,Mukah,poverty,2024,11.9
+Sarawak,Mukah,sanitation,2022,99.54
+Sarawak,Mukah,sanitation,2024,100
+Sarawak,Mukah,schools_primary,2024,29
+Sarawak,Mukah,schools_primary,2025,29
+Sarawak,Mukah,schools_secondary,2024,3
+Sarawak,Mukah,schools_secondary,2025,3
+Sarawak,Mukah,schools_tertiary,2024,0
+Sarawak,Mukah,schools_tertiary,2025,0
+Sarawak,Mukah,unemployment,2023,2.8
+Sarawak,Mukah,unemployment,2024,2.6
+Sarawak,Pakan,electricity,2022,96.1
+Sarawak,Pakan,electricity,2024,100
+Sarawak,Pakan,expenditure_mean,2022,3076
+Sarawak,Pakan,expenditure_mean,2024,3444
+Sarawak,Pakan,income_median,2022,3546
+Sarawak,Pakan,income_median,2024,3742
+Sarawak,Pakan,piped_water,2022,87.3
+Sarawak,Pakan,piped_water,2024,90.91
+Sarawak,Pakan,poverty,2022,17.6
+Sarawak,Pakan,poverty,2024,14.5
+Sarawak,Pakan,sanitation,2022,100
+Sarawak,Pakan,sanitation,2024,100
+Sarawak,Pakan,unemployment,2023,1.7
+Sarawak,Pakan,unemployment,2024,1.6
+Sarawak,Pantu,electricity,2024,100
+Sarawak,Pantu,expenditure_mean,2024,2371
+Sarawak,Pantu,income_median,2024,2525
+Sarawak,Pantu,piped_water,2024,24.75
+Sarawak,Pantu,poverty,2024,10.9
+Sarawak,Pusa,electricity,2022,95.7
+Sarawak,Pusa,electricity,2024,100
+Sarawak,Pusa,expenditure_mean,2022,2389
+Sarawak,Pusa,expenditure_mean,2024,2736
+Sarawak,Pusa,income_median,2022,3124
+Sarawak,Pusa,income_median,2024,3276
+Sarawak,Pusa,piped_water,2022,74.2
+Sarawak,Pusa,piped_water,2024,100
+Sarawak,Pusa,poverty,2022,17.2
+Sarawak,Pusa,poverty,2024,14.6
+Sarawak,Pusa,sanitation,2022,100
+Sarawak,Pusa,sanitation,2024,100
+Sarawak,Pusa,schools_primary,2024,1
+Sarawak,Pusa,schools_primary,2025,1
+Sarawak,Pusa,schools_tertiary,2024,0
+Sarawak,Pusa,schools_tertiary,2025,0
+Sarawak,Pusa,unemployment,2023,1.2
+Sarawak,Pusa,unemployment,2024,1.7
+Sarawak,Samarahan,electricity,2022,100
+Sarawak,Samarahan,electricity,2024,100
+Sarawak,Samarahan,expenditure_mean,2022,4475
+Sarawak,Samarahan,expenditure_mean,2024,4973
+Sarawak,Samarahan,income_median,2022,5953
+Sarawak,Samarahan,income_median,2024,6785
+Sarawak,Samarahan,piped_water,2022,100
+Sarawak,Samarahan,piped_water,2024,100
+Sarawak,Samarahan,poverty,2022,7.9
+Sarawak,Samarahan,poverty,2024,6.3
+Sarawak,Samarahan,sanitation,2022,100
+Sarawak,Samarahan,sanitation,2024,100
+Sarawak,Samarahan,schools_primary,2024,26
+Sarawak,Samarahan,schools_primary,2025,26
+Sarawak,Samarahan,schools_secondary,2024,4
+Sarawak,Samarahan,schools_secondary,2025,4
+Sarawak,Samarahan,schools_tertiary,2024,0
+Sarawak,Samarahan,schools_tertiary,2025,0
+Sarawak,Samarahan,unemployment,2023,5.3
+Sarawak,Samarahan,unemployment,2024,5.7
+Sarawak,Saratok,electricity,2022,100
+Sarawak,Saratok,electricity,2024,100
+Sarawak,Saratok,expenditure_mean,2022,2974
+Sarawak,Saratok,expenditure_mean,2024,3127
+Sarawak,Saratok,income_median,2022,3763
+Sarawak,Saratok,income_median,2024,3418
+Sarawak,Saratok,piped_water,2022,98.3
+Sarawak,Saratok,piped_water,2024,99.29
+Sarawak,Saratok,poverty,2022,7.4
+Sarawak,Saratok,poverty,2024,5
+Sarawak,Saratok,sanitation,2022,100
+Sarawak,Saratok,sanitation,2024,100
+Sarawak,Saratok,schools_primary,2024,49
+Sarawak,Saratok,schools_primary,2025,49
+Sarawak,Saratok,schools_secondary,2024,5
+Sarawak,Saratok,schools_secondary,2025,5
+Sarawak,Saratok,schools_tertiary,2024,0
+Sarawak,Saratok,schools_tertiary,2025,0
+Sarawak,Saratok,unemployment,2023,3.3
+Sarawak,Saratok,unemployment,2024,3.1
+Sarawak,Sarikei,electricity,2022,100
+Sarawak,Sarikei,electricity,2024,100
+Sarawak,Sarikei,expenditure_mean,2022,3078
+Sarawak,Sarikei,expenditure_mean,2024,3849
+Sarawak,Sarikei,income_median,2022,3528
+Sarawak,Sarikei,income_median,2024,4675
+Sarawak,Sarikei,piped_water,2022,96.7
+Sarawak,Sarikei,piped_water,2024,96.55
+Sarawak,Sarikei,poverty,2022,20.9
+Sarawak,Sarikei,poverty,2024,17.8
+Sarawak,Sarikei,sanitation,2022,100
+Sarawak,Sarikei,sanitation,2024,100
+Sarawak,Sarikei,schools_primary,2024,44
+Sarawak,Sarikei,schools_primary,2025,44
+Sarawak,Sarikei,schools_secondary,2024,6
+Sarawak,Sarikei,schools_secondary,2025,6
+Sarawak,Sarikei,schools_tertiary,2024,0
+Sarawak,Sarikei,schools_tertiary,2025,0
+Sarawak,Sarikei,unemployment,2023,4.5
+Sarawak,Sarikei,unemployment,2024,4.3
+Sarawak,Sebauh,electricity,2022,100
+Sarawak,Sebauh,electricity,2024,98.55
+Sarawak,Sebauh,expenditure_mean,2022,2660
+Sarawak,Sebauh,expenditure_mean,2024,3311
+Sarawak,Sebauh,income_median,2022,4428
+Sarawak,Sebauh,income_median,2024,4636
+Sarawak,Sebauh,piped_water,2022,68.7
+Sarawak,Sebauh,piped_water,2024,59.42
+Sarawak,Sebauh,poverty,2022,4.8
+Sarawak,Sebauh,poverty,2024,2.9
+Sarawak,Sebauh,sanitation,2022,100
+Sarawak,Sebauh,sanitation,2024,100
+Sarawak,Sebauh,schools_primary,2024,9
+Sarawak,Sebauh,schools_primary,2025,9
+Sarawak,Sebauh,schools_secondary,2024,1
+Sarawak,Sebauh,schools_secondary,2025,1
+Sarawak,Sebauh,schools_tertiary,2024,0
+Sarawak,Sebauh,schools_tertiary,2025,0
+Sarawak,Sebauh,unemployment,2023,1.5
+Sarawak,Sebauh,unemployment,2024,1.4
+Sarawak,Sebuyau,electricity,2024,100
+Sarawak,Sebuyau,expenditure_mean,2024,2462
+Sarawak,Sebuyau,income_median,2024,2717
+Sarawak,Sebuyau,piped_water,2024,67.39
+Sarawak,Sebuyau,poverty,2024,21.4
+Sarawak,Selangau,electricity,2022,93.3
+Sarawak,Selangau,electricity,2024,95.96
+Sarawak,Selangau,expenditure_mean,2022,2798
+Sarawak,Selangau,expenditure_mean,2024,2947
+Sarawak,Selangau,income_median,2022,3005
+Sarawak,Selangau,income_median,2024,4170
+Sarawak,Selangau,piped_water,2022,38.5
+Sarawak,Selangau,piped_water,2024,31.31
+Sarawak,Selangau,poverty,2022,19.6
+Sarawak,Selangau,poverty,2024,17.2
+Sarawak,Selangau,sanitation,2022,100
+Sarawak,Selangau,sanitation,2024,98.99
+Sarawak,Selangau,schools_tertiary,2024,0
+Sarawak,Selangau,schools_tertiary,2025,0
+Sarawak,Selangau,unemployment,2023,1.9
+Sarawak,Selangau,unemployment,2024,2.3
+Sarawak,Serian,electricity,2022,99
+Sarawak,Serian,electricity,2024,100
+Sarawak,Serian,expenditure_mean,2022,3515
+Sarawak,Serian,expenditure_mean,2024,3594
+Sarawak,Serian,income_median,2022,4074
+Sarawak,Serian,income_median,2024,4082
+Sarawak,Serian,piped_water,2022,86.2
+Sarawak,Serian,piped_water,2024,87.93
+Sarawak,Serian,poverty,2022,14.6
+Sarawak,Serian,poverty,2024,11.8
+Sarawak,Serian,sanitation,2022,100
+Sarawak,Serian,sanitation,2024,100
+Sarawak,Serian,schools_primary,2024,79
+Sarawak,Serian,schools_primary,2025,79
+Sarawak,Serian,schools_secondary,2024,6
+Sarawak,Serian,schools_secondary,2025,6
+Sarawak,Serian,schools_tertiary,2024,0
+Sarawak,Serian,schools_tertiary,2025,0
+Sarawak,Serian,unemployment,2023,6.9
+Sarawak,Serian,unemployment,2024,6.7
+Sarawak,Sibu,electricity,2022,93.7
+Sarawak,Sibu,electricity,2024,100
+Sarawak,Sibu,expenditure_mean,2022,4366
+Sarawak,Sibu,expenditure_mean,2024,4490
+Sarawak,Sibu,income_median,2022,5248
+Sarawak,Sibu,income_median,2024,5737
+Sarawak,Sibu,piped_water,2022,98.1
+Sarawak,Sibu,piped_water,2024,99.21
+Sarawak,Sibu,poverty,2022,10.2
+Sarawak,Sibu,poverty,2024,6.3
+Sarawak,Sibu,sanitation,2022,99.92
+Sarawak,Sibu,sanitation,2024,100
+Sarawak,Sibu,schools_primary,2024,113
+Sarawak,Sibu,schools_primary,2025,113
+Sarawak,Sibu,schools_secondary,2024,24
+Sarawak,Sibu,schools_secondary,2025,24
+Sarawak,Sibu,schools_tertiary,2024,0
+Sarawak,Sibu,schools_tertiary,2025,0
+Sarawak,Sibu,unemployment,2023,5.6
+Sarawak,Sibu,unemployment,2024,5.7
+Sarawak,Siburan,electricity,2024,100
+Sarawak,Siburan,expenditure_mean,2024,4088
+Sarawak,Siburan,income_median,2024,5217
+Sarawak,Siburan,piped_water,2024,95.8
+Sarawak,Siburan,poverty,2024,4.2
+Sarawak,Simunjan,electricity,2022,100
+Sarawak,Simunjan,electricity,2024,100
+Sarawak,Simunjan,expenditure_mean,2022,2874
+Sarawak,Simunjan,expenditure_mean,2024,3130
+Sarawak,Simunjan,income_median,2022,3196
+Sarawak,Simunjan,income_median,2024,3365
+Sarawak,Simunjan,piped_water,2022,70.5
+Sarawak,Simunjan,piped_water,2024,87.5
+Sarawak,Simunjan,poverty,2022,17.9
+Sarawak,Simunjan,poverty,2024,14.9
+Sarawak,Simunjan,sanitation,2022,100
+Sarawak,Simunjan,sanitation,2024,100
+Sarawak,Simunjan,schools_primary,2024,49
+Sarawak,Simunjan,schools_primary,2025,49
+Sarawak,Simunjan,schools_secondary,2024,4
+Sarawak,Simunjan,schools_secondary,2025,4
+Sarawak,Simunjan,schools_tertiary,2024,0
+Sarawak,Simunjan,schools_tertiary,2025,0
+Sarawak,Simunjan,unemployment,2023,4.3
+Sarawak,Simunjan,unemployment,2024,4.2
+Sarawak,Song,electricity,2022,78.1
+Sarawak,Song,electricity,2024,81.69
+Sarawak,Song,expenditure_mean,2022,2841
+Sarawak,Song,expenditure_mean,2024,2939
+Sarawak,Song,income_median,2022,2926
+Sarawak,Song,income_median,2024,3052
+Sarawak,Song,piped_water,2022,29.8
+Sarawak,Song,piped_water,2024,47.89
+Sarawak,Song,poverty,2022,15.8
+Sarawak,Song,poverty,2024,11.3
+Sarawak,Song,sanitation,2022,100
+Sarawak,Song,sanitation,2024,100
+Sarawak,Song,schools_primary,2024,17
+Sarawak,Song,schools_primary,2025,17
+Sarawak,Song,schools_secondary,2024,3
+Sarawak,Song,schools_secondary,2025,3
+Sarawak,Song,schools_tertiary,2024,0
+Sarawak,Song,schools_tertiary,2025,0
+Sarawak,Song,unemployment,2023,3.3
+Sarawak,Song,unemployment,2024,3.7
+Sarawak,Sri Aman,electricity,2022,97.9
+Sarawak,Sri Aman,electricity,2024,100
+Sarawak,Sri Aman,expenditure_mean,2022,3071
+Sarawak,Sri Aman,expenditure_mean,2024,3378
+Sarawak,Sri Aman,income_median,2022,3704
+Sarawak,Sri Aman,income_median,2024,3967
+Sarawak,Sri Aman,piped_water,2022,84.7
+Sarawak,Sri Aman,piped_water,2024,97.17
+Sarawak,Sri Aman,poverty,2022,8.9
+Sarawak,Sri Aman,poverty,2024,6.2
+Sarawak,Sri Aman,sanitation,2022,100
+Sarawak,Sri Aman,sanitation,2024,100
+Sarawak,Sri Aman,schools_primary,2024,36
+Sarawak,Sri Aman,schools_primary,2025,36
+Sarawak,Sri Aman,schools_secondary,2024,5
+Sarawak,Sri Aman,schools_secondary,2025,5
+Sarawak,Sri Aman,schools_tertiary,2024,0
+Sarawak,Sri Aman,schools_tertiary,2025,0
+Sarawak,Sri Aman,unemployment,2023,2
+Sarawak,Sri Aman,unemployment,2024,1.6
+Sarawak,Subis,electricity,2022,100
+Sarawak,Subis,electricity,2024,100
+Sarawak,Subis,expenditure_mean,2022,2756
+Sarawak,Subis,expenditure_mean,2024,3967
+Sarawak,Subis,income_median,2022,5194
+Sarawak,Subis,income_median,2024,5531
+Sarawak,Subis,piped_water,2022,67.4
+Sarawak,Subis,piped_water,2024,90.59
+Sarawak,Subis,poverty,2022,4.7
+Sarawak,Subis,poverty,2024,2.4
+Sarawak,Subis,sanitation,2022,100
+Sarawak,Subis,sanitation,2024,100
+Sarawak,Subis,schools_primary,2024,24
+Sarawak,Subis,schools_primary,2025,24
+Sarawak,Subis,schools_secondary,2024,2
+Sarawak,Subis,schools_secondary,2025,2
+Sarawak,Subis,schools_tertiary,2024,0
+Sarawak,Subis,schools_tertiary,2025,0
+Sarawak,Subis,unemployment,2023,1.7
+Sarawak,Subis,unemployment,2024,1.5
+Sarawak,Tanjung Manis,electricity,2022,100
+Sarawak,Tanjung Manis,electricity,2024,100
+Sarawak,Tanjung Manis,expenditure_mean,2022,2899
+Sarawak,Tanjung Manis,expenditure_mean,2024,2902
+Sarawak,Tanjung Manis,income_median,2022,3300
+Sarawak,Tanjung Manis,income_median,2024,3837
+Sarawak,Tanjung Manis,piped_water,2022,92.4
+Sarawak,Tanjung Manis,piped_water,2024,89.74
+Sarawak,Tanjung Manis,poverty,2022,20.7
+Sarawak,Tanjung Manis,poverty,2024,15.4
+Sarawak,Tanjung Manis,sanitation,2022,100
+Sarawak,Tanjung Manis,sanitation,2024,100
+Sarawak,Tanjung Manis,unemployment,2023,5.3
+Sarawak,Tanjung Manis,unemployment,2024,5.6
+Sarawak,Tatau,electricity,2022,77.8
+Sarawak,Tatau,electricity,2024,87.01
+Sarawak,Tatau,expenditure_mean,2022,3066
+Sarawak,Tatau,expenditure_mean,2024,3071
+Sarawak,Tatau,income_median,2022,4787
+Sarawak,Tatau,income_median,2024,4409
+Sarawak,Tatau,piped_water,2022,63.7
+Sarawak,Tatau,piped_water,2024,62.34
+Sarawak,Tatau,poverty,2022,5.9
+Sarawak,Tatau,poverty,2024,2.6
+Sarawak,Tatau,sanitation,2022,100
+Sarawak,Tatau,sanitation,2024,100
+Sarawak,Tatau,schools_primary,2024,14
+Sarawak,Tatau,schools_primary,2025,14
+Sarawak,Tatau,schools_secondary,2024,1
+Sarawak,Tatau,schools_secondary,2025,1
+Sarawak,Tatau,schools_tertiary,2024,0
+Sarawak,Tatau,schools_tertiary,2025,0
+Sarawak,Tatau,unemployment,2023,3.1
+Sarawak,Tatau,unemployment,2024,2.8
+Sarawak,Tebedu,electricity,2022,91.4
+Sarawak,Tebedu,electricity,2024,100
+Sarawak,Tebedu,expenditure_mean,2022,2397
+Sarawak,Tebedu,expenditure_mean,2024,2639
+Sarawak,Tebedu,income_median,2022,2579
+Sarawak,Tebedu,income_median,2024,3024
+Sarawak,Tebedu,piped_water,2022,44.1
+Sarawak,Tebedu,piped_water,2024,81.72
+Sarawak,Tebedu,poverty,2022,26.9
+Sarawak,Tebedu,poverty,2024,25.8
+Sarawak,Tebedu,sanitation,2022,100
+Sarawak,Tebedu,sanitation,2024,100
+Sarawak,Tebedu,unemployment,2023,5.9
+Sarawak,Tebedu,unemployment,2024,6.1
+Sarawak,Telang Usan,electricity,2022,92.8
+Sarawak,Telang Usan,electricity,2024,93.75
+Sarawak,Telang Usan,expenditure_mean,2022,2578
+Sarawak,Telang Usan,expenditure_mean,2024,2824
+Sarawak,Telang Usan,income_median,2022,3870
+Sarawak,Telang Usan,income_median,2024,4281
+Sarawak,Telang Usan,piped_water,2022,57.8
+Sarawak,Telang Usan,piped_water,2024,57.5
+Sarawak,Telang Usan,poverty,2022,6
+Sarawak,Telang Usan,poverty,2024,1.3
+Sarawak,Telang Usan,sanitation,2022,100
+Sarawak,Telang Usan,sanitation,2024,100
+Sarawak,Telang Usan,unemployment,2023,1.2
+Sarawak,Telang Usan,unemployment,2024,1.5
+Selangor,All,electricity,2022,100
+Selangor,All,electricity,2024,100
+Selangor,All,expenditure_mean,2022,6770
+Selangor,All,expenditure_mean,2024,7266
+Selangor,All,income_median,2022,9983
+Selangor,All,income_median,2024,10726
+Selangor,All,piped_water,2022,100
+Selangor,All,piped_water,2024,100
+Selangor,All,poverty,2022,1.5
+Selangor,All,poverty,2024,0.9
+Selangor,All,sanitation,2022,100
+Selangor,All,sanitation,2024,100
+Selangor,All,unemployment,2023,2.7
+Selangor,All,unemployment,2024,2.3
+Selangor,Gombak,electricity,2022,100
+Selangor,Gombak,electricity,2024,100
+Selangor,Gombak,expenditure_mean,2022,6673
+Selangor,Gombak,expenditure_mean,2024,7326
+Selangor,Gombak,income_median,2022,10180
+Selangor,Gombak,income_median,2024,10777
+Selangor,Gombak,piped_water,2022,100
+Selangor,Gombak,piped_water,2024,99.97
+Selangor,Gombak,poverty,2022,2.4
+Selangor,Gombak,poverty,2024,2.1
+Selangor,Gombak,sanitation,2022,100
+Selangor,Gombak,sanitation,2024,100
+Selangor,Gombak,schools_primary,2024,68
+Selangor,Gombak,schools_primary,2025,68
+Selangor,Gombak,schools_secondary,2024,36
+Selangor,Gombak,schools_secondary,2025,36
+Selangor,Gombak,schools_tertiary,2024,1
+Selangor,Gombak,schools_tertiary,2025,1
+Selangor,Gombak,unemployment,2023,3.6
+Selangor,Gombak,unemployment,2024,3
+Selangor,Hulu Langat,electricity,2022,100
+Selangor,Hulu Langat,electricity,2024,100
+Selangor,Hulu Langat,expenditure_mean,2022,6289
+Selangor,Hulu Langat,expenditure_mean,2024,6758
+Selangor,Hulu Langat,income_median,2022,11210
+Selangor,Hulu Langat,income_median,2024,11404
+Selangor,Hulu Langat,piped_water,2022,100
+Selangor,Hulu Langat,piped_water,2024,100
+Selangor,Hulu Langat,poverty,2022,0.5
+Selangor,Hulu Langat,poverty,2024,0.1
+Selangor,Hulu Langat,sanitation,2022,100
+Selangor,Hulu Langat,sanitation,2024,100
+Selangor,Hulu Langat,schools_primary,2024,91
+Selangor,Hulu Langat,schools_primary,2025,92
+Selangor,Hulu Langat,schools_secondary,2024,40
+Selangor,Hulu Langat,schools_secondary,2025,40
+Selangor,Hulu Langat,schools_tertiary,2024,1
+Selangor,Hulu Langat,schools_tertiary,2025,1
+Selangor,Hulu Langat,unemployment,2023,2.7
+Selangor,Hulu Langat,unemployment,2024,2.3
+Selangor,Hulu Selangor,electricity,2022,100
+Selangor,Hulu Selangor,electricity,2024,100
+Selangor,Hulu Selangor,expenditure_mean,2022,4604
+Selangor,Hulu Selangor,expenditure_mean,2024,5425
+Selangor,Hulu Selangor,income_median,2022,7678
+Selangor,Hulu Selangor,income_median,2024,8485
+Selangor,Hulu Selangor,piped_water,2022,100
+Selangor,Hulu Selangor,piped_water,2024,100
+Selangor,Hulu Selangor,poverty,2022,1.7
+Selangor,Hulu Selangor,poverty,2024,0.4
+Selangor,Hulu Selangor,sanitation,2022,100
+Selangor,Hulu Selangor,sanitation,2024,100
+Selangor,Hulu Selangor,schools_primary,2024,51
+Selangor,Hulu Selangor,schools_primary,2025,51
+Selangor,Hulu Selangor,schools_secondary,2024,17
+Selangor,Hulu Selangor,schools_secondary,2025,17
+Selangor,Hulu Selangor,schools_tertiary,2024,0
+Selangor,Hulu Selangor,schools_tertiary,2025,0
+Selangor,Hulu Selangor,unemployment,2023,1.7
+Selangor,Hulu Selangor,unemployment,2024,1.4
+Selangor,Klang,electricity,2022,100
+Selangor,Klang,electricity,2024,100
+Selangor,Klang,expenditure_mean,2022,6622
+Selangor,Klang,expenditure_mean,2024,6927
+Selangor,Klang,income_median,2022,8203
+Selangor,Klang,income_median,2024,8837
+Selangor,Klang,piped_water,2022,100
+Selangor,Klang,piped_water,2024,100
+Selangor,Klang,poverty,2022,2.2
+Selangor,Klang,poverty,2024,1
+Selangor,Klang,sanitation,2022,99.9
+Selangor,Klang,sanitation,2024,100
+Selangor,Klang,schools_primary,2024,91
+Selangor,Klang,schools_primary,2025,91
+Selangor,Klang,schools_secondary,2024,40
+Selangor,Klang,schools_secondary,2025,40
+Selangor,Klang,schools_tertiary,2024,0
+Selangor,Klang,schools_tertiary,2025,0
+Selangor,Klang,unemployment,2023,3.2
+Selangor,Klang,unemployment,2024,2.6
+Selangor,Kuala Langat,electricity,2022,100
+Selangor,Kuala Langat,electricity,2024,100
+Selangor,Kuala Langat,expenditure_mean,2022,5621
+Selangor,Kuala Langat,expenditure_mean,2024,6123
+Selangor,Kuala Langat,income_median,2022,10093
+Selangor,Kuala Langat,income_median,2024,10583
+Selangor,Kuala Langat,piped_water,2022,100
+Selangor,Kuala Langat,piped_water,2024,100
+Selangor,Kuala Langat,poverty,2022,0.3
+Selangor,Kuala Langat,poverty,2024,0.3
+Selangor,Kuala Langat,sanitation,2022,100
+Selangor,Kuala Langat,sanitation,2024,100
+Selangor,Kuala Langat,schools_primary,2024,57
+Selangor,Kuala Langat,schools_primary,2025,57
+Selangor,Kuala Langat,schools_secondary,2024,19
+Selangor,Kuala Langat,schools_secondary,2025,19
+Selangor,Kuala Langat,schools_tertiary,2024,0
+Selangor,Kuala Langat,schools_tertiary,2025,0
+Selangor,Kuala Langat,unemployment,2023,1.6
+Selangor,Kuala Langat,unemployment,2024,1.2
+Selangor,Kuala Selangor,electricity,2022,100
+Selangor,Kuala Selangor,electricity,2024,100
+Selangor,Kuala Selangor,expenditure_mean,2022,5543
+Selangor,Kuala Selangor,expenditure_mean,2024,5974
+Selangor,Kuala Selangor,income_median,2022,7644
+Selangor,Kuala Selangor,income_median,2024,8046
+Selangor,Kuala Selangor,piped_water,2022,100
+Selangor,Kuala Selangor,piped_water,2024,100
+Selangor,Kuala Selangor,poverty,2022,2.8
+Selangor,Kuala Selangor,poverty,2024,1.8
+Selangor,Kuala Selangor,sanitation,2022,100
+Selangor,Kuala Selangor,sanitation,2024,100
+Selangor,Kuala Selangor,schools_primary,2024,68
+Selangor,Kuala Selangor,schools_primary,2025,68
+Selangor,Kuala Selangor,schools_secondary,2024,22
+Selangor,Kuala Selangor,schools_secondary,2025,22
+Selangor,Kuala Selangor,schools_tertiary,2024,0
+Selangor,Kuala Selangor,schools_tertiary,2025,0
+Selangor,Kuala Selangor,unemployment,2023,3.1
+Selangor,Kuala Selangor,unemployment,2024,2.6
+Selangor,Petaling,electricity,2022,100
+Selangor,Petaling,electricity,2024,100
+Selangor,Petaling,expenditure_mean,2022,7721
+Selangor,Petaling,expenditure_mean,2024,8210
+Selangor,Petaling,income_median,2022,9618
+Selangor,Petaling,income_median,2024,10688
+Selangor,Petaling,piped_water,2022,100
+Selangor,Petaling,piped_water,2024,100
+Selangor,Petaling,poverty,2022,1.6
+Selangor,Petaling,poverty,2024,1
+Selangor,Petaling,sanitation,2022,100
+Selangor,Petaling,sanitation,2024,100
+Selangor,Petaling,schools_primary,2024,148
+Selangor,Petaling,schools_primary,2025,150
+Selangor,Petaling,schools_secondary,2024,77
+Selangor,Petaling,schools_secondary,2025,77
+Selangor,Petaling,schools_tertiary,2024,2
+Selangor,Petaling,schools_tertiary,2025,2
+Selangor,Petaling,unemployment,2023,2.4
+Selangor,Petaling,unemployment,2024,2
+Selangor,Sabak Bernam,electricity,2022,100
+Selangor,Sabak Bernam,electricity,2024,100
+Selangor,Sabak Bernam,expenditure_mean,2022,5128
+Selangor,Sabak Bernam,expenditure_mean,2024,5621
+Selangor,Sabak Bernam,income_median,2022,5533
+Selangor,Sabak Bernam,income_median,2024,6941
+Selangor,Sabak Bernam,piped_water,2022,100
+Selangor,Sabak Bernam,piped_water,2024,100
+Selangor,Sabak Bernam,poverty,2022,5.3
+Selangor,Sabak Bernam,poverty,2024,2.7
+Selangor,Sabak Bernam,sanitation,2022,100
+Selangor,Sabak Bernam,sanitation,2024,100
+Selangor,Sabak Bernam,schools_primary,2024,47
+Selangor,Sabak Bernam,schools_primary,2025,47
+Selangor,Sabak Bernam,schools_secondary,2024,17
+Selangor,Sabak Bernam,schools_secondary,2025,17
+Selangor,Sabak Bernam,schools_tertiary,2024,0
+Selangor,Sabak Bernam,schools_tertiary,2025,0
+Selangor,Sabak Bernam,unemployment,2023,2.2
+Selangor,Sabak Bernam,unemployment,2024,1.9
+Selangor,Sepang,electricity,2022,100
+Selangor,Sepang,electricity,2024,100
+Selangor,Sepang,expenditure_mean,2022,6976
+Selangor,Sepang,expenditure_mean,2024,7676
+Selangor,Sepang,income_median,2022,12608
+Selangor,Sepang,income_median,2024,11131
+Selangor,Sepang,piped_water,2022,100
+Selangor,Sepang,piped_water,2024,100
+Selangor,Sepang,poverty,2022,0
+Selangor,Sepang,poverty,2024,0.1
+Selangor,Sepang,sanitation,2022,100
+Selangor,Sepang,sanitation,2024,100
+Selangor,Sepang,schools_primary,2024,40
+Selangor,Sepang,schools_primary,2025,40
+Selangor,Sepang,schools_secondary,2024,13
+Selangor,Sepang,schools_secondary,2025,13
+Selangor,Sepang,schools_tertiary,2024,0
+Selangor,Sepang,schools_tertiary,2025,0
+Selangor,Sepang,unemployment,2023,3.1
+Selangor,Sepang,unemployment,2024,2.5
+Terengganu,All,electricity,2022,100
+Terengganu,All,electricity,2024,100
+Terengganu,All,expenditure_mean,2022,4796
+Terengganu,All,expenditure_mean,2024,5219
+Terengganu,All,income_median,2022,5878
+Terengganu,All,income_median,2024,6627
+Terengganu,All,piped_water,2022,98.5
+Terengganu,All,piped_water,2024,99.9
+Terengganu,All,poverty,2022,6.2
+Terengganu,All,poverty,2024,5.8
+Terengganu,All,sanitation,2022,100
+Terengganu,All,sanitation,2024,100
+Terengganu,All,unemployment,2023,3.4
+Terengganu,All,unemployment,2024,3.1
+Terengganu,Besut,electricity,2022,100
+Terengganu,Besut,electricity,2024,100
+Terengganu,Besut,expenditure_mean,2022,4191
+Terengganu,Besut,expenditure_mean,2024,4339
+Terengganu,Besut,income_median,2022,4743
+Terengganu,Besut,income_median,2024,5820
+Terengganu,Besut,piped_water,2022,93.8
+Terengganu,Besut,piped_water,2024,100
+Terengganu,Besut,poverty,2022,12.7
+Terengganu,Besut,poverty,2024,13.1
+Terengganu,Besut,sanitation,2022,100
+Terengganu,Besut,sanitation,2024,100
+Terengganu,Besut,schools_primary,2024,54
+Terengganu,Besut,schools_primary,2025,54
+Terengganu,Besut,schools_secondary,2024,21
+Terengganu,Besut,schools_secondary,2025,21
+Terengganu,Besut,schools_tertiary,2024,0
+Terengganu,Besut,schools_tertiary,2025,0
+Terengganu,Besut,unemployment,2023,3.8
+Terengganu,Besut,unemployment,2024,3.5
+Terengganu,Dungun,electricity,2022,100
+Terengganu,Dungun,electricity,2024,100
+Terengganu,Dungun,expenditure_mean,2022,5215
+Terengganu,Dungun,expenditure_mean,2024,5833
+Terengganu,Dungun,income_median,2022,6356
+Terengganu,Dungun,income_median,2024,7156
+Terengganu,Dungun,piped_water,2022,99.4
+Terengganu,Dungun,piped_water,2024,98.99
+Terengganu,Dungun,poverty,2022,2.2
+Terengganu,Dungun,poverty,2024,4.4
+Terengganu,Dungun,sanitation,2022,100
+Terengganu,Dungun,sanitation,2024,100
+Terengganu,Dungun,schools_primary,2024,48
+Terengganu,Dungun,schools_primary,2025,48
+Terengganu,Dungun,schools_secondary,2024,24
+Terengganu,Dungun,schools_secondary,2025,24
+Terengganu,Dungun,schools_tertiary,2024,0
+Terengganu,Dungun,schools_tertiary,2025,0
+Terengganu,Dungun,unemployment,2023,3.4
+Terengganu,Dungun,unemployment,2024,3.1
+Terengganu,Hulu Terengganu,electricity,2022,100
+Terengganu,Hulu Terengganu,electricity,2024,100
+Terengganu,Hulu Terengganu,expenditure_mean,2022,4332
+Terengganu,Hulu Terengganu,expenditure_mean,2024,4554
+Terengganu,Hulu Terengganu,income_median,2022,5090
+Terengganu,Hulu Terengganu,income_median,2024,6134
+Terengganu,Hulu Terengganu,piped_water,2022,99.4
+Terengganu,Hulu Terengganu,piped_water,2024,100
+Terengganu,Hulu Terengganu,poverty,2022,10.8
+Terengganu,Hulu Terengganu,poverty,2024,6.6
+Terengganu,Hulu Terengganu,sanitation,2022,100
+Terengganu,Hulu Terengganu,sanitation,2024,100
+Terengganu,Hulu Terengganu,schools_primary,2024,49
+Terengganu,Hulu Terengganu,schools_primary,2025,49
+Terengganu,Hulu Terengganu,schools_secondary,2024,17
+Terengganu,Hulu Terengganu,schools_secondary,2025,17
+Terengganu,Hulu Terengganu,schools_tertiary,2024,0
+Terengganu,Hulu Terengganu,schools_tertiary,2025,0
+Terengganu,Hulu Terengganu,unemployment,2023,3.7
+Terengganu,Hulu Terengganu,unemployment,2024,3.3
+Terengganu,Kemaman,electricity,2022,100
+Terengganu,Kemaman,electricity,2024,100
+Terengganu,Kemaman,expenditure_mean,2022,4978
+Terengganu,Kemaman,expenditure_mean,2024,5644
+Terengganu,Kemaman,income_median,2022,6425
+Terengganu,Kemaman,income_median,2024,7709
+Terengganu,Kemaman,piped_water,2022,100
+Terengganu,Kemaman,piped_water,2024,100
+Terengganu,Kemaman,poverty,2022,4.1
+Terengganu,Kemaman,poverty,2024,3.5
+Terengganu,Kemaman,sanitation,2022,100
+Terengganu,Kemaman,sanitation,2024,100
+Terengganu,Kemaman,schools_primary,2024,47
+Terengganu,Kemaman,schools_primary,2025,47
+Terengganu,Kemaman,schools_secondary,2024,25
+Terengganu,Kemaman,schools_secondary,2025,25
+Terengganu,Kemaman,schools_tertiary,2024,0
+Terengganu,Kemaman,schools_tertiary,2025,0
+Terengganu,Kemaman,unemployment,2023,2.9
+Terengganu,Kemaman,unemployment,2024,2.6
+Terengganu,Kuala Nerus,electricity,2022,100
+Terengganu,Kuala Nerus,electricity,2024,100
+Terengganu,Kuala Nerus,expenditure_mean,2022,5224
+Terengganu,Kuala Nerus,expenditure_mean,2024,5498
+Terengganu,Kuala Nerus,income_median,2022,6800
+Terengganu,Kuala Nerus,income_median,2024,7304
+Terengganu,Kuala Nerus,piped_water,2022,99.4
+Terengganu,Kuala Nerus,piped_water,2024,100
+Terengganu,Kuala Nerus,poverty,2022,1.9
+Terengganu,Kuala Nerus,poverty,2024,1.6
+Terengganu,Kuala Nerus,sanitation,2022,100
+Terengganu,Kuala Nerus,sanitation,2024,100
+Terengganu,Kuala Nerus,schools_primary,2024,29
+Terengganu,Kuala Nerus,schools_primary,2025,29
+Terengganu,Kuala Nerus,schools_secondary,2024,16
+Terengganu,Kuala Nerus,schools_secondary,2025,16
+Terengganu,Kuala Nerus,schools_tertiary,2024,0
+Terengganu,Kuala Nerus,schools_tertiary,2025,0
+Terengganu,Kuala Nerus,unemployment,2023,3.6
+Terengganu,Kuala Nerus,unemployment,2024,3.3
+Terengganu,Kuala Terengganu,electricity,2022,100
+Terengganu,Kuala Terengganu,electricity,2024,100
+Terengganu,Kuala Terengganu,expenditure_mean,2022,4881
+Terengganu,Kuala Terengganu,expenditure_mean,2024,5264
+Terengganu,Kuala Terengganu,income_median,2022,5872
+Terengganu,Kuala Terengganu,income_median,2024,6615
+Terengganu,Kuala Terengganu,piped_water,2022,98.6
+Terengganu,Kuala Terengganu,piped_water,2024,100
+Terengganu,Kuala Terengganu,poverty,2022,5.9
+Terengganu,Kuala Terengganu,poverty,2024,4.2
+Terengganu,Kuala Terengganu,sanitation,2022,100
+Terengganu,Kuala Terengganu,sanitation,2024,100
+Terengganu,Kuala Terengganu,schools_primary,2024,53
+Terengganu,Kuala Terengganu,schools_primary,2025,53
+Terengganu,Kuala Terengganu,schools_secondary,2024,24
+Terengganu,Kuala Terengganu,schools_secondary,2025,24
+Terengganu,Kuala Terengganu,schools_tertiary,2024,2
+Terengganu,Kuala Terengganu,schools_tertiary,2025,2
+Terengganu,Kuala Terengganu,unemployment,2023,3.6
+Terengganu,Kuala Terengganu,unemployment,2024,3.3
+Terengganu,Marang,electricity,2022,100
+Terengganu,Marang,electricity,2024,100
+Terengganu,Marang,expenditure_mean,2022,4675
+Terengganu,Marang,expenditure_mean,2024,5141
+Terengganu,Marang,income_median,2022,5291
+Terengganu,Marang,income_median,2024,6246
+Terengganu,Marang,piped_water,2022,99.4
+Terengganu,Marang,piped_water,2024,100
+Terengganu,Marang,poverty,2022,9
+Terengganu,Marang,poverty,2024,7.3
+Terengganu,Marang,sanitation,2022,100
+Terengganu,Marang,sanitation,2024,100
+Terengganu,Marang,schools_primary,2024,29
+Terengganu,Marang,schools_primary,2025,29
+Terengganu,Marang,schools_secondary,2024,13
+Terengganu,Marang,schools_secondary,2025,13
+Terengganu,Marang,schools_tertiary,2024,0
+Terengganu,Marang,schools_tertiary,2025,0
+Terengganu,Marang,unemployment,2023,3
+Terengganu,Marang,unemployment,2024,2.6
+Terengganu,Setiu,electricity,2022,100
+Terengganu,Setiu,electricity,2024,100
+Terengganu,Setiu,expenditure_mean,2022,4017
+Terengganu,Setiu,expenditure_mean,2024,4314
+Terengganu,Setiu,income_median,2022,5211
+Terengganu,Setiu,income_median,2024,6125
+Terengganu,Setiu,piped_water,2022,97.2
+Terengganu,Setiu,piped_water,2024,100
+Terengganu,Setiu,poverty,2022,7.5
+Terengganu,Setiu,poverty,2024,4.7
+Terengganu,Setiu,sanitation,2022,100
+Terengganu,Setiu,sanitation,2024,100
+Terengganu,Setiu,schools_primary,2024,43
+Terengganu,Setiu,schools_primary,2025,43
+Terengganu,Setiu,schools_secondary,2024,14
+Terengganu,Setiu,schools_secondary,2025,14
+Terengganu,Setiu,schools_tertiary,2024,0
+Terengganu,Setiu,schools_tertiary,2025,0
+Terengganu,Setiu,unemployment,2023,3.9
+Terengganu,Setiu,unemployment,2024,3.6
+W.P. Kuala Lumpur,All,expenditure_mean,2022,7823
+W.P. Kuala Lumpur,All,expenditure_mean,2024,8178
+W.P. Kuala Lumpur,All,income_median,2022,10234
+W.P. Kuala Lumpur,All,income_median,2024,10802
+W.P. Kuala Lumpur,All,poverty,2022,1.4
+W.P. Kuala Lumpur,All,poverty,2024,1
+W.P. Kuala Lumpur,All,unemployment,2023,3
+W.P. Kuala Lumpur,All,unemployment,2024,2.6
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,electricity,2022,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,electricity,2024,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,expenditure_mean,2022,7823
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,expenditure_mean,2024,8178
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,income_median,2022,10234
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,income_median,2024,10802
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,piped_water,2022,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,piped_water,2024,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,poverty,2022,1.4
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,poverty,2024,1
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,sanitation,2022,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,sanitation,2024,100
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_primary,2024,187
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_primary,2025,186
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_secondary,2024,104
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_secondary,2025,104
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_tertiary,2024,2
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,schools_tertiary,2025,2
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,unemployment,2023,3
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,unemployment,2024,2.6
+W.P. Labuan,All,expenditure_mean,2022,4176
+W.P. Labuan,All,expenditure_mean,2024,4497
+W.P. Labuan,All,income_median,2022,6904
+W.P. Labuan,All,income_median,2024,7383
+W.P. Labuan,All,poverty,2022,2.5
+W.P. Labuan,All,poverty,2024,2
+W.P. Labuan,All,unemployment,2023,6.8
+W.P. Labuan,All,unemployment,2024,6.5
+W.P. Labuan,W.P. Labuan,electricity,2022,100
+W.P. Labuan,W.P. Labuan,electricity,2024,100
+W.P. Labuan,W.P. Labuan,expenditure_mean,2022,4176
+W.P. Labuan,W.P. Labuan,expenditure_mean,2024,4497
+W.P. Labuan,W.P. Labuan,income_median,2022,6904
+W.P. Labuan,W.P. Labuan,income_median,2024,7383
+W.P. Labuan,W.P. Labuan,piped_water,2022,100
+W.P. Labuan,W.P. Labuan,piped_water,2024,100
+W.P. Labuan,W.P. Labuan,poverty,2022,2.5
+W.P. Labuan,W.P. Labuan,poverty,2024,2
+W.P. Labuan,W.P. Labuan,sanitation,2022,100
+W.P. Labuan,W.P. Labuan,sanitation,2024,100
+W.P. Labuan,W.P. Labuan,schools_primary,2024,17
+W.P. Labuan,W.P. Labuan,schools_primary,2025,17
+W.P. Labuan,W.P. Labuan,schools_secondary,2024,11
+W.P. Labuan,W.P. Labuan,schools_secondary,2025,11
+W.P. Labuan,W.P. Labuan,schools_tertiary,2024,0
+W.P. Labuan,W.P. Labuan,schools_tertiary,2025,0
+W.P. Labuan,W.P. Labuan,unemployment,2023,6.8
+W.P. Labuan,W.P. Labuan,unemployment,2024,6.5
+W.P. Putrajaya,All,expenditure_mean,2022,8897
+W.P. Putrajaya,All,expenditure_mean,2024,9186
+W.P. Putrajaya,All,income_median,2022,10056
+W.P. Putrajaya,All,income_median,2024,10769
+W.P. Putrajaya,All,poverty,2022,0.1
+W.P. Putrajaya,All,poverty,2024,0.2
+W.P. Putrajaya,All,unemployment,2023,0.8
+W.P. Putrajaya,All,unemployment,2024,1
+W.P. Putrajaya,W.P. Putrajaya,electricity,2022,100
+W.P. Putrajaya,W.P. Putrajaya,electricity,2024,100
+W.P. Putrajaya,W.P. Putrajaya,expenditure_mean,2022,8897
+W.P. Putrajaya,W.P. Putrajaya,expenditure_mean,2024,9186
+W.P. Putrajaya,W.P. Putrajaya,income_median,2022,10056
+W.P. Putrajaya,W.P. Putrajaya,income_median,2024,10769
+W.P. Putrajaya,W.P. Putrajaya,piped_water,2022,100
+W.P. Putrajaya,W.P. Putrajaya,piped_water,2024,100
+W.P. Putrajaya,W.P. Putrajaya,poverty,2022,0.1
+W.P. Putrajaya,W.P. Putrajaya,poverty,2024,0.2
+W.P. Putrajaya,W.P. Putrajaya,sanitation,2022,100
+W.P. Putrajaya,W.P. Putrajaya,sanitation,2024,100
+W.P. Putrajaya,W.P. Putrajaya,schools_primary,2024,16
+W.P. Putrajaya,W.P. Putrajaya,schools_primary,2025,16
+W.P. Putrajaya,W.P. Putrajaya,schools_secondary,2024,11
+W.P. Putrajaya,W.P. Putrajaya,schools_secondary,2025,11
+W.P. Putrajaya,W.P. Putrajaya,schools_tertiary,2024,0
+W.P. Putrajaya,W.P. Putrajaya,schools_tertiary,2025,0
+W.P. Putrajaya,W.P. Putrajaya,unemployment,2023,0.8
+W.P. Putrajaya,W.P. Putrajaya,unemployment,2024,1

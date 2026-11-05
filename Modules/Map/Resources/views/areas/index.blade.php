@@ -70,6 +70,7 @@
         @include('map::areas._about')
     </div>
 
+    <script src="{{ versioned_asset('modules/map/areas-motion.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/map/nearby.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/map/areas-near.js') }}" defer></script>
 @endif

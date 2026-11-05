@@ -114,6 +114,36 @@ return [
         'about' => 'https://photon.komoot.io',
     ],
 
+    // "Living here" on a police district's profile: income, spending, poverty, unemployment, schools and amenities, from
+    // the Department of Statistics Malaysia and the Ministry of Education, by administrative district (AreaLiving). They
+    // come with the code, as population-by-state.csv does, so a release needs no database work; "php artisan
+    // map:update-living" makes file from these sources again when they're updated. areas gives the administrative
+    // district each police district's pin is in (see district-living-LICENSE.txt).
+    'living' => [
+        'file' => 'Database/data/district-living.csv',
+        'areas' => 'Database/data/police-district-areas.csv',
+        'sources' => [
+            'hies_district' => 'https://storage.dosm.gov.my/hies/hies_district.csv',
+            'hies_state' => 'https://storage.dosm.gov.my/hies/hies_state.csv',
+            'hh_income' => 'https://storage.dosm.gov.my/hies/hh_income.csv',
+            'hh_poverty' => 'https://storage.dosm.gov.my/hies/hh_poverty.csv',
+            'lfs_district' => 'https://storage.dosm.gov.my/labour/lfs_district.csv',
+            'lfs_state_sex' => 'https://storage.dosm.gov.my/labour/lfs_state_sex.csv',
+            'lfs_year' => 'https://storage.dosm.gov.my/labour/lfs_year.csv',
+            'hh_access_amenities' => 'https://storage.dosm.gov.my/hies/hh_access_amenities.csv',
+            'schools_district' => 'https://storage.data.gov.my/education/schools_district.csv',
+        ],
+        // Spellings the tidying in UpdateLivingFigures can't join to the others, as "State|Spelling" => the name to use.
+        'aliases' => [
+            'Pahang|Cameron Highland' => 'Cameron Highlands',
+            'Pahang|Kuala Lipis' => 'Lipis',
+            'Perak|Larut Matang & Selama' => 'Larut dan Matang',
+            'Sarawak|Tanjong Manis' => 'Tanjung Manis',
+            'Terengganu|Hulu' => 'Hulu Terengganu',
+        ],
+        'about' => 'https://open.dosm.gov.my/data-catalogue/hies_district',
+    ],
+
     // The police stations "php artisan map:import-stations" starts dbo.PoliceStations with, in this module (see
     // police-stations-LICENSE.txt). The Police stations page keeps them up to date after that.
     'stations' => 'Database/data/police-stations.csv',

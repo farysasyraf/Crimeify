@@ -9,6 +9,7 @@ use Modules\Map\Console\ImportCrimeData;
 use Modules\Map\Console\ImportPoliceStations;
 use Modules\Map\Console\ImportPopulation;
 use Modules\Map\Console\ImportStateCrime;
+use Modules\Map\Console\UpdateLivingFigures;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
 use Nwidart\Modules\Support\ModuleServiceProvider;
@@ -35,6 +36,7 @@ class MapServiceProvider extends ModuleServiceProvider
         ImportPoliceStations::class,
         ImportPopulation::class,
         ImportStateCrime::class,
+        UpdateLivingFigures::class,
     ];
 
     /**

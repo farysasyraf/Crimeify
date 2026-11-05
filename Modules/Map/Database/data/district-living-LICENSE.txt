@@ -1,0 +1,41 @@
+district-living.csv and police-district-areas.csv: "Living here" on a police district's profile
+
+district-living.csv: each administrative district's latest two years of household income and spending, poverty,
+unemployment, schools and amenities, with its state's and Malaysia's for those years where they're published.
+"php artisan map:update-living" makes it again from the sources below: run it when they're updated, then commit it.
+
+Sources:   Department of Statistics Malaysia (DOSM), through OpenDOSM, https://open.dosm.gov.my/data-catalogue:
+             hies_district, hies_state, hh_income, hh_poverty (household income, spending and poverty)
+             lfs_district, lfs_state_sex, lfs_year (the labour force)
+             hh_access_amenities (homes with piped water, sanitation and electricity)
+           Ministry of Education, through data.gov.my: schools_district
+Licence:   Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/
+
+As the sources have them:
+  - Income is a household's gross monthly income, the median; spending is a household's monthly average. Malaysia's
+    spending isn't in these files, so that comparison is left out.
+  - Poverty is absolute poverty: the share of households under the poverty line.
+  - Perlis, Kuala Lumpur, Labuan and Putrajaya are each one district. The jobs file gives only the state, which is
+    theirs.
+  - The files spell some districts differently, and differently from year to year, like Hulu Langat and Ulu Langat, or
+    S.P.Utara and Seberang Perai Utara. The command joins them: see tidy() and config('map.living.aliases').
+  - Perak's schools are for Larut, Matang and Selama together, under Larut dan Matang.
+
+police-district-areas.csv: the administrative district each police district is matched to. It isn't the same thing:
+police districts aren't published as areas, and they don't follow administrative districts, above all in cities.
+
+Made once by finding which district shape each police district's pin (police-districts.csv) falls in, not from names:
+all 155 pins fell inside a shape. Most police districts are in a district of their own name; many in cities share one,
+like Petaling's five. A pin says where a police district's headquarters is, so a police district that crosses a
+border gets the district its pin is in, like Ampang Jaya, in Hulu Langat.
+
+Shapes:    geoBoundaries, Malaysia, ADM2 (2020), https://www.geoboundaries.org, Creative Commons Attribution 3.0. Only
+           the result is kept here.
+
+Changed by hand after that:
+  - W.P. Putrajaya: the shapes have no Putrajaya, so its pin falls in Sepang. It's its own territory in the figures.
+  - W.P. Labuan: the same.
+  - Kulaijaya and Ledang: the shapes have the old names of Kulai and Tangkak.
+  - Padawan is left out, so its profile has no "Living here". Its pin falls in Serian on these 2020 shapes, but Sarawak
+    has made new districts since, like Siburan, so that can't be relied on.
+  - Matu Daro's pin is in Daro, the district it's matched to. The police district takes in Matu too.

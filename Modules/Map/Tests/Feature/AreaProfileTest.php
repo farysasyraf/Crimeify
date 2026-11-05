@@ -119,7 +119,10 @@ class AreaProfileTest extends TestCase
             ->assertSee('Police district in Johor · Crime 2022–2023')
             ->assertSee("That's a smaller fall than across Johor.")
             ->assertSee('Compared with Johor, more of the crime here is break-in: 50%, against 22%.')
-            ->assertSeeInOrder(['Crimes reported', '90', '↓ 10%', 'from 2022'], false)
+            ->assertSeeInOrder(['Crimes reported in 2023', '<strong>90</strong>', '↓ 10%', 'from 2022'], false)
+            // The headline again, small, for when it has scrolled away: out of reach until then.
+            ->assertSee('<div class="area-dock" data-area-dock inert>', false)
+            ->assertSee('modules/map/areas-motion.js', false)
             ->assertSee('IPD Batu Pahat')
             ->assertSee('href="tel:', false)
             ->assertSee('About these figures')

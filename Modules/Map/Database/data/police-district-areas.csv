@@ -1,0 +1,155 @@
+state,district,area_state,area,how
+Johor,Batu Pahat,Johor,Batu Pahat,pin in district
+Johor,Iskandar Puteri,Johor,Johor Bahru,pin in district
+Johor,Johor Bahru Selatan,Johor,Johor Bahru,pin in district
+Johor,Johor Bahru Utara,Johor,Johor Bahru,pin in district
+Johor,Kluang,Johor,Kluang,pin in district
+Johor,Kota Tinggi,Johor,Kota Tinggi,pin in district
+Johor,Kulaijaya,Johor,Kulai,pin in district
+Johor,Ledang,Johor,Tangkak,pin in district
+Johor,Mersing,Johor,Mersing,pin in district
+Johor,Muar,Johor,Muar,pin in district
+Johor,Pontian,Johor,Pontian,pin in district
+Johor,Segamat,Johor,Segamat,pin in district
+Johor,Seri Alam,Johor,Johor Bahru,pin in district
+Kedah,Baling,Kedah,Baling,pin in district
+Kedah,Bandar Baharu,Kedah,Bandar Baharu,pin in district
+Kedah,Kota Setar,Kedah,Kota Setar,pin in district
+Kedah,Kuala Muda,Kedah,Kuala Muda,pin in district
+Kedah,Kubang Pasu,Kedah,Kubang Pasu,pin in district
+Kedah,Kulim,Kedah,Kulim,pin in district
+Kedah,Langkawi,Kedah,Langkawi,pin in district
+Kedah,Padang Terap,Kedah,Padang Terap,pin in district
+Kedah,Pendang,Kedah,Pendang,pin in district
+Kedah,Sik,Kedah,Sik,pin in district
+Kedah,Yan,Kedah,Yan,pin in district
+Kelantan,Bachok,Kelantan,Bachok,pin in district
+Kelantan,Gua Musang,Kelantan,Gua Musang,pin in district
+Kelantan,Jeli,Kelantan,Jeli,pin in district
+Kelantan,Kota Bharu,Kelantan,Kota Bharu,pin in district
+Kelantan,Kuala Krai,Kelantan,Kuala Krai,pin in district
+Kelantan,Machang,Kelantan,Machang,pin in district
+Kelantan,Pasir Mas,Kelantan,Pasir Mas,pin in district
+Kelantan,Pasir Puteh,Kelantan,Pasir Puteh,pin in district
+Kelantan,Tanah Merah,Kelantan,Tanah Merah,pin in district
+Kelantan,Tumpat,Kelantan,Tumpat,pin in district
+Melaka,Alor Gajah,Melaka,Alor Gajah,pin in district
+Melaka,Jasin,Melaka,Jasin,pin in district
+Melaka,Melaka Tengah,Melaka,Melaka Tengah,pin in district
+Negeri Sembilan,Jelebu,Negeri Sembilan,Jelebu,pin in district
+Negeri Sembilan,Jempol,Negeri Sembilan,Jempol,pin in district
+Negeri Sembilan,Kuala Pilah,Negeri Sembilan,Kuala Pilah,pin in district
+Negeri Sembilan,Nilai,Negeri Sembilan,Seremban,pin in district
+Negeri Sembilan,Port Dickson,Negeri Sembilan,Port Dickson,pin in district
+Negeri Sembilan,Rembau,Negeri Sembilan,Rembau,pin in district
+Negeri Sembilan,Seremban,Negeri Sembilan,Seremban,pin in district
+Negeri Sembilan,Tampin,Negeri Sembilan,Tampin,pin in district
+Pahang,Bentong,Pahang,Bentong,pin in district
+Pahang,Bera,Pahang,Bera,pin in district
+Pahang,Cameron Highlands,Pahang,Cameron Highlands,pin in district
+Pahang,Jerantut,Pahang,Jerantut,pin in district
+Pahang,Kuala Lipis,Pahang,Lipis,pin in district
+Pahang,Kuantan,Pahang,Kuantan,pin in district
+Pahang,Maran,Pahang,Maran,pin in district
+Pahang,Pekan,Pahang,Pekan,pin in district
+Pahang,Raub,Pahang,Raub,pin in district
+Pahang,Rompin,Pahang,Rompin,pin in district
+Pahang,Temerloh,Pahang,Temerloh,pin in district
+Perak,Batu Gajah,Perak,Kinta,pin in district
+Perak,Gerik,Perak,Hulu Perak,pin in district
+Perak,Hilir Perak,Perak,Hilir Perak,pin in district
+Perak,Ipoh,Perak,Kinta,pin in district
+Perak,Kampar,Perak,Kampar,pin in district
+Perak,Kerian,Perak,Kerian,pin in district
+Perak,Kuala Kangsar,Perak,Kuala Kangsar,pin in district
+Perak,Manjung,Perak,Manjung,pin in district
+Perak,Pengkalan Hulu,Perak,Hulu Perak,pin in district
+Perak,Perak Tengah,Perak,Perak Tengah,pin in district
+Perak,Selama,Perak,Selama,pin in district
+Perak,Sungai Siput,Perak,Kuala Kangsar,pin in district
+Perak,Taiping,Perak,Larut Dan Matang,pin in district
+Perak,Tanjong Malim,Perak,Muallim,pin in district
+Perak,Tapah,Perak,Batang Padang,pin in district
+Perlis,Arau,Perlis,Perlis,pin in district
+Perlis,Kangar,Perlis,Perlis,pin in district
+Perlis,Padang Besar,Perlis,Perlis,pin in district
+Pulau Pinang,Barat Daya,Pulau Pinang,Barat Daya,pin in district
+Pulau Pinang,Seberang Perai Selatan,Pulau Pinang,Seberang Perai Selatan,pin in district
+Pulau Pinang,Seberang Perai Tengah,Pulau Pinang,Seberang Perai Tengah,pin in district
+Pulau Pinang,Seberang Perai Utara,Pulau Pinang,Seberang Perai Utara,pin in district
+Pulau Pinang,Timur Laut,Pulau Pinang,Timur Laut,pin in district
+Sabah,Beaufort,Sabah,Beaufort,pin in district
+Sabah,Beluran,Sabah,Beluran,pin in district
+Sabah,Keningau,Sabah,Keningau,pin in district
+Sabah,Kota Belud,Sabah,Kota Belud,pin in district
+Sabah,Kota Kinabalu,Sabah,Kota Kinabalu,pin in district
+Sabah,Kota Kinabatangan,Sabah,Kinabatangan,pin in district
+Sabah,Kota Marudu,Sabah,Kota Marudu,pin in district
+Sabah,Kudat,Sabah,Kudat,pin in district
+Sabah,Kunak,Sabah,Kunak,pin in district
+Sabah,Lahad Datu,Sabah,Lahad Datu,pin in district
+Sabah,Papar,Sabah,Papar,pin in district
+Sabah,Penampang,Sabah,Penampang,pin in district
+Sabah,Ranau,Sabah,Ranau,pin in district
+Sabah,Sandakan,Sabah,Sandakan,pin in district
+Sabah,Semporna,Sabah,Semporna,pin in district
+Sabah,Sipitang,Sabah,Sipitang,pin in district
+Sabah,Tawau,Sabah,Tawau,pin in district
+Sabah,Tenom,Sabah,Tenom,pin in district
+Sabah,Tuaran,Sabah,Tuaran,pin in district
+Sabah,W.P. Labuan,W.P. Labuan,W.P. Labuan,own territory
+Sarawak,Bau,Sarawak,Bau,pin in district
+Sarawak,Belaga,Sarawak,Belaga,pin in district
+Sarawak,Betong,Sarawak,Betong,pin in district
+Sarawak,Bintulu,Sarawak,Bintulu,pin in district
+Sarawak,Dalat,Sarawak,Dalat,pin in district
+Sarawak,Julau,Sarawak,Julau,pin in district
+Sarawak,Kanowit,Sarawak,Kanowit,pin in district
+Sarawak,Kapit,Sarawak,Kapit,pin in district
+Sarawak,Kota Samarahan,Sarawak,Samarahan,pin in district
+Sarawak,Kuching,Sarawak,Kuching,pin in district
+Sarawak,Lawas,Sarawak,Lawas,pin in district
+Sarawak,Limbang,Sarawak,Limbang,pin in district
+Sarawak,Lubok Antu,Sarawak,Lubok Antu,pin in district
+Sarawak,Lundu,Sarawak,Lundu,pin in district
+Sarawak,Marudi,Sarawak,Marudi,pin in district
+Sarawak,Matu Daro,Sarawak,Daro,pin in district
+Sarawak,Meradong,Sarawak,Maradong,pin in district
+Sarawak,Miri,Sarawak,Miri,pin in district
+Sarawak,Mukah,Sarawak,Mukah,pin in district
+Sarawak,Saratok,Sarawak,Saratok,pin in district
+Sarawak,Sarikei,Sarawak,Sarikei,pin in district
+Sarawak,Serian,Sarawak,Serian,pin in district
+Sarawak,Sibu,Sarawak,Sibu,pin in district
+Sarawak,Simunjan,Sarawak,Simunjan,pin in district
+Sarawak,Song,Sarawak,Song,pin in district
+Sarawak,Sri Aman,Sarawak,Sri Aman,pin in district
+Sarawak,Tatau,Sarawak,Tatau,pin in district
+Selangor,Ampang Jaya,Selangor,Hulu Langat,pin in district
+Selangor,Gombak,Selangor,Gombak,pin in district
+Selangor,Hulu Selangor,Selangor,Hulu Selangor,pin in district
+Selangor,Kajang,Selangor,Hulu Langat,pin in district
+Selangor,Klang Selatan,Selangor,Klang,pin in district
+Selangor,Klang Utara,Selangor,Klang,pin in district
+Selangor,Kuala Langat,Selangor,Kuala Langat,pin in district
+Selangor,Kuala Selangor,Selangor,Kuala Selangor,pin in district
+Selangor,Petaling Jaya,Selangor,Petaling,pin in district
+Selangor,Sabak Bernam,Selangor,Sabak Bernam,pin in district
+Selangor,Sepang,Selangor,Sepang,pin in district
+Selangor,Serdang,Selangor,Petaling,pin in district
+Selangor,Shah Alam,Selangor,Petaling,pin in district
+Selangor,Subang Jaya,Selangor,Petaling,pin in district
+Selangor,Sungai Buloh,Selangor,Petaling,pin in district
+Terengganu,Besut,Terengganu,Besut,pin in district
+Terengganu,Dungun,Terengganu,Dungun,pin in district
+Terengganu,Hulu Terengganu,Terengganu,Hulu Terengganu,pin in district
+Terengganu,Kemaman,Terengganu,Kemaman,pin in district
+Terengganu,Kuala Terengganu,Terengganu,Kuala Terengganu,pin in district
+Terengganu,Marang,Terengganu,Marang,pin in district
+Terengganu,Setiu,Terengganu,Setiu,pin in district
+W.P. Kuala Lumpur,Brickfields,W.P. Kuala Lumpur,W.P. Kuala Lumpur,pin in district
+W.P. Kuala Lumpur,Cheras,W.P. Kuala Lumpur,W.P. Kuala Lumpur,pin in district
+W.P. Kuala Lumpur,Dang Wangi,W.P. Kuala Lumpur,W.P. Kuala Lumpur,pin in district
+W.P. Kuala Lumpur,Sentul,W.P. Kuala Lumpur,W.P. Kuala Lumpur,pin in district
+W.P. Kuala Lumpur,W.P. Putrajaya,W.P. Putrajaya,W.P. Putrajaya,own territory
+W.P. Kuala Lumpur,Wangsa Maju,W.P. Kuala Lumpur,W.P. Kuala Lumpur,pin in district

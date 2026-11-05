@@ -8,6 +8,7 @@
 @php
     $district = $profile->district;
     $year = $profile->latestYear();
+    $total = $year ? $profile->total($year) : 0;
     $number = fn (int $value) => number_format($value);
     // A change as a tag: ↓ in green for less crime, ↑ in red for more.
     $change = fn (?float $change) => $change === null ? '' : ($change === 0.0
@@ -44,21 +45,47 @@
 @endpush
 
 @section('content')
-<div class="page-head area-head">
-    <div>
-        <p class="area-kicker"><a href="{{ route('public.areas', $language) }}">{{ __('Check an area') }}</a></p>
-        <h1>{{ $district->Name }}</h1>
-        <p class="muted">
-            {{ __('Police district in :region', ['region' => $district->regionName()]) }}@if ($year) · {{ __('Crime :from–:to', ['from' => $profile->firstYear(), 'to' => $year]) }}@endif
-        </p>
-    </div>
-    <div class="area-actions">
-        <a class="btn btn-sm" href="{{ $compareUrl }}"><span class="material-icon" aria-hidden="true">compare_arrows</span>{{ __('Compare with other areas') }}</a>
-        <a class="btn btn-sm" href="{{ $mapUrl }}"><span class="material-icon" aria-hidden="true">map</span>{{ __('See it on the map') }}</a>
-    </div>
-</div>
-
 <div class="area-page">
+    {{-- The headline, as one row on a wide screen: where it is, its latest year's crime and how that changed, and where
+         to go next. Its name glides here from the link chosen, where the browser can (areas.css, areas-motion.js). --}}
+    <header class="area-card area-wide area-hero" data-area-hero>
+        <span class="area-hero-icon" aria-hidden="true"><span class="material-icon">local_police</span></span>
+        <div class="area-hero-place">
+            <p class="area-kicker"><a href="{{ route('public.areas', $language) }}">{{ __('Check an area') }}</a></p>
+            <h1>{{ $district->Name }}</h1>
+            <p class="area-hero-where">
+                <span class="material-icon" aria-hidden="true">location_on</span>
+                <span>{{ __('Police district in :region', ['region' => $district->regionName()]) }}@if ($year) · {{ __('Crime :from–:to', ['from' => $profile->firstYear(), 'to' => $year]) }}@endif</span>
+            </p>
+        </div>
+        @if ($year)
+            <div class="area-hero-figure">
+                <span class="area-hero-label">{{ __('Crimes reported in :year', ['year' => $year]) }}</span>
+                <span class="area-hero-number"><strong>{{ $number($total) }}</strong> {!! $change($profile->latestChange()) !!}</span>
+                @if ($profile->latestChange() !== null)
+                    <span class="area-sub">{{ __('from :year', ['year' => $year - 1]) }}</span>
+                @endif
+            </div>
+        @endif
+        <div class="area-actions">
+            <a class="btn btn-sm btn-primary" href="{{ $compareUrl }}"><span class="material-icon" aria-hidden="true">compare_arrows</span>{{ __('Compare with other areas') }}</a>
+            <a class="btn btn-sm" href="{{ $mapUrl }}"><span class="material-icon" aria-hidden="true">map</span>{{ __('See it on the map') }}</a>
+        </div>
+    </header>
+
+    {{-- The headline again, small, under the page's bar once it has scrolled away, so Compare is always at hand
+         (areas-motion.js). It's inert, so out of reach, until then. --}}
+    <div class="area-dock" data-area-dock inert>
+        <div class="area-dock-bar">
+            <span class="area-dock-icon" aria-hidden="true"><span class="material-icon">local_police</span></span>
+            <span class="area-dock-name"><strong>{{ $district->Name }}</strong> <span class="area-sub">{{ $district->regionName() }}</span></span>
+            @if ($year)
+                <span class="area-dock-figure"><strong>{{ $number($total) }}</strong> <span class="area-sub">{{ __('crimes in :year', ['year' => $year]) }}</span> {!! $change($profile->latestChange()) !!}</span>
+            @endif
+            <a class="btn btn-sm btn-primary" href="{{ $compareUrl }}"><span class="material-icon" aria-hidden="true">compare_arrows</span>{{ __('Compare with other areas') }}</a>
+        </div>
+    </div>
+
     <section class="area-card area-wide" aria-labelledby="area-summary-heading">
         <h2 id="area-summary-heading">{{ __('What the figures say') }}</h2>
         <ul class="area-summary">
@@ -69,14 +96,10 @@
     </section>
 
     @if ($year)
-        @php($total = $profile->total($year))
+        {{-- The year's crimes are in the headline; here, how they divide, and the change since the first year. --}}
         <section class="area-card area-wide" aria-labelledby="area-latest-heading">
             <h2 id="area-latest-heading">{{ __('In :year', ['year' => $year]) }}</h2>
-            <dl class="area-stats">
-                <div class="area-stat">
-                    <dt>{{ __('Crimes reported') }}</dt>
-                    <dd><strong>{{ $number($total) }}</strong> {!! $change($profile->latestChange()) !!}@if ($profile->latestChange() !== null) <span class="area-sub">{{ __('from :year', ['year' => $year - 1]) }}</span>@endif</dd>
-                </div>
+            <dl class="area-stats area-stats-three">
                 @foreach (config('map.crime.categories') as $category => $label)
                     <div class="area-stat">
                         <dt>{{ __($label) }}</dt>
@@ -170,6 +193,10 @@
         <script type="application/json" id="area-data">@json($chart)</script>
     @endif
 
+    @if ($living)
+        @include('map::areas._living')
+    @endif
+
     @php($stations = $profile->stations())
     @if ($stations->isNotEmpty())
         <section class="area-card area-wide" aria-labelledby="area-stations-heading">
@@ -197,6 +224,7 @@
     @include('map::areas._about')
 </div>
 
+<script src="{{ versioned_asset('modules/map/areas-motion.js') }}" defer></script>
 <script src="{{ versioned_asset('vendor/chartjs/chart.umd.min.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/areas.js') }}" defer></script>
 @endsection

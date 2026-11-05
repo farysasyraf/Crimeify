@@ -322,6 +322,7 @@
     "What the figures say": "Apa kata angka",
     "In :year": "Pada :year",
     "Crimes reported": "Jenayah dilaporkan",
+    "Crimes reported in :year": "Jenayah dilaporkan pada :year",
     "from :year": "berbanding :year",
     ":share of all": ":share daripada semua",
     "Since :year": "Sejak :year",
@@ -398,5 +399,23 @@
     "Zoomed into the state": "Dizum ke negeri",
     "All of Malaysia": "Seluruh Malaysia",
     "This game is on Easy: the map zooms into each district's state.": "Permainan ini pada tahap Mudah: peta dizum ke negeri setiap daerah.",
-    "This game is on Hard: the whole of Malaysia.": "Permainan ini pada tahap Sukar: seluruh Malaysia."
+    "This game is on Hard: the whole of Malaysia.": "Permainan ini pada tahap Sukar: seluruh Malaysia.",
+
+    "Living here": "Tinggal di sini",
+    "For :area, the administrative district this police district's pin is in.": "Bagi :area, daerah pentadbiran tempat pin daerah polis ini berada.",
+    "It also takes in :districts.": "Ia juga merangkumi :districts.",
+    "Median monthly household income": "Pendapatan bulanan isi rumah penengah",
+    "Average monthly household spending": "Purata perbelanjaan bulanan isi rumah",
+    "Households in poverty": "Isi rumah miskin",
+    "Unemployment": "Pengangguran",
+    "Piped water": "Air paip",
+    "Sanitation": "Sanitasi",
+    "Electricity": "Elektrik",
+    "Primary schools": "Sekolah rendah",
+    "Secondary schools": "Sekolah menengah",
+    "Colleges and universities": "Kolej dan universiti",
+    "Homes with": "Rumah dengan",
+    "Figures for the whole administrative district, from the Department of Statistics Malaysia and the Ministry of Education. They describe the area, not its crime: they don't explain it.": "Angka bagi seluruh daerah pentadbiran, daripada Jabatan Perangkaan Malaysia dan Kementerian Pendidikan. Angka ini menggambarkan kawasan tersebut, bukan jenayahnya: ia tidak menjelaskan jenayah di sana.",
+    "Administrative district": "Daerah pentadbiran",
+    "Police districts in the same administrative district have the same figures here.": "Daerah polis dalam daerah pentadbiran yang sama mempunyai angka yang sama di sini."
 }

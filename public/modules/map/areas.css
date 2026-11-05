@@ -35,6 +35,46 @@
 .area-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .area-actions .btn { display: inline-flex; align-items: center; gap: 6px; }
 
+/* A profile's headline: the place with its badge, the year's crimes with the change, and what to do next, divided as
+   one row on a wide screen. The heading hugs its name, so the name can glide into it (below). */
+.area-hero {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "icon place figure actions";
+    align-items: center; gap: 16px 28px; padding: 22px 24px;
+    background: radial-gradient(120% 160% at 0% 0%, rgba(58, 170, 242, .14), transparent 55%), var(--area-card);
+}
+.area-hero-icon, .area-dock-icon {
+    display: grid; place-items: center; flex: none; border-radius: 16px;
+    background: linear-gradient(135deg, #3aaaf2, #2563c9); color: #fff;
+}
+.area-hero-icon { grid-area: icon; width: 56px; height: 56px; box-shadow: 0 8px 22px rgba(58, 170, 242, .25); }
+.area-hero-icon .material-icon { font-size: 30px; }
+.area-hero-place { grid-area: place; min-width: 0; }
+.area-hero h1 { width: fit-content; max-width: 100%; margin: 0; overflow-wrap: anywhere; view-transition-name: area-title; }
+.area-hero-where { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; color: var(--area-soft); font-size: .875rem; }
+.area-hero-where .material-icon { flex: none; margin-top: 1px; font-size: 17px; color: var(--area-accent); }
+.area-hero-figure { grid-area: figure; display: grid; gap: 2px; }
+.area-hero-figure, .area-hero .area-actions { align-self: stretch; align-content: center; padding-left: 28px; border-left: 1px solid var(--area-rule); }
+.area-hero-label { color: var(--area-soft); font-size: .8125rem; }
+.area-hero-number { display: flex; align-items: center; gap: 10px; }
+.area-hero-number strong { font-size: 1.75rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.area-hero .area-actions { grid-area: actions; align-items: center; }
+.area-count { display: inline-block; }
+
+/* The headline again, small, under the page's bar once it has scrolled away (areas-motion.js), sliding out from
+   under it. Not on phones, whose bar is tall already. */
+.area-dock {
+    position: fixed; top: var(--area-dock-top, 0); right: 0; left: 0; z-index: 15;
+    border-bottom: 1px solid rgba(255, 255, 255, .06); background: rgba(22, 23, 26, .92); backdrop-filter: blur(8px);
+    transform: translateY(-100%); visibility: hidden; transition: transform .3s cubic-bezier(.2, .7, .2, 1), visibility 0s .3s;
+}
+.area-dock.is-shown { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.area-dock-bar { display: flex; align-items: center; gap: 12px 18px; max-width: 1320px; margin: 0 auto; padding: 8px 24px; }
+.area-dock-icon { width: 32px; height: 32px; border-radius: 10px; }
+.area-dock-icon .material-icon { font-size: 19px; }
+.area-dock-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.area-dock-figure { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.area-dock .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
 /* What the figures say, in sentences. */
 .area-summary { margin: 0; padding-left: 20px; display: grid; gap: 8px; line-height: 1.55; }
 .area-summary li::marker { color: var(--area-accent); }
@@ -46,6 +86,7 @@
 .area-stat dt { color: var(--area-soft); font-size: .8125rem; }
 .area-stat dd { margin: 4px 0 0; }
 .area-stat strong { display: block; font-size: 1.5rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.area-stats-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .area-sub { color: var(--area-soft); font-size: .8125rem; }
 
 /* A change as a tag: down in green, up in red, each with its arrow. */
@@ -87,6 +128,11 @@
 .area-mix-label { grid-row: span var(--bars); }
 .area-mix-group .area-mix-track { height: 8px; }
 .area-mix-line { display: contents; }
+
+/* "Living here": which administrative district it is, the table, then schools and amenities. */
+.area-living-intro { margin: -6px 0 12px; }
+.area-living-stats { margin-top: 14px; }
+.area-swatch-inline { display: inline-flex; align-items: center; gap: 8px; }
 
 /* The police stations: each one's name, address and phone, and where it is. */
 .area-stations { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
@@ -143,9 +189,42 @@
 .area-table td strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 .area-table tbody tr:last-child > * { border-bottom: 0; }
 
+/* Motion (areas-motion.js): each card rises into view once, one after another, as the numbers in it count up. The
+   headline stays where it is, as a name may be gliding into it, and its badge and change pop in. Only on screens, so a
+   printout has every card, and not for anyone whose system asks for less motion. If the script never runs, the cards
+   show anyway after a moment. */
+@media screen and (prefers-reduced-motion: no-preference) {
+    .js .area-page > .area-card:not(.area-hero, .is-in) { opacity: 0; transform: translateY(16px); }
+    .js:not(.area-motion) .area-page > .area-card:not(.area-hero) { animation: area-shown 0s 1.5s forwards; }
+    .area-motion .area-page > .area-card:not(.area-hero) { transition: opacity .6s ease, transform .6s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--area-delay, 0s); }
+    .area-hero-icon { animation: area-pop .6s cubic-bezier(.34, 1.56, .64, 1) .15s both; }
+    .area-hero-number .area-change { animation: area-slide .4s ease 1s both; }
+}
+@keyframes area-shown { to { opacity: 1; transform: none; } }
+@keyframes area-pop { from { opacity: 0; transform: scale(.6) rotate(-10deg); } }
+@keyframes area-slide { from { opacity: 0; transform: translateX(-6px); } }
+@media (prefers-reduced-motion: reduce) {
+    .area-dock, .area-dock.is-shown { transition: none; }
+}
+
+/* Between the Areas pages, the browser fades one into the next with the bar along the top kept still, and a police
+   district's name glides from the link chosen (named by areas-motion.js) into its profile's heading. Browsers without
+   View Transitions just go to the page. */
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition { navigation: auto; }
+}
+.public-topbar { view-transition-name: public-topbar; }
+::view-transition-group(area-title) { animation-duration: .45s; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+
 @media (max-width: 999.98px) {
     .area-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .area-stats-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .area-picker { grid-template-columns: minmax(0, 1fr); }
+    /* The figure and the buttons under the place, with one line over both: no gap between the columns to break it. */
+    .area-hero { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon place place" "figure figure actions"; column-gap: 0; }
+    .area-hero-place { padding-left: 20px; }
+    .area-hero-figure, .area-hero .area-actions { padding: 16px 0 0; border-top: 1px solid var(--area-rule); border-left: 0; }
+    .area-hero .area-actions { padding-left: 16px; justify-content: flex-end; }
 }
 @media (max-width: 760px) {
     .area-page { grid-template-columns: minmax(0, 1fr); }
@@ -154,4 +233,16 @@
     .area-mix-label { grid-column: 1 / -1; grid-row: auto; }
     .area-trend-row { grid-template-columns: minmax(0, 1fr) auto; }
     .area-trend-row .area-bar { grid-column: 1 / -1; grid-row: 2; }
+    .area-table th, .area-table td { padding: 10px 4px; }
+    .area-table thead th { font-size: .8125rem; }
+    .area-table td strong { font-size: .9375rem; }
+    .area-stats-three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .area-stats-three > :last-child { grid-column: 1 / -1; }
+    .area-hero { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "icon place" "figure figure" "actions actions"; row-gap: 14px; padding: 18px; }
+    .area-hero-place { padding-left: 14px; }
+    .area-hero-icon { width: 46px; height: 46px; border-radius: 14px; }
+    .area-hero-icon .material-icon { font-size: 26px; }
+    .area-hero .area-actions { padding: 0; border-top: 0; }
+    .area-hero .area-actions .btn { flex: 1 1 auto; justify-content: center; }
+    .area-dock { display: none; }
 }

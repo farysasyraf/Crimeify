@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Map\Entities\PoliceDistrict;
+use Modules\Map\Support\AreaLiving;
 use Modules\Map\Support\AreaProfile;
 use Modules\Map\Support\DistrictPreview;
 
@@ -48,6 +49,7 @@ class AreaController extends Controller
 
         return view('map::areas.show', [
             'profile' => AreaProfile::of($found),
+            'living' => AreaLiving::of($found),
             'language' => $this->language(),
             'path' => implode('/', $found->path()),
             'mapUrl' => route('public.map.district', $path),
@@ -88,6 +90,7 @@ class AreaController extends Controller
 
         return view('map::areas.compare', [
             'profiles' => $profiles,
+            'livings' => $districts->map(fn (PoliceDistrict $district) => AreaLiving::of($district))->all(),
             'years' => $years,
             'regions' => $this->choices(),
             'chosen' => $districts->map(fn (PoliceDistrict $district) => implode('/', $district->path()))->all(),
