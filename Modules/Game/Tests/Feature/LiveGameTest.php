@@ -336,7 +336,7 @@ class LiveGameTest extends TestCase
                 ['rank' => 2, 'name' => 'Ali', 'score' => 2700],
                 ['rank' => 2, 'name' => 'Chong', 'score' => 2700],
             ],
-        ]);
+        ])->assertJsonPath('awards', []); // Awards are DistrictGuessr's.
         $this->assertSame(LiveGame::Finished, $game->fresh()->Status);
         $this->assertNotNull($game->fresh()->FinishedAt);
 
@@ -439,6 +439,72 @@ class LiveGameTest extends TestCase
         $this->post('/game-scores/store-live', ['game' => 'districtguessr', 'rounds' => 4])->assertRedirect('/game-scores')
             ->assertSessionHas('status', 'error');
         $this->assertSame(1, LiveGame::count());
+    }
+
+    public function test_a_finished_districtguessr_game_gives_out_awards(): void
+    {
+        $game = $this->hostedGuessr();
+        $players = collect(['Siti', 'Ali', 'Chong', 'Devi'])->mapWithKeys(fn (string $name) => [$name => $this->join($game, $name)]);
+
+        // Each round: Ali a degree off after 1 second, Siti right on it after 10, Chong three degrees off after 20; Devi
+        // only pins the last round, right on it after 5.
+        foreach ([1, 2, 3] as $round) {
+            $this->host($game, 'next');
+            $this->travel(4)->seconds();
+            $this->pin($game, $players['Ali'], off: 1)->assertOk();
+            if ($round === 3) {
+                $this->travel(4)->seconds();
+                $this->pin($game, $players['Devi'])->assertOk();
+            }
+            $this->travel($round === 3 ? 5 : 9)->seconds();
+            $this->pin($game, $players['Siti'])->assertOk();
+            $this->travel(10)->seconds();
+            $this->pin($game, $players['Chong'], off: 3)->assertOk();
+            if ($round < 3) {
+                $this->host($game, 'close');
+            }
+        }
+
+        // Last after the first round, Devi climbs above Chong in the last two. Every award to someone else.
+        $awards = [
+            ['award' => 'sharpshooter', 'name' => 'Siti', 'count' => 3, 'km' => 10],
+            ['award' => 'speed', 'name' => 'Ali', 'seconds' => 1],
+            ['award' => 'comeback', 'name' => 'Devi', 'places' => 1, 'rounds' => 2],
+            ['award' => 'explorer', 'name' => 'Chong', 'km' => 1000.8],
+        ];
+        $this->host($game, 'next')->assertJson([
+            'phase' => 'finished',
+            'leaderboard' => [['name' => 'Siti', 'score' => 2814], ['name' => 'Ali', 'score' => 1002], ['name' => 'Devi', 'score' => 969], ['name' => 'Chong', 'score' => 96]],
+            'awards' => $awards,
+        ])->assertJsonMissingPath('awards.0.player');
+
+        // On each phone too, their own marked.
+        $this->check($game, $players['Devi'])->assertJson(['phase' => 'finished', 'awards' => [
+            ['award' => 'sharpshooter', 'you' => false], ['award' => 'speed', 'you' => false], ['award' => 'comeback', 'you' => true], ['award' => 'explorer', 'you' => false],
+        ]]);
+    }
+
+    public function test_awards_go_round_and_need_something_to_earn_them(): void
+    {
+        $game = $this->hostedGuessr();
+        $siti = $this->join($game, 'Siti');
+        $ali = $this->join($game, 'Ali');
+
+        // Siti right on it after 1 second each round, Ali a degree off after 5: Siti the fastest, but with an award
+        // already, so Speed Demon goes to Ali; no one climbs, so no Comeback; and only Ali was ever off.
+        foreach ([1, 2, 3] as $round) {
+            $this->host($game, 'next');
+            $this->travel(4)->seconds();
+            $this->pin($game, $siti)->assertOk();
+            $this->travel(4)->seconds();
+            $this->pin($game, $ali, off: 1)->assertOk();
+        }
+
+        $this->host($game, 'next')->assertJson(['phase' => 'finished', 'awards' => [
+            ['award' => 'sharpshooter', 'name' => 'Siti', 'count' => 3],
+            ['award' => 'speed', 'name' => 'Ali', 'seconds' => 5],
+            ['award' => 'explorer', 'name' => 'Ali', 'km' => 333.6],
+        ]])->assertJsonCount(3, 'awards');
     }
 
     public function test_the_host_plays_districtguessr_on_easy_for_everyone(): void

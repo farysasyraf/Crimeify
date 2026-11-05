@@ -76,6 +76,9 @@ return [
         // they don't each read the database. The file store, as the site runs as one instance (DEPLOY.md).
         'store' => 'file',
         'keep' => 2,
+        // A finished DistrictGuessr game's awards, so more than the top 3 have something to cheer: Sharpshooter counts
+        // the pins within `near` km, and Comeback the places climbed over the `last` rounds (LiveGames::awards()).
+        'awards' => ['near' => 10, 'last' => 3],
     ],
 
     // DistrictGuessr: a police district's name and its state, to find on a map of Malaysia with only its states'

@@ -134,6 +134,11 @@
         <h2 id="live-end-heading" tabindex="-1">{{ __('Game over') }}</h2>
         <p class="live-place" data-live="place"></p>
         <p class="game-final">{{ __('Your points') }} <strong data-live="final"></strong></p>
+        {{-- DistrictGuessr's awards, the player's own marked. --}}
+        <div class="live-awards-panel" data-live="awards-panel" hidden>
+            <h3 class="live-board-heading">{{ __('Awards') }}</h3>
+            <ul class="live-awards" data-live="awards"></ul>
+        </div>
         <h3 class="live-board-heading">{{ __('Leaderboard') }}</h3>
         <ol class="live-board" data-live="board"></ol>
         <a class="btn btn-primary game-play" href="{{ route('public.game.live') }}" data-live="again">

@@ -1,8 +1,8 @@
 // A live game's big screen (LiveGameController): checks where the game is up to about every second and shows it for the
 // room: the players as they join, a few seconds to get ready for each round, its cards or its district on the map
 // (guessr-map.js) with the time left and how many have answered, then its answer (how many said higher and lower, or
-// where the district is and everyone's pins, the 3 closest named) and the top 5, and at the end the podium and
-// everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
+// where the district is and everyone's pins, the 3 closest named) and the top 5, and at the end the podium, in
+// DistrictGuessr its awards, and everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
 // server's clock, worked out from each check, as on the players' phones.
 (() => {
     const host = document.querySelector('[data-live-host]');
@@ -355,7 +355,7 @@
             const step = document.createElement('li');
             step.className = `live-podium-step is-top-${row.rank}`;
 
-            for (const [kind, text] of [['name', row.name], ['score', `${number.format(row.score)} points`], ['rank', row.rank]]) {
+            for (const [kind, text] of [['name', row.name], ['score', `${number.format(row.score)} ${row.score === 1 ? 'point' : 'points'}`], ['rank', row.rank]]) {
                 const cell = document.createElement('span');
                 cell.className = `live-podium-${kind}`;
                 cell.textContent = text;
@@ -364,6 +364,12 @@
 
             return step;
         }));
+
+        // DistrictGuessr's awards, under the podium.
+        const awards = window.GuessrMap ? GuessrMap.awards(state.awards ?? []) : [];
+        slot('awards').replaceChildren(...awards);
+        slot('awards-panel').hidden = awards.length === 0;
+
         board(slot('board'), state.leaderboard);
     };
 

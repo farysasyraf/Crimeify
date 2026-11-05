@@ -303,6 +303,11 @@ class LiveGames
 
         if ($phase === LiveGame::Finished) {
             $view['leaderboard'] = $this->board(array_slice($ranked, 0, 10), $player);
+            // DistrictGuessr's awards, the player's own marked.
+            $view['awards'] = array_map(
+                fn (array $award) => array_diff_key($award, ['player' => 0]) + ['you' => $award['player'] === $player],
+                $state['awards'] ?? [],
+            );
         }
 
         return $view;
@@ -359,9 +364,99 @@ class LiveGames
 
         if ($phase === LiveGame::Finished) {
             $view['leaderboard'] = $this->board($ranked);
+            $view['awards'] = array_map(fn (array $award) => array_diff_key($award, ['player' => 0]), $state['awards'] ?? []);
         }
 
         return $view;
+    }
+
+    /**
+     * A finished DistrictGuessr game's awards, so more than the top 3 have something to cheer, each with its player's
+     * Id and name and what earned it:
+     *
+     * - Sharpshooter: the most pins within config('game.live.awards.near') km (of the same, the closer on average);
+     *   when no one had one, the closest pin of the game.
+     * - Speed Demon: the fastest confirm on average, of those who pinned at least half the rounds.
+     * - Comeback: the most places climbed over the last config('game.live.awards.last') rounds, at least one.
+     * - Explorer: the furthest from the districts, all their pins together.
+     *
+     * Each goes to someone without an award yet if there's anyone who qualifies, the next best; otherwise to the best.
+     * Of the same, by name. None for Higher or Lower, or a game ended before its first round.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function awards(LiveGame $game): array
+    {
+        $played = $game->Round;
+
+        if ($game->Game !== self::DistrictGuessr || $played === 0) {
+            return [];
+        }
+
+        $config = config('game.live.awards');
+        $names = LivePlayer::query()->where('LiveGameId', $game->Id)->pluck('PlayerName', 'Id')->all();
+        $answers = LiveAnswer::query()->where('LiveGameId', $game->Id)->get(['LivePlayerId', 'Round', 'Points', 'Milliseconds', 'Km']);
+        $byName = fn (int $a, int $b) => strcasecmp($names[$a], $names[$b]);
+
+        // Each player's pins: how many, how many near, all their kilometres, their closest, and their average time.
+        $pins = $answers->whereNotNull('Km')->groupBy('LivePlayerId')->map(fn ($mine) => [
+            'count' => $mine->count(),
+            'near' => $mine->where('Km', '<=', $config['near'])->count(),
+            'km' => round($mine->sum('Km'), 1),
+            'closest' => (float) $mine->min('Km'),
+            'ms' => $mine->avg('Milliseconds'),
+        ]);
+
+        // The players by score after a round, and their places, as the leaderboard has them.
+        $places = function (int $round) use ($answers, $names): array {
+            $scores = [];
+            foreach (array_keys($names) as $id) {
+                $scores[$id] = (int) $answers->where('LivePlayerId', $id)->where('Round', '<=', $round)->sum('Points');
+            }
+            uksort($scores, fn (int $a, int $b) => $scores[$b] <=> $scores[$a] ?: strcasecmp($names[$a], $names[$b]));
+
+            $place = [];
+            $previous = null;
+            foreach (array_keys($scores) as $index => $id) {
+                $place[$id] = $previous !== null && $scores[$id] === $scores[$previous] ? $place[$previous] : $index + 1;
+                $previous = $id;
+            }
+
+            return $place;
+        };
+        $from = max(1, $played - $config['last']);
+        [$before, $after] = [$places($from), $places($played)];
+
+        $near = $pins->filter(fn (array $p) => $p['near'] > 0)->keys()
+            ->sort(fn (int $a, int $b) => $pins[$b]['near'] <=> $pins[$a]['near'] ?: $pins[$a]['km'] / $pins[$a]['count'] <=> $pins[$b]['km'] / $pins[$b]['count'] ?: $byName($a, $b));
+        $candidates = [
+            'sharpshooter' => $near->isNotEmpty()
+                ? $near->map(fn (int $id) => ['player' => $id, 'count' => $pins[$id]['near'], 'km' => $config['near']])
+                : $pins->keys()->sort(fn (int $a, int $b) => $pins[$a]['closest'] <=> $pins[$b]['closest'] ?: $byName($a, $b))
+                    ->map(fn (int $id) => ['player' => $id, 'closest' => $pins[$id]['closest']]),
+            'speed' => $pins->filter(fn (array $p) => $p['count'] >= (int) ceil($played / 2))->keys()
+                ->sort(fn (int $a, int $b) => $pins[$a]['ms'] <=> $pins[$b]['ms'] ?: $byName($a, $b))
+                ->map(fn (int $id) => ['player' => $id, 'seconds' => round($pins[$id]['ms'] / 1000, 1)]),
+            'comeback' => collect(array_keys($names))->filter(fn (int $id) => $before[$id] - $after[$id] >= 1)
+                ->sort(fn (int $a, int $b) => ($before[$b] - $after[$b]) <=> ($before[$a] - $after[$a]) ?: $after[$a] <=> $after[$b] ?: $byName($a, $b))
+                ->map(fn (int $id) => ['player' => $id, 'places' => $before[$id] - $after[$id], 'rounds' => $played - $from]),
+            'explorer' => $pins->filter(fn (array $p) => $p['km'] > 0)->keys()
+                ->sort(fn (int $a, int $b) => $pins[$b]['km'] <=> $pins[$a]['km'] ?: $byName($a, $b))
+                ->map(fn (int $id) => ['player' => $id, 'km' => $pins[$id]['km']]),
+        ];
+
+        $awards = [];
+        $awarded = [];
+        foreach ($candidates as $award => $ranked) {
+            $winner = $ranked->first(fn (array $candidate) => ! isset($awarded[$candidate['player']])) ?? $ranked->first();
+
+            if ($winner !== null) {
+                $awards[] = ['award' => $award, 'player' => $winner['player'], 'name' => $names[$winner['player']]] + array_diff_key($winner, ['player' => 0]);
+                $awarded[$winner['player']] = true;
+            }
+        }
+
+        return $awards;
     }
 
     /**
@@ -473,6 +568,8 @@ class LiveGames
                 'lng' => $answer->Lng,
                 'km' => $answer->Km,
             ]])->all(),
+            // Once it's over.
+            'awards' => $game->Status === LiveGame::Finished ? $this->awards($game) : [],
         ] + ($game->Game === self::DistrictGuessr ? $this->district($dealt) : $this->pair($dealt));
     }
 

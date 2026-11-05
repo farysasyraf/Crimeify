@@ -522,6 +522,11 @@
         slot('place').textContent = t('Place :rank of :count', { rank: state.rank, count: state.players });
         slot('final').textContent = number.format(state.score);
 
+        // DistrictGuessr's awards, this player's own marked.
+        const awards = GuessrMap.awards(state.awards ?? []);
+        slot('awards').replaceChildren(...awards);
+        slot('awards-panel').hidden = awards.length === 0;
+
         const rows = [...state.leaderboard];
         if (!rows.some((row) => row.you)) {
             rows.push(null, { rank: state.rank, name: state.name, score: state.score, you: true });

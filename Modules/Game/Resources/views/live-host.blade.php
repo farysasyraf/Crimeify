@@ -114,6 +114,11 @@
     <section class="game-panel live-panel" data-host-part="finished" hidden aria-labelledby="host-end-heading">
         <h2 id="host-end-heading">Final results</h2>
         <ol class="live-podium" data-host="podium"></ol>
+        {{-- DistrictGuessr's awards, so more than the top 3 have something to cheer. --}}
+        <div class="live-awards-panel" data-host="awards-panel" hidden>
+            <h3 class="live-board-heading">Awards</h3>
+            <ul class="live-awards" data-host="awards"></ul>
+        </div>
         <ol class="live-board" data-host="board"></ol>
         <div class="live-host-actions">
             <a class="btn" href="{{ page_url('game-scores') }}">Back to Game scores</a>

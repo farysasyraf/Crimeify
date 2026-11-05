@@ -61,5 +61,36 @@ window.GuessrMap = (() => {
 
         // Kilometres as the game shows them: to a tenth under 10.
         km: (km) => (km < 10 ? km.toFixed(1) : number.format(Math.round(km))),
+
+        // A finished live game's awards (LiveGames::awards()) as list items, for the big screen and the phones: each
+        // award's icon and name, who won it, and what for, the player's own marked.
+        awards(list) {
+            const kinds = {
+                sharpshooter: ['my_location', t('Sharpshooter'), (a) => (a.count
+                    ? tn(a.count, ':count pin within :km km', ':count pins within :km km', { km: a.km })
+                    : t('Closest pin: :km km', { km: this.km(a.closest) }))],
+                speed: ['bolt', t('Speed Demon'), (a) => t('Pinned in :seconds s on average', { seconds: Number(a.seconds).toFixed(1) })],
+                comeback: ['trending_up', t('Comeback'), (a) => tn(a.places, 'Up :count place in the last rounds', 'Up :count places in the last rounds')],
+                explorer: ['explore', t('Explorer'), (a) => t(':km km off in all', { km: this.km(a.km) })],
+            };
+
+            return list.filter((award) => kinds[award.award]).map((award) => {
+                const [icon, title, detail] = kinds[award.award];
+                const item = document.createElement('li');
+                item.className = `live-award is-${award.award}${award.you ? ' is-you' : ''}`;
+
+                for (const [part, text] of [['icon', icon], ['title', title], ['name', award.name], ['detail', detail(award)]]) {
+                    const cell = document.createElement('span');
+                    cell.className = `live-award-${part}${part === 'icon' ? ' material-icon' : ''}`;
+                    cell.textContent = text;
+                    if (part === 'icon') {
+                        cell.setAttribute('aria-hidden', 'true');
+                    }
+                    item.append(cell);
+                }
+
+                return item;
+            });
+        },
     };
 })();
