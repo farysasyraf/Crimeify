@@ -48,14 +48,27 @@ class LiveGames
      */
     public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr'];
 
+    /**
+     * Higher or Lower's modes: Classic, everyone plays every round for points; or Last One Standing, where a wrong
+     * answer, or none, puts a player out (unless everyone still in gets it wrong, when they all stay in), and the game
+     * ends when one is left, or after its rounds. Points still count, to rank those left at the end, and those out in
+     * the same round.
+     */
+    public const Classic = 'classic';
+
+    public const LastOneStanding = 'last-one-standing';
+
+    public const Modes = [self::Classic, self::LastOneStanding];
+
     public function __construct(private Cards $cards, private DistrictGuessr $guessr) {}
 
     /**
      * Make a game of the game given for the host, with every round dealt: for Higher or Lower, its cards, getting
-     * closer round by round as the solo game does with its score; for DistrictGuessr, its districts, at the level given
-     * (DistrictGuessr::Easy or Hard). None when there's nothing to play with.
+     * closer round by round as the solo game does with its score, in the mode given (Classic or Last One Standing, whose
+     * rounds are the most it can last); for DistrictGuessr, its districts, at the level given (DistrictGuessr::Easy or
+     * Hard). None when there's nothing to play with.
      */
-    public function create(User $host, int $rounds, string $game = self::HigherOrLower, string $difficulty = DistrictGuessr::Hard): ?LiveGame
+    public function create(User $host, int $rounds, string $game = self::HigherOrLower, string $difficulty = DistrictGuessr::Hard, string $mode = self::Classic): ?LiveGame
     {
         $dealt = $game === self::DistrictGuessr ? $this->guessr->deal($rounds) : $this->pairs($rounds);
 
@@ -65,6 +78,7 @@ class LiveGames
 
         return LiveGame::create([
             'Game' => $game,
+            'Mode' => $game === self::HigherOrLower ? $mode : self::Classic,
             'Difficulty' => $game === self::DistrictGuessr ? $difficulty : DistrictGuessr::Hard,
             'Code' => $this->freeCode(),
             'HostId' => $host->Id,
@@ -92,8 +106,9 @@ class LiveGames
     }
 
     /**
-     * Add a player to the game, at any point before it finishes: one who joins late misses the rounds before.
-     * A name someone in the game already has (any capitals) is a UniqueConstraintViolationException.
+     * Add a player to the game, at any point before it finishes: one who joins late misses the rounds before, and in
+     * Last One Standing, once it has started, watches (OutRound 0), as they couldn't have stayed in through the rounds
+     * before. A name someone in the game already has (any capitals) is a UniqueConstraintViolationException.
      */
     public function join(LiveGame $game, string $name): LivePlayer
     {
@@ -103,6 +118,7 @@ class LiveGames
             'PlayerName' => $name,
             'PlayerKey' => GameRun::keyFor($name),
             'Score' => 0,
+            'OutRound' => $game->Mode === self::LastOneStanding && $game->Round > 0 ? 0 : null,
             'JoinedAt' => now(),
         ]);
         $this->changed($game->Id);
@@ -112,17 +128,19 @@ class LiveGames
 
     /**
      * Start the game or move it on, from the lobby or a round's answer: the next round, after a few seconds to get
-     * ready, or after the last, the end. False at any other point, as when the host's button is pressed twice.
+     * ready, or after the last, the end. In Last One Standing, those out this round go out first, and the game ends
+     * when only one is left. False at any other point, as when the host's button is pressed twice.
      */
     public function next(LiveGame $game): bool
     {
         $state = $this->state($game->Id);
+        $phase = $state === null ? null : $this->phase($state);
 
-        if ($state === null || ! in_array($this->phase($state), [LiveGame::Lobby, self::Reveal], true)) {
+        if (! in_array($phase, [LiveGame::Lobby, self::Reveal], true)) {
             return false;
         }
 
-        if ($game->Round >= $game->Rounds) {
+        if ($game->Round >= $game->Rounds || ($phase === self::Reveal && $this->knockOut($state))) {
             return $this->finish($game);
         }
 
@@ -160,10 +178,17 @@ class LiveGames
     }
 
     /**
-     * End the game, after its last round or before: its scores are its leaderboard.
+     * End the game, after its last round or before: its scores are its leaderboard. In Last One Standing, from a
+     * round's answer, those out in it go out first; from a round still being answered, no one does.
      */
     public function finish(LiveGame $game): bool
     {
+        $state = $this->state($game->Id);
+
+        if ($state !== null && $this->phase($state) === self::Reveal) {
+            $this->knockOut($state);
+        }
+
         $game->update(['Status' => LiveGame::Finished, 'FinishedAt' => now()]);
         $this->changed($game->Id);
 
@@ -259,16 +284,94 @@ class LiveGames
             return self::Ready;
         }
 
-        $everyone = $state['players'] !== [] && count($state['answers']) >= count($state['players']);
+        // Everyone who can answer: in Last One Standing, those still in.
+        $answering = count($this->stillIn($state));
+        $everyone = $answering > 0 && count($state['answers']) >= $answering;
 
         return $everyone || $now >= $state['closesAt'] + config('game.live.grace') * 1000 ? self::Reveal : self::Question;
+    }
+
+    /**
+     * Whether the game is Higher or Lower's Last One Standing.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    public function lastOneStanding(array $state): bool
+    {
+        return ($state['mode'] ?? self::Classic) === self::LastOneStanding;
+    }
+
+    /**
+     * The players still in as the round being played began, by Id: everyone, but in Last One Standing those already
+     * out or watching.
+     *
+     * @param  array<string, mixed>  $state
+     * @return list<int>
+     */
+    private function stillIn(array $state): array
+    {
+        return array_keys(array_filter($state['players'], fn (array $player) => ($player['out'] ?? null) === null));
+    }
+
+    /**
+     * Each player's round out, as it stands in the phase given: in Last One Standing at a round's answer, those out in
+     * it (the state's knocked) count as out in it already, before the host moves on and it's kept. None for still in.
+     *
+     * @param  array<string, mixed>  $state
+     * @return array<int, int|null>
+     */
+    private function outs(array $state, string $phase): array
+    {
+        $outs = array_map(fn (array $player) => $player['out'] ?? null, $state['players']);
+
+        if ($this->lastOneStanding($state) && $phase === self::Reveal) {
+            foreach ($state['knocked'] as $id) {
+                $outs[$id] = $state['round'];
+            }
+        }
+
+        return $outs;
+    }
+
+    /**
+     * Whether Last One Standing is decided at this round's answer: of more than one still in as it began, one or none
+     * left. A game begun with one player plays all its rounds.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private function decided(array $state): bool
+    {
+        $before = count($this->stillIn($state));
+
+        return $this->lastOneStanding($state) && $before > 1 && $before - count($state['knocked']) <= 1;
+    }
+
+    /**
+     * At a round's answer in Last One Standing, keep who went out in it, and say whether the game is decided. For
+     * Classic, nothing, and never decided.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private function knockOut(array $state): bool
+    {
+        if (! $this->lastOneStanding($state)) {
+            return false;
+        }
+
+        if ($state['knocked'] !== []) {
+            LivePlayer::query()->whereKey($state['knocked'])->whereNull('OutRound')->update(['OutRound' => $state['round']]);
+        }
+
+        return $this->decided($state);
     }
 
     /**
      * What a player's phone shows: the phase, the round and its times, the cards in the player's language or the
      * district, and whether they've answered (and where they pinned); at the answer, the count that was hidden or where
      * the district is, and how they did; their score and place, from the answer on (not while answering, which would
-     * give away who was right); and at the end, the top 10.
+     * give away who was right); and at the end, the top 10. In Last One Standing, too, the round the player went out
+     * in (none while still in, 0 when watching), and at the answer whether everyone still in got it wrong, so all
+     * stayed in.
      *
      * @param  array<string, mixed>  $state
      * @return array<string, mixed>
@@ -277,11 +380,17 @@ class LiveGames
     {
         $now = $this->now();
         $phase = $this->phase($state, $now);
-        $ranked = $this->ranked($state);
+        $outs = $this->outs($state, $phase);
+        $ranked = $this->ranked($state, $outs);
         $me = collect($ranked)->firstWhere('id', $player);
         $mine = $state['answers'][$player] ?? null;
-        $view = $this->common($state, $phase, $now) + ['name' => $me['name']];
+        $view = $this->common($state, $phase, $now, $outs) + ['name' => $me['name']];
         $pins = $state['game'] === self::DistrictGuessr;
+
+        if ($this->lastOneStanding($state)) {
+            $view['out'] = $outs[$player];
+            $view['saved'] = $phase === self::Reveal && $state['saved'];
+        }
 
         if (in_array($phase, [self::Ready, self::Question, self::Reveal], true)) {
             $view += $pins
@@ -316,7 +425,8 @@ class LiveGames
     /**
      * What the big screen shows: the phase, the round and its times, the players by name while they join, how many
      * have answered, the cards or the district; at the answer, the count that was hidden and how many said higher and
-     * lower, or where the district is and everyone's pins, closest first; the top 5; and at the end, everyone.
+     * lower, or where the district is and everyone's pins, closest first; the top 5; and at the end, everyone. In Last
+     * One Standing at the answer, too, who went out, or whether everyone still in got it wrong, so all stayed in.
      *
      * @param  array<string, mixed>  $state
      * @return array<string, mixed>
@@ -325,9 +435,15 @@ class LiveGames
     {
         $now = $this->now();
         $phase = $this->phase($state, $now);
-        $ranked = $this->ranked($state);
-        $view = $this->common($state, $phase, $now) + ['answered' => count($state['answers'])];
+        $outs = $this->outs($state, $phase);
+        $ranked = $this->ranked($state, $outs);
+        $view = $this->common($state, $phase, $now, $outs) + ['answered' => count($state['answers'])];
         $pins = $state['game'] === self::DistrictGuessr;
+
+        if ($this->lastOneStanding($state) && $phase === self::Reveal) {
+            $view['knocked'] = array_map(fn (int $id) => $state['players'][$id]['name'], $state['knocked']);
+            $view['saved'] = $state['saved'];
+        }
 
         if ($phase === LiveGame::Lobby) {
             $view['names'] = array_column($state['players'], 'name');
@@ -359,7 +475,7 @@ class LiveGames
             }
 
             $view['leaderboard'] = $this->board(array_slice($ranked, 0, 5));
-            $view['last'] = $state['round'] >= $state['rounds'];
+            $view['last'] = $state['round'] >= $state['rounds'] || $this->decided($state);
         }
 
         if ($phase === LiveGame::Finished) {
@@ -461,21 +577,29 @@ class LiveGames
 
     /**
      * The players, most points first, each with their place: the same points, the same place (1, 2, 2, 4), listed by
-     * name.
+     * name. In Last One Standing, those still in first, then the others by the round they went out in, the latest
+     * first, those watching last, each by points; with the round they went out in (outs(), as of the phase).
      *
      * @param  array<string, mixed>  $state
-     * @return list<array{id: int, name: string, score: int, rank: int}>
+     * @param  array<int, int|null>|null  $outs
+     * @return list<array{id: int, name: string, score: int, rank: int, out?: int|null}>
      */
-    public function ranked(array $state): array
+    public function ranked(array $state, ?array $outs = null): array
     {
+        $standing = $this->lastOneStanding($state);
+        $outs ??= $this->outs($state, LiveGame::Finished);
+        // What places a player: the round they went out in, still in counting above any, then their points.
+        $key = fn (array $player) => $standing ? [$player['out'] ?? PHP_INT_MAX, $player['score']] : [$player['score']];
+
         $players = collect($state['players'])
-            ->map(fn (array $player, int $id) => ['id' => $id, 'name' => $player['name'], 'score' => $player['score']])
-            ->sortBy([['score', 'desc'], fn (array $a, array $b) => strcasecmp($a['name'], $b['name'])])
+            ->map(fn (array $player, int $id) => ['id' => $id, 'name' => $player['name'], 'score' => $player['score']]
+                + ($standing ? ['out' => $outs[$id] ?? null] : []))
+            ->sort(fn (array $a, array $b) => $key($b) <=> $key($a) ?: strcasecmp($a['name'], $b['name']))
             ->values();
 
         $ranked = [];
         foreach ($players as $index => $player) {
-            $ranked[] = $player + ['rank' => $index > 0 && $player['score'] === $ranked[$index - 1]['score'] ? $ranked[$index - 1]['rank'] : $index + 1];
+            $ranked[] = $player + ['rank' => $index > 0 && $key($player) === $key($ranked[$index - 1]) ? $ranked[$index - 1]['rank'] : $index + 1];
         }
 
         return $ranked;
@@ -490,15 +614,17 @@ class LiveGames
     }
 
     /**
-     * What both views have.
+     * What both views have: in Last One Standing, too, how many are still in (left), as of the phase.
      *
      * @param  array<string, mixed>  $state
+     * @param  array<int, int|null>  $outs
      * @return array<string, mixed>
      */
-    private function common(array $state, string $phase, int $now): array
+    private function common(array $state, string $phase, int $now, array $outs): array
     {
         return [
             'game' => $state['game'],
+            'mode' => $state['mode'] ?? self::Classic,
             'difficulty' => $state['difficulty'] ?? DistrictGuessr::Hard,
             'now' => $now,
             'phase' => $phase,
@@ -508,14 +634,15 @@ class LiveGames
             'opensAt' => $state['opensAt'],
             'closesAt' => $state['closesAt'],
             'players' => count($state['players']),
-        ];
+        ] + ($this->lastOneStanding($state) ? ['left' => count(array_filter($outs, fn (?int $out) => $out === null))] : []);
     }
 
     /**
-     * Ranked players as a leaderboard shows them, the given player marked as "you".
+     * Ranked players as a leaderboard shows them, the given player marked as "you", and in Last One Standing the round
+     * each went out in (none still in, 0 watching).
      *
-     * @param  list<array{id: int, name: string, score: int, rank: int}>  $ranked
-     * @return list<array{rank: int, name: string, score: int, you: bool}>
+     * @param  list<array{id: int, name: string, score: int, rank: int, out?: int|null}>  $ranked
+     * @return list<array{rank: int, name: string, score: int, you: bool, out?: int|null}>
      */
     private function board(array $ranked, ?int $you = null): array
     {
@@ -524,7 +651,7 @@ class LiveGames
             'name' => $player['name'],
             'score' => $player['score'],
             'you' => $player['id'] === $you,
-        ], $ranked);
+        ] + (array_key_exists('out', $player) ? ['out' => $player['out']] : []), $ranked);
     }
 
     /**
@@ -544,9 +671,18 @@ class LiveGames
         $answers = $game->Round === 0 ? collect() : LiveAnswer::query()->where('LiveGameId', $id)->where('Round', $game->Round)->get();
         $dealt = $game->Round === 0 ? null : $game->Cards[$game->Round - 1];
 
+        // Last One Standing: who goes out at this round's answer, those still in without a right one, unless that's
+        // every one of them, when everyone stays in (saved). Only final once the round's answer shows.
+        $in = $players->whereNull('OutRound')->pluck('Id');
+        $knocked = $in->diff($answers->where('Correct', true)->pluck('LivePlayerId'))->values()->all();
+        $saved = $in->isNotEmpty() && count($knocked) === $in->count();
+
         return [
             'id' => $game->Id,
             'game' => $game->Game,
+            'mode' => $game->Mode ?? self::Classic,
+            'knocked' => $saved ? [] : $knocked,
+            'saved' => $saved,
             'difficulty' => $game->Difficulty ?? DistrictGuessr::Hard,
             'code' => $game->Code,
             'status' => $game->Status,
@@ -559,6 +695,7 @@ class LiveGames
                 'name' => $player->PlayerName,
                 'token' => $player->Token,
                 'score' => $player->Score,
+                'out' => $player->OutRound,
             ]])->all(),
             'answers' => $answers->mapWithKeys(fn (LiveAnswer $answer) => [$answer->LivePlayerId => [
                 'guess' => $answer->Guess,

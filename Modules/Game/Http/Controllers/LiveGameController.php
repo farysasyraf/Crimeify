@@ -21,24 +21,30 @@ class LiveGameController extends Controller
     public function __construct(private LiveGames $live) {}
 
     /**
-     * Make a game of the game and with the rounds chosen, and for DistrictGuessr the level, and open its big screen.
-     * Higher or Lower when no game is given, and Hard when no level is.
+     * Make a game of the game and with the rounds chosen, for Higher or Lower in the mode chosen and for DistrictGuessr
+     * at the level, and open its big screen. Higher or Lower when no game is given, Classic when no mode is, and Hard
+     * when no level is.
      */
     public function store(Request $request): RedirectResponse
     {
         $rounds = config('game.live.rounds');
         $request->validate([
             'game' => ['nullable', 'string', Rule::in(array_keys(LiveGames::Kinds))],
+            'mode' => ['nullable', Rule::in(LiveGames::Modes)],
             'difficulty' => ['nullable', Rule::in(DistrictGuessr::Levels)],
             'rounds' => ['required', 'integer', "between:{$rounds['least']},{$rounds['most']}"],
         ], [
             'game.in' => 'Choose a game to host.',
+            'mode.in' => 'Choose Classic or Last One Standing.',
             'difficulty.in' => 'Choose Easy or Hard.',
             'rounds.between' => 'A live game can have :min to :max rounds.',
         ]);
 
         $kind = $request->input('game') ?? LiveGames::HigherOrLower;
-        $game = $this->live->create($request->user(), $request->integer('rounds'), $kind, $request->input('difficulty') ?? DistrictGuessr::Hard);
+        $game = $this->live->create(
+            $request->user(), $request->integer('rounds'), $kind,
+            $request->input('difficulty') ?? DistrictGuessr::Hard, $request->input('mode') ?? LiveGames::Classic,
+        );
 
         if ($game === null) {
             return redirect(page_url('game-scores'))
@@ -60,6 +66,7 @@ class LiveGameController extends Controller
             'game' => $liveGame,
             'pins' => $liveGame->Game === LiveGames::DistrictGuessr,
             'easy' => $liveGame->Game === LiveGames::DistrictGuessr && $liveGame->Difficulty === DistrictGuessr::Easy,
+            'standing' => $liveGame->Game === LiveGames::HigherOrLower && $liveGame->Mode === LiveGames::LastOneStanding,
             'boundaries' => versioned_asset(config('map.boundaries')),
             'joinUrl' => route('public.game.live'),
             'urls' => [

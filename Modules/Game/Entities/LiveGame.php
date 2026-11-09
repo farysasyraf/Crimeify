@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// A live game, of Higher or Lower or DistrictGuessr (Game, its key on the Games page, and for DistrictGuessr its level,
-// Difficulty), stored in dbo.LiveGames: its code, who hosts it, its rounds (Cards: two cards a round, or a district), and
-// where it's up to. LiveGames (Support) plays it.
+// A live game, of Higher or Lower or DistrictGuessr (Game, its key on the Games page; for Higher or Lower its mode, Mode:
+// Classic or Last One Standing; for DistrictGuessr its level, Difficulty), stored in dbo.LiveGames: its code, who hosts
+// it, its rounds (Cards: two cards a round, or a district), and where it's up to. LiveGames (Support) plays it.
 #[Table(name: 'LiveGames', key: 'Id', timestamps: false)]
-#[Fillable(['Game', 'Difficulty', 'Code', 'HostId', 'HostName', 'Rounds', 'Seconds', 'Cards', 'Status', 'Round', 'OpensAt', 'ClosesAt', 'CreatedAt', 'FinishedAt'])]
+#[Fillable(['Game', 'Mode', 'Difficulty', 'Code', 'HostId', 'HostName', 'Rounds', 'Seconds', 'Cards', 'Status', 'Round', 'OpensAt', 'ClosesAt', 'CreatedAt', 'FinishedAt'])]
 class LiveGame extends Model
 {
     public const Lobby = 'lobby';
@@ -66,13 +66,14 @@ class LiveGame extends Model
     }
 
     /**
-     * The game's name as Game scores lists it, with DistrictGuessr's level, like "DistrictGuessr (Easy)".
+     * The game's name as Game scores lists it, with DistrictGuessr's level or Higher or Lower's mode other than Classic,
+     * like "DistrictGuessr (Easy)" or "Higher or Lower (Last One Standing)".
      */
     public function gameName(): string
     {
         return match ($this->Game) {
             'districtguessr' => 'DistrictGuessr ('.ucfirst($this->Difficulty ?? 'hard').')',
-            'higher-or-lower' => 'Higher or Lower',
+            'higher-or-lower' => $this->Mode === 'last-one-standing' ? 'Higher or Lower (Last One Standing)' : 'Higher or Lower',
             default => $this->Game,
         };
     }

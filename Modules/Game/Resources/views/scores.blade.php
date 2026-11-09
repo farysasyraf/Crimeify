@@ -6,6 +6,7 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/scores.css') }}" />
+    <script src="{{ versioned_asset('modules/game/scores.js') }}" defer></script>
 @endpush
 
 {{-- The games' scores, for administrators only: hosting a live game, of either game; for the game chosen, each
@@ -32,7 +33,8 @@
         <p class="muted">
             Like a quiz night: put its big screen on a projector or share it in a meeting, and everyone joins with its
             code on their phone. Each round shows everyone the same two cards, or the same district to pin on the map,
-            and the sooner the answer, the more points. Its leaderboard shows at the end.
+            and the sooner the answer, the more points. Its leaderboard shows at the end. In Higher or Lower's Last One
+            Standing, a wrong answer puts a player out, and the last one in wins; its rounds are the most it can last.
         </p>
     </div>
     <form method="post" action="{{ page_url('game-scores/store-live') }}" class="scores-filters scores-live-form"
@@ -46,9 +48,18 @@
                 @endforeach
             </select>
         </div>
-        {{-- DistrictGuessr's level for everyone: Easy zooms each phone's map into the district's state. --}}
-        <div>
-            <label for="live-difficulty">Level <span class="scores-level-note">(DistrictGuessr)</span></label>
+        {{-- Each game's own choice, shown only with that game (scores.js): Higher or Lower's mode, Classic or Last One
+             Standing, where a wrong answer puts a player out; DistrictGuessr's level, where Easy zooms each phone's map
+             into the district's state. Without JavaScript, both show; each game ignores the other's. --}}
+        <div data-live-for="higher-or-lower" @class(['is-other' => $liveKind !== 'higher-or-lower'])>
+            <label for="live-mode">Mode</label>
+            <select id="live-mode" name="mode">
+                <option value="classic" @selected(old('mode', 'classic') === 'classic')>Classic</option>
+                <option value="last-one-standing" @selected(old('mode') === 'last-one-standing')>Last One Standing</option>
+            </select>
+        </div>
+        <div data-live-for="districtguessr" @class(['is-other' => $liveKind !== 'districtguessr'])>
+            <label for="live-difficulty">Level</label>
             <select id="live-difficulty" name="difficulty">
                 <option value="easy" @selected(old('difficulty', $liveDifficulty) === 'easy')>Easy</option>
                 <option value="hard" @selected(old('difficulty', $liveDifficulty) === 'hard')>Hard</option>

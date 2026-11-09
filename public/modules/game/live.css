@@ -54,6 +54,10 @@
 .is-top-3 .live-board-rank { background: rgba(205, 140, 90, .2); color: #e0a77a; }
 .live-board-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .live-board-score { font-weight: 700; font-variant-numeric: tabular-nums; }
+/* Last One Standing: still in, or the round a player went out in; those out a little dimmer. */
+.live-board-tag { flex: none; color: var(--accent-soft); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.live-board-row.is-out .live-board-tag { color: var(--muted); font-weight: 500; }
+.live-board-row.is-out .live-board-name { color: var(--muted); }
 .live-board-gap { padding: 2px 12px; color: var(--muted); text-align: center; }
 
 /* The big screen. */

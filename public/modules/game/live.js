@@ -3,7 +3,8 @@
 // a few seconds to get ready, the round until its time is up (two cards with Higher and Lower, or a district to pin on
 // the map, guessr-map.js, and Confirm), then its answer with the player's points and place, and at the end the top 10.
 // Each round opens on the server's clock, worked out from each check, so every phone shows it at the same moment. The
-// game and the player are remembered in the tab, so reloading keeps them in it.
+// game and the player are remembered in the tab, so reloading keeps them in it. While the game's on, the screen stays
+// on, and on phones that can, a buzz says a round has opened and its answer is in (awake.js).
 (() => {
     const live = document.querySelector('[data-live]');
 
@@ -41,6 +42,9 @@
     const serverNow = () => Date.now() + offset;
     const answered = () => guessed !== null && view !== null && guessed.round === view.round;
     const pins = () => view?.game === 'districtguessr';
+    // Higher or Lower's Last One Standing, and whether this player sits out this round: out before it, or watching.
+    const standingMode = () => view?.mode === 'last-one-standing';
+    const sittingOut = () => standingMode() && view.out !== null && view.out !== undefined && view.out !== view.round;
 
     const keep = (value) => {
         try {
@@ -124,6 +128,7 @@
         clearTimeout(checking);
         me = view = dealt = revealed = guessed = null;
         keep(null);
+        window.CrimeifyAwake?.keep(false);
         showGame(null);
         show('join');
         joinError(message);
@@ -158,12 +163,17 @@
     const render = (state) => {
         view = state;
         showGame(state.game);
+        window.CrimeifyAwake?.keep(state.phase !== 'finished');
 
         if (pins()) {
             outlines ??= GuessrMap.load(live.dataset.boundaries);
             slot('level-rule').textContent = state.difficulty === 'easy'
                 ? t("This game is on Easy: the map zooms into each district's state.")
                 : t('This game is on Hard: the whole of Malaysia.');
+        } else {
+            slot('mode-rule').textContent = standingMode()
+                ? t("This game is Last One Standing: a wrong answer, or none, and you're out; if everyone still in gets it wrong, they all stay in. The last one in wins.")
+                : t('This game is Classic: everyone plays every round, and the most points win.');
         }
 
         if (state.guess) {
@@ -300,6 +310,10 @@
         }
 
         dealt = view.round;
+        // Once a round opens, not again for its answer after reloading.
+        if (['ready', 'question'].includes(view.phase)) {
+            window.CrimeifyAwake?.buzz(40);
+        }
         slot('round').textContent = t('Round :round of :rounds', { round: view.round, rounds: view.rounds })
             + (pins() ? ` · ${view.difficulty === 'easy' ? t('Easy') : t('Hard')}` : '');
         say('standing', '');
@@ -310,7 +324,10 @@
             dealCards();
         }
 
-        if (answered()) {
+        if (sittingOut()) {
+            lock();
+            say('note', view.out === 0 ? t("This game had already started: you're watching.") : t("You're out: watch how it ends."));
+        } else if (answered()) {
             lock(guessed.guess);
             say('note', lockedIn(guessed.guess));
         } else {
@@ -371,7 +388,7 @@
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
         live.classList.toggle('is-hurrying', left > 0 && left <= 3000);
 
-        if (left > 0 || answered() || sending) {
+        if (left > 0 || answered() || sending || sittingOut()) {
             return;
         }
 
@@ -388,7 +405,7 @@
         const now = serverNow();
         const at = guess === 'pin' ? pin?.getLatLng() : null;
 
-        if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at)
+        if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at) || sittingOut()
             || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
             return;
         }
@@ -444,13 +461,37 @@
         const was = number.format(state.answer);
         next.classList.add(result?.correct ? 'is-right' : 'is-wrong');
 
-        if (result === null) {
+        // Last One Standing: still out or watching; all saved, as everyone still in got it wrong; out this round; or in.
+        if (standingMode() && sittingOut()) {
+            say('note', state.out === 0 ? t("This game had already started: you're watching.") : t("You're out: watch how it ends."));
+        } else if (standingMode() && state.saved) {
+            say('note', t('It was :answer. Everyone still in got it wrong, so you all stay in!', { answer: was }), 'right');
+        } else if (standingMode() && state.out === state.round) {
+            say('note', result === null ? t("No answer: you're out. It was :answer.", { answer: was }) : t("Wrong: it was :answer. You're out!", { answer: was }), 'wrong');
+        } else if (standingMode()) {
+            say('note', t('Right! +:points points. Still in!', { points: number.format(result.points) }), 'right');
+        } else if (result === null) {
             say('note', t('No answer this round. It was :answer.', { answer: was }), 'wrong');
         } else if (result.correct) {
             say('note', t('Right! +:points points', { points: number.format(result.points) }), 'right');
         } else {
             say('note', t('Wrong: it was :answer.', { answer: was }), 'wrong');
         }
+    };
+
+    // Where the player stands: in Last One Standing, still in or the round they went out in; otherwise points and place.
+    const standingText = (state) => {
+        if (!standingMode()) {
+            return t('Your points: :score · Place :rank of :count', { score: number.format(state.score), rank: state.rank, count: state.players });
+        }
+
+        if (state.out === null) {
+            return t('Still in · :left of :count left', { left: state.left, count: state.players });
+        }
+
+        return state.out === 0
+            ? t('Watching · :left of :count still in', { left: state.left, count: state.players })
+            : t('Out in round :round · Place :rank of :count', { round: state.out, rank: state.rank, count: state.players });
     };
 
     // DistrictGuessr's answer: where the district is, with a dashed line from the player's pin, how far off it was and
@@ -490,13 +531,14 @@
     // The round's answer, once, and how this player did, with their points and place.
     const reveal = (state) => {
         deal();
-        say('standing', t('Your points: :score · Place :rank of :count', { score: number.format(state.score), rank: state.rank, count: state.players }));
+        say('standing', standingText(state));
 
         if (revealed === state.round) {
             return;
         }
 
         revealed = state.round;
+        window.CrimeifyAwake?.buzz([60, 80, 60]);
         live.classList.remove('is-hurrying');
         slot('seconds').textContent = 0;
         slot('bar').style.transform = 'scaleX(0)';
@@ -529,7 +571,7 @@
 
         const rows = [...state.leaderboard];
         if (!rows.some((row) => row.you)) {
-            rows.push(null, { rank: state.rank, name: state.name, score: state.score, you: true });
+            rows.push(null, { rank: state.rank, name: state.name, score: state.score, you: true, ...(standingMode() ? { out: state.out } : {}) });
         }
 
         slot('board').replaceChildren(...rows.map((row) => {
@@ -541,8 +583,13 @@
                 return item;
             }
 
-            item.className = `live-board-row${row.you ? ' is-you' : ''}${row.rank <= 3 ? ` is-top-${row.rank}` : ''}`;
-            for (const [kind, text] of [['rank', row.rank], ['name', row.name], ['score', number.format(row.score)]]) {
+            // In Last One Standing, still in, or the round they went out in.
+            const tag = !('out' in row) ? null : row.out === null ? t('Still in') : row.out === 0 ? t('Watching') : t('Out in round :round', { round: row.out });
+            item.className = `live-board-row${row.you ? ' is-you' : ''}${row.rank <= 3 ? ` is-top-${row.rank}` : ''}${tag !== null && row.out !== null ? ' is-out' : ''}`;
+            for (const [kind, text] of [['rank', row.rank], ['name', row.name], ['tag', tag], ['score', number.format(row.score)]]) {
+                if (text === null) {
+                    continue;
+                }
                 const cell = document.createElement('span');
                 cell.className = `live-board-${kind}`;
                 cell.textContent = text;

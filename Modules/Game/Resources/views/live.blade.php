@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/live.css') }}" />
     <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/guessr-map.js') }}" defer></script>
+    <script src="{{ versioned_asset('modules/game/awake.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/live.js') }}" defer></script>
 @endpush
 
@@ -78,6 +79,8 @@
         <p class="muted">{{ __('Watch the big screen: the game starts when the host starts it.') }}</p>
         <p class="live-count" data-live="players"></p>
         <ol class="live-rules" data-live-game="higher-or-lower" hidden>
+            {{-- The game's mode, as the host chose it (live.js). --}}
+            <li data-live="mode-rule"></li>
             <li>{{ __("Each round has two cards, each a police district's count of the same crime in one year.") }}</li>
             <li>{{ __("Guess whether the second card's count is higher or lower than the first's.") }}</li>
             <li>{{ __('A right guess scores up to :points points: the sooner, the more.', ['points' => number_format(config('game.live.points'))]) }}</li>

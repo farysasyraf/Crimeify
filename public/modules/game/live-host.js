@@ -3,7 +3,8 @@
 // (guessr-map.js) with the time left and how many have answered, then its answer (how many said higher and lower, or
 // where the district is and everyone's pins, the 3 closest named) and the top 5, and at the end the podium, in
 // DistrictGuessr its awards, and everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
-// server's clock, worked out from each check, as on the players' phones.
+// server's clock, worked out from each check, as on the players' phones. The screen stays on until the game's over
+// (awake.js).
 (() => {
     const host = document.querySelector('[data-live-host]');
 
@@ -101,6 +102,7 @@
 
     const render = (state) => {
         view = state;
+        window.CrimeifyAwake?.keep(state.phase !== 'finished');
         host.dataset.phase = state.phase;
         slot('foot').hidden = state.phase === 'finished';
         slot('join').hidden = state.phase === 'finished';
@@ -223,7 +225,9 @@
         slot('seconds').textContent = Math.ceil(left / 1000);
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
         host.classList.toggle('is-hurrying', left > 0 && left <= 3000);
-        slot('note').textContent = `${view.answered} of ${view.players} ${pins ? 'pinned' : 'answered'}`;
+        slot('note').textContent = standing()
+            ? `${view.answered} of ${view.left} still in answered`
+            : `${view.answered} of ${view.players} ${pins ? 'pinned' : 'answered'}`;
         part('round').querySelector('[data-host-action="close"]').hidden = false;
         part('round').querySelector('[data-host-action="next"]').hidden = true;
     };
@@ -247,12 +251,17 @@
         requestAnimationFrame(step);
     };
 
+    // A leaderboard's rows; in Last One Standing, each with whether they're still in, or the round they went out in.
     const board = (list, rows) => {
         list.replaceChildren(...rows.map((row) => {
             const item = document.createElement('li');
-            item.className = `live-board-row${row.rank <= 3 ? ` is-top-${row.rank}` : ''}`;
+            item.className = `live-board-row${row.rank <= 3 ? ` is-top-${row.rank}` : ''}${'out' in row && row.out !== null ? ' is-out' : ''}`;
+            const tag = !('out' in row) ? null : row.out === null ? 'Still in' : row.out === 0 ? 'Watching' : `Out in round ${row.out}`;
 
-            for (const [kind, text] of [['rank', row.rank], ['name', row.name], ['score', number.format(row.score)]]) {
+            for (const [kind, text] of [['rank', row.rank], ['name', row.name], ['tag', tag], ['score', number.format(row.score)]]) {
+                if (text === null) {
+                    continue;
+                }
                 const cell = document.createElement('span');
                 cell.className = `live-board-${kind}`;
                 cell.textContent = text;
@@ -263,13 +272,26 @@
         }));
     };
 
-    // Higher or Lower's answer: the count that was hidden, and how many said which.
+    const standing = () => view?.mode === 'last-one-standing';
+
+    // Higher or Lower's answer: the count that was hidden, and how many said which; in Last One Standing, who went out,
+    // or that everyone still in got it wrong and stays in, and how many are left.
     const showCount = (state) => {
         const next = slot('cards').querySelector('.game-card-next');
         next.classList.add('is-right');
         countUp(next.querySelector('[data-card="crimes"]'), state.answer);
 
-        slot('note').textContent = `It was ${state.right}! ${state.said.higher} said higher, ${state.said.lower} said lower.`;
+        if (!standing()) {
+            slot('note').textContent = `It was ${state.right}! ${state.said.higher} said higher, ${state.said.lower} said lower.`;
+            return;
+        }
+
+        const out = state.knocked ?? [];
+        const names = out.slice(0, 6).join(', ') + (out.length > 6 ? ` and ${out.length - 6} more` : '');
+        const what = state.saved
+            ? 'Everyone still in got it wrong, so they all stay in.'
+            : (out.length ? `Out: ${names}.` : 'No one out.');
+        slot('note').textContent = `It was ${state.right}! ${what} ${state.left} still in.`;
     };
 
     // DistrictGuessr's answer: where the district is, and everyone's pins, closest first, the 3 closest in gold, silver
@@ -350,6 +372,13 @@
         }
 
         show('finished');
+
+        // Last One Standing's winner, by name, when one is left.
+        const left = standing() ? state.leaderboard.filter((row) => row.out === null) : [];
+        if (left.length === 1) {
+            document.getElementById('host-end-heading').textContent = `Last one standing: ${left[0].name}!`;
+        }
+
         const [first, second, third] = state.leaderboard;
         slot('podium').replaceChildren(...[second, first, third].filter(Boolean).map((row) => {
             const step = document.createElement('li');

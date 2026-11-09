@@ -17,6 +17,7 @@
         <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
         <script src="{{ versioned_asset('modules/game/guessr-map.js') }}" defer></script>
     @endif
+    <script src="{{ versioned_asset('modules/game/awake.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/live-host.js') }}" defer></script>
 @endpush
 
@@ -58,6 +59,10 @@
             {{ $pins ? 'the closer the pin, and the sooner, the more points.' : 'the sooner a right answer, the more points.' }}
             @if ($pins)
                 {{ $easy ? 'On Easy: each map zooms into the district\'s state.' : 'On Hard: the whole of Malaysia.' }}
+            @endif
+            @if ($standing)
+                Last One Standing: a wrong answer, or none, and you're out; if everyone still in gets it wrong, they all
+                stay in. The last one in wins, or after {{ $game->Rounds }} rounds, whoever's left.
             @endif
         </p>
         <ul class="live-names" data-host="names"></ul>

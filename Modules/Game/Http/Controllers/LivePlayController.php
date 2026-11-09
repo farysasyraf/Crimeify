@@ -85,6 +85,8 @@ class LivePlayController extends Controller
     {
         $this->speak($request);
         [$state, $player] = $this->player($request, $game);
+        // In Last One Standing, only those still in answer.
+        abort_if($this->live->lastOneStanding($state) && ($state['players'][$player]['out'] ?? null) !== null, 409, __("You're out of this game: watch how it ends."));
         $pins = $state['game'] === LiveGames::DistrictGuessr;
         $request->validate(['round' => ['required', 'integer']] + ($pins
             ? ['lat' => ['required', 'numeric', 'between:-90,90'], 'lng' => ['required', 'numeric', 'between:-180,180']]

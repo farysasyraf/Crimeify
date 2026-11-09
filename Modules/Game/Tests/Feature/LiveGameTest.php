@@ -132,7 +132,8 @@ class LiveGameTest extends TestCase
             ->assertSee('<p class="live-code">'.$game->spacedCode().'</p>', false)
             ->assertSee('Join at <strong>'.preg_replace('#^https?://#', '', route('public.game.live')).'</strong>', false)
             ->assertSee('data-state="'.route('game-scores/live-state', ['liveGame' => $game]).'"', false)
-            ->assertSee(versioned_asset('modules/game/live-host.js'), false)
+            // Its screen kept on through the game.
+            ->assertSeeInOrder(['<script src="'.versioned_asset('modules/game/awake.js').'" defer></script>', versioned_asset('modules/game/live-host.js')], false)
             ->assertDontSee('aria-label="Pages"', false);
 
         // Listed on Game scores, with its big screen.
@@ -369,6 +370,93 @@ class LiveGameTest extends TestCase
         $this->check($game, $siti)->assertJson(['phase' => 'finished', 'rank' => 1]);
     }
 
+    public function test_last_one_standing_puts_out_wrong_answers_until_one_is_left(): void
+    {
+        $this->figures();
+        $this->signIn();
+        $this->get('/game-scores')->assertSeeInOrder(['<select id="live-mode" name="mode">', '<option value="classic" selected>Classic</option>', '<option value="last-one-standing"', 'Last One Standing'], false);
+
+        // Each game's own choice shows with that game: to start with, the one of the board being looked at.
+        $this->get('/game-scores')
+            ->assertSeeInOrder(['<div data-live-for="higher-or-lower" class="">', '<div data-live-for="districtguessr" class="is-other">'], false)
+            ->assertSee(versioned_asset('modules/game/scores.js'), false);
+        $this->get('/game-scores?game=districtguessr-easy')
+            ->assertSeeInOrder(['<div data-live-for="higher-or-lower" class="is-other">', '<div data-live-for="districtguessr" class="">'], false);
+        $this->post('/game-scores/store-live', ['mode' => 'made-up', 'rounds' => 5])->assertSessionHasErrors('mode');
+        $this->post('/game-scores/store-live', ['mode' => 'last-one-standing', 'rounds' => 5])->assertRedirect();
+        $game = LiveGame::sole();
+        $this->assertSame('last-one-standing', $game->Mode);
+        $this->get("/game-scores/live/{$game->Id}")->assertSee("Last One Standing: a wrong answer, or none, and you're out", false);
+        $this->get('/game-scores')->assertSeeInOrder(['Live games', $game->spacedCode(), 'Higher or Lower (Last One Standing)'], false);
+        $players = collect(['Siti', 'Ali', 'Chong', 'Devi'])->mapWithKeys(fn (string $name) => [$name => $this->join($game, $name)]);
+        $this->check($game, $players['Siti'])->assertJson(['mode' => 'last-one-standing', 'out' => null, 'left' => 4]);
+
+        // Round 1: Siti and Ali right, Chong wrong, Devi no answer: both out, as the answer shows.
+        $this->host($game, 'next');
+        $this->travel(3)->seconds();
+        $this->answer($game, $players['Siti'], $this->right($game))->assertOk();
+        $this->answer($game, $players['Ali'], $this->right($game))->assertOk();
+        $this->answer($game, $players['Chong'], $this->wrong($game))->assertOk();
+        $this->host($game, 'close')->assertJson(['phase' => 'reveal', 'knocked' => ['Chong', 'Devi'], 'saved' => false, 'left' => 2, 'last' => false]);
+        $this->check($game, $players['Chong'])->assertJson(['phase' => 'reveal', 'out' => 1, 'left' => 2, 'rank' => 3]);
+        $this->check($game, $players['Siti'])->assertJson(['phase' => 'reveal', 'out' => null, 'rank' => 1]);
+
+        // Kept as the host moves on; those out can't answer, and one who joins now watches.
+        $this->host($game, 'next');
+        $this->assertSame([null, null, 1, 1], $game->players()->orderBy('Id')->pluck('OutRound')->all());
+        $this->travel(3)->seconds();
+        $this->answer($game, $players['Chong'], $this->right($game))->assertStatus(409)->assertJsonPath('message', "You're out of this game: watch how it ends.");
+        $ekin = $this->join($game, 'Ekin');
+        $this->check($game, $ekin)->assertJson(['phase' => 'question', 'out' => 0]);
+
+        // Round 2: both still in wrong, so both stay in, and the answer shows once they've both answered.
+        $this->answer($game, $players['Siti'], $this->wrong($game))->assertOk();
+        $this->answer($game, $players['Ali'], $this->wrong($game))->assertOk();
+        $this->host($game)->assertJson(['phase' => 'reveal', 'knocked' => [], 'saved' => true, 'left' => 2]);
+        $this->check($game, $players['Ali'])->assertJson(['saved' => true, 'out' => null]);
+
+        // Round 3: Ali wrong, so Siti is the last one standing, two rounds before the last.
+        $this->host($game, 'next');
+        $this->travel(3)->seconds();
+        $this->answer($game, $players['Siti'], $this->right($game))->assertOk();
+        $this->answer($game, $players['Ali'], $this->wrong($game))->assertOk();
+        $this->host($game)->assertJson(['phase' => 'reveal', 'knocked' => ['Ali'], 'left' => 1, 'last' => true]);
+
+        // Still in first, then by the round out, latest first, then by points; those watching last.
+        $this->host($game, 'next')->assertJson(['phase' => 'finished', 'round' => 3, 'leaderboard' => [
+            ['rank' => 1, 'name' => 'Siti', 'score' => 2000, 'out' => null],
+            ['rank' => 2, 'name' => 'Ali', 'score' => 1000, 'out' => 3],
+            ['rank' => 3, 'name' => 'Chong', 'score' => 0, 'out' => 1],
+            ['rank' => 3, 'name' => 'Devi', 'score' => 0, 'out' => 1],
+            ['rank' => 5, 'name' => 'Ekin', 'score' => 0, 'out' => 0],
+        ]]);
+        $this->assertSame(LiveGame::Finished, $game->fresh()->Status);
+        $this->check($game, $players['Ali'])->assertJson(['phase' => 'finished', 'out' => 3, 'rank' => 2]);
+
+        // Classic is still the mode when none is chosen.
+        $this->post('/game-scores/store-live', ['rounds' => 3]);
+        $this->assertSame('classic', LiveGame::query()->latest('Id')->value('Mode'));
+    }
+
+    public function test_ending_last_one_standing_mid_round_puts_no_one_out(): void
+    {
+        $this->figures();
+        $this->signIn();
+        $this->post('/game-scores/store-live', ['mode' => 'last-one-standing', 'rounds' => 3]);
+        $game = LiveGame::sole();
+        $siti = $this->join($game, 'Siti');
+        $this->join($game, 'Ali');
+
+        // Ended while Ali is still to answer: no one goes out, so both are still in, Siti first on points.
+        $this->host($game, 'next');
+        $this->travel(3)->seconds();
+        $this->answer($game, $siti, $this->right($game))->assertOk();
+        $this->host($game, 'finish')->assertJson(['phase' => 'finished', 'leaderboard' => [
+            ['rank' => 1, 'name' => 'Siti', 'out' => null], ['rank' => 2, 'name' => 'Ali', 'out' => null],
+        ]]);
+        $this->assertSame([null, null], $game->players()->orderBy('Id')->pluck('OutRound')->all());
+    }
+
     public function test_the_cards_come_in_the_players_language(): void
     {
         $game = $this->hosted();
@@ -591,7 +679,9 @@ class LiveGameTest extends TestCase
             ->assertSee('<div data-live-game="higher-or-lower" hidden>', false)
             ->assertSee('<div data-live-game="districtguessr" hidden>', false)
             ->assertSee('data-boundaries="'.versioned_asset(config('map.boundaries')).'"', false)
-            ->assertSee('The sooner you confirm, the more of them you keep: 75% at the last moment.');
+            ->assertSee('The sooner you confirm, the more of them you keep: 75% at the last moment.')
+            // The phone's screen kept on, and a buzz each round where it can.
+            ->assertSeeInOrder(['<script src="'.versioned_asset('modules/game/awake.js').'" defer></script>', '<script src="'.versioned_asset('modules/game/live.js').'" defer></script>'], false);
 
         $this->get('/public/game/live?lang=ms')->assertOk()
             ->assertSee('<title>Permainan langsung · '.config('app.name').'</title>', false)
