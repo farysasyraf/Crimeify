@@ -18,6 +18,10 @@
     @if ($skyline)
         <link rel="stylesheet" href="{{ versioned_asset('modules/game/skyline.css') }}" />
     @endif
+    @if ($caseFile)
+        <link rel="stylesheet" href="{{ versioned_asset('modules/game/case-file.css') }}" />
+        <script src="{{ versioned_asset('modules/game/case-screen.js') }}" defer></script>
+    @endif
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/live.css') }}" />
     @if ($pins)
         <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
@@ -40,7 +44,8 @@
 @php $join = preg_replace('#^https?://#', '', $joinUrl); @endphp
 <div class="game-page game live-host" data-live-host data-token="{{ csrf_token() }}" data-state="{{ $urls['state'] }}"
     data-next="{{ $urls['next'] }}" data-close="{{ $urls['close'] }}" data-finish="{{ $urls['finish'] }}"
-    @if ($pins) data-boundaries="{{ $boundaries }}" @endif @if ($skyline) data-skyline="{{ $boundaries }}" @endif>
+    @if ($pins) data-boundaries="{{ $boundaries }}" @endif @if ($skyline) data-skyline="{{ $boundaries }}" @endif
+    @if ($caseFile) data-case-file="{{ $boundaries }}" @endif>
     <div class="live-host-head">
         @if ($pins)
             <h1 class="game-title">
@@ -49,6 +54,10 @@
         @elseif ($skyline)
             <h1 class="game-title">
                 <img class="skyline-title" src="{{ versioned_asset('modules/game/title-skyline.svg') }}" alt="Skyline" lang="en" width="5775" height="952" />
+            </h1>
+        @elseif ($caseFile)
+            <h1 class="game-title">
+                <img class="case-title" src="{{ versioned_asset('modules/game/title-case-file.svg') }}" alt="Case File" lang="en" width="5755" height="1610" />
             </h1>
         @else
             @include('game::_title')
@@ -73,6 +82,9 @@
                 the closer the pin, and the sooner, the more points.
             @elseif ($skyline)
                 the closer the guess at the hidden tower's height, and the sooner, the more points.
+            @elseif ($caseFile)
+                a clue opens on the desk every {{ config('game.case_file.every') }} seconds, and the sooner a right
+                accusation, the fewer clues it took and the more points.
             @else
                 the sooner a right answer, the more points.
             @endif
@@ -118,6 +130,10 @@
                     </div>
                     <div class="guessr-map" data-host="map" role="img" aria-label="Map of Malaysia, with everyone's pins once the round is over"></div>
                 </div>
+            @elseif ($caseFile)
+                <div class="live-host-case" data-host="case">
+                    @include('game::_case-screen', ['mode' => 'host', 'id' => 'host-case'])
+                </div>
             @elseif ($skyline)
                 <div class="live-host-skyline" data-host="skyline">
                     @include('game::_skyline-round', ['controls' => false, 'id' => 'host-skyline'])
@@ -157,7 +173,7 @@
         <button type="button" class="btn btn-ghost btn-sm" data-host-action="finish">End the game now</button>
     </div>
 
-    @unless ($pins || $skyline)
+    @unless ($pins || $skyline || $caseFile)
         @include('game::_card')
     @endunless
 </div>

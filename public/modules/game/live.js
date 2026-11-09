@@ -1,7 +1,9 @@
-// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower, DistrictGuessr or Skyline: joins with the
-// code on the big screen and a name, then checks where the game is up to about every second and shows it: waiting for
-// the host, a few seconds to get ready, the round until its time is up (two cards with Higher and Lower, a district to
-// pin on the map, guessr-map.js, and Confirm, or a state's towers, skyline-round.js, with the slider and Confirm), then
+// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower, DistrictGuessr, Skyline or Case File:
+// joins with the code on the big screen and a name, then checks where the game is up to about every second and shows
+// it: waiting for the host, a few seconds to get ready, the round until its time is up (two cards with Higher and Lower,
+// a district to pin on the map, guessr-map.js, and Confirm, a state's towers, skyline-round.js, with the slider and
+// Confirm, or a case in its pixel screen, case-screen.js, its clues opening as the game says, and the suspects to
+// accuse, what's said said in its text box), then
 // its answer with the player's points and place, and at the end the top 10.
 // Each round opens on the server's clock, worked out from each check, so every phone shows it at the same moment. The
 // game and the player are remembered in the tab, so reloading keeps them in it. While the game's on, the screen stays
@@ -43,11 +45,14 @@
     // to wait for.
     let sky = null;
     let shown = Promise.resolve();
+    // Case File's screen, once made.
+    let caseScreen = null;
 
     const serverNow = () => Date.now() + offset;
     const answered = () => guessed !== null && view !== null && guessed.round === view.round;
     const pins = () => view?.game === 'districtguessr';
     const skyline = () => view?.game === 'skyline';
+    const caseFile = () => view?.game === 'case-file';
     // Higher or Lower's Last One Standing, and whether this player sits out this round: out before it, or watching.
     const standingMode = () => view?.mode === 'last-one-standing';
     const sittingOut = () => standingMode() && view.out !== null && view.out !== undefined && view.out !== view.round;
@@ -117,6 +122,11 @@
     };
 
     const say = (name, text, kind = '') => {
+        // Case File's, in its screen's text box.
+        if (caseFile() && name === 'note' && text) {
+            caseScreen?.say(text);
+        }
+
         const element = slot(name);
         element.textContent = text;
         element.hidden = text === '';
@@ -179,6 +189,8 @@
         } else if (skyline()) {
             outlines ??= GuessrMap.load(live.dataset.boundaries);
             SkylineRound.load();
+        } else if (caseFile()) {
+            outlines ??= GuessrMap.load(live.dataset.boundaries);
         } else {
             slot('mode-rule').textContent = standingMode()
                 ? t("This game is Last One Standing: a wrong answer, or none, and you're out; if everyone still in gets it wrong, they all stay in. The last one in wins.")
@@ -189,6 +201,13 @@
         if (state.guess !== null && state.guess !== undefined) {
             // As after reloading the page mid-round.
             guessed = { round: state.round, guess: state.guess };
+        }
+
+        // Case File's clues as they open, and what a right accusation is worth now.
+        live.classList.toggle('is-case', caseFile());
+        if (caseFile() && caseScreen && dealt === state.round && state.phase === 'question') {
+            caseScreen.clues(state.clues);
+            caseScreen.hud({ worth: state.worth });
         }
 
         if (state.phase === 'lobby') {
@@ -338,8 +357,40 @@
         }
     };
 
-    // The answer as it shows while waiting for the others: Skyline's is the height.
+    // Case File's case: its suspects, none picked, and the clues open so far, or the pick already made, as after
+    // reloading.
+    const setCase = () => {
+        caseScreen ??= CaseScreen.create(slot('case').querySelector('[data-case-screen]'), {
+            outlines: outlines ?? GuessrMap.load(live.dataset.boundaries),
+            onAccuse: () => answer('suspect'),
+        });
+        caseScreen.show({ suspects: view.suspects, clues: view.clues, worth: view.worth });
+        caseScreen.hud({ label: t('Round :round of :rounds', { round: view.round, rounds: view.rounds }), time: view.seconds, score: null });
+
+        if (answered()) {
+            caseScreen.choose(guessed.guess);
+        } else if (!sittingOut()) {
+            caseScreen.say(t('A new case! Its rap sheet is open; the other clues open one by one. The suspects are on the corkboard.'), [
+                { label: t('Read the rap sheet'), primary: true, action: () => { caseScreen.hush(); caseScreen.look('rap'); } },
+                { label: t('Suspects'), action: () => { caseScreen.hush(); caseScreen.view('board'); } },
+            ]);
+        }
+
+        // The whole screen in view, just under the bar along the top, which stays in place.
+        const bar = document.querySelector('.public-topbar')?.getBoundingClientRect().bottom ?? 0;
+        live.style.setProperty('--bar', `${bar}px`);
+        const top = slot('case').getBoundingClientRect().top;
+        if (Math.abs(top - bar - 8) > 4) {
+            window.scrollTo({ top: window.scrollY + top - bar - 8, behavior: calm ? 'auto' : 'smooth' });
+        }
+    };
+
+    // The answer as it shows while waiting for the others: Skyline's is the height, Case File's the suspect accused.
     const lockedIn = (guess) => {
+        if (caseFile()) {
+            return t('Accused: :name. Waiting for the others…', { name: view.suspects[guess]?.name ?? '' });
+        }
+
         if (typeof guess === 'number') {
             return t('Locked in: :count. Waiting for the others…', { count: number.format(guess) });
         }
@@ -370,6 +421,8 @@
             setOut();
         } else if (skyline()) {
             setSkyline();
+        } else if (caseFile()) {
+            setCase();
         } else {
             dealCards();
         }
@@ -388,6 +441,11 @@
 
     // No more answering: the buttons, the pin and Confirm, which goes, or the slider, once the towers are set out.
     const lock = (guess = null) => {
+        if (caseFile()) {
+            caseScreen?.lock();
+            return;
+        }
+
         if (skyline()) {
             const round = view.round;
             shown = shown.then(() => {
@@ -412,6 +470,11 @@
     };
 
     const unlock = () => {
+        if (caseFile()) {
+            caseScreen?.unlock();
+            return;
+        }
+
         if (skyline()) {
             shown = shown.then(() => sky.unlock());
             return;
@@ -450,6 +513,10 @@
 
         const left = Math.max(0, view.closesAt - now);
         slot('seconds').textContent = Math.ceil(left / 1000);
+        if (caseFile()) {
+            caseScreen?.hud({ time: Math.ceil(left / 1000) });
+            caseScreen?.clock(left / 1000, view.seconds);
+        }
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
         live.classList.toggle('is-hurrying', left > 0 && left <= 3000);
 
@@ -461,6 +528,8 @@
             answer('pin', true);
         } else if (skyline() && sky?.value() !== null && sky?.value() !== undefined && now <= view.closesAt + 1000) {
             answer('height', true);
+        } else if (caseFile() && caseScreen?.chosen() !== null && caseScreen?.chosen() !== undefined && now <= view.closesAt + 1000) {
+            answer('suspect', true);
         } else {
             lock();
             say('note', t("Time's up. The answer's coming…"));
@@ -472,20 +541,21 @@
         const now = serverNow();
         const at = guess === 'pin' ? pin?.getLatLng() : null;
         const height = guess === 'height' ? (sky?.value() ?? null) : null;
+        const suspect = guess === 'suspect' ? (caseScreen?.chosen() ?? null) : null;
 
         if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at) || (guess === 'height' && height === null)
-            || sittingOut() || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
+            || (guess === 'suspect' && suspect === null) || sittingOut() || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
             return;
         }
 
-        const mine = guess === 'height' ? height : guess;
+        const mine = { height, suspect }[guess] ?? guess;
         sending = true;
         guessed = { round: view.round, guess: mine };
         lock(mine);
         say('note', lockedIn(mine));
 
         try {
-            const body = at ? { lat: at.lat, lng: at.lng } : guess === 'height' ? { value: height } : { guess };
+            const body = at ? { lat: at.lat, lng: at.lng } : guess === 'height' ? { value: height } : guess === 'suspect' ? { suspect } : { guess };
             await request(`/${me.game}/answer`, { round: view.round, ...body });
         } catch (problem) {
             // Not taken, unless the round has stopped taking answers or already has this one.
@@ -619,6 +689,20 @@
         shown = shown.then(() => (dealt === round ? sky.reveal({ crimes: state.answer, guess: result ? state.guess : null }) : null));
     };
 
+    // Case File's answer: every clue open, the stamp, the district marked and a wrong accusation crossed out, and how
+    // the player did.
+    const showCase = (state) => {
+        const result = state.result;
+        const district = state.suspects[state.answer]?.name ?? '';
+        const text = result === null
+            ? t('No answer this round. It was :answer.', { answer: district })
+            : result.correct
+                ? t('Case solved! It was :district · +:points points', { district, points: number.format(result.points) })
+                : t('Wrong suspect: it was :district.', { district });
+
+        caseScreen?.reveal({ culprit: state.answer, suspect: result ? state.guess : null, clues: state.clues, text: `${text} ${standingText(state)}` });
+    };
+
     // The round's answer, once, and how this player did, with their points and place.
     const reveal = (state) => {
         deal();
@@ -639,6 +723,8 @@
             showPlace(state);
         } else if (skyline()) {
             showHeight(state);
+        } else if (caseFile()) {
+            showCase(state);
         } else {
             showCount(state);
         }
@@ -741,6 +827,9 @@
             guess = event.key === 'Enter' && !slot('confirm').disabled && outside ? 'pin' : null;
         } else if (skyline()) {
             guess = event.key === 'Enter' && sky?.value() !== null && outside ? 'height' : null;
+        } else if (caseFile()) {
+            // Accuse takes a tap, as a pick can be changed until then.
+            guess = null;
         }
 
         if (!guess) {

@@ -97,6 +97,9 @@
 .live-host .skyline-label.is-answer { font-size: 1.15rem; }
 .live-host .skyline-list:not([open]) { display: none; }
 .live-host-play.is-split .skyline-ask { min-height: 40px; }
+/* Case File, played in its pixel screen: its own strip has the round and the time, and its text box what's said, so
+   the page's go. */
+.live.is-case .game-status, .live.is-case .live-note, .live-host.is-case .game-status, .live-host.is-case .live-note { display: none !important; }
 .live-host-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
 .live-host-foot { display: flex; justify-content: center; margin-top: 24px; }
 

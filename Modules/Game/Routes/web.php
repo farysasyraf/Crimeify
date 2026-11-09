@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Game\Http\Controllers\CaseFileController;
 use Modules\Game\Http\Controllers\DistrictGuessrController;
 use Modules\Game\Http\Controllers\GameController;
 use Modules\Game\Http\Controllers\LibraryController;
@@ -23,6 +24,7 @@ Route::middleware('public-locale')->group(function () {
         Route::get('/public/game/higher-or-lower', [GameController::class, 'publicIndex'])->name('public.game.higher-or-lower');
         Route::get('/public/game/districtguessr', [DistrictGuessrController::class, 'page'])->name('public.game.districtguessr');
         Route::get('/public/game/skyline', [SkylineController::class, 'page'])->name('public.game.skyline');
+        Route::get('/public/game/case-file', [CaseFileController::class, 'page'])->name('public.game.case-file');
         Route::get('/public/game/live', [LivePlayController::class, 'page'])->name('public.game.live');
     });
 
@@ -40,5 +42,11 @@ Route::middleware('public-locale')->group(function () {
         Route::post('/public/game/skyline/start', [SkylineController::class, 'start'])->name('public.game.skyline.start');
         Route::post('/public/game/skyline/guess', [SkylineController::class, 'guess'])->name('public.game.skyline.guess');
         Route::post('/public/game/skyline/next', [SkylineController::class, 'next'])->name('public.game.skyline.next');
+
+        // Case File's start, clues, picks and next cases.
+        Route::post('/public/game/case-file/start', [CaseFileController::class, 'start'])->name('public.game.case-file.start');
+        Route::post('/public/game/case-file/clue', [CaseFileController::class, 'clue'])->name('public.game.case-file.clue');
+        Route::post('/public/game/case-file/accuse', [CaseFileController::class, 'accuse'])->name('public.game.case-file.accuse');
+        Route::post('/public/game/case-file/next', [CaseFileController::class, 'next'])->name('public.game.case-file.next');
     });
 });

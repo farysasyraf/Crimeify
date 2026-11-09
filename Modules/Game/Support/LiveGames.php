@@ -45,10 +45,12 @@ class LiveGames
 
     public const Skyline = 'skyline';
 
+    public const CaseFile = 'case-file';
+
     /**
      * Their names, as the host chooses one on Game scores.
      */
-    public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr', self::Skyline => 'Skyline'];
+    public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr', self::Skyline => 'Skyline', self::CaseFile => 'Case File'];
 
     /**
      * Higher or Lower's modes: Classic, everyone plays every round for points; or Last One Standing, where a wrong
@@ -62,7 +64,7 @@ class LiveGames
 
     public const Modes = [self::Classic, self::LastOneStanding];
 
-    public function __construct(private Cards $cards, private DistrictGuessr $guessr, private Skyline $skyline) {}
+    public function __construct(private Cards $cards, private DistrictGuessr $guessr, private Skyline $skyline, private CaseFile $cases) {}
 
     /**
      * Make a game of the game given for the host, with every round dealt: for Higher or Lower, its cards, getting
@@ -75,6 +77,7 @@ class LiveGames
         $dealt = match ($game) {
             self::DistrictGuessr => $this->guessr->deal($rounds),
             self::Skyline => $this->skyline->deal($rounds),
+            self::CaseFile => $this->cases->deal($rounds),
             default => $this->pairs($rounds),
         };
 
@@ -93,6 +96,8 @@ class LiveGames
             'Seconds' => match ($game) {
                 self::DistrictGuessr => config('game.districtguessr.seconds'),
                 self::Skyline => config('game.skyline.seconds'),
+                // A clue every few seconds, the last open for as long.
+                self::CaseFile => count(CaseFile::order()) * config('game.case_file.every'),
                 default => config('game.seconds'),
             },
             'Cards' => $dealt,
@@ -208,12 +213,13 @@ class LiveGames
     /**
      * A player's answer to the round given, as the game has it: for Higher or Lower, a guess ('higher' or 'lower'); for
      * DistrictGuessr, a pin (lat and lng); for Skyline, the height (value), up to the round's most. Its points, whether
-     * it scored any, and for a pin, its kilometres off. None when that round isn't taking answers: before it shows,
-     * after its time, or when it isn't the round being played. Answering a round twice is a
-     * UniqueConstraintViolationException.
+     * it scored any, and for a pin, its kilometres off; for Case File, a suspect, by their place on the board, which if
+     * it's them scores what the case was worth with the clues open then (CaseFile::worthAt()). None when that round
+     * isn't taking answers: before it shows, after its time, or when it isn't the round being played. Answering a
+     * round twice is a UniqueConstraintViolationException.
      *
      * @param  array<string, mixed>  $state
-     * @param  array{guess?: string, lat?: float, lng?: float, value?: int}  $input
+     * @param  array{guess?: string, lat?: float, lng?: float, value?: int, suspect?: int}  $input
      * @return array{correct: bool, points: int, km?: float}|null
      */
     public function answer(array $state, int $player, int $round, array $input): ?array
@@ -239,6 +245,10 @@ class LiveGames
             $value = min($input['value'], $state['most']);
             $points = (int) round(Skyline::points($value, $state['answer']) * (1 - $slow));
             $answer = ['Guess' => (string) $value, 'Correct' => $points > 0];
+        } elseif ($state['game'] === self::CaseFile) {
+            $correct = $input['suspect'] === $state['answer'];
+            $points = $correct ? CaseFile::worthAt($this->shown($state, $now)) : 0;
+            $answer = ['Guess' => (string) $input['suspect'], 'Correct' => $correct];
         } else {
             $correct = $input['guess'] === $state['right'];
             $points = $correct ? (int) round(config('game.live.points') * (1 - $slow)) : 0;
@@ -411,10 +421,11 @@ class LiveGames
             $view += match ($state['game']) {
                 self::DistrictGuessr => ['district' => $state['district'], 'pin' => $mine === null ? null : ['lat' => $mine['lat'], 'lng' => $mine['lng']]],
                 self::Skyline => ['skyline' => $state['skyline'][$locale] ?? $state['skyline']['en']],
+                self::CaseFile => $this->caseView($state, $phase, $now, $locale),
                 default => ['cards' => $state['cards'][$locale] ?? $state['cards']['en']],
             };
-            // Skyline's, the height.
-            $view['guess'] = $mine === null ? null : ($state['game'] === self::Skyline ? (int) $mine['guess'] : $mine['guess']);
+            // Skyline's, the height; Case File's, the suspect's place.
+            $view['guess'] = $mine === null ? null : (in_array($state['game'], [self::Skyline, self::CaseFile], true) ? (int) $mine['guess'] : $mine['guess']);
         }
 
         if ($phase === self::Reveal) {
@@ -471,6 +482,7 @@ class LiveGames
             $view += match ($state['game']) {
                 self::DistrictGuessr => ['district' => $state['district']],
                 self::Skyline => ['skyline' => $state['skyline']['en']],
+                self::CaseFile => $this->caseView($state, $phase, $now, 'en'),
                 default => ['cards' => $state['cards']['en']],
             };
         }
@@ -502,6 +514,19 @@ class LiveGames
                     ->sortBy([['off', 'asc'], fn (array $a, array $b) => strcasecmp($a['name'], $b['name'])])
                     ->values()
                     ->all();
+            } elseif ($state['game'] === self::CaseFile) {
+                // How many picked each suspect, how many got it, and the quickest who did.
+                $picks = array_fill(0, count($state['suspects']), 0);
+                foreach ($state['answers'] as $answer) {
+                    $picks[(int) $answer['guess']] = ($picks[(int) $answer['guess']] ?? 0) + 1;
+                }
+                $fastest = collect($state['answers'])->filter(fn (array $answer) => $answer['correct'])->sortBy('ms')->keys()->first();
+                $view['picks'] = $picks;
+                $view['solved'] = count(array_filter($state['answers'], fn (array $answer) => $answer['correct']));
+                $view['fastest'] = $fastest === null ? null : [
+                    'name' => $state['players'][$fastest]['name'] ?? '',
+                    'seconds' => round($state['answers'][$fastest]['ms'] / 1000, 1),
+                ];
             } else {
                 $guesses = array_count_values(array_column($state['answers'], 'guess'));
                 $view['right'] = $state['right'];
@@ -738,14 +763,70 @@ class LiveGames
                 'lat' => $answer->Lat,
                 'lng' => $answer->Lng,
                 'km' => $answer->Km,
+                'ms' => (int) $answer->Milliseconds,
             ]])->all(),
             // Once it's over.
             'awards' => $game->Status === LiveGame::Finished ? $this->awards($game) : [],
         ] + match ($game->Game) {
             self::DistrictGuessr => $this->district($dealt),
             self::Skyline => $this->skylineRound($dealt),
+            self::CaseFile => $this->caseRound($dealt),
             default => $this->pair($dealt),
         };
+    }
+
+    /**
+     * How many of a Case File round's clues are open at the time given: the rap sheet as it opens, then one more every
+     * config('game.case_file.every') seconds, all of them at its answer.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private function shown(array $state, int $now): int
+    {
+        $every = config('game.case_file.every') * 1000;
+
+        return min(count(CaseFile::order()), 1 + intdiv(max(0, $now - $state['opensAt']), $every));
+    }
+
+    /**
+     * What the phones and the big screen show of a Case File round: its suspects, and its clues open so far, in the
+     * language given (none while getting ready; every one at the answer), with how many, and the seconds between them.
+     *
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    private function caseView(array $state, string $phase, int $now, string $locale): array
+    {
+        $shown = match ($phase) {
+            self::Ready => 0,
+            self::Reveal => count(CaseFile::order()),
+            default => $this->shown($state, $now),
+        };
+        $clues = $state['clues'][$locale] ?? $state['clues']['en'];
+
+        return [
+            'suspects' => $state['suspects'],
+            'clues' => array_slice($clues, 0, $shown, true),
+            'shown' => $shown,
+            'every' => config('game.case_file.every'),
+            'worth' => CaseFile::worthAt($shown),
+        ];
+    }
+
+    /**
+     * A Case File round's part of the state: its suspects, every clue in both languages, and which suspect it is,
+     * which only the server sees until the answer.
+     *
+     * @param  array<string, mixed>|null  $case
+     * @return array{suspects: list<array{name: string, state: string}>|null, clues: array<string, array<string, mixed>>|null, answer: int|null}
+     */
+    private function caseRound(?array $case): array
+    {
+        return [
+            'suspects' => $case === null ? null : CaseFile::suspects($case),
+            'clues' => $case === null ? null : ['en' => CaseFile::clues($case, CaseFile::order(), 'en'), 'ms' => CaseFile::clues($case, CaseFile::order(), 'ms')],
+            'answer' => $case['culprit'] ?? null,
+        ];
     }
 
     /**

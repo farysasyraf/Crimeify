@@ -66,8 +66,9 @@ return [
         // A right Higher or Lower answer's points. A DistrictGuessr pin's are its distance's (DistrictGuessr::points()).
         'points' => 1000,
         // The share of an answer's points lost by answering at the last moment rather than straight away, by game: half
-        // in Higher or Lower; a quarter in DistrictGuessr and Skyline, where how close the answer is counts most.
-        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25, 'skyline' => 0.25],
+        // in Higher or Lower; a quarter in DistrictGuessr and Skyline, where how close the answer is counts most; none in
+        // Case File, where a pick's points are the clues open when it was made (CaseFile::worth()).
+        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25, 'skyline' => 0.25, 'case-file' => 0],
         // Seconds an answer may take to arrive after the round closes.
         'grace' => 1,
         // Hours a game can be joined for after it's made.
@@ -113,6 +114,25 @@ return [
         'falloff' => 2,
         'districts' => 5,
         'headroom' => 1.5,
+    ],
+
+    // Case File: each case is a mystery police district, to pick from `suspects` on the corkboard by the clues on the
+    // detective's desk. The rap sheet shows to start with; each other clue opened takes its points off the case's
+    // (`clues`, in the order a live game opens them, one every `every` seconds), so solved on the rap sheet alone it's
+    // worth all 1,000, and with every clue open, 150. A wrong pick, none or a late one scores nothing. The photo blurs
+    // where the district is, over `blur` of its state's breadth.
+    'case_file' => [
+        'cases' => 5,
+        'seconds' => 60,
+        // Seconds more for a pick to arrive, then it counts as none.
+        'grace' => 4,
+        // Seconds counting down before the first case.
+        'ready' => 3,
+        'points' => 1000,
+        'clues' => ['rap' => 0, 'trend' => 150, 'rank' => 150, 'photo' => 250, 'tip' => 300],
+        'suspects' => 6,
+        'every' => 6,
+        'blur' => 0.18,
     ],
 
     // The longest name a player can give.

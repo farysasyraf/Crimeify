@@ -1,0 +1,310 @@
+/* Case File's pixel game screen (_case-screen.blade.php, case-screen.js): one screen the whole game is played in, its
+   pixels kept square at any size. The office, scaled to fit; close-ups on the desk's wood and the suspects on the
+   corkboard's cork (case-wood.png, case-cork.png, repeating, in --wood and --cork, at --px, the office's own scale,
+   rounded); the strip along the top; the text box along the foot; papers, cards and stamps with square, pixel edges.
+   Labels are in Silkscreen and words in Pixelify Sans, pixel typefaces (SIL Open Font License 1.1, Silkscreen-OFL.txt
+   and PixelifySans-OFL.txt). Dark whatever the theme, as the office is at dusk. */
+@font-face {
+    font-family: "Silkscreen";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("silkscreen.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Pixelify Sans";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("pixelify.woff2") format("woff2");
+}
+
+.case-page { max-width: 1040px; }
+.case-page-head { display: flex; justify-content: flex-end; margin: -4px 0 10px; }
+
+.case-screen {
+    --case-ink: #0c0d11;
+    --case-paper: #ece4ce;
+    --case-paper-dim: #cabea4;
+    --case-amber: #f5c26b;
+    --case-red: #d6403a;
+    --case-green: #7fd8a4;
+    --px: 3;
+    --hud-room: clamp(38px, 5.4cqw, 54px);
+    position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; container-type: inline-size;
+    border-radius: 4px; color: var(--case-paper); font-family: "Pixelify Sans", system-ui, sans-serif;
+    background: repeating-linear-gradient(180deg, #2e221e 0 calc(var(--px) * 6px), #1d1614 calc(var(--px) * 6px) calc(var(--px) * 7px));
+    box-shadow: 0 0 0 4px var(--case-ink), 8px 8px 0 4px rgba(0, 0, 0, .4);
+}
+/* On a phone, as tall as the screen under the bar along the top, the office across its top. */
+@media (max-width: 700px) {
+    .case-screen { aspect-ratio: auto; height: clamp(540px, calc(100svh - var(--bar, 64px) - 16px), 860px); }
+}
+.case-screen [hidden] { display: none !important; }
+.case-view { position: absolute; inset: 0; }
+
+/* The office: the picture at its own 320 by 240 pixels, scaled to fit (case-screen.js), its clues laid over it. */
+.case-scene { position: absolute; top: 0; left: 0; width: 320px; height: 240px; transform-origin: 0 0; }
+.case-room-art, .case-prop, .case-clock, .case-photo, .case-mugshot, .case-call-phone, .case-chart, .case-polaroid-picture,
+.case-view-clue, .case-view-board, .case-view-cover, .case-view-report { image-rendering: pixelated; }
+.case-room-art { display: block; width: 320px; height: 240px; }
+.case-prop {
+    position: absolute; z-index: 2; padding: 0; border: 0; border-radius: 0; cursor: pointer;
+    background: url("case-clues.png") no-repeat 0 var(--row); background-size: 84px 105px;
+}
+.case-prop.is-open { background-position: var(--open) var(--row); }
+.case-prop:disabled { cursor: default; }
+.case-prop:not(:disabled):hover, .case-spot:not(:disabled):hover {
+    filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff);
+}
+.case-prop:focus-visible, .case-spot:focus-visible { outline: 1px solid var(--case-amber); outline-offset: 1px; }
+/* The corkboard, to the suspects: under the photo, which is on it. */
+.case-spot { position: absolute; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.case-spot:not(:disabled):hover { filter: none; outline: 1px dashed rgba(255, 240, 200, .85); outline-offset: -1px; }
+.case-spot:disabled { cursor: default; }
+/* Closed clues glint now and then, one after another, so it's clear they can be tapped; not while pointed at, so the
+   outline shows. */
+.case-screen:not(.is-locked):not(.is-host) .case-prop:not(.is-open):not(:hover):not(:focus-visible) { animation: case-glint 4s steps(1) var(--glint, 0s) infinite; }
+.case-prop-clipboard { --glint: .8s; }
+.case-prop-ledger { --glint: 1.6s; }
+.case-prop-photo { --glint: 2.4s; }
+.case-prop-note { --glint: 3.2s; }
+@keyframes case-glint {
+    0%, 88%, 100% { filter: none; }
+    90%, 94% { filter: drop-shadow(1px 0 0 rgba(255, 240, 200, .9)) drop-shadow(-1px 0 0 rgba(255, 240, 200, .9)) drop-shadow(0 -1px 0 rgba(255, 240, 200, .9)); }
+}
+/* A clue opening: it hops and turns over (case-screen.js waits for it, TURN, before the close-up); the photo's picture
+   develops once it has. */
+.case-prop.is-opening { animation: case-turn .36s steps(4) both; }
+@keyframes case-turn {
+    0% { transform: translateY(0) scaleY(1); }
+    40% { transform: translateY(-4px) scaleY(.55); }
+    100% { transform: none; }
+}
+.case-photo.is-developing { animation: case-develop .5s steps(4) .36s both; }
+@keyframes case-develop { from { opacity: 0; } to { opacity: 1; } }
+.case-clock { position: absolute; left: 98px; top: 48px; width: 17px; height: 17px; pointer-events: none; }
+.case-photo { position: absolute; left: 267px; top: 53px; width: 24px; height: 22px; pointer-events: none; z-index: 3; }
+.case-countdown {
+    position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; margin: 0; background: rgba(12, 13, 17, .55);
+    color: var(--case-paper); font: 400 clamp(64px, 18cqw, 160px)/1 "Silkscreen", monospace; text-shadow: 6px 6px 0 var(--case-ink);
+}
+
+/* Along the top: the case, the time, what it's worth, the score, and the way to the suspects or back. */
+.case-hud {
+    position: absolute; top: 0; right: 0; left: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
+    min-height: var(--hud-room); padding: 6px 12px; background: rgba(12, 13, 17, .86); box-shadow: 0 3px 0 var(--case-ink);
+    font: 400 clamp(11px, 1.6cqw, 16px)/1.2 "Silkscreen", monospace; letter-spacing: .5px; text-transform: uppercase;
+}
+.case-hud-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--case-paper-dim); }
+.case-hud-item strong { color: var(--case-paper); font-weight: 400; }
+.case-hud-label { color: var(--case-amber); }
+.case-hud-item .material-icon { font-size: 1.3em; }
+.case-hud-item.is-hurrying { color: var(--case-red); animation: case-blink 1s steps(1) infinite; }
+.case-screen.is-locked .case-hud-item.is-hurrying { animation: none; }
+@keyframes case-blink { 50% { opacity: .45; } }
+.case-hud-item.is-dropping strong { animation: case-drop .6s steps(3); }
+@keyframes case-drop { 0% { color: var(--case-red); transform: translateY(-3px); } 100% { color: var(--case-paper); } }
+.case-hud-nav {
+    display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 6px 10px; border: 0; border-radius: 0;
+    background: var(--case-amber); color: var(--case-ink); font: inherit; text-transform: uppercase; cursor: pointer;
+    box-shadow: 0 3px 0 #9c7434;
+}
+.case-hud-nav:hover { background: #ffd48a; }
+.case-hud-nav:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.case-hud-nav .material-icon { font-size: 1.3em; }
+
+/* Along the foot: what's said, typed out, and the choices. */
+.case-dialogue {
+    position: absolute; right: 3%; bottom: 4%; left: 3%; z-index: 6; padding: 12px 16px;
+    background: #101218; box-shadow: 0 0 0 3px var(--case-ink), 0 0 0 6px var(--case-paper), 0 0 0 9px var(--case-ink);
+    font: 500 clamp(14px, 2.1cqw, 21px)/1.4 "Pixelify Sans", system-ui, sans-serif;
+}
+.case-dialogue-text { min-height: 1.4em; margin: 0 0 10px; cursor: default; }
+/* What's still to be typed: laid out, so the lines stay put, but not seen yet. */
+.case-unsaid { visibility: hidden; }
+.case-dialogue-choices { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.case-dialogue-choices:empty { display: none; }
+.case-choice {
+    padding: 7px 14px; border: 0; border-radius: 0; background: #2b2f3c; color: var(--case-paper); cursor: pointer;
+    font: 600 clamp(13px, 1.8cqw, 18px)/1.2 "Pixelify Sans", system-ui, sans-serif; box-shadow: 0 3px 0 var(--case-ink);
+}
+.case-choice::before { content: "▸ "; color: var(--case-amber); }
+.case-choice:hover { background: #363b4c; }
+.case-choice.is-primary { background: var(--case-amber); color: var(--case-ink); box-shadow: 0 3px 0 #9c7434; }
+.case-choice.is-primary::before { color: var(--case-ink); }
+.case-choice:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* The close-ups and the suspects: the desk's wood, or the corkboard's cork, what's on them in the middle, clear of the
+   strip along the top and, when it shows, the text box. */
+.case-view-clue, .case-view-board, .case-view-cover, .case-view-report {
+    display: flex; align-items: center; justify-content: center; overflow: auto;
+    padding: calc(var(--hud-room) + 14px) 4% 4%;
+}
+.case-view-clue, .case-view-cover, .case-view-report { background: var(--wood) 0 0 / calc(64px * var(--px)) repeat, #6e442a; }
+.case-view-board { background: var(--cork) 0 0 / calc(64px * var(--px)) repeat, #8c643a; box-shadow: inset 0 0 0 calc(3px * var(--px)) #52311f; }
+.case-view-cover, .case-view-report { padding-top: 4%; }
+.case-screen.has-dialogue .case-view-clue, .case-screen.has-dialogue .case-view-board { padding-bottom: clamp(130px, 24cqw, 200px); }
+.case-close { display: contents; }
+
+/* A sheet of paper, with square edges and a shadow. */
+.case-paper {
+    position: relative; width: min(100%, 36rem); max-height: 100%; margin: auto; overflow: auto; padding: 16px 20px;
+    background: var(--case-paper); color: #1b1d23; font-size: clamp(14px, 2cqw, 19px); line-height: 1.45;
+    box-shadow: 0 0 0 3px #b8ab8c, 8px 8px 0 3px rgba(0, 0, 0, .35);
+}
+.case-paper-title { margin: 0 0 12px; color: #a83232; font: 400 clamp(15px, 2.4cqw, 24px)/1.2 "Silkscreen", monospace; letter-spacing: 1px; text-transform: uppercase; }
+.case-paper-mark {
+    position: absolute; top: 14px; right: 16px; padding: 2px 8px; border: 2px solid #a83232; color: #a83232;
+    font: 400 clamp(10px, 1.4cqw, 13px)/1.2 "Silkscreen", monospace; text-transform: uppercase;
+}
+.case-paper-text { margin: 10px 0 0; }
+
+/* The rap sheet: the mugshot beside what it says. */
+.case-rap { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; }
+.case-mugshot { flex: none; width: calc(28px * var(--px)); height: calc(32px * var(--px)); box-shadow: 0 0 0 3px #1b1d23; }
+.case-facts { display: grid; gap: 10px; margin: 0; }
+.case-facts dt { color: #6b6150; font: 400 clamp(10px, 1.4cqw, 13px)/1.2 "Silkscreen", monospace; text-transform: uppercase; }
+.case-facts dd { display: flex; align-items: center; gap: 6px; margin: 2px 0 0; font-size: 1.25em; font-weight: 700; }
+.case-facts .material-icon { color: #a83232; }
+
+/* The trend report: its chart in pixels, and its years under it. */
+.case-chart { display: block; width: 100%; height: auto; aspect-ratio: 72 / 40; box-shadow: 0 0 0 2px #b8ab8c; }
+.case-chart-years { display: flex; justify-content: space-between; margin: 6px 0 0; color: #6b6150; font: 400 clamp(10px, 1.4cqw, 13px)/1 "Silkscreen", monospace; }
+
+/* The ranking: a ledger's lines, each place's name blacked out but this one's. */
+.case-ledger { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; font: 400 clamp(10px, 1.5cqw, 14px)/1 "Silkscreen", monospace; }
+.case-ledger li { display: flex; align-items: center; gap: 8px; padding: 3px 4px; break-inside: avoid; }
+.case-ledger-place { min-width: 2.4em; color: #6b6150; text-align: right; }
+.case-ledger-name { flex: 1; height: .8em; background: #1b1d23; }
+.case-ledger li.is-it { background: var(--case-amber); }
+.case-ledger li.is-it .case-ledger-place { color: #1b1d23; }
+.case-ledger li.is-it .case-ledger-name { height: auto; background: none; font-weight: 700; }
+
+/* The photo: a polaroid of the state, the blur where it is, and what's written on it. */
+.case-polaroid { width: min(100%, 26rem); margin: auto; padding: 4% 4% 0; background: #f0eee6; box-shadow: 8px 8px 0 3px rgba(0, 0, 0, .35); }
+.case-polaroid-picture { display: block; width: 100%; height: auto; aspect-ratio: 64 / 48; }
+.case-polaroid figcaption { padding: 10px 2px 14px; color: #1b1d23; font-size: clamp(14px, 2cqw, 19px); text-align: center; }
+
+/* The tip-off: the phone, and what the informant said, typed out in a bubble. */
+.case-call { display: grid; justify-items: center; gap: 18px; width: min(100%, 34rem); margin: auto; }
+.case-call-phone { width: calc(72px * var(--px)); height: calc(48px * var(--px)); max-width: 100%; }
+.case-bubble {
+    position: relative; margin: 0; padding: 14px 18px; background: var(--case-paper); color: #1b1d23;
+    font-size: clamp(16px, 2.4cqw, 23px); font-weight: 600; box-shadow: 0 0 0 3px #1b1d23, 6px 6px 0 3px rgba(0, 0, 0, .35);
+}
+.case-bubble::before {
+    content: ""; position: absolute; bottom: 100%; left: 50%; width: 16px; height: 12px; margin: 0 0 3px -8px;
+    background: var(--case-paper); clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* The suspects: index cards pinned on the corkboard, three across, or two on a phone; the one picked lifted. */
+.case-board { width: min(100%, 58rem); margin: auto; }
+.case-board-title {
+    display: table; margin: 0 auto 14px; padding: 6px 14px; background: var(--case-ink); color: var(--case-amber);
+    font: 400 clamp(14px, 2.2cqw, 22px)/1.2 "Silkscreen", monospace; letter-spacing: 1px; text-transform: uppercase;
+}
+.case-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2cqw, 18px); margin: 0; padding: 0; list-style: none; }
+@container (max-width: 560px) {
+    .case-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.case-cards li { min-width: 0; }
+.case-card {
+    position: relative; display: grid; gap: 2px; width: 100%; min-height: clamp(64px, 10cqw, 92px); padding: 16px 12px 10px;
+    border: 0; border-radius: 0; background: var(--case-paper); color: #1b1d23; text-align: left; font: inherit;
+    box-shadow: 0 4px 0 var(--case-paper-dim), 4px 8px 0 rgba(0, 0, 0, .35); transition: transform .12s steps(2);
+}
+button.case-card { cursor: pointer; }
+button.case-card:hover:not(:disabled) { transform: translateY(-2px); }
+.case-card::before {
+    content: ""; position: absolute; top: 5px; left: 50%; width: 8px; height: 8px; margin-left: -4px;
+    background: var(--case-red); box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .5);
+}
+.case-card-number { position: absolute; top: 5px; left: 8px; color: #6b6150; font: 400 11px/1 "Silkscreen", monospace; }
+.case-card-name { font-size: clamp(14px, 2cqw, 19px); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.case-card-state { color: #6b6150; font-size: clamp(12px, 1.6cqw, 15px); }
+.case-card.is-chosen { transform: translateY(-4px); outline: 3px solid var(--case-amber); outline-offset: 2px; }
+.case-card:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.case-card:disabled { cursor: default; }
+.case-card.is-culprit { background: #d9f2df; outline: 3px solid var(--case-green); outline-offset: 2px; }
+.case-card.is-wrong { background: #e9c9c2; }
+.case-card.is-wrong .case-card-name { text-decoration: line-through; text-decoration-color: var(--case-red); text-decoration-thickness: 2px; }
+.case-card-picks { margin-top: 4px; color: #3a3428; font: 400 clamp(10px, 1.4cqw, 13px)/1.2 "Silkscreen", monospace; }
+.case-card-stamp {
+    position: absolute; right: 8px; bottom: 8px; padding: 2px 6px; border: 3px solid var(--case-red); color: var(--case-red);
+    font: 400 clamp(12px, 1.8cqw, 17px)/1 "Silkscreen", monospace; text-transform: uppercase; transform: rotate(-10deg);
+    background: rgba(236, 228, 206, .6);
+}
+.case-card.is-culprit .case-card-stamp { border-color: #2f7a4b; color: #2f7a4b; }
+.case-card-stamp.is-stamping { animation: case-stamp .3s steps(3) both; }
+@keyframes case-stamp {
+    from { opacity: 0; transform: rotate(-10deg) scale(2.4); }
+    to { opacity: 1; transform: rotate(-10deg) scale(1); }
+}
+
+/* A rubber stamp to press: accusing, or opening the file. */
+.case-accuse, .case-stamp-button {
+    display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px auto 0; padding: 10px 22px;
+    border: 0; border-radius: 0; background: var(--case-red); color: #fff; cursor: pointer;
+    font: 400 clamp(13px, 1.9cqw, 19px)/1.2 "Silkscreen", monospace; letter-spacing: .5px; text-transform: uppercase;
+    box-shadow: 0 4px 0 #8a2622, 0 0 0 3px var(--case-ink);
+}
+.case-accuse:hover:not(:disabled), .case-stamp-button:hover { background: #e85a52; }
+.case-accuse:focus-visible, .case-stamp-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.case-accuse:disabled { cursor: default; background: #5a3a3a; color: #c9b6b2; box-shadow: 0 4px 0 #3a2626, 0 0 0 3px var(--case-ink); }
+.case-accuse .material-icon { font-size: 1.3em; }
+
+/* The case file's cover, to start on: a manila folder, its tab, the title, how to play, and the name. */
+.case-folder {
+    position: relative; width: min(100%, 40rem); margin: auto; padding: 22px 24px 20px; background: #c4964e; color: #2a1f12;
+    box-shadow: 0 0 0 3px #7a5a2c, 10px 10px 0 3px rgba(0, 0, 0, .35);
+}
+.case-folder-tab {
+    position: absolute; bottom: 100%; left: 6%; padding: 5px 14px 3px; background: #c4964e; color: #a83232;
+    font: 400 clamp(10px, 1.4cqw, 13px)/1.2 "Silkscreen", monospace; box-shadow: 0 -3px 0 #7a5a2c, 3px 0 0 #7a5a2c, -3px 0 0 #7a5a2c;
+}
+.case-folder-titlebox { display: inline-block; margin: 0 0 14px; padding: 10px 14px; background: var(--case-ink); box-shadow: 0 0 0 3px #7a5a2c; }
+.case-folder-title { display: block; width: min(52cqw, 17rem); height: auto; }
+.case-folder-heading { margin: 0 0 6px; color: #7a2a24; font: 400 clamp(12px, 1.6cqw, 15px)/1.2 "Silkscreen", monospace; text-transform: uppercase; }
+.case-folder-rules { display: grid; gap: 4px; margin: 0 0 14px; padding-left: 1.2em; font-size: clamp(13px, 1.8cqw, 17px); line-height: 1.4; }
+.case-folder-form { display: grid; gap: 6px; }
+.case-folder-label { color: #7a2a24; font: 400 clamp(11px, 1.5cqw, 14px)/1.2 "Silkscreen", monospace; text-transform: uppercase; }
+.case-folder .case-folder-name {
+    width: 100%; padding: 6px 4px; border: 0; border-bottom: 3px dashed #2a1f12; border-radius: 0; background: rgba(255, 255, 255, .18);
+    color: #1b1d23; font: 600 clamp(16px, 2.4cqw, 22px)/1.2 "Pixelify Sans", system-ui, sans-serif;
+}
+.case-folder .case-folder-name::placeholder { color: #6b5232; }
+.case-folder .case-folder-name:focus { outline: 3px solid var(--case-ink); outline-offset: 2px; }
+.case-folder .case-stamp-button { justify-self: start; margin: 8px 0 0; }
+.case-folder-error { margin: 0; color: #7a1c18; font-weight: 700; }
+.case-folder-note { margin: 4px 0 0; color: #4a3a22; font-size: clamp(11px, 1.4cqw, 13px); }
+
+/* The closing report: every case, solved or not, with the clues it took and its points, and the score. */
+.case-report { width: min(100%, 40rem); }
+.case-summary { margin: 0; padding: 0; list-style: none; counter-reset: case; }
+.case-summary li {
+    display: grid; grid-template-columns: 2em minmax(0, 1fr) auto auto; align-items: baseline; gap: 2px 12px;
+    padding: 8px 6px; border-bottom: 2px dashed #cabea4; counter-increment: case;
+}
+.case-summary li::before { content: counter(case) "."; color: #6b6150; font-family: "Silkscreen", monospace; }
+.case-summary-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-summary-state { grid-column: 2; grid-row: 2; color: #6b6150; font-size: .85em; }
+.case-summary-how { grid-column: 3; grid-row: 1; color: #6b6150; }
+.is-solved .case-summary-how { color: #2f7a4b; }
+.is-unsolved .case-summary-how { color: #a83232; }
+.case-summary-points { grid-column: 4; grid-row: 1; min-width: 3em; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.case-report-total { margin: 14px 0 0; color: #6b6150; font: 400 clamp(12px, 1.6cqw, 15px)/1.2 "Silkscreen", monospace; text-transform: uppercase; }
+.case-report-total strong { display: block; margin: 4px 0; color: #1b1d23; font: 700 clamp(32px, 6cqw, 52px)/1 "Pixelify Sans", system-ui, sans-serif; }
+.case-report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+.case-report-actions .case-stamp-button { margin: 0; }
+.case-report h2:focus { outline: none; }
+@container (max-width: 520px) {
+    .case-summary li { grid-template-columns: 1.6em minmax(0, 1fr) auto; }
+    .case-summary-how { grid-column: 2; grid-row: 3; }
+    .case-summary-points { grid-column: 3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .case-screen .case-prop, .case-prop.is-opening, .case-photo.is-developing, .case-card-stamp.is-stamping, .case-hud-item.is-hurrying, .case-hud-item.is-dropping strong { animation: none !important; }
+    .case-card { transition: none; }
+}

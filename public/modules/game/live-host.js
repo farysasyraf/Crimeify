@@ -1,8 +1,9 @@
 // A live game's big screen (LiveGameController): checks where the game is up to about every second and shows it for the
 // room: the players as they join, a few seconds to get ready for each round, its cards, its district on the map
 // (guessr-map.js) or its state's towers (skyline-round.js) with the time left and how many have answered, then its answer
-// (how many said higher and lower; where the district is and everyone's pins; or the real tower growing through
-// everyone's guesses; the 3 closest named) and the top 5, and at the end the podium, in
+// (how many said higher and lower; where the district is and everyone's pins; the real tower growing through
+// everyone's guesses, the 3 closest named; or the case's district, with how many picked each suspect and the quickest
+// who got it, its clues having opened one by one in its pixel screen, case-screen.js) and the top 5, and at the end the podium, in
 // DistrictGuessr its awards, and everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
 // server's clock, worked out from each check, as on the players' phones. The screen stays on until the game's over
 // (awake.js).
@@ -39,6 +40,11 @@
     const skylineOutlines = skyline ? fetch(host.dataset.skyline).then((response) => response.json()).catch(() => null) : null;
     let sky = null;
     let shown = Promise.resolve();
+    // Case File's screen, once made, and its states' outlines for the photo clue.
+    const caseFile = host.dataset.caseFile !== undefined;
+    const caseOutlines = caseFile ? fetch(host.dataset.caseFile).then((response) => response.json()).catch(() => null) : null;
+    let caseScreen = null;
+    host.classList.toggle('is-case', caseFile);
 
     const serverNow = () => Date.now() + offset;
 
@@ -113,6 +119,12 @@
         slot('foot').hidden = state.phase === 'finished';
         slot('join').hidden = state.phase === 'finished';
 
+        // Case File's clues as they open, and what a right accusation is worth now.
+        if (caseFile && caseScreen && dealt === state.round && state.phase === 'question') {
+            caseScreen.clues(state.clues);
+            caseScreen.hud({ worth: state.worth, extra: `${state.answered} of ${state.players} accused` });
+        }
+
         if (state.phase === 'lobby') {
             show('lobby');
 
@@ -168,6 +180,13 @@
         } else if (skyline) {
             sky ??= SkylineRound.create(slot('skyline').querySelector('[data-sky-round]'), { outlines: skylineOutlines });
             shown = sky.show(view.skyline);
+        } else if (caseFile) {
+            caseScreen ??= CaseScreen.create(slot('case').querySelector('[data-case-screen]'), { outlines: caseOutlines });
+            caseScreen.show({ suspects: view.suspects, clues: view.clues, worth: view.worth });
+            caseScreen.hud({ label: `Round ${view.round} of ${view.rounds}`, time: view.seconds, score: null, extra: `0 of ${view.players} accused` });
+            if (view.clues?.rap) {
+                caseScreen.look('rap');
+            }
         } else {
             dealCards();
         }
@@ -233,10 +252,14 @@
         const left = Math.max(0, view.closesAt - now);
         slot('seconds').textContent = Math.ceil(left / 1000);
         slot('bar').style.transform = `scaleX(${left / (view.seconds * 1000)})`;
+        if (caseFile) {
+            caseScreen?.hud({ time: Math.ceil(left / 1000) });
+            caseScreen?.clock(left / 1000, view.seconds);
+        }
         host.classList.toggle('is-hurrying', left > 0 && left <= 3000);
         slot('note').textContent = standing()
             ? `${view.answered} of ${view.left} still in answered`
-            : `${view.answered} of ${view.players} ${pins ? 'pinned' : 'answered'}`;
+            : `${view.answered} of ${view.players} ${pins ? 'pinned' : caseFile ? 'accused' : 'answered'}`;
         part('round').querySelector('[data-host-action="close"]').hidden = false;
         part('round').querySelector('[data-host-action="next"]').hidden = true;
     };
@@ -361,6 +384,19 @@
         shown = shown.then(() => (dealt === round ? sky.reveal({ crimes: state.answer, ghosts: state.guesses }) : null));
     };
 
+    // Case File's answer: every clue open, the stamp, the district marked, how many picked each suspect, how many got it
+    // and the quickest who did; the desk beside the top 5.
+    const showCase = (state) => {
+        const district = state.suspects[state.answer]?.name ?? '';
+        const fastest = state.fastest ? ` Fastest: ${state.fastest.name}, ${Number(state.fastest.seconds).toFixed(1)} s.` : '';
+        slot('note').textContent = state.solved > 0
+            ? `It was ${district}! ${state.solved} of ${state.players} solved it.${fastest}`
+            : `It was ${district}. No one solved it.`;
+        slot('play').classList.toggle('is-split', state.leaderboard.length > 0);
+        caseScreen?.reveal({ culprit: state.answer, clues: state.clues, picks: state.picks, text: slot('note').textContent });
+        caseScreen?.hud({ extra: '' });
+    };
+
     // The round's answer, once, and the top 5.
     const reveal = (state) => {
         deal();
@@ -383,6 +419,8 @@
             showPins(state);
         } else if (skyline) {
             showHeights(state);
+        } else if (caseFile) {
+            showCase(state);
         } else {
             showCount(state);
         }

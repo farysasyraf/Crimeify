@@ -24,6 +24,7 @@ class Library
         $seconds = config('game.seconds');
         $guessr = config('game.districtguessr');
         $skyline = config('game.skyline');
+        $cases = config('game.case_file');
 
         return [
             [
@@ -82,6 +83,24 @@ class Library
                     ['icon' => 'location_city', 'title' => __(':rounds rounds', ['rounds' => $skyline['rounds']]), 'text' => __('Each with one crime and one year, and :seconds seconds to judge the hidden tower.', ['seconds' => $skyline['seconds']])],
                     ['icon' => 'height', 'title' => __('The closer, the more'), 'text' => __('Up to :points points a round: all of them within :perfect%.', ['points' => number_format($skyline['points']), 'perfect' => $skyline['perfect'] * 100])],
                     ['icon' => '3d_rotation', 'title' => __('Turn it round'), 'text' => __('Drag to turn the towers, pinch to zoom, and tap one for its count.')],
+                ],
+            ],
+            [
+                'key' => 'case-file',
+                // The game's name, the same in Bahasa Melayu.
+                'name' => 'Case File',
+                'tile' => ['image' => 'modules/game/tile-case-file.png'],
+                'title' => ['image' => 'modules/game/title-case-file.svg', 'width' => 5755, 'height' => 1610],
+                'picture' => ['image' => 'modules/game/picture-case-file.png', 'width' => 640, 'height' => 360],
+                'about' => __('A mystery police district, and the clues on a detective\'s desk: open as few as you dare, then pick it out from six suspects.'),
+                'actions' => [
+                    ['label' => __('Play'), 'url' => route('public.game.case-file'), 'icon' => 'play_arrow'],
+                    ['label' => __('Join a live game'), 'url' => route('public.game.live'), 'icon' => 'groups'],
+                ],
+                'cards' => [
+                    ['icon' => 'folder_open', 'title' => __(':cases cases', ['cases' => $cases['cases']]), 'text' => __('Each a police district, with its rap sheet open and :seconds seconds to crack it.', ['seconds' => $cases['seconds']])],
+                    ['icon' => 'search', 'title' => __('Fewer clues, more points'), 'text' => __('Up to :points points a case: each clue you open takes some off.', ['points' => number_format($cases['points'])])],
+                    ['icon' => 'person_search', 'title' => __('Six suspects'), 'text' => __('Districts near each other, so it\'s the clues that tell them apart.')],
                 ],
             ],
             [

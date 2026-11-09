@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Game\Entities\CaseRun;
 use Modules\Game\Entities\GameRun;
 use Modules\Game\Entities\GameWinner;
 use Modules\Game\Entities\GuessrRun;
@@ -31,13 +32,14 @@ class GameScoreController extends Controller
      * scored), and secondsToScore(), and for DistrictGuessr the level its games were played at, as each is ranked on
      * its own. A winner keeps the key of the board they were chosen from (GameWinner::Game).
      *
-     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun|SkylineRun>, difficulty?: string}>
+     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun|SkylineRun|CaseRun>, difficulty?: string}>
      */
     public const Games = [
         'higher-or-lower' => ['name' => 'Higher or Lower', 'model' => GameRun::class],
         'districtguessr-easy' => ['name' => 'DistrictGuessr Easy', 'model' => GuessrRun::class, 'difficulty' => DistrictGuessr::Easy],
         'districtguessr' => ['name' => 'DistrictGuessr Hard', 'model' => GuessrRun::class, 'difficulty' => DistrictGuessr::Hard],
         'skyline' => ['name' => 'Skyline', 'model' => SkylineRun::class],
+        'case-file' => ['name' => 'Case File', 'model' => CaseRun::class],
     ];
 
     /**
@@ -67,7 +69,7 @@ class GameScoreController extends Controller
             'to' => $period['to'],
             'filtered' => $period['from'] !== null || $period['to'] !== null,
             'periodText' => GameWinner::describePeriod($period['from'], $period['to']),
-            'players' => $best->map(fn (GameRun|GuessrRun|SkylineRun $run, int $index) => [
+            'players' => $best->map(fn (GameRun|GuessrRun|SkylineRun|CaseRun $run, int $index) => [
                 'rank' => $index + 1,
                 'run' => $run,
                 'games' => (int) ($played[$run->PlayerKey] ?? 1),
@@ -83,6 +85,7 @@ class GameScoreController extends Controller
             'liveKind' => match (true) {
                 str_starts_with($game, LiveGames::DistrictGuessr) => LiveGames::DistrictGuessr,
                 $game === LiveGames::Skyline => LiveGames::Skyline,
+                $game === LiveGames::CaseFile => LiveGames::CaseFile,
                 default => LiveGames::HigherOrLower,
             },
             'liveDifficulty' => self::Games[$game]['difficulty'] ?? DistrictGuessr::Easy,
@@ -182,7 +185,7 @@ class GameScoreController extends Controller
      * The game's games started between the dates, in Malaysia time as the app keeps them, both days included.
      *
      * @param  array{from: ?string, to: ?string}  $period
-     * @return Builder<GameRun>|Builder<GuessrRun>|Builder<SkylineRun>
+     * @return Builder<GameRun>|Builder<GuessrRun>|Builder<SkylineRun>|Builder<CaseRun>
      */
     private function games(string $game, array $period): Builder
     {
