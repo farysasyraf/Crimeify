@@ -43,10 +43,12 @@ class LiveGames
 
     public const DistrictGuessr = 'districtguessr';
 
+    public const Skyline = 'skyline';
+
     /**
      * Their names, as the host chooses one on Game scores.
      */
-    public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr'];
+    public const Kinds = [self::HigherOrLower => 'Higher or Lower', self::DistrictGuessr => 'DistrictGuessr', self::Skyline => 'Skyline'];
 
     /**
      * Higher or Lower's modes: Classic, everyone plays every round for points; or Last One Standing, where a wrong
@@ -60,7 +62,7 @@ class LiveGames
 
     public const Modes = [self::Classic, self::LastOneStanding];
 
-    public function __construct(private Cards $cards, private DistrictGuessr $guessr) {}
+    public function __construct(private Cards $cards, private DistrictGuessr $guessr, private Skyline $skyline) {}
 
     /**
      * Make a game of the game given for the host, with every round dealt: for Higher or Lower, its cards, getting
@@ -70,7 +72,11 @@ class LiveGames
      */
     public function create(User $host, int $rounds, string $game = self::HigherOrLower, string $difficulty = DistrictGuessr::Hard, string $mode = self::Classic): ?LiveGame
     {
-        $dealt = $game === self::DistrictGuessr ? $this->guessr->deal($rounds) : $this->pairs($rounds);
+        $dealt = match ($game) {
+            self::DistrictGuessr => $this->guessr->deal($rounds),
+            self::Skyline => $this->skyline->deal($rounds),
+            default => $this->pairs($rounds),
+        };
 
         if ($dealt === null) {
             return null;
@@ -84,7 +90,11 @@ class LiveGames
             'HostId' => $host->Id,
             'HostName' => $host->Name,
             'Rounds' => $rounds,
-            'Seconds' => $game === self::DistrictGuessr ? config('game.districtguessr.seconds') : config('game.seconds'),
+            'Seconds' => match ($game) {
+                self::DistrictGuessr => config('game.districtguessr.seconds'),
+                self::Skyline => config('game.skyline.seconds'),
+                default => config('game.seconds'),
+            },
             'Cards' => $dealt,
             'Status' => LiveGame::Lobby,
             'Round' => 0,
@@ -197,12 +207,13 @@ class LiveGames
 
     /**
      * A player's answer to the round given, as the game has it: for Higher or Lower, a guess ('higher' or 'lower'); for
-     * DistrictGuessr, a pin (lat and lng). Its points, whether it scored any, and for a pin, its kilometres off. None
-     * when that round isn't taking answers: before it shows, after its time, or when it isn't the round being played.
-     * Answering a round twice is a UniqueConstraintViolationException.
+     * DistrictGuessr, a pin (lat and lng); for Skyline, the height (value), up to the round's most. Its points, whether
+     * it scored any, and for a pin, its kilometres off. None when that round isn't taking answers: before it shows,
+     * after its time, or when it isn't the round being played. Answering a round twice is a
+     * UniqueConstraintViolationException.
      *
      * @param  array<string, mixed>  $state
-     * @param  array{guess?: string, lat?: float, lng?: float}  $input
+     * @param  array{guess?: string, lat?: float, lng?: float, value?: int}  $input
      * @return array{correct: bool, points: int, km?: float}|null
      */
     public function answer(array $state, int $player, int $round, array $input): ?array
@@ -224,6 +235,10 @@ class LiveGames
             $km = round(DistrictGuessr::km($input['lat'], $input['lng'], $state['answer']['lat'], $state['answer']['lng']), 1);
             $points = (int) round(DistrictGuessr::points($km) * (1 - $slow));
             $answer = ['Guess' => 'pin', 'Correct' => $points > 0, 'Lat' => $input['lat'], 'Lng' => $input['lng'], 'Km' => $km];
+        } elseif ($state['game'] === self::Skyline) {
+            $value = min($input['value'], $state['most']);
+            $points = (int) round(Skyline::points($value, $state['answer']) * (1 - $slow));
+            $answer = ['Guess' => (string) $value, 'Correct' => $points > 0];
         } else {
             $correct = $input['guess'] === $state['right'];
             $points = $correct ? (int) round(config('game.live.points') * (1 - $slow)) : 0;
@@ -393,10 +408,13 @@ class LiveGames
         }
 
         if (in_array($phase, [self::Ready, self::Question, self::Reveal], true)) {
-            $view += $pins
-                ? ['district' => $state['district'], 'pin' => $mine === null ? null : ['lat' => $mine['lat'], 'lng' => $mine['lng']]]
-                : ['cards' => $state['cards'][$locale] ?? $state['cards']['en']];
-            $view['guess'] = $mine['guess'] ?? null;
+            $view += match ($state['game']) {
+                self::DistrictGuessr => ['district' => $state['district'], 'pin' => $mine === null ? null : ['lat' => $mine['lat'], 'lng' => $mine['lng']]],
+                self::Skyline => ['skyline' => $state['skyline'][$locale] ?? $state['skyline']['en']],
+                default => ['cards' => $state['cards'][$locale] ?? $state['cards']['en']],
+            };
+            // Skyline's, the height.
+            $view['guess'] = $mine === null ? null : ($state['game'] === self::Skyline ? (int) $mine['guess'] : $mine['guess']);
         }
 
         if ($phase === self::Reveal) {
@@ -450,7 +468,11 @@ class LiveGames
         }
 
         if (in_array($phase, [self::Ready, self::Question, self::Reveal], true)) {
-            $view += $pins ? ['district' => $state['district']] : ['cards' => $state['cards']['en']];
+            $view += match ($state['game']) {
+                self::DistrictGuessr => ['district' => $state['district']],
+                self::Skyline => ['skyline' => $state['skyline']['en']],
+                default => ['cards' => $state['cards']['en']],
+            };
         }
 
         if ($phase === self::Reveal) {
@@ -466,6 +488,18 @@ class LiveGames
                         'points' => $answer['points'],
                     ])
                     ->sortBy([['km', 'asc'], fn (array $a, array $b) => strcasecmp($a['name'], $b['name'])])
+                    ->values()
+                    ->all();
+            } elseif ($state['game'] === self::Skyline) {
+                // Everyone's height, the closest first.
+                $view['guesses'] = collect($state['answers'])
+                    ->map(fn (array $answer, int $id) => [
+                        'name' => $state['players'][$id]['name'] ?? '',
+                        'value' => (int) $answer['guess'],
+                        'off' => abs((int) $answer['guess'] - $state['answer']),
+                        'points' => $answer['points'],
+                    ])
+                    ->sortBy([['off', 'asc'], fn (array $a, array $b) => strcasecmp($a['name'], $b['name'])])
                     ->values()
                     ->all();
             } else {
@@ -707,7 +741,11 @@ class LiveGames
             ]])->all(),
             // Once it's over.
             'awards' => $game->Status === LiveGame::Finished ? $this->awards($game) : [],
-        ] + ($game->Game === self::DistrictGuessr ? $this->district($dealt) : $this->pair($dealt));
+        ] + match ($game->Game) {
+            self::DistrictGuessr => $this->district($dealt),
+            self::Skyline => $this->skylineRound($dealt),
+            default => $this->pair($dealt),
+        };
     }
 
     /**
@@ -743,6 +781,22 @@ class LiveGames
         return [
             'district' => $district === null ? null : ['name' => $district['name'], 'place' => $district['place'], 'region' => $district['region'] ?? null],
             'answer' => $district === null ? null : ['lat' => $district['lat'], 'lng' => $district['lng']],
+        ];
+    }
+
+    /**
+     * A Skyline round's part of the state: what the screens show of it in both languages (Skyline::face()), the count
+     * of the tower to guess, and how high a guess can go.
+     *
+     * @param  array<string, mixed>|null  $round
+     * @return array{skyline: array<string, array<string, mixed>>|null, answer: int|null, most: int|null}
+     */
+    private function skylineRound(?array $round): array
+    {
+        return [
+            'skyline' => $round === null ? null : ['en' => Skyline::face($round, 'en'), 'ms' => Skyline::face($round, 'ms')],
+            'answer' => $round['crimes'] ?? null,
+            'most' => $round === null ? null : Skyline::most($round),
         ];
     }
 

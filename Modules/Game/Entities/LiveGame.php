@@ -74,6 +74,7 @@ class LiveGame extends Model
         return match ($this->Game) {
             'districtguessr' => 'DistrictGuessr ('.ucfirst($this->Difficulty ?? 'hard').')',
             'higher-or-lower' => $this->Mode === 'last-one-standing' ? 'Higher or Lower (Last One Standing)' : 'Higher or Lower',
+            'skyline' => 'Skyline',
             default => $this->Game,
         };
     }

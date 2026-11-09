@@ -20,6 +20,12 @@
         radial-gradient(40% 50% at 92% 86%, rgba(127, 216, 164, .14), transparent 62%),
         var(--doodles) 0 0 / 420px, #0c0d10;
 }
+.library-art-skyline {
+    background:
+        radial-gradient(60% 70% at 74% 46%, rgba(58, 170, 242, .22), transparent 62%),
+        radial-gradient(35% 45% at 70% 62%, rgba(245, 194, 107, .12), transparent 62%),
+        var(--doodles) 0 0 / 420px, #0c0d10;
+}
 .library-art-live {
     background: radial-gradient(60% 70% at 76% 40%, rgba(58, 170, 242, .24), transparent 62%), var(--doodles) 0 0 / 420px, #0c0d10;
 }
@@ -75,6 +81,9 @@
 .library-title img { width: auto; max-width: 100%; height: 170px; object-fit: contain; object-position: left center; }
 /* A wide title, lower, so it's as big to the eye. */
 #game-districtguessr .library-title img { height: 118px; }
+#game-skyline .library-title img { height: 96px; }
+/* Skyline's towers, not as wide, as they're taller. */
+#game-skyline .library-picture { max-width: 400px; }
 .library-heading { margin: 0 0 14px; font-size: 3rem; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
 .library-text { max-width: 520px; margin: 0 0 24px; color: #d3dae1; font-size: 1.05rem; }
 .library-actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -123,6 +132,7 @@
     .library-tile.is-selected .material-icon { font-size: 46px; }
     .library-title img { height: 120px; }
     #game-districtguessr .library-title img { height: 76px; }
+    #game-skyline .library-title img { height: 60px; }
     .library-heading { font-size: 2.2rem; }
 }
 @media (prefers-reduced-motion: reduce) {

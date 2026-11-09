@@ -66,8 +66,8 @@ return [
         // A right Higher or Lower answer's points. A DistrictGuessr pin's are its distance's (DistrictGuessr::points()).
         'points' => 1000,
         // The share of an answer's points lost by answering at the last moment rather than straight away, by game: half
-        // in Higher or Lower; a quarter in DistrictGuessr, where how close the pin is counts most.
-        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25],
+        // in Higher or Lower; a quarter in DistrictGuessr and Skyline, where how close the answer is counts most.
+        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25, 'skyline' => 0.25],
         // Seconds an answer may take to arrive after the round closes.
         'grace' => 1,
         // Hours a game can be joined for after it's made.
@@ -94,6 +94,25 @@ return [
         'points' => 1000,
         'perfect' => 2,
         'scale' => 100,
+    ],
+
+    // Skyline: a state's police districts as 3D towers, each as tall as its count of one crime in one year, one of them
+    // greyed out to raise to the height thought right. A state needs `districts` towers with counts from
+    // config('game.least') up to be dealt; the tower to guess is any of them but the tallest, whose count shows, to
+    // judge by. The guess scores all the points within `perfect` of the count (a share of it), and fewer the further
+    // off, by `falloff`: some 820 at 10% off, 610 at 25%, 370 at 50%. The slider reaches `headroom` times the tallest.
+    'skyline' => [
+        'rounds' => 10,
+        'seconds' => 30,
+        // Seconds more for a guess to arrive, then it counts as none.
+        'grace' => 4,
+        // Seconds counting down before the first round.
+        'ready' => 3,
+        'points' => 1000,
+        'perfect' => 0.02,
+        'falloff' => 2,
+        'districts' => 5,
+        'headroom' => 1.5,
     ],
 
     // The longest name a player can give.

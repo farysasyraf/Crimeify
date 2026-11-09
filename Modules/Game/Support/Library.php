@@ -23,6 +23,7 @@ class Library
     {
         $seconds = config('game.seconds');
         $guessr = config('game.districtguessr');
+        $skyline = config('game.skyline');
 
         return [
             [
@@ -63,6 +64,24 @@ class Library
                     ['icon' => 'location_on', 'title' => __(':rounds districts', ['rounds' => $guessr['rounds']]), 'text' => __('Each with its state as a hint, and :seconds seconds to pin it.', ['seconds' => $guessr['seconds']])],
                     ['icon' => 'straighten', 'title' => __('The closer, the more'), 'text' => __('Up to :points points a district: all of them within :km km.', ['points' => number_format($guessr['points']), 'km' => $guessr['perfect']])],
                     ['icon' => 'map', 'title' => __('No names on the map'), 'text' => __("Only the states' outlines, so it's what you know that counts.")],
+                ],
+            ],
+            [
+                'key' => 'skyline',
+                // The game's name, the same in Bahasa Melayu.
+                'name' => 'Skyline',
+                'tile' => ['image' => 'modules/game/tile-skyline.svg'],
+                'title' => ['image' => 'modules/game/title-skyline.svg', 'width' => 5775, 'height' => 952],
+                'picture' => ['image' => 'modules/game/city-skyline.svg', 'width' => 900, 'height' => 980],
+                'about' => __("A state's police districts as 3D towers, each as tall as its count of one crime. One is hidden: raise it to the height you think it is."),
+                'actions' => [
+                    ['label' => __('Play'), 'url' => route('public.game.skyline'), 'icon' => 'play_arrow'],
+                    ['label' => __('Join a live game'), 'url' => route('public.game.live'), 'icon' => 'groups'],
+                ],
+                'cards' => [
+                    ['icon' => 'location_city', 'title' => __(':rounds rounds', ['rounds' => $skyline['rounds']]), 'text' => __('Each with one crime and one year, and :seconds seconds to judge the hidden tower.', ['seconds' => $skyline['seconds']])],
+                    ['icon' => 'height', 'title' => __('The closer, the more'), 'text' => __('Up to :points points a round: all of them within :perfect%.', ['points' => number_format($skyline['points']), 'perfect' => $skyline['perfect'] * 100])],
+                    ['icon' => '3d_rotation', 'title' => __('Turn it round'), 'text' => __('Drag to turn the towers, pinch to zoom, and tap one for its count.')],
                 ],
             ],
             [

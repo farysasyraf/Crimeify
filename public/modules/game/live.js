@@ -1,7 +1,8 @@
-// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower or DistrictGuessr: joins with the code on
-// the big screen and a name, then checks where the game is up to about every second and shows it: waiting for the host,
-// a few seconds to get ready, the round until its time is up (two cards with Higher and Lower, or a district to pin on
-// the map, guessr-map.js, and Confirm), then its answer with the player's points and place, and at the end the top 10.
+// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower, DistrictGuessr or Skyline: joins with the
+// code on the big screen and a name, then checks where the game is up to about every second and shows it: waiting for
+// the host, a few seconds to get ready, the round until its time is up (two cards with Higher and Lower, a district to
+// pin on the map, guessr-map.js, and Confirm, or a state's towers, skyline-round.js, with the slider and Confirm), then
+// its answer with the player's points and place, and at the end the top 10.
 // Each round opens on the server's clock, worked out from each check, so every phone shows it at the same moment. The
 // game and the player are remembered in the tab, so reloading keeps them in it. While the game's on, the screen stays
 // on, and on phones that can, a buzz says a round has opened and its answer is in (awake.js).
@@ -38,10 +39,15 @@
     let pin = null;
     let marks = [];
     let placed = Promise.resolve();
+    // Skyline's round (skyline-round.js), once made, and the round's towers once they're set out, for what comes after
+    // to wait for.
+    let sky = null;
+    let shown = Promise.resolve();
 
     const serverNow = () => Date.now() + offset;
     const answered = () => guessed !== null && view !== null && guessed.round === view.round;
     const pins = () => view?.game === 'districtguessr';
+    const skyline = () => view?.game === 'skyline';
     // Higher or Lower's Last One Standing, and whether this player sits out this round: out before it, or watching.
     const standingMode = () => view?.mode === 'last-one-standing';
     const sittingOut = () => standingMode() && view.out !== null && view.out !== undefined && view.out !== view.round;
@@ -170,13 +176,17 @@
             slot('level-rule').textContent = state.difficulty === 'easy'
                 ? t("This game is on Easy: the map zooms into each district's state.")
                 : t('This game is on Hard: the whole of Malaysia.');
+        } else if (skyline()) {
+            outlines ??= GuessrMap.load(live.dataset.boundaries);
+            SkylineRound.load();
         } else {
             slot('mode-rule').textContent = standingMode()
                 ? t("This game is Last One Standing: a wrong answer, or none, and you're out; if everyone still in gets it wrong, they all stay in. The last one in wins.")
                 : t('This game is Classic: everyone plays every round, and the most points win.');
         }
 
-        if (state.guess) {
+        // Skyline's guess can be 0.
+        if (state.guess !== null && state.guess !== undefined) {
             // As after reloading the page mid-round.
             guessed = { round: state.round, guess: state.guess };
         }
@@ -296,10 +306,48 @@
         }
     };
 
-    // The answer as it shows while waiting for the others.
-    const lockedIn = (guess) => (guess === 'pin'
-        ? t('Pinned. Waiting for the others…')
-        : t('Locked in: :guess. Waiting for the others…', { guess: guess === 'higher' ? t('Higher') : t('Lower') }));
+    // Skyline's towers, the glass one back on the ground, or at the guess already made, as after reloading; locked once
+    // the round's not taking a guess from this phone.
+    const setSkyline = () => {
+        const round = view.round;
+        sky ??= SkylineRound.create(slot('skyline').querySelector('[data-sky-round]'), {
+            outlines: outlines ?? GuessrMap.load(live.dataset.boundaries),
+            onConfirm: () => answer('height'),
+        });
+
+        shown = sky.show(view.skyline).then(() => {
+            if (dealt !== round || !view) {
+                return;
+            }
+
+            if (answered()) {
+                sky.set(guessed.guess);
+            }
+
+            if (answered() || sittingOut() || revealed === round || serverNow() > view.closesAt) {
+                sky.lock();
+            }
+        });
+
+        // The towers and the slider in view, as on a phone, where the title takes the top of the screen: the round from
+        // its timer down, just under the bar along the top, which stays in place.
+        const controls = slot('skyline').querySelector('[data-sky="controls"]');
+        if (controls.getBoundingClientRect().bottom > window.innerHeight) {
+            const bar = document.querySelector('.public-topbar')?.getBoundingClientRect().bottom ?? 0;
+            window.scrollTo({ top: window.scrollY + part('round').getBoundingClientRect().top - bar - 8, behavior: calm ? 'auto' : 'smooth' });
+        }
+    };
+
+    // The answer as it shows while waiting for the others: Skyline's is the height.
+    const lockedIn = (guess) => {
+        if (typeof guess === 'number') {
+            return t('Locked in: :count. Waiting for the others…', { count: number.format(guess) });
+        }
+
+        return guess === 'pin'
+            ? t('Pinned. Waiting for the others…')
+            : t('Locked in: :guess. Waiting for the others…', { guess: guess === 'higher' ? t('Higher') : t('Lower') });
+    };
 
     // The round, once each round.
     const deal = () => {
@@ -320,6 +368,8 @@
 
         if (pins()) {
             setOut();
+        } else if (skyline()) {
+            setSkyline();
         } else {
             dealCards();
         }
@@ -336,8 +386,18 @@
         }
     };
 
-    // No more answering: the buttons, or the pin and Confirm, which goes.
+    // No more answering: the buttons, the pin and Confirm, which goes, or the slider, once the towers are set out.
     const lock = (guess = null) => {
+        if (skyline()) {
+            const round = view.round;
+            shown = shown.then(() => {
+                if (dealt === round) {
+                    sky.lock();
+                }
+            });
+            return;
+        }
+
         if (pins()) {
             pin?.dragging?.disable();
             slot('confirm').disabled = true;
@@ -352,6 +412,11 @@
     };
 
     const unlock = () => {
+        if (skyline()) {
+            shown = shown.then(() => sky.unlock());
+            return;
+        }
+
         if (pins()) {
             pin?.dragging?.enable();
             slot('confirm').disabled = pin === null;
@@ -394,29 +459,34 @@
 
         if (pins() && pin && now <= view.closesAt + 1000) {
             answer('pin', true);
+        } else if (skyline() && sky?.value() !== null && sky?.value() !== undefined && now <= view.closesAt + 1000) {
+            answer('height', true);
         } else {
             lock();
             say('note', t("Time's up. The answer's coming…"));
         }
     };
 
-    // The answer: higher or lower, or the pin, as it is when the time's up.
+    // The answer: higher or lower, the pin, or Skyline's height, as it is when the time's up.
     const answer = async (guess, late = false) => {
         const now = serverNow();
         const at = guess === 'pin' ? pin?.getLatLng() : null;
+        const height = guess === 'height' ? (sky?.value() ?? null) : null;
 
-        if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at) || sittingOut()
-            || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
+        if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at) || (guess === 'height' && height === null)
+            || sittingOut() || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
             return;
         }
 
+        const mine = guess === 'height' ? height : guess;
         sending = true;
-        guessed = { round: view.round, guess };
-        lock(guess);
-        say('note', lockedIn(guess));
+        guessed = { round: view.round, guess: mine };
+        lock(mine);
+        say('note', lockedIn(mine));
 
         try {
-            await request(`/${me.game}/answer`, { round: view.round, ...(at ? { lat: at.lat, lng: at.lng } : { guess }) });
+            const body = at ? { lat: at.lat, lng: at.lng } : guess === 'height' ? { value: height } : { guess };
+            await request(`/${me.game}/answer`, { round: view.round, ...body });
         } catch (problem) {
             // Not taken, unless the round has stopped taking answers or already has this one.
             if (problem.status !== 409) {
@@ -528,6 +598,27 @@
         });
     };
 
+    // Skyline's answer: the real tower grows inside the glass one, with what it was, how far off the guess was, and its
+    // points.
+    const showHeight = (state) => {
+        const result = state.result;
+        const was = number.format(state.answer);
+
+        if (result === null) {
+            say('note', t('No answer this round. It was :answer.', { answer: was }), 'wrong');
+        } else {
+            const off = Math.round((Math.abs(state.guess - state.answer) / Math.max(state.answer, 1)) * 100);
+            const scored = number.format(result.points);
+            const text = off <= Number(live.dataset.skylinePerfect)
+                ? t('Spot on! It was :count · :points points', { count: was, points: scored })
+                : tn(result.points, 'It was :count: :off% off · :points point', 'It was :count: :off% off · :points points', { count: was, off, points: scored });
+            say('note', text, result.points >= 500 ? 'right' : result.points > 0 ? 'near' : 'wrong');
+        }
+
+        const round = state.round;
+        shown = shown.then(() => (dealt === round ? sky.reveal({ crimes: state.answer, guess: result ? state.guess : null }) : null));
+    };
+
     // The round's answer, once, and how this player did, with their points and place.
     const reveal = (state) => {
         deal();
@@ -546,6 +637,8 @@
 
         if (pins()) {
             showPlace(state);
+        } else if (skyline()) {
+            showHeight(state);
         } else {
             showCount(state);
         }
@@ -634,15 +727,21 @@
 
     slot('confirm').addEventListener('click', () => answer('pin'));
 
-    // ↑ for higher and ↓ for lower, while the round's cards wait for an answer; Enter confirms the pin.
+    // ↑ for higher and ↓ for lower, while the round's cards wait for an answer; Enter confirms the pin, or Skyline's
+    // height (whose slider has the arrows).
     document.addEventListener('keydown', (event) => {
         if (part('round').hidden || answered() || event.altKey || event.ctrlKey || event.metaKey) {
             return;
         }
 
-        const guess = pins()
-            ? (event.key === 'Enter' && !slot('confirm').disabled && !event.target.closest?.('a, button, input') ? 'pin' : null)
-            : { ArrowUp: 'higher', ArrowDown: 'lower' }[event.key];
+        const outside = !event.target.closest?.('a, button, input:not([type="range"]), summary');
+        let guess = { ArrowUp: 'higher', ArrowDown: 'lower' }[event.key];
+
+        if (pins()) {
+            guess = event.key === 'Enter' && !slot('confirm').disabled && outside ? 'pin' : null;
+        } else if (skyline()) {
+            guess = event.key === 'Enter' && sky?.value() !== null && outside ? 'height' : null;
+        }
 
         if (!guess) {
             return;

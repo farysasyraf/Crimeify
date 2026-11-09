@@ -4,7 +4,9 @@
   rising into an up arrow, the bottom one red with its last letter's stem, or for an R its leg, dropping into a down
   arrow;
 - title-districtguessr.svg, DistrictGuessr's: DISTRICT over GUESSR in blue, beside a map pin as tall as both (Material
-  Icons Round, which the app serves from public/fonts, Apache License 2.0).
+  Icons Round, which the app serves from public/fonts, Apache License 2.0);
+- title-skyline.svg, Skyline's: SKY in white and LINE in blue, after four towers rising from the baseline, the third an
+  amber outline, as the game's tower to guess.
 
 Only needed again to change the words, the colours or the arrows; the pages use the SVG files. Montserrat is under the
 SIL Open Font License 1.1 (public/modules/game/Montserrat-OFL.txt): download the variable font from
@@ -24,7 +26,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 
-GREEN, RED, LIGHT, BLUE = '#59ac51', '#c75555', '#eef2f6', '#3aaaf2'
+GREEN, RED, LIGHT, BLUE, AMBER = '#59ac51', '#c75555', '#eef2f6', '#3aaaf2', '#f5c26b'
 
 font_path, out_dir = sys.argv[1], sys.argv[2]
 
@@ -198,5 +200,46 @@ def wordmark(top, bottom, label, out):
     print(f'{out}: {width:.0f} x {height:.0f}')
 
 
+def skyline(label, out):
+    """SKY in light and LINE in blue, one word in Montserrat Black, after four towers rising from its baseline, the
+    tallest above the letters and the third an amber outline, as Skyline's tower to guess."""
+    height = cap * 1.36
+    tower, gap, rim = STEM * 0.95, STEM * 0.34, STEM * 0.24
+    towers, glass, x = [], '', 0
+    for index, share in enumerate([0.62, 1.36, 0.96, 0.5]):
+        top = height - cap * share
+        if index == 2:
+            # An outline: the tower less its inside, which the even-odd rule leaves empty.
+            glass = (f'M{x:.0f} {top:.0f}H{x + tower:.0f}V{height:.0f}H{x:.0f}Z'
+                     f'M{x + rim:.0f} {top + rim:.0f}V{height - rim:.0f}H{x + tower - rim:.0f}V{top + rim:.0f}Z')
+        else:
+            towers.append(f'M{x:.0f} {top:.0f}H{x + tower:.0f}V{height:.0f}H{x:.0f}Z')
+        x += tower + gap
+
+    left = x - gap + cap * 0.24
+    _, placed, word_width, origin = set_word('SKYLINE', left, height)
+
+    def letters(part):
+        pen = SVGPathPen(glyphs)
+        for name, glyph_x in part:
+            glyphs[name].draw(TransformPen(pen, (1, 0, 0, -1, origin + glyph_x, height)))
+        return pen.getCommands()
+
+    width = left + word_width
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height:.0f}" role="img" aria-label="{label}">\n'
+        f'<!-- {label}, drawn by Modules/Game/Resources/title/make_title.py: lettering in Montserrat Black, SIL Open '
+        'Font License 1.1 (Montserrat-OFL.txt). -->\n'
+        f'<g fill="{BLUE}"><path d="{"".join(towers)}"/><path d="{letters(placed[3:])}"/></g>\n'
+        f'<g fill="{AMBER}"><path fill-rule="evenodd" d="{glass}"/></g>\n'
+        f'<g fill="{LIGHT}"><path d="{letters(placed[:3])}"/></g>\n'
+        '</svg>\n'
+    )
+    with open(f'{out_dir}/{out}', 'w', encoding='utf-8', newline='\n') as file:
+        file.write(svg)
+    print(f'{out}: {width:.0f} x {height:.0f}')
+
+
 title('HIGHER', 'LOWER', 'left', 'leg', 'Higher or Lower', 'title.svg')
 wordmark('DISTRICT', 'GUESSR', 'DistrictGuessr', 'title-districtguessr.svg')
+skyline('Skyline', 'title-skyline.svg')

@@ -131,6 +131,9 @@ class PublicLanguageTest extends TestCase
             'Modules/Game/Resources/views/districtguessr.blade.php', 'Modules/Game/Http/Controllers/DistrictGuessrController.php',
             'public/modules/game/districtguessr.js', 'public/modules/game/guessr-map.js',
             'public/modules/game/game.js', 'public/modules/game/live.js',
+            'Modules/Game/Resources/views/skyline.blade.php', 'Modules/Game/Resources/views/_skyline-round.blade.php',
+            'Modules/Game/Http/Controllers/SkylineController.php', 'public/modules/game/skyline.js',
+            'public/modules/game/skyline-round.js', 'public/modules/game/skyline-scene.js',
         ];
         $literal = '([\'"])((?:\\\\.|(?!\\1).)*)\\1';
         $patterns = [

@@ -4,19 +4,22 @@
 @section('description', __('Join a live game with the code on the big screen.'))
 
 @push('head')
+    @include('game::_skyline-imports')
     <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet/leaflet.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/game.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/districtguessr.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('modules/game/skyline.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/live.css') }}" />
     <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/guessr-map.js') }}" defer></script>
+    <script src="{{ versioned_asset('modules/game/skyline-round.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/awake.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/live.js') }}" defer></script>
 @endpush
 
-{{-- A live game on a phone (LivePlayController), for everyone without logging in, of Higher or Lower or DistrictGuessr:
-     join with the code on the host's big screen and a name, wait for the host to start, then each round answer higher
-     or lower, or pin the district on the map, the sooner the better, and at the end see your place and the top 10.
+{{-- A live game on a phone (LivePlayController), for everyone without logging in, of Higher or Lower, DistrictGuessr
+     or Skyline: join with the code on the host's big screen and a name, wait for the host to start, then each round
+     answer higher or lower, pin the district on the map, or raise the tower, the sooner the better, and at the end see your place and the top 10.
      live.js does it all, from what the game says about every second; the parts below are shown one at a time, in the
      page's language, and those marked with a game (data-live-game) only once the phone knows it's that game's.
      Reloading the page keeps the player in the game. --}}
@@ -31,6 +34,11 @@
                 <img class="guessr-title" src="{{ versioned_asset('modules/game/title-districtguessr.svg') }}" alt="DistrictGuessr" lang="en" width="6273" height="1498" />
             </h1>
         </div>
+        <div data-live-game="skyline" hidden>
+            <h1 class="game-title">
+                <img class="skyline-title" src="{{ versioned_asset('modules/game/title-skyline.svg') }}" alt="Skyline" lang="en" width="5775" height="952" />
+            </h1>
+        </div>
         <p class="muted">{{ __('A live game: everyone plays the same rounds at once, and the sooner the answer, the more points.') }}</p>
     </div>
     <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
@@ -38,7 +46,8 @@
     </a>
 </div>
 
-<div class="game live" data-live data-api="{{ $api }}" data-language="{{ $language }}" data-boundaries="{{ $boundaries }}">
+<div class="game live" data-live data-api="{{ $api }}" data-language="{{ $language }}" data-boundaries="{{ $boundaries }}"
+    data-skyline-perfect="{{ $skyline['perfect'] * 100 }}">
     <noscript>
         <div class="alert alert-info">{{ __('The game needs JavaScript. Turn it on in your browser to play.') }}</div>
     </noscript>
@@ -49,7 +58,7 @@
             <h2 id="live-rules-heading">{{ __('How to play') }}</h2>
             <ol>
                 <li>{{ __('Type the code on the big screen and your name, then wait for the host to start.') }}</li>
-                <li>{{ __('Everyone gets the same round at once: two cards to guess higher or lower, or a police district to pin on the map.') }}</li>
+                <li>{{ __('Everyone gets the same round at once: two cards to guess higher or lower, a police district to pin on the map, or a tower to raise.') }}</li>
                 <li>{{ __('The sooner you answer, the more points.') }}</li>
             </ol>
         </div>
@@ -93,6 +102,12 @@
             <li>{{ __('Up to :points points a district, all of them within :km km: the closer, the more.', ['points' => number_format($guessr['points']), 'km' => $guessr['perfect']]) }}</li>
             <li>{{ __('The sooner you confirm, the more of them you keep: :share% at the last moment.', ['share' => $guessr['keeps']]) }}</li>
         </ol>
+        <ol class="live-rules" data-live-game="skyline" hidden>
+            <li>{{ __("Each round shows a state's police districts as towers, each as tall as its count of one crime in one year.") }}</li>
+            <li>{{ __('One tower is a glass outline: raise it with the slider to how tall you think it is, then press Confirm. :seconds seconds a round.', ['seconds' => $skyline['seconds']]) }}</li>
+            <li>{{ __('Up to :points points a round, all of them within :perfect%: the closer, the more.', ['points' => number_format($skyline['points']), 'perfect' => $skyline['perfect'] * 100]) }}</li>
+            <li>{{ __('The sooner you confirm, the more of them you keep: :share% at the last moment.', ['share' => $skyline['keeps']]) }}</li>
+        </ol>
     </section>
 
     {{-- A few seconds to get ready for a round. --}}
@@ -102,8 +117,8 @@
         <p class="muted">{{ __('Get ready…') }}</p>
     </section>
 
-    {{-- A round: the time left and the two cards, or the district and the map to pin it on; once answered, waiting for
-         the others; then its answer, how the player did, and their points and place. --}}
+    {{-- A round: the time left and the two cards, the district and the map to pin it on, or the towers and the slider;
+         once answered, waiting for the others; then its answer, how the player did, and their points and place. --}}
     <section class="game-board" data-live-part="round" hidden>
         <div class="game-status">
             <p class="game-score" data-live="round"></p>
@@ -126,6 +141,9 @@
                     </button>
                 </div>
             </div>
+        </div>
+        <div data-live-game="skyline" data-live="skyline" hidden>
+            @include('game::_skyline-round', ['controls' => true, 'id' => 'live-skyline'])
         </div>
         <p class="live-standing" data-live="standing" hidden></p>
         <p class="game-keys muted" data-live-game="higher-or-lower" hidden>{{ __('Keys work too:') }} <kbd>↑</kbd> {{ __('higher') }}, <kbd>↓</kbd> {{ __('lower') }}</p>

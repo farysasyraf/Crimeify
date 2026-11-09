@@ -1,7 +1,8 @@
 // A live game's big screen (LiveGameController): checks where the game is up to about every second and shows it for the
-// room: the players as they join, a few seconds to get ready for each round, its cards or its district on the map
-// (guessr-map.js) with the time left and how many have answered, then its answer (how many said higher and lower, or
-// where the district is and everyone's pins, the 3 closest named) and the top 5, and at the end the podium, in
+// room: the players as they join, a few seconds to get ready for each round, its cards, its district on the map
+// (guessr-map.js) or its state's towers (skyline-round.js) with the time left and how many have answered, then its answer
+// (how many said higher and lower; where the district is and everyone's pins; or the real tower growing through
+// everyone's guesses; the 3 closest named) and the top 5, and at the end the podium, in
 // DistrictGuessr its awards, and everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
 // server's clock, worked out from each check, as on the players' phones. The screen stays on until the game's over
 // (awake.js).
@@ -33,6 +34,11 @@
     let drawing = null;
     let marks = [];
     let placed = Promise.resolve();
+    // Skyline's round, once made, its states' outlines, and the round's towers once they're set out.
+    const skyline = host.dataset.skyline !== undefined;
+    const skylineOutlines = skyline ? fetch(host.dataset.skyline).then((response) => response.json()).catch(() => null) : null;
+    let sky = null;
+    let shown = Promise.resolve();
 
     const serverNow = () => Date.now() + offset;
 
@@ -159,6 +165,9 @@
 
         if (pins) {
             setOut();
+        } else if (skyline) {
+            sky ??= SkylineRound.create(slot('skyline').querySelector('[data-sky-round]'), { outlines: skylineOutlines });
+            shown = sky.show(view.skyline);
         } else {
             dealCards();
         }
@@ -338,6 +347,20 @@
         });
     };
 
+    // Skyline's answer: everyone's guesses as rings round the tower to guess, rising into place, then the real tower
+    // growing through them, the 3 closest named; the towers beside the top 5.
+    const showHeights = (state) => {
+        const closest = state.guesses[0];
+        const was = number.format(state.answer);
+        slot('note').textContent = closest
+            ? `It was ${was}! Closest: ${closest.name}, with ${number.format(closest.value)}.`
+            : `It was ${was}. No one guessed.`;
+        slot('play').classList.toggle('is-split', state.leaderboard.length > 0);
+
+        const round = state.round;
+        shown = shown.then(() => (dealt === round ? sky.reveal({ crimes: state.answer, ghosts: state.guesses }) : null));
+    };
+
     // The round's answer, once, and the top 5.
     const reveal = (state) => {
         deal();
@@ -358,6 +381,8 @@
 
         if (pins) {
             showPins(state);
+        } else if (skyline) {
+            showHeights(state);
         } else {
             showCount(state);
         }

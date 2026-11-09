@@ -5,6 +5,7 @@ use Modules\Game\Http\Controllers\DistrictGuessrController;
 use Modules\Game\Http\Controllers\GameController;
 use Modules\Game\Http\Controllers\LibraryController;
 use Modules\Game\Http\Controllers\LivePlayController;
+use Modules\Game\Http\Controllers\SkylineController;
 
 // The Game scores page in the app (game-scores, GameScoreController@index) and its winner actions are routes saved on
 // the Routes page, for ADMIN to start with, so who can see the scores is set there. The module's RouteServiceProvider
@@ -21,6 +22,7 @@ Route::middleware('public-locale')->group(function () {
         Route::get('/public/game', [LibraryController::class, 'index'])->name('public.game');
         Route::get('/public/game/higher-or-lower', [GameController::class, 'publicIndex'])->name('public.game.higher-or-lower');
         Route::get('/public/game/districtguessr', [DistrictGuessrController::class, 'page'])->name('public.game.districtguessr');
+        Route::get('/public/game/skyline', [SkylineController::class, 'page'])->name('public.game.skyline');
         Route::get('/public/game/live', [LivePlayController::class, 'page'])->name('public.game.live');
     });
 
@@ -33,5 +35,10 @@ Route::middleware('public-locale')->group(function () {
         Route::post('/public/game/districtguessr/start', [DistrictGuessrController::class, 'start'])->name('public.game.districtguessr.start');
         Route::post('/public/game/districtguessr/guess', [DistrictGuessrController::class, 'guess'])->name('public.game.districtguessr.guess');
         Route::post('/public/game/districtguessr/next', [DistrictGuessrController::class, 'next'])->name('public.game.districtguessr.next');
+
+        // Skyline's start, guesses and next rounds.
+        Route::post('/public/game/skyline/start', [SkylineController::class, 'start'])->name('public.game.skyline.start');
+        Route::post('/public/game/skyline/guess', [SkylineController::class, 'guess'])->name('public.game.skyline.guess');
+        Route::post('/public/game/skyline/next', [SkylineController::class, 'next'])->name('public.game.skyline.next');
     });
 });

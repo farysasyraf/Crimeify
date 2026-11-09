@@ -7,7 +7,10 @@
 - map-districtguessr.svg: Malaysia's states (the Map module's malaysia-states.geojson, simplified), with a guess and
   its answer, beside DistrictGuessr's title;
 - tile-districtguessr.svg: DistrictGuessr's tile, its title (title-districtguessr.svg) over that map, the doodles and a
-  blue glow.
+  blue glow;
+- city-skyline.svg: a block of lit towers, one an amber glass outline to guess, beside Skyline's title;
+- tile-skyline.svg: Skyline's tile, its title (title-skyline.svg) over those towers, the doodles and a blue and amber
+  glow.
 
 The doodles are Material Icons Round, which the app serves from public/fonts (Apache License 2.0, see
 material-icons-LICENSE.txt there), drawn as outlines. Only needed again to change the art; the pages use the SVG files.
@@ -208,4 +211,108 @@ outline, outline_height, place = malaysia(tile * 0.9)
     f'{guessed(place, 40)}</g>\n'
     '</svg>\n', encoding='utf-8', newline='\n')
 
-print('doodles.svg, tile-higher-or-lower.svg, map-districtguessr.svg and tile-districtguessr.svg')
+AMBER = '#f5c26b'
+
+
+def city(width):
+    """A block of police districts' towers on a slab, as Skyline sets a state out, seen from a corner: lit blue towers
+    of different heights, the tallest brightest, and one an amber glass outline, as the tower to guess. Its SVG, from
+    0, 0 at its top left, and its height."""
+    pick = random.Random(12)
+    columns, rows = 5, 4
+    # A cell's width across the drawing, and how its sides and height are drawn (30 degrees, as isometric).
+    cell = width / (columns + rows) / math.cos(math.radians(30))
+    across, down = cell * math.cos(math.radians(30)), cell * math.sin(math.radians(30))
+    slab = cell * 0.22
+    tall = cell * 2.9
+
+    heights = {(c, r): pick.uniform(0.3, 0.95) for c in range(columns) for r in range(rows) if pick.random() > 0.25}
+    heights[(3, 0)] = 1.25
+    # The tower to guess at the front, with nothing in front of it.
+    guess = (2, 3)
+    heights[guess] = 0.8
+    heights.pop((3, 3), None)
+
+    # Room above the back corner for the tallest tower.
+    lift = tall * 1.3 + slab
+
+    def point(c, r, h):
+        return (c - r) * across + rows * across, (c + r) * down - h + lift
+
+    def polygon(points, fill, extra=''):
+        return f'<path d="M{"L".join(f"{x:.1f} {y:.1f}" for x, y in points)}Z" fill="{fill}"{extra}/>'
+
+    parts = []
+    # The slab: its top, then its two sides.
+    corners = [point(0, 0, slab), point(columns, 0, slab), point(columns, rows, slab), point(0, rows, slab)]
+    parts.append(polygon([point(0, rows, slab), point(columns, rows, slab), point(columns, rows, 0), point(0, rows, 0)], '#12171d'))
+    parts.append(polygon([point(columns, 0, slab), point(columns, rows, slab), point(columns, rows, 0), point(columns, 0, 0)], '#0f1318'))
+    parts.append(polygon(corners, '#1a2028', f' stroke="{BLUE}" stroke-opacity="0.7" stroke-width="1.6" stroke-linejoin="round"'))
+
+    # The towers, from the back, so those in front are drawn over them.
+    inset = 0.18
+    for c, r in sorted(heights, key=lambda key: (key[0] + key[1], key[0])):
+        h = heights[(c, r)] * tall
+        x0, x1, y0, y1 = c + inset, c + 1 - inset, r + inset, r + 1 - inset
+        top = [point(x0, y0, slab + h), point(x1, y0, slab + h), point(x1, y1, slab + h), point(x0, y1, slab + h)]
+        left = [point(x0, y1, slab + h), point(x1, y1, slab + h), point(x1, y1, slab), point(x0, y1, slab)]
+        right = [point(x1, y0, slab + h), point(x1, y1, slab + h), point(x1, y1, slab), point(x1, y0, slab)]
+
+        if (c, r) == guess:
+            glass = f' fill-opacity="0.16" stroke="{AMBER}" stroke-width="2.4" stroke-linejoin="round"'
+            parts += [polygon(face, AMBER, glass) for face in (left, right, top)]
+            continue
+
+        bright = heights[(c, r)] > 1.1
+        shades = ('#5cc4ff', '#2f8fd0', '#1f6aa0') if bright else ('#3b9ee0', '#226c9f', '#184f77')
+        parts += [polygon(top, shades[0]), polygon(left, shades[1]), polygon(right, shades[2])]
+
+        # Windows down its two sides, some lit.
+        floors = max(1, int(h / (cell * 0.22)))
+        for floor in range(floors):
+            for side, (a, b) in (('left', (x0, x1)), ('right', (y0, y1))):
+                for pane in range(2):
+                    if pick.random() < 0.45:
+                        continue
+                    u0, u1 = a + (b - a) * (0.18 + pane * 0.42), a + (b - a) * (0.42 + pane * 0.42)
+                    z0, z1 = slab + h - (floor + 0.75) * cell * 0.22, slab + h - (floor + 0.3) * cell * 0.22
+                    if z0 < slab + cell * 0.05:
+                        continue
+                    if side == 'left':
+                        pane_points = [point(u0, y1, z1), point(u1, y1, z1), point(u1, y1, z0), point(u0, y1, z0)]
+                    else:
+                        pane_points = [point(x1, u0, z1), point(x1, u1, z1), point(x1, u1, z0), point(x1, u0, z0)]
+                    parts.append(polygon(pane_points, '#ffe0a0', f' fill-opacity="{pick.uniform(0.55, 0.95):.2f}"'))
+
+    return ''.join(parts), (columns + rows) * down + lift
+
+
+# Skyline's picture beside its title on the Games page: a block of towers, one to guess.
+picture = 900
+drawing, drawing_height = city(picture)
+(OUT / 'city-skyline.svg').write_text(
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {picture} {drawing_height:.0f}" role="img" aria-label="Towers">\n'
+    f'<!-- Skyline\'s towers, drawn by Modules/Game/Resources/art/make_art.py. -->\n{drawing}\n</svg>\n',
+    encoding='utf-8', newline='\n')
+
+# Skyline's tile: its title over the towers, the doodles and a blue and amber glow.
+width, height, lettering = title('title-skyline.svg')
+scale = tile * 0.8 / width
+drawing, drawing_height = city(tile * 0.74)
+(OUT / 'tile-skyline.svg').write_text(
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {tile} {tile}" role="img" aria-label="Skyline">\n'
+    f'<!-- Skyline\'s tile. {credit} Title: title-skyline.svg. -->\n'
+    '<defs>\n'
+    f'<pattern id="doodles" width="{SIZE}" height="{SIZE}" patternUnits="userSpaceOnUse" patternTransform="scale(0.6)">{pattern}</pattern>\n'
+    f'<radialGradient id="blue" cx="0.5" cy="0.66" r="0.6"><stop offset="0" stop-color="{BLUE}" stop-opacity="0.3"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>\n'
+    f'<radialGradient id="amber" cx="0.55" cy="0.62" r="0.3"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.18"/><stop offset="1" stop-color="{AMBER}" stop-opacity="0"/></radialGradient>\n'
+    '</defs>\n'
+    f'<rect width="{tile}" height="{tile}" fill="{BLACK}"/>\n'
+    f'<rect width="{tile}" height="{tile}" fill="url(#doodles)"/>\n'
+    f'<rect width="{tile}" height="{tile}" fill="url(#blue)"/>\n'
+    f'<rect width="{tile}" height="{tile}" fill="url(#amber)"/>\n'
+    f'<g transform="translate({(tile - width * scale) / 2:.1f} {tile * 0.1:.1f}) scale({scale:.5f})">{lettering}</g>\n'
+    f'<g transform="translate({tile * 0.13:.1f} {tile * 0.95 - drawing_height:.1f})">{drawing}</g>\n'
+    '</svg>\n', encoding='utf-8', newline='\n')
+
+print('doodles.svg, tile-higher-or-lower.svg, map-districtguessr.svg, tile-districtguessr.svg, city-skyline.svg and tile-skyline.svg')

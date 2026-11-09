@@ -13,7 +13,7 @@ use Illuminate\View\View;
 use Modules\Game\Entities\GameRun;
 use Modules\Game\Support\LiveGames;
 
-// Playing a live game of Higher or Lower or DistrictGuessr on a phone (LiveGames), for everyone without logging in: the page to join with
+// Playing a live game of Higher or Lower, DistrictGuessr or Skyline on a phone (LiveGames), for everyone without logging in: the page to join with
 // the code on the big screen (/public/game/live), then, from live.js, joining, checking the game about every second, and
 // answering. Those three are in Routes/api.php, without a session, so the checks don't each write one to the database;
 // the phone says who it is with the player's Id and token in the X-Player and X-Player-Token headers, and its language
@@ -39,6 +39,8 @@ class LivePlayController extends Controller
             'boundaries' => versioned_asset(config('map.boundaries')),
             // For how to play DistrictGuessr: the share of a pin's points kept at the last moment, as a percentage.
             'guessr' => config('game.districtguessr') + ['keeps' => (int) round(100 * (1 - config('game.live.speed.districtguessr')))],
+            // And Skyline's.
+            'skyline' => config('game.skyline') + ['keeps' => (int) round(100 * (1 - config('game.live.speed.skyline')))],
         ]);
     }
 
@@ -78,8 +80,8 @@ class LivePlayController extends Controller
     }
 
     /**
-     * The player's answer to the round given: higher or lower, or a pin on the map (lat and lng) in DistrictGuessr.
-     * How it did shows with the round's answer.
+     * The player's answer to the round given: higher or lower, a pin on the map (lat and lng) in DistrictGuessr, or a
+     * tower's height (value) in Skyline. How it did shows with the round's answer.
      */
     public function answer(Request $request, int $game): JsonResponse
     {
@@ -87,13 +89,16 @@ class LivePlayController extends Controller
         [$state, $player] = $this->player($request, $game);
         // In Last One Standing, only those still in answer.
         abort_if($this->live->lastOneStanding($state) && ($state['players'][$player]['out'] ?? null) !== null, 409, __("You're out of this game: watch how it ends."));
-        $pins = $state['game'] === LiveGames::DistrictGuessr;
-        $request->validate(['round' => ['required', 'integer']] + ($pins
-            ? ['lat' => ['required', 'numeric', 'between:-90,90'], 'lng' => ['required', 'numeric', 'between:-180,180']]
-            : ['guess' => ['required', 'in:higher,lower']]));
-        $input = $pins
-            ? ['lat' => (float) $request->input('lat'), 'lng' => (float) $request->input('lng')]
-            : ['guess' => (string) $request->input('guess')];
+        $request->validate(['round' => ['required', 'integer']] + match ($state['game']) {
+            LiveGames::DistrictGuessr => ['lat' => ['required', 'numeric', 'between:-90,90'], 'lng' => ['required', 'numeric', 'between:-180,180']],
+            LiveGames::Skyline => ['value' => ['required', 'integer', 'min:0', 'max:1000000']],
+            default => ['guess' => ['required', 'in:higher,lower']],
+        });
+        $input = match ($state['game']) {
+            LiveGames::DistrictGuessr => ['lat' => (float) $request->input('lat'), 'lng' => (float) $request->input('lng')],
+            LiveGames::Skyline => ['value' => $request->integer('value')],
+            default => ['guess' => (string) $request->input('guess')],
+        };
 
         try {
             // A round just started may be newer than what's kept: read the game again before saying it's not taking answers.
