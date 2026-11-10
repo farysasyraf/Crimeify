@@ -2,13 +2,9 @@
 
 namespace Modules\Game\Support;
 
-use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Modules\Game\Entities\SkylineRun;
-use Modules\Map\Entities\CrimeStat;
-use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Support\CrimeData;
 
 // Skyline's rounds and points: each round is one state's police districts, from the Map module's dbo.CrimeStats and
@@ -17,15 +13,10 @@ use Modules\Map\Support\CrimeData;
 // config('game.skyline.districts') of its districts have counts from config('game.least') up; the tower to guess is
 // one of those, but not the tallest, whose count shows, to judge by. The rounds of a game are of different states and
 // crimes where there are enough. As with Higher or Lower's cards (Cards), what can be dealt is read from the tables once
-// and kept for a few minutes (config('game.deck')), rather than read each time a game starts.
+// and kept for a few minutes (config('game.deck'), ReadsCrimeSets), rather than read each time a game starts.
 class Skyline
 {
-    /**
-     * What can be dealt as read this request.
-     *
-     * @var array<string, array<string, mixed>>
-     */
-    private array $deck = [];
+    use ReadsCrimeSets;
 
     /**
      * A game's rounds, as many as asked (a solo game's to start with): each a state, the codes of the regions its
@@ -187,57 +178,13 @@ class Skyline
     }
 
     /**
-     * What can be dealt: each state's districts with pins, as [latitude, longitude, region], and every state, crime type
-     * and year with enough towers, with each district's count (none there, 0). Crime types as the map lists them, but
-     * those config('game.left_out'). Kept for config('game.deck.keep') seconds, under a key for the settings that
-     * decide it.
+     * What can be dealt (ReadsCrimeSets): each state's districts with pins, and every state, crime type and year with
+     * config('game.skyline.districts') towers, a tower to guess among them that isn't the tallest.
      *
      * @return array{pins: array<string, array<string, array{0: float, 1: float, 2: string}>>, sets: list<array{state: string, category: string, type: string, year: int, counts: array<string, int>}>}
      */
     private function deck(): array
     {
-        $config = config('game.skyline');
-        $key = 'game.skyline.'.md5(json_encode([config('game.least'), config('game.left_out'), $config['districts'], config('map.crime.types')]));
-
-        return $this->deck[$key] ??= $this->store()->remember($key, config('game.deck.keep'), function () use ($config) {
-            $pins = [];
-            foreach (PoliceDistrict::query()->orderBy('Name')->get(['State', 'Name', 'Region', 'Latitude', 'Longitude']) as $district) {
-                $pins[$district->State][$district->Name] = [(float) $district->Latitude, (float) $district->Longitude, $district->Region];
-            }
-
-            $counts = [];
-            $rows = CrimeStat::query()
-                ->where('State', '!=', 'Malaysia')
-                ->where('District', '!=', 'All')
-                ->where(function ($query) {
-                    foreach (config('map.crime.types') as $category => $types) {
-                        $query->orWhere(fn ($inCategory) => $inCategory->where('Category', $category)
-                            ->whereIn('Type', array_values(array_diff(array_keys($types), config('game.left_out')))));
-                    }
-                })
-                ->get(['State', 'District', 'Category', 'Type', 'Year', 'Crimes']);
-            foreach ($rows as $row) {
-                if (isset($pins[$row->State][$row->District])) {
-                    $counts["{$row->State}|{$row->Category}|{$row->Type}|{$row->Year}"][$row->District] = (int) $row->Crimes;
-                }
-            }
-
-            $sets = [];
-            foreach ($counts as $key => $byDistrict) {
-                $counted = array_filter($byDistrict, fn (int $crimes) => $crimes >= config('game.least'));
-                // Enough towers, and one to guess that isn't the tallest.
-                if (count($counted) >= $config['districts'] && count(array_unique($counted)) > 1) {
-                    [$state, $category, $type, $year] = explode('|', $key);
-                    $sets[] = ['state' => $state, 'category' => $category, 'type' => $type, 'year' => (int) $year, 'counts' => $byDistrict];
-                }
-            }
-
-            return ['pins' => $pins, 'sets' => $sets];
-        });
-    }
-
-    private function store(): Repository
-    {
-        return Cache::store(config('game.deck.store'));
+        return $this->crimeSets('skyline', config('game.skyline.districts'));
     }
 }

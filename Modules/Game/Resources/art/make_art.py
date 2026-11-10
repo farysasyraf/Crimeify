@@ -9,8 +9,10 @@
 - tile-districtguessr.svg: DistrictGuessr's tile, its title (title-districtguessr.svg) over that map, the doodles and a
   blue glow;
 - city-skyline.svg: a block of lit towers, one an amber glass outline to guess, beside Skyline's title;
-- tile-skyline.svg: Skyline's tile, its title (title-skyline.svg) over those towers, the doodles and a blue and amber
-  glow.
+- tile-skyline.svg: Skyline's tile, those towers with its title (title-skyline.svg) along the foot under them, the
+  doodles and a blue and amber glow;
+- blueprint-skyline.svg: Skyline's cover, those towers as an architect's blueprint in line work, the one to guess a
+  dashed amber outline with a dimension line marked "?" (in Share Tech Mono, public/modules/game).
 
 The doodles are Material Icons Round, which the app serves from public/fonts (Apache License 2.0, see
 material-icons-LICENSE.txt there), drawn as outlines. Only needed again to change the art; the pages use the SVG files.
@@ -295,24 +297,145 @@ drawing, drawing_height = city(picture)
     f'<!-- Skyline\'s towers, drawn by Modules/Game/Resources/art/make_art.py. -->\n{drawing}\n</svg>\n',
     encoding='utf-8', newline='\n')
 
-# Skyline's tile: its title over the towers, the doodles and a blue and amber glow.
+# Skyline's tile: the towers, its title along the foot under them, the doodles and a blue and amber glow round them.
 width, height, lettering = title('title-skyline.svg')
 scale = tile * 0.8 / width
-drawing, drawing_height = city(tile * 0.74)
+title_y = tile * 0.93 - height * scale
+drawing_width = tile * 0.67
+drawing, drawing_height = city(drawing_width)
+drawing_y = (title_y - tile * 0.03 - drawing_height) / 2 + tile * 0.01
 (OUT / 'tile-skyline.svg').write_text(
     f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {tile} {tile}" role="img" aria-label="Skyline">\n'
     f'<!-- Skyline\'s tile. {credit} Title: title-skyline.svg. -->\n'
     '<defs>\n'
     f'<pattern id="doodles" width="{SIZE}" height="{SIZE}" patternUnits="userSpaceOnUse" patternTransform="scale(0.6)">{pattern}</pattern>\n'
-    f'<radialGradient id="blue" cx="0.5" cy="0.66" r="0.6"><stop offset="0" stop-color="{BLUE}" stop-opacity="0.3"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>\n'
-    f'<radialGradient id="amber" cx="0.55" cy="0.62" r="0.3"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.18"/><stop offset="1" stop-color="{AMBER}" stop-opacity="0"/></radialGradient>\n'
+    f'<radialGradient id="blue" cx="0.5" cy="0.42" r="0.6"><stop offset="0" stop-color="{BLUE}" stop-opacity="0.3"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>\n'
+    f'<radialGradient id="amber" cx="0.55" cy="0.45" r="0.3"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.18"/><stop offset="1" stop-color="{AMBER}" stop-opacity="0"/></radialGradient>\n'
     '</defs>\n'
     f'<rect width="{tile}" height="{tile}" fill="{BLACK}"/>\n'
     f'<rect width="{tile}" height="{tile}" fill="url(#doodles)"/>\n'
     f'<rect width="{tile}" height="{tile}" fill="url(#blue)"/>\n'
     f'<rect width="{tile}" height="{tile}" fill="url(#amber)"/>\n'
-    f'<g transform="translate({(tile - width * scale) / 2:.1f} {tile * 0.1:.1f}) scale({scale:.5f})">{lettering}</g>\n'
-    f'<g transform="translate({tile * 0.13:.1f} {tile * 0.95 - drawing_height:.1f})">{drawing}</g>\n'
+    f'<g transform="translate({(tile - drawing_width) / 2:.1f} {drawing_y:.1f})">{drawing}</g>\n'
+    f'<g transform="translate({(tile - width * scale) / 2:.1f} {title_y:.1f}) scale({scale:.5f})">{lettering}</g>\n'
     '</svg>\n', encoding='utf-8', newline='\n')
 
-print('doodles.svg, tile-higher-or-lower.svg, map-districtguessr.svg, tile-districtguessr.svg, city-skyline.svg and tile-skyline.svg')
+INK, PAPER = '#dcefff', '#0d3157'
+
+
+def letter(path, char, x, y, size):
+    """A letter of the font at path as an SVG path's commands, its middle at x, y, size tall."""
+    font_file = TTFont(path)
+    shapes = font_file.getGlyphSet()
+    name = font_file.getBestCmap()[ord(char)]
+    bounds = BoundsPen(shapes)
+    shapes[name].draw(bounds)
+    x_min, y_min, x_max, y_max = bounds.bounds
+    scale = size / (y_max - y_min)
+    pen = SVGPathPen(shapes)
+    shapes[name].draw(TransformPen(pen, (scale, 0, 0, -scale, x - (x_min + x_max) / 2 * scale, y + (y_min + y_max) / 2 * scale)))
+    return pen.getCommands()
+
+
+def blueprint(width):
+    """Skyline's cover drawing, an architect's blueprint of a block of police districts' towers on a slab, seen from a
+    corner as the game shows them: line work in white ink, the slab's cells and each tower's floors ruled in, and one a
+    dashed amber outline, the tower to guess, with a dimension line up its side marked "?". No words, so it reads the
+    same in either language. Its SVG, from 0, 0 at its top left, its width and its height. Each ink line has a
+    pathLength of 1, and every line its place in the order (--i), so the page can draw them in one after another
+    (skyline-sheet.css)."""
+    pick = random.Random(21)
+    columns, rows = 4, 3
+    cell = width / (columns + rows + 1) / math.cos(math.radians(30))
+    across, down = cell * math.cos(math.radians(30)), cell * math.sin(math.radians(30))
+    slab, tall, floor = cell * 0.18, cell * 2.5, cell * 0.24
+
+    heights = {(c, r): pick.uniform(0.32, 0.9) for c in range(columns) for r in range(rows) if pick.random() > 0.2}
+    heights[(0, 0)] = 1.2
+    # The tower to guess on the right corner, its side clear for the dimension line.
+    guess = (columns - 1, 0)
+    heights[guess] = 1.0
+
+    def point(c, r, h):
+        return (c - r) * across + rows * across, (c + r) * down - h
+
+    parts, seen = [], []
+
+    def path(points, cls, order, closed=True, extra=''):
+        seen.extend(points)
+        d = 'M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in points) + ('Z' if closed else '')
+        # Only the ink lines draw in; the amber ones' dashes are their own lengths.
+        length = ' pathLength="1"' if cls == 'bp-line' else ''
+        parts.append(f'<path class="{cls}" d="{d}"{length} style="--i:{order}"{extra}/>')
+
+    ink = f' fill="{PAPER}" stroke="{INK}" stroke-width="1.6" stroke-linejoin="round"'
+    faint = f' fill="none" stroke="{INK}" stroke-opacity="0.3" stroke-width="1"'
+
+    # The slab: its two sides, its top, and its cells.
+    corners = [point(0, 0, slab), point(columns, 0, slab), point(columns, rows, slab), point(0, rows, slab)]
+    path([point(0, rows, slab), point(columns, rows, slab), point(columns, rows, 0), point(0, rows, 0)], 'bp-line', 0, extra=ink)
+    path([point(columns, 0, slab), point(columns, rows, slab), point(columns, rows, 0), point(columns, 0, 0)], 'bp-line', 0, extra=ink)
+    path(corners, 'bp-line', 0, extra=ink)
+    for c in range(1, columns):
+        path([point(c, 0, slab), point(c, rows, slab)], 'bp-line', 0, closed=False, extra=faint)
+    for r in range(1, rows):
+        path([point(0, r, slab), point(columns, r, slab)], 'bp-line', 0, closed=False, extra=faint)
+
+    # The towers, from the back, so those in front are drawn over them: faces in the paper's blue, a little lighter
+    # on top and darker on the right, outlined, their floors ruled across.
+    inset, order = 0.2, 0
+    for c, r in sorted(heights, key=lambda key: (key[0] + key[1], key[0])):
+        order += 1
+        h = heights[(c, r)] * tall
+        x0, x1, y0, y1 = c + inset, c + 1 - inset, r + inset, r + 1 - inset
+        top = [point(x0, y0, slab + h), point(x1, y0, slab + h), point(x1, y1, slab + h), point(x0, y1, slab + h)]
+        left = [point(x0, y1, slab + h), point(x1, y1, slab + h), point(x1, y1, slab), point(x0, y1, slab)]
+        right = [point(x1, y0, slab + h), point(x1, y1, slab + h), point(x1, y1, slab), point(x1, y0, slab)]
+
+        if (c, r) == guess:
+            glass = f' fill="{AMBER}" fill-opacity="0.08" stroke="{AMBER}" stroke-width="2" stroke-dasharray="7 5" stroke-linejoin="round"'
+            for face in (left, right, top):
+                path(face, 'bp-guess', order, extra=glass)
+
+            # Its height, as a dimension line off its right side: lines out from its top and its foot, the line
+            # between them with an arrowhead each end, and "?" in a circle half way.
+            edge_x, foot, head = right[0][0], right[3][1], right[0][1]
+            x = edge_x + cell * 0.55
+            dim = f' fill="none" stroke="{AMBER}" stroke-width="1.4"'
+            for y in (head, foot):
+                path([(edge_x + 5, y), (x + 9, y)], 'bp-dim', order, closed=False, extra=dim + ' stroke-opacity="0.7"')
+            path([(x, head + 2), (x, foot - 2)], 'bp-dim', order, closed=False, extra=dim)
+            arrow = f' fill="{AMBER}"'
+            path([(x, head), (x - 4.5, head + 11), (x + 4.5, head + 11)], 'bp-dim', order, extra=arrow)
+            path([(x, foot), (x - 4.5, foot - 11), (x + 4.5, foot - 11)], 'bp-dim', order, extra=arrow)
+            middle = (head + foot) / 2
+            seen.extend([(x - 17, middle - 17), (x + 17, middle + 17)])
+            parts.append(f'<circle class="bp-dim" cx="{x:.1f}" cy="{middle:.1f}" r="16" fill="{PAPER}" stroke="{AMBER}" stroke-width="1.6"/>')
+            mark = letter(OUT / 'ShareTechMono-Regular.ttf', '?', x, middle, 17)
+            parts.append(f'<path class="bp-dim" d="{mark}" fill="{AMBER}"/>')
+            continue
+
+        path(left, 'bp-line', order, extra=ink)
+        path(right, 'bp-line', order, extra=ink.replace(PAPER, '#0a2744'))
+        path(top, 'bp-line', order, extra=ink.replace(PAPER, '#14406e'))
+        z = slab + floor
+        while z < slab + h - floor * 0.5:
+            path([point(x0, y1, z), point(x1, y1, z)], 'bp-line', order, closed=False, extra=faint)
+            path([point(x1, y0, z), point(x1, y1, z)], 'bp-line', order, closed=False, extra=faint)
+            z += floor
+
+    # Everything moved in from its edges, with a little room round it.
+    pad = 6
+    left_x, top_y = min(x for x, _ in seen) - pad, min(y for _, y in seen) - pad
+    wide, high = max(x for x, _ in seen) + pad - left_x, max(y for _, y in seen) + pad - top_y
+    return f'<g transform="translate({-left_x:.1f} {-top_y:.1f})">{"".join(parts)}</g>', wide, high
+
+
+# Skyline's cover: the blueprint of its towers (skyline.blade.php puts it in the page, to draw it in).
+drawing, drawing_width, drawing_height = blueprint(900)
+(OUT / 'blueprint-skyline.svg').write_text(
+    f'<svg xmlns="http://www.w3.org/2000/svg" class="sky-blueprint" viewBox="0 0 {drawing_width:.0f} {drawing_height:.0f}" aria-hidden="true" focusable="false">\n'
+    '<!-- Skyline\'s blueprint, drawn by Modules/Game/Resources/art/make_art.py; its "?" in Share Tech Mono (SIL Open Font License 1.1, ShareTechMono-OFL.txt). -->\n'
+    f'{drawing}\n</svg>\n', encoding='utf-8', newline='\n')
+
+print('doodles.svg, tile-higher-or-lower.svg, map-districtguessr.svg, tile-districtguessr.svg, city-skyline.svg, tile-skyline.svg and blueprint-skyline.svg')

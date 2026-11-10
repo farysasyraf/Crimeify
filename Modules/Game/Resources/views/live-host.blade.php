@@ -22,6 +22,10 @@
         <link rel="stylesheet" href="{{ versioned_asset('modules/game/case-file.css') }}" />
         <script src="{{ versioned_asset('modules/game/case-screen.js') }}" defer></script>
     @endif
+    @if ($lineUp)
+        <link rel="stylesheet" href="{{ versioned_asset('modules/game/line-up.css') }}" />
+        <script src="{{ versioned_asset('modules/game/line-up-room.js') }}" defer></script>
+    @endif
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/live.css') }}" />
     @if ($pins)
         <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
@@ -35,7 +39,8 @@
 @endpush
 
 {{-- A live game's big screen (LiveGameController@host), to put on a projector or share in a meeting: the code to join
-     with and the players as they join, then each round's cards, its district on the map, or its state's towers, with the
+     with and the players as they join, then each round's cards, its district on the map, its state's towers, its case or
+     its line-up, with the
      time left and how many have answered, then its answer (how many said higher and lower, everyone's pins, or everyone's
      guesses as rings round the tower, the closest named) and the top 5, and at the end the podium and everyone's points. live-host.js shows it from what the game says about every
      second; Start, Show the answer and Next round move it on. In English, as the app is; the players' phones are in
@@ -45,7 +50,9 @@
 <div class="game-page game live-host" data-live-host data-token="{{ csrf_token() }}" data-state="{{ $urls['state'] }}"
     data-next="{{ $urls['next'] }}" data-close="{{ $urls['close'] }}" data-finish="{{ $urls['finish'] }}"
     @if ($pins) data-boundaries="{{ $boundaries }}" @endif @if ($skyline) data-skyline="{{ $boundaries }}" @endif
-    @if ($caseFile) data-case-file="{{ $boundaries }}" @endif>
+    @if ($caseFile) data-case-file="{{ $boundaries }}" @endif @if ($lineUp) data-line-up="{{ $boundaries }}" @endif>
+    {{-- The game's music, for the room: the big screen is its speaker. --}}
+    <div class="live-host-music">@include('game::_music', ['game' => $game->Game, 'small' => true])</div>
     <div class="live-host-head">
         @if ($pins)
             <h1 class="game-title">
@@ -58,6 +65,10 @@
         @elseif ($caseFile)
             <h1 class="game-title">
                 <img class="case-title" src="{{ versioned_asset('modules/game/title-case-file.svg') }}" alt="Case File" lang="en" width="5755" height="1610" />
+            </h1>
+        @elseif ($lineUp)
+            <h1 class="game-title">
+                <img class="lu-title" src="{{ versioned_asset('modules/game/title-line-up.svg') }}" alt="Line-Up" lang="en" width="2413" height="680" />
             </h1>
         @else
             @include('game::_title')
@@ -85,6 +96,8 @@
             @elseif ($caseFile)
                 a clue opens on the desk every {{ config('game.case_file.every') }} seconds, and the sooner a right
                 accusation, the fewer clues it took and the more points.
+            @elseif ($lineUp)
+                the more of the line-up in its right order, most crime first, and the sooner, the more points.
             @else
                 the sooner a right answer, the more points.
             @endif
@@ -134,6 +147,12 @@
                 <div class="live-host-case" data-host="case">
                     @include('game::_case-screen', ['mode' => 'host', 'id' => 'host-case'])
                 </div>
+            @elseif ($lineUp)
+                <div class="live-host-lineup" data-host="lineup">
+                    <p class="lu-ask"><span class="material-icon" aria-hidden="true" data-host="lu-icon"></span><span data-host="lu-type"></span><span
+                        class="lu-ask-state" data-host="lu-state"></span><span class="lu-ask-year" data-host="lu-year"></span></p>
+                    @include('game::_line-up-room', ['mode' => 'host'])
+                </div>
             @elseif ($skyline)
                 <div class="live-host-skyline" data-host="skyline">
                     @include('game::_skyline-round', ['controls' => false, 'id' => 'host-skyline'])
@@ -172,9 +191,13 @@
     <div class="live-host-foot" data-host="foot">
         <button type="button" class="btn btn-ghost btn-sm" data-host-action="finish">End the game now</button>
     </div>
+    @include('game::_music-credit', ['game' => $game->Game])
 
-    @unless ($pins || $skyline || $caseFile)
+    @unless ($pins || $skyline || $caseFile || $lineUp)
         @include('game::_card')
     @endunless
+    @if ($lineUp)
+        @include('game::_line-up-sprite')
+    @endif
 </div>
 @endsection

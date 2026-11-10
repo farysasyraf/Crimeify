@@ -1,0 +1,192 @@
+/* Skyline's cover and inspection report (skyline.blade.php, skyline.js), as an architect's blueprint: deep blue paper
+   ruled in a faint grid, a drawing frame in from its edge, white ink, and amber for the tower to guess, as in the game.
+   The cover: the drawing of the towers (blueprint-skyline.svg, drawn by make_art.py), which draws itself in, the guess's
+   dashes marching; how to play, as the drawing's notes; and its title block, with the architect's name to play as and
+   the stamp to start. The report: every round's tower as guessed beside it as it really is, its points, the score and
+   the INSPECTED stamp. Lettered in Share Tech Mono and Architects Daughter (SIL Open Font License 1.1,
+   ShareTechMono-OFL.txt and ArchitectsDaughter-OFL.txt), served as they come. Dark whatever the theme, as the game is. */
+@font-face {
+    font-family: "Share Tech Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("ShareTechMono-Regular.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Architects Daughter";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("ArchitectsDaughter-Regular.ttf") format("truetype");
+}
+
+.sky-sheet {
+    --bp-paper: #0d3157;
+    --bp-ink: #dcefff;
+    --bp-soft: #a6cbec;
+    --bp-rule: rgba(220, 239, 255, .3);
+    --bp-amber: #f5c26b;
+    --bp-real: #7fd8a4;
+    position: relative; padding: 38px 40px; border-radius: var(--radius); color: var(--bp-ink);
+    font-family: "Architects Daughter", "Segoe Print", cursive; font-size: 1.02rem; line-height: 1.45;
+    background:
+        linear-gradient(rgba(160, 210, 255, .13) 1px, transparent 1px) -1px -1px / 120px 120px,
+        linear-gradient(90deg, rgba(160, 210, 255, .13) 1px, transparent 1px) -1px -1px / 120px 120px,
+        linear-gradient(rgba(160, 210, 255, .055) 1px, transparent 1px) -1px -1px / 24px 24px,
+        linear-gradient(90deg, rgba(160, 210, 255, .055) 1px, transparent 1px) -1px -1px / 24px 24px,
+        radial-gradient(120% 90% at 40% 35%, #134476, var(--bp-paper) 72%);
+    background-color: var(--bp-paper);
+    box-shadow: var(--shadow);
+}
+/* The drawing frame: a line in from the paper's edge, and a finer one inside it. */
+.sky-sheet::before, .sky-sheet::after { content: ""; position: absolute; pointer-events: none; }
+.sky-sheet::before { inset: 12px; border: 2px solid rgba(220, 239, 255, .55); }
+.sky-sheet::after { inset: 17px; border: 1px solid rgba(220, 239, 255, .22); }
+.sky-sheet > * { position: relative; z-index: 1; }
+
+/* Labels in technical lettering; words by hand. */
+.sky-label {
+    margin: 0; color: var(--bp-soft); font: 400 .8rem/1.2 "Share Tech Mono", ui-monospace, monospace;
+    letter-spacing: .14em; text-transform: uppercase;
+}
+.sky-small { margin: 0; color: var(--bp-soft); font: 400 .8rem/1.45 system-ui, sans-serif; }
+
+/* The cover: the drawing on the left, its notes and title block on the right; on a phone, one under another. */
+.sky-cover {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "drawing notes" "drawing block";
+    gap: 22px 34px; align-items: start;
+}
+.sky-drawing { grid-area: drawing; align-self: center; }
+.sky-blueprint { display: block; width: 100%; height: auto; }
+.sky-notes { grid-area: notes; }
+.sky-notes h2 { padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--bp-rule); }
+.sky-notes ol { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; counter-reset: note; }
+.sky-notes li { display: grid; grid-template-columns: 1.9em minmax(0, 1fr); counter-increment: note; }
+.sky-notes li::before { content: counter(note) "."; color: var(--bp-amber); font-family: "Share Tech Mono", ui-monospace, monospace; }
+
+/* The title block, as in a drawing's corner: cells ruled off, the project across the top, the architect's name, and the
+   stamp to start. */
+.sky-block {
+    grid-area: block; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); align-self: end;
+    border: 2px solid rgba(220, 239, 255, .6); background: rgba(13, 49, 87, .7);
+}
+.sky-cell {
+    display: grid; align-content: start; gap: 4px; margin: 0; padding: 9px 12px;
+    border-right: 1px solid var(--bp-rule); border-bottom: 1px solid var(--bp-rule);
+}
+.sky-cell:nth-child(3) { border-right: 0; }
+.sky-cell strong { color: var(--bp-ink); font: 400 1.15rem/1.2 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .06em; }
+.sky-cell-project strong { font-size: 1.45rem; letter-spacing: .16em; text-transform: uppercase; }
+.sky-cell-name, .sky-cell-start { grid-column: 1 / -1; border-right: 0; }
+.sky-cell-start { gap: 12px; padding: 14px 12px 12px; border-bottom: 0; }
+/* On the block, so it outranks the site's own text boxes. */
+.sky-block .sky-name {
+    width: 100%; padding: 4px 2px; border: 0; border-bottom: 2px dashed rgba(220, 239, 255, .7); border-radius: 0;
+    background: transparent; color: var(--bp-ink); font: 400 1.35rem/1.2 "Architects Daughter", "Segoe Print", cursive;
+}
+.sky-block .sky-name::placeholder { color: var(--bp-soft); opacity: .6; }
+.sky-block .sky-name:focus { outline: none; border-bottom-color: var(--bp-amber); border-bottom-style: solid; }
+.sky-error { margin: 0; color: #ffb4a8; font: 600 .9rem/1.4 system-ui, sans-serif; }
+
+/* A rubber stamp in amber, a little askew: to start, and to play again. */
+.sky-stamp {
+    display: inline-flex; align-items: center; justify-self: start; gap: 8px; padding: 9px 18px;
+    border: 4px double var(--bp-amber); border-radius: 4px; background: rgba(245, 194, 107, .1); color: var(--bp-amber);
+    font: 400 1.05rem/1.1 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase;
+    transform: rotate(-2.5deg); cursor: pointer; transition: transform .15s ease, background-color .15s ease;
+}
+.sky-stamp:hover { background: rgba(245, 194, 107, .2); transform: rotate(-1deg) scale(1.03); }
+.sky-stamp:active { transform: rotate(-2.5deg) scale(.95); }
+.sky-stamp:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+.sky-stamp .material-icon { font-size: 1.35em; }
+.sky-link {
+    padding: 4px 2px; border: 0; background: none; color: var(--bp-soft); cursor: pointer;
+    font: 400 .85rem/1.2 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: underline dashed; text-underline-offset: 4px;
+}
+.sky-link:hover { color: var(--bp-ink); }
+.sky-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* The countdown, on the same paper. */
+.sky-ready .game-countdown { color: var(--bp-ink); font: 400 6.5rem/1 "Share Tech Mono", ui-monospace, monospace; }
+
+/* The inspection report. */
+.sky-report { display: grid; gap: 14px; }
+.sky-report-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px;
+    padding-bottom: 10px; border-bottom: 2px solid rgba(220, 239, 255, .5);
+}
+.sky-report-title {
+    margin: 0; color: var(--bp-ink); font: 400 1.5rem/1.2 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .16em;
+    text-transform: uppercase;
+}
+.sky-report-title:focus { outline: none; }
+.sky-report-architect { display: flex; align-items: baseline; gap: 10px; margin: 0; }
+.sky-report-architect strong { font-size: 1.3rem; font-weight: 400; }
+.sky-report-key { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; color: var(--bp-soft); font-size: .95rem; }
+.sky-report-key > span { display: inline-flex; align-items: center; gap: 8px; }
+.sky-swatch { display: inline-block; width: 12px; height: 16px; }
+.sky-swatch.is-guess, .sky-bar.is-guess { border: 2px dashed var(--bp-amber); border-bottom: 0; background: rgba(245, 194, 107, .12); }
+.sky-swatch.is-real, .sky-bar.is-real { border: 2px solid var(--bp-real); border-bottom: 0; background: rgba(127, 216, 164, .2); }
+
+.sky-rounds { display: grid; margin: 0; padding: 0; list-style: none; }
+.sky-round {
+    display: grid; grid-template-columns: 2em minmax(0, 1.25fr) 52px minmax(0, 1.5fr) 4.2em; align-items: center; gap: 4px 14px;
+    padding: 8px 4px; border-bottom: 1px dashed var(--bp-rule);
+}
+.sky-round-number { color: var(--bp-soft); font-family: "Share Tech Mono", ui-monospace, monospace; }
+.sky-round-place { display: grid; min-width: 0; }
+.sky-round-place strong { font-size: 1.08rem; font-weight: 400; line-height: 1.25; overflow-wrap: anywhere; }
+.sky-round-place span { color: var(--bp-soft); font-size: .88rem; }
+/* The round's two towers side by side, from a ground line, the taller of them its full height. */
+.sky-round-towers { display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 46px; border-bottom: 2px solid rgba(220, 239, 255, .7); }
+.sky-bar { width: 15px; height: calc(var(--h) * 100%); min-height: 2px; transform-origin: bottom; }
+.sky-round-figures { font-size: .98rem; }
+.sky-round-points { color: var(--bp-ink); font: 400 1.2rem/1 "Share Tech Mono", ui-monospace, monospace; text-align: right; font-variant-numeric: tabular-nums; }
+.sky-round.is-right .sky-round-points { color: var(--bp-real); }
+.sky-round.is-near .sky-round-points { color: var(--bp-amber); }
+.sky-round.is-wrong .sky-round-points { color: var(--bp-soft); }
+
+.sky-report-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px 20px; margin-top: 4px; }
+.sky-report-total { display: grid; gap: 4px; margin: 0; }
+.sky-report-total strong { color: var(--bp-ink); font: 400 2.8rem/1 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .02em; }
+.sky-inspected {
+    justify-self: end; padding: 6px 16px; border: 4px double var(--bp-real); border-radius: 4px; color: var(--bp-real);
+    font: 400 1.45rem/1.1 "Share Tech Mono", ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase;
+    transform: rotate(-8deg); opacity: .92;
+}
+.sky-report-actions { display: flex; flex-wrap: wrap; grid-column: 1 / -1; align-items: center; gap: 14px 22px; }
+
+@media (max-width: 720px) {
+    .sky-sheet { padding: 30px 26px; }
+    .sky-sheet::before { inset: 9px; }
+    .sky-sheet::after { inset: 13px; }
+    .sky-cover { grid-template-columns: minmax(0, 1fr); grid-template-areas: "drawing" "notes" "block"; }
+    .sky-blueprint { width: min(100%, 340px); margin: 0 auto; }
+    .sky-block { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .sky-cell-project { grid-column: 1 / -1; border-right: 0; }
+    .sky-cell:nth-child(2) { border-right: 1px solid var(--bp-rule); }
+    .sky-ready .game-countdown { font-size: 5rem; }
+    .sky-round { grid-template-columns: 1.6em minmax(0, 1fr) 44px 3.4em; }
+    .sky-round-figures { grid-column: 2 / -1; grid-row: 2; font-size: .92rem; }
+    .sky-report-total strong { font-size: 2.3rem; }
+    .sky-inspected { font-size: 1.15rem; }
+}
+
+/* Drawn in, line after line, the paper's blue filling each face as its outline goes round; then the tower to guess,
+   its dashes marching, and its height a "?". The report's rows one after another, each tower rising from the ground,
+   and the stamp coming down last. Not when motion is turned down. */
+@media (prefers-reduced-motion: no-preference) {
+    .sky-cover .bp-line { stroke-dasharray: 1; stroke-dashoffset: 1; fill-opacity: 0; animation: sky-draw .7s ease-out calc(var(--i) * 70ms) forwards; }
+    .sky-cover .bp-guess { opacity: 0; animation: sky-appear .5s ease-out 1.4s forwards, sky-march 1.6s linear 1.4s infinite; }
+    .sky-cover .bp-dim { opacity: 0; animation: sky-appear .5s ease-out 1.9s forwards; }
+    .sky-report .sky-round { animation: sky-row .4s ease-out calc(var(--n) * 80ms) both; }
+    .sky-report .sky-bar { animation: sky-rise .6s cubic-bezier(.2, .8, .3, 1) calc(var(--n) * 80ms + .15s) both; }
+    .sky-report .sky-inspected { animation: sky-stamp .32s ease-in calc(var(--rows, 10) * 80ms + .5s) both; }
+}
+@keyframes sky-draw { to { stroke-dashoffset: 0; fill-opacity: 1; } }
+@keyframes sky-appear { to { opacity: 1; } }
+@keyframes sky-march { to { stroke-dashoffset: -24; } }
+@keyframes sky-row { from { opacity: 0; transform: translateY(6px); } }
+@keyframes sky-rise { from { transform: scaleY(0); } }
+@keyframes sky-stamp { from { opacity: 0; transform: rotate(-8deg) scale(2.2); } }

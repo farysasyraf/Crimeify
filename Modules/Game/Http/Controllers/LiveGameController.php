@@ -12,7 +12,7 @@ use Modules\Game\Entities\LiveGame;
 use Modules\Game\Support\DistrictGuessr;
 use Modules\Game\Support\LiveGames;
 
-// Hosting a live game of Higher or Lower, DistrictGuessr, Skyline or Case File (LiveGames): made from the Game scores page with the game,
+// Hosting a live game of Higher or Lower, DistrictGuessr, Skyline, Case File or Line-Up (LiveGames): made from the Game scores page with the game,
 // the number of rounds and, for DistrictGuessr, the level, then run from its big screen, for everyone in the room to see, which shows the code to join
 // with, then each round's cards or district and its answer, and at the end the leaderboard. The screen checks the game about every second (state()) and its buttons
 // move it on. Its routes are on the Routes page, with Game scores', for ADMIN to start with.
@@ -67,6 +67,7 @@ class LiveGameController extends Controller
             'pins' => $liveGame->Game === LiveGames::DistrictGuessr,
             'skyline' => $liveGame->Game === LiveGames::Skyline,
             'caseFile' => $liveGame->Game === LiveGames::CaseFile,
+            'lineUp' => $liveGame->Game === LiveGames::LineUp,
             'easy' => $liveGame->Game === LiveGames::DistrictGuessr && $liveGame->Difficulty === DistrictGuessr::Easy,
             'standing' => $liveGame->Game === LiveGames::HigherOrLower && $liveGame->Mode === LiveGames::LastOneStanding,
             'boundaries' => versioned_asset(config('map.boundaries')),

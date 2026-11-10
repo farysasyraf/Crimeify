@@ -12,9 +12,10 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Game\Entities\GameRun;
 use Modules\Game\Support\CaseFile;
+use Modules\Game\Support\LineUp;
 use Modules\Game\Support\LiveGames;
 
-// Playing a live game of Higher or Lower, DistrictGuessr, Skyline or Case File on a phone (LiveGames), for everyone without logging in: the page to join with
+// Playing a live game of Higher or Lower, DistrictGuessr, Skyline, Case File or Line-Up on a phone (LiveGames), for everyone without logging in: the page to join with
 // the code on the big screen (/public/game/live), then, from live.js, joining, checking the game about every second, and
 // answering. Those three are in Routes/api.php, without a session, so the checks don't each write one to the database;
 // the phone says who it is with the player's Id and token in the X-Player and X-Player-Token headers, and its language
@@ -44,6 +45,8 @@ class LivePlayController extends Controller
             'skyline' => config('game.skyline') + ['keeps' => (int) round(100 * (1 - config('game.live.speed.skyline')))],
             // And Case File's: a clue every few seconds, and what a right pick is worth with the first and every clue.
             'caseFile' => ['every' => config('game.case_file.every'), 'clues' => count(CaseFile::order()), 'most' => CaseFile::worthAt(1), 'least' => CaseFile::worthAt(count(CaseFile::order()))],
+            // And Line-Up's: its points, and the share of them kept at the last moment.
+            'lineUp' => config('game.line_up') + ['most' => LineUp::most(), 'keeps' => (int) round(100 * (1 - config('game.live.speed.line-up')))],
         ]);
     }
 
@@ -84,8 +87,8 @@ class LivePlayController extends Controller
 
     /**
      * The player's answer to the round given: higher or lower, a pin on the map (lat and lng) in DistrictGuessr, a
-     * tower's height (value) in Skyline, or a suspect by their place on the board in Case File. How it did shows with
-     * the round's answer.
+     * tower's height (value) in Skyline, a suspect by their place on the board in Case File, or in Line-Up, the order of
+     * the suspects (order), each by where they first stood. How it did shows with the round's answer.
      */
     public function answer(Request $request, int $game): JsonResponse
     {
@@ -97,12 +100,17 @@ class LivePlayController extends Controller
             LiveGames::DistrictGuessr => ['lat' => ['required', 'numeric', 'between:-90,90'], 'lng' => ['required', 'numeric', 'between:-180,180']],
             LiveGames::Skyline => ['value' => ['required', 'integer', 'min:0', 'max:1000000']],
             LiveGames::CaseFile => ['suspect' => ['required', 'integer', 'min:0', 'max:'.(count($state['suspects'] ?? []) - 1)]],
+            LiveGames::LineUp => [
+                'order' => ['required', 'array', 'size:'.config('game.line_up.suspects')],
+                'order.*' => ['integer', 'distinct', 'min:0', 'max:'.(config('game.line_up.suspects') - 1)],
+            ],
             default => ['guess' => ['required', 'in:higher,lower']],
         });
         $input = match ($state['game']) {
             LiveGames::DistrictGuessr => ['lat' => (float) $request->input('lat'), 'lng' => (float) $request->input('lng')],
             LiveGames::Skyline => ['value' => $request->integer('value')],
             LiveGames::CaseFile => ['suspect' => $request->integer('suspect')],
+            LiveGames::LineUp => ['order' => array_map('intval', $request->input('order'))],
             default => ['guess' => (string) $request->input('guess')],
         };
 

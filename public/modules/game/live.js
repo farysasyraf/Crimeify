@@ -1,9 +1,9 @@
-// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower, DistrictGuessr, Skyline or Case File:
+// A live game on a phone (LivePlayController, LiveGames), of Higher or Lower, DistrictGuessr, Skyline, Case File or Line-Up:
 // joins with the code on the big screen and a name, then checks where the game is up to about every second and shows
 // it: waiting for the host, a few seconds to get ready, the round until its time is up (two cards with Higher and Lower,
 // a district to pin on the map, guessr-map.js, and Confirm, a state's towers, skyline-round.js, with the slider and
 // Confirm, or a case in its pixel screen, case-screen.js, its clues opening as the game says, and the suspects to
-// accuse, what's said said in its text box), then
+// accuse, what's said said in its text box, or a line-up, line-up-room.js, to put in order and Confirm), then
 // its answer with the player's points and place, and at the end the top 10.
 // Each round opens on the server's clock, worked out from each check, so every phone shows it at the same moment. The
 // game and the player are remembered in the tab, so reloading keeps them in it. While the game's on, the screen stays
@@ -47,12 +47,17 @@
     let shown = Promise.resolve();
     // Case File's screen, once made.
     let caseScreen = null;
+    // Line-Up's room, once made.
+    let lineUpRoom = null;
 
     const serverNow = () => Date.now() + offset;
     const answered = () => guessed !== null && view !== null && guessed.round === view.round;
     const pins = () => view?.game === 'districtguessr';
     const skyline = () => view?.game === 'skyline';
     const caseFile = () => view?.game === 'case-file';
+    const lineUp = () => view?.game === 'line-up';
+    // Line-Up's controls along the foot of its room: Confirm, and what's said.
+    const luControl = (name) => slot('lineup').querySelector(`[data-lu="${name}"]`);
     // Higher or Lower's Last One Standing, and whether this player sits out this round: out before it, or watching.
     const standingMode = () => view?.mode === 'last-one-standing';
     const sittingOut = () => standingMode() && view.out !== null && view.out !== undefined && view.out !== view.round;
@@ -127,6 +132,21 @@
             caseScreen?.say(text);
         }
 
+        // Line-Up's, along the foot of its room, in place of which way the order goes and how to move them.
+        if (lineUp() && name === 'note') {
+            luControl('result').textContent = text;
+            luControl('result').hidden = text === '';
+            luControl('result').className = `lu-result${kind ? ` is-${kind}` : ''}`;
+            luControl('scale').hidden = text !== '';
+            luControl('help').hidden = text !== '';
+        }
+
+        // And the player's points and place, under it.
+        if (lineUp() && name === 'standing') {
+            luControl('standing').textContent = text;
+            luControl('standing').hidden = text === '';
+        }
+
         const element = slot(name);
         element.textContent = text;
         element.hidden = text === '';
@@ -189,7 +209,7 @@
         } else if (skyline()) {
             outlines ??= GuessrMap.load(live.dataset.boundaries);
             SkylineRound.load();
-        } else if (caseFile()) {
+        } else if (caseFile() || lineUp()) {
             outlines ??= GuessrMap.load(live.dataset.boundaries);
         } else {
             slot('mode-rule').textContent = standingMode()
@@ -205,6 +225,7 @@
 
         // Case File's clues as they open, and what a right accusation is worth now.
         live.classList.toggle('is-case', caseFile());
+        live.classList.toggle('is-lineup', lineUp());
         if (caseFile() && caseScreen && dealt === state.round && state.phase === 'question') {
             caseScreen.clues(state.clues);
             caseScreen.hud({ worth: state.worth });
@@ -385,8 +406,35 @@
         }
     };
 
-    // The answer as it shows while waiting for the others: Skyline's is the height, Case File's the suspect accused.
+    // Line-Up's suspects as they first stand, none moved, or in the order already given, as after reloading; the crime,
+    // state and year over them.
+    const setLineUp = () => {
+        lineUpRoom ??= LineUpRoom.create(slot('lineup').querySelector('[data-lu-room]'), { outlines: outlines ?? GuessrMap.load(live.dataset.boundaries) });
+        slot('lu-icon').textContent = view.lineup.icon;
+        slot('lu-type').textContent = view.lineup.type;
+        slot('lu-state').textContent = view.lineup.state;
+        slot('lu-year').textContent = view.lineup.year;
+        lineUpRoom.show(view.lineup);
+        if (answered()) {
+            lineUpRoom.set(guessed.guess);
+        }
+        luControl('confirm').hidden = false;
+        luControl('confirm').disabled = false;
+
+        // The room and Confirm in view, just under the bar along the top, which stays in place.
+        if (luControl('confirm').getBoundingClientRect().bottom > window.innerHeight) {
+            const bar = document.querySelector('.public-topbar')?.getBoundingClientRect().bottom ?? 0;
+            window.scrollTo({ top: window.scrollY + part('round').getBoundingClientRect().top - bar - 8, behavior: calm ? 'auto' : 'smooth' });
+        }
+    };
+
+    // The answer as it shows while waiting for the others: Skyline's is the height, Case File's the suspect accused,
+    // Line-Up's the order.
     const lockedIn = (guess) => {
+        if (lineUp()) {
+            return t('Line-up given. Waiting for the others…');
+        }
+
         if (caseFile()) {
             return t('Accused: :name. Waiting for the others…', { name: view.suspects[guess]?.name ?? '' });
         }
@@ -423,6 +471,8 @@
             setSkyline();
         } else if (caseFile()) {
             setCase();
+        } else if (lineUp()) {
+            setLineUp();
         } else {
             dealCards();
         }
@@ -443,6 +493,12 @@
     const lock = (guess = null) => {
         if (caseFile()) {
             caseScreen?.lock();
+            return;
+        }
+
+        if (lineUp()) {
+            lineUpRoom?.lock();
+            luControl('confirm').disabled = true;
             return;
         }
 
@@ -472,6 +528,12 @@
     const unlock = () => {
         if (caseFile()) {
             caseScreen?.unlock();
+            return;
+        }
+
+        if (lineUp()) {
+            lineUpRoom?.unlock();
+            luControl('confirm').disabled = false;
             return;
         }
 
@@ -530,32 +592,37 @@
             answer('height', true);
         } else if (caseFile() && caseScreen?.chosen() !== null && caseScreen?.chosen() !== undefined && now <= view.closesAt + 1000) {
             answer('suspect', true);
+        } else if (lineUp() && lineUpRoom?.touched() && now <= view.closesAt + 1000) {
+            // A line-up moved counts as it stands; one never moved, as none.
+            answer('order', true);
         } else {
             lock();
             say('note', t("Time's up. The answer's coming…"));
         }
     };
 
-    // The answer: higher or lower, the pin, or Skyline's height, as it is when the time's up.
+    // The answer: higher or lower, the pin, Skyline's height, Case File's suspect or Line-Up's order, as it is when the
+    // time's up.
     const answer = async (guess, late = false) => {
         const now = serverNow();
         const at = guess === 'pin' ? pin?.getLatLng() : null;
         const height = guess === 'height' ? (sky?.value() ?? null) : null;
         const suspect = guess === 'suspect' ? (caseScreen?.chosen() ?? null) : null;
+        const order = guess === 'order' ? (lineUpRoom?.order() ?? null) : null;
 
         if (sending || answered() || !view || revealed === view.round || (guess === 'pin' && !at) || (guess === 'height' && height === null)
-            || (guess === 'suspect' && suspect === null) || sittingOut() || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
+            || (guess === 'suspect' && suspect === null) || (guess === 'order' && order === null) || sittingOut() || now < view.opensAt - 500 || now > view.closesAt + (late ? 1000 : 0)) {
             return;
         }
 
-        const mine = { height, suspect }[guess] ?? guess;
+        const mine = { height, suspect, order }[guess] ?? guess;
         sending = true;
         guessed = { round: view.round, guess: mine };
         lock(mine);
         say('note', lockedIn(mine));
 
         try {
-            const body = at ? { lat: at.lat, lng: at.lng } : guess === 'height' ? { value: height } : guess === 'suspect' ? { suspect } : { guess };
+            const body = at ? { lat: at.lat, lng: at.lng } : guess === 'height' ? { value: height } : guess === 'suspect' ? { suspect } : guess === 'order' ? { order } : { guess };
             await request(`/${me.game}/answer`, { round: view.round, ...body });
         } catch (problem) {
             // Not taken, unless the round has stopped taking answers or already has this one.
@@ -703,6 +770,29 @@
         caseScreen?.reveal({ culprit: state.answer, suspect: result ? state.guess : null, clues: state.clues, text: `${text} ${standingText(state)}` });
     };
 
+    // Line-Up's answer: each suspect on a riser to its count, the right places stamped on the floor, against the order
+    // given (with none, they step into the right one), and how it did.
+    const showLineUp = (state) => {
+        const result = state.result;
+        const given = result ? state.guess : null;
+        luControl('confirm').hidden = true;
+
+        if (!given) {
+            say('note', t("Time's up, with no line-up: here's the right order."), 'wrong');
+        } else {
+            const offs = given.map((suspect, at) => Math.abs(state.answer.indexOf(suspect) - at));
+            const right = offs.filter((off) => off === 0).length;
+            const near = offs.filter((off) => off === 1).length;
+            const points = number.format(result.points);
+            say('note', right === offs.length
+                ? t('Perfect line-up! +:points points', { points })
+                : t(':right in the right place, :near one place off · +:points points', { right, near, points }),
+            result.points >= 500 ? 'right' : result.points > 0 ? 'near' : 'wrong');
+        }
+
+        lineUpRoom?.reveal({ crimes: state.crimes, truth: state.answer, given });
+    };
+
     // The round's answer, once, and how this player did, with their points and place.
     const reveal = (state) => {
         deal();
@@ -725,6 +815,8 @@
             showHeight(state);
         } else if (caseFile()) {
             showCase(state);
+        } else if (lineUp()) {
+            showLineUp(state);
         } else {
             showCount(state);
         }
@@ -812,6 +904,7 @@
     });
 
     slot('confirm').addEventListener('click', () => answer('pin'));
+    luControl('confirm').addEventListener('click', () => answer('order'));
 
     // ↑ for higher and ↓ for lower, while the round's cards wait for an answer; Enter confirms the pin, or Skyline's
     // height (whose slider has the arrows).
@@ -830,6 +923,9 @@
         } else if (caseFile()) {
             // Accuse takes a tap, as a pick can be changed until then.
             guess = null;
+        } else if (lineUp()) {
+            // Not on a suspect, where Enter picks it up.
+            guess = event.key === 'Enter' && outside && !luControl('confirm').disabled ? 'order' : null;
         }
 
         if (!guess) {

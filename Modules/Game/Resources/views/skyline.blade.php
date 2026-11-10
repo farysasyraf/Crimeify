@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/game.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/districtguessr.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/skyline.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('modules/game/skyline-sheet.css') }}" />
     <script src="{{ versioned_asset('modules/game/skyline-round.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/skyline.js') }}" defer></script>
 @endpush
@@ -27,9 +28,12 @@
         </h1>
         <p class="muted">{{ __("A state's police districts as 3D towers, each as tall as its count of one crime. One is hidden: raise it to the height you think it is.") }}</p>
     </div>
-    <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
-        <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
-    </a>
+    <div class="game-head-actions">
+        @include('game::_music', ['game' => 'skyline'])
+        <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
+            <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
+        </a>
+    </div>
 </div>
 
 @if (! $ready)
@@ -44,10 +48,14 @@
             <div class="alert alert-info">{{ __('The game needs JavaScript. Turn it on in your browser to play.') }}</div>
         </noscript>
 
-        {{-- Before a game: how to play, and the name to play as. --}}
-        <section class="game-panel game-intro" data-skyline-part="intro" aria-labelledby="skyline-rules-heading">
-            <div class="game-rules">
-                <h2 id="skyline-rules-heading">{{ __('How to play') }}</h2>
+        {{-- Before a game, its cover: an architect's blueprint (skyline-sheet.css). The drawing of the towers, the one to
+             guess dashed amber with its height a "?" (blueprint-skyline.svg, drawn by make_art.py, in the page so it
+             can draw itself in); how to play, as the drawing's notes; and its title block, with the project, the
+             rounds and their time, the architect's name to play as, and the stamp to start. --}}
+        <section class="sky-sheet sky-cover" data-skyline-part="intro" aria-labelledby="skyline-rules-heading">
+            <div class="sky-drawing">{!! file_get_contents(public_path('modules/game/blueprint-skyline.svg')) !!}</div>
+            <div class="sky-notes">
+                <h2 class="sky-label" id="skyline-rules-heading">{{ __('How to play') }}</h2>
                 <ol>
                     <li>{{ __("Each round shows a state's police districts as towers, each as tall as its count of one crime in one year.") }}</li>
                     <li>{{ __('One tower is a glass outline: raise it with the slider to how tall you think it is, then press Confirm. :seconds seconds a round.', ['seconds' => $seconds]) }}</li>
@@ -56,23 +64,29 @@
                     <li>{{ __('Drag to turn the towers, pinch or scroll to zoom, and tap one for its count.') }}</li>
                 </ol>
             </div>
-            <form class="game-start" data-skyline-start novalidate>
+            <form class="sky-block game-start" data-skyline-start novalidate>
                 @csrf
-                <div class="field">
-                    <label for="skyline-name">{{ __('Your name') }}</label>
-                    <input type="text" id="skyline-name" name="name" maxlength="{{ $nameLength }}" autocomplete="name" required aria-describedby="skyline-name-note" />
+                <p class="sky-cell sky-cell-project"><span class="sky-label">{{ __('Project') }}</span> <strong lang="en">Skyline</strong></p>
+                <p class="sky-cell"><span class="sky-label">{{ __('Rounds') }}</span> <strong>{{ $rounds }}</strong></p>
+                <p class="sky-cell"><span class="sky-label">{{ __('Each round') }}</span> <strong>{{ __(':seconds s', ['seconds' => $seconds]) }}</strong></p>
+                <div class="sky-cell sky-cell-name">
+                    <label class="sky-label" for="skyline-name">{{ __('Architect') }}</label>
+                    <input class="sky-name" type="text" id="skyline-name" name="name" maxlength="{{ $nameLength }}" autocomplete="name" required
+                        placeholder="{{ __('Your name') }}" aria-describedby="skyline-name-note" />
                 </div>
-                <p class="game-error" role="alert" data-skyline-error hidden></p>
-                <button type="submit" class="btn btn-primary game-play">
-                    <span class="material-icon" aria-hidden="true">play_arrow</span>{{ __('Start') }}
-                </button>
-                <p class="game-note muted" id="skyline-name-note">{{ __("Your name and score go to :app's administrators, who choose the winner. Only they see the scores.", ['app' => config('app.name')]) }}</p>
+                <div class="sky-cell sky-cell-start">
+                    <p class="game-error sky-error" role="alert" data-skyline-error hidden></p>
+                    <button type="submit" class="sky-stamp">
+                        <span class="material-icon" aria-hidden="true">architecture</span>{{ __('Start building') }}
+                    </button>
+                    <p class="sky-small" id="skyline-name-note">{{ __("Your name and score go to :app's administrators, who choose the winner. Only they see the scores.", ['app' => config('app.name')]) }}</p>
+                </div>
             </form>
         </section>
 
-        {{-- A few seconds counting down before the first round. --}}
-        <section class="game-panel game-ready" data-skyline-part="ready" hidden>
-            <p class="muted">{{ __('Get ready…') }}</p>
+        {{-- A few seconds counting down before the first round, on the blueprint's paper. --}}
+        <section class="game-panel game-ready sky-sheet sky-ready" data-skyline-part="ready" hidden>
+            <p class="sky-label">{{ __('Get ready…') }}</p>
             <p class="game-countdown" data-skyline="countdown" aria-hidden="true"></p>
         </section>
 
@@ -93,20 +107,32 @@
             </div>
         </section>
 
-        {{-- After a game: the score, and every round's. --}}
-        <section class="game-panel game-over" data-skyline-part="over" hidden aria-labelledby="skyline-over-heading">
-            <span class="material-icon game-over-icon" aria-hidden="true">sports_score</span>
-            <h2 id="skyline-over-heading" tabindex="-1">{{ __('Game over') }}</h2>
-            <p class="game-final">{{ __('Your score') }} <strong data-skyline="final">0</strong> <span class="muted" data-skyline="out-of"></span></p>
-            <ol class="guessr-rounds skyline-rounds" data-skyline="rounds"></ol>
-            <div class="game-over-actions">
-                <button type="button" class="btn btn-primary game-play" data-skyline-action="again">
-                    <span class="material-icon" aria-hidden="true">replay</span>{{ __('Play again') }}
-                </button>
-                <button type="button" class="btn btn-ghost" data-skyline-action="rename">{{ __('Change name') }}</button>
+        {{-- After a game, the inspection report, on the blueprint's paper: who built it, every round's tower as built (the
+             guess, dashed amber) beside it as it really is (the count), with its figures and points, and the score,
+             stamped INSPECTED. --}}
+        <section class="sky-sheet sky-report" data-skyline-part="over" hidden aria-labelledby="skyline-over-heading">
+            <header class="sky-report-head">
+                <h2 class="sky-report-title" id="skyline-over-heading" tabindex="-1">{{ __('Inspection report') }}</h2>
+                <p class="sky-report-architect"><span class="sky-label">{{ __('Architect') }}</span> <strong data-skyline="architect"></strong></p>
+            </header>
+            <p class="sky-report-key" aria-hidden="true">
+                <span><span class="sky-swatch is-guess"></span>{{ __('Your guess') }}</span>
+                <span><span class="sky-swatch is-real"></span>{{ __('The real count') }}</span>
+            </p>
+            <ol class="sky-rounds" data-skyline="rounds"></ol>
+            <div class="sky-report-foot">
+                <p class="sky-report-total"><span class="sky-label">{{ __('Your score') }}</span> <strong data-skyline="final">0</strong> <span class="sky-label" data-skyline="out-of"></span></p>
+                <span class="sky-inspected" aria-hidden="true">{{ __('Inspected') }}</span>
+                <div class="sky-report-actions">
+                    <button type="button" class="sky-stamp" data-skyline-action="again">
+                        <span class="material-icon" aria-hidden="true">replay</span>{{ __('Play again') }}
+                    </button>
+                    <button type="button" class="sky-link" data-skyline-action="rename">{{ __('Change name') }}</button>
+                </div>
             </div>
         </section>
     </div>
 @endif
+@include('game::_music-credit', ['game' => 'skyline'])
 </div>
 @endsection

@@ -136,6 +136,9 @@ class PublicLanguageTest extends TestCase
             'public/modules/game/skyline-round.js', 'public/modules/game/skyline-scene.js',
             'Modules/Game/Resources/views/case-file.blade.php', 'Modules/Game/Resources/views/_case-screen.blade.php',
             'Modules/Game/Http/Controllers/CaseFileController.php', 'public/modules/game/case-screen.js', 'public/modules/game/case-file.js',
+            'Modules/Game/Resources/views/line-up.blade.php', 'Modules/Game/Resources/views/_line-up-room.blade.php',
+            'Modules/Game/Http/Controllers/LineUpController.php', 'public/modules/game/line-up.js', 'public/modules/game/line-up-room.js',
+            'Modules/Game/Resources/views/_music.blade.php', 'Modules/Game/Resources/views/_music-credit.blade.php', 'public/modules/game/music.js',
         ];
         $literal = '([\'"])((?:\\\\.|(?!\\1).)*)\\1';
         $patterns = [

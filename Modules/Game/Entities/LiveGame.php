@@ -76,6 +76,7 @@ class LiveGame extends Model
             'higher-or-lower' => $this->Mode === 'last-one-standing' ? 'Higher or Lower (Last One Standing)' : 'Higher or Lower',
             'skyline' => 'Skyline',
             'case-file' => 'Case File',
+            'line-up' => 'Line-Up',
             default => $this->Game,
         };
     }

@@ -10,18 +10,21 @@
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/districtguessr.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/skyline.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/case-file.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('modules/game/line-up.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/game/live.css') }}" />
     <script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/guessr-map.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/skyline-round.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/case-screen.js') }}" defer></script>
+    <script src="{{ versioned_asset('modules/game/line-up-room.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/awake.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/game/live.js') }}" defer></script>
 @endpush
 
 {{-- A live game on a phone (LivePlayController), for everyone without logging in, of Higher or Lower, DistrictGuessr,
-     Skyline or Case File: join with the code on the host's big screen and a name, wait for the host to start, then each
-     round answer higher or lower, pin the district on the map, raise the tower, or accuse a suspect, the sooner the better, and at the end see your place and the top 10.
+     Skyline, Case File or Line-Up: join with the code on the host's big screen and a name, wait for the host to start,
+     then each round answer higher or lower, pin the district on the map, raise the tower, accuse a suspect, or put the
+     line-up in order, the sooner the better, and at the end see your place and the top 10.
      live.js does it all, from what the game says about every second; the parts below are shown one at a time, in the
      page's language, and those marked with a game (data-live-game) only once the phone knows it's that game's.
      Reloading the page keeps the player in the game. --}}
@@ -46,6 +49,11 @@
                 <img class="skyline-title" src="{{ versioned_asset('modules/game/title-skyline.svg') }}" alt="Skyline" lang="en" width="5775" height="952" />
             </h1>
         </div>
+        <div data-live-game="line-up" hidden>
+            <h1 class="game-title">
+                <img class="lu-title" src="{{ versioned_asset('modules/game/title-line-up.svg') }}" alt="Line-Up" lang="en" width="2413" height="680" />
+            </h1>
+        </div>
         <p class="muted">{{ __('A live game: everyone plays the same rounds at once, and the sooner the answer, the more points.') }}</p>
     </div>
     <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
@@ -65,7 +73,7 @@
             <h2 id="live-rules-heading">{{ __('How to play') }}</h2>
             <ol>
                 <li>{{ __('Type the code on the big screen and your name, then wait for the host to start.') }}</li>
-                <li>{{ __('Everyone gets the same round at once: two cards to guess higher or lower, a police district to pin on the map, a tower to raise, or a case to solve.') }}</li>
+                <li>{{ __('Everyone gets the same round at once: two cards to guess higher or lower, a police district to pin on the map, a tower to raise, a case to solve, or a line-up to put in order.') }}</li>
                 <li>{{ __('The sooner you answer, the more points.') }}</li>
             </ol>
         </div>
@@ -120,6 +128,12 @@
             <li>{{ __('Pick the district and accuse them: the sooner, the fewer clues open and the more points, from :most down to :least.', ['most' => number_format($caseFile['most']), 'least' => number_format($caseFile['least'])]) }}</li>
             <li>{{ __('A wrong suspect scores none.') }}</li>
         </ol>
+        <ol class="live-rules" data-live-game="line-up" hidden>
+            <li>{{ __(':count police districts of one state stand in the line-up, each holding its name.', ['count' => $lineUp['suspects']]) }}</li>
+            <li>{{ __('Put them in order for the crime and year shown, most on the left. Tap two to swap them, or drag one along the line.') }}</li>
+            <li>{{ __(':right points for each in its place, :near if it\'s one place off: up to :most a round.', ['right' => $lineUp['right'], 'near' => $lineUp['near'], 'most' => number_format($lineUp['most'])]) }}</li>
+            <li>{{ __('The sooner you confirm, the more of them you keep: :share% at the last moment.', ['share' => $lineUp['keeps']]) }}</li>
+        </ol>
     </section>
 
     {{-- A few seconds to get ready for a round. --}}
@@ -160,6 +174,11 @@
         <div data-live-game="skyline" data-live="skyline" hidden>
             @include('game::_skyline-round', ['controls' => true, 'id' => 'live-skyline'])
         </div>
+        <div data-live-game="line-up" data-live="lineup" hidden>
+            <p class="lu-ask live-lu-ask"><span class="material-icon" aria-hidden="true" data-live="lu-icon"></span><span data-live="lu-type"></span><span
+                class="lu-ask-state" data-live="lu-state"></span><span class="lu-ask-year" data-live="lu-year"></span></p>
+            @include('game::_line-up-room', ['mode' => 'phone'])
+        </div>
         <p class="live-standing" data-live="standing" hidden></p>
         <p class="game-keys muted" data-live-game="higher-or-lower" hidden>{{ __('Keys work too:') }} <kbd>↑</kbd> {{ __('higher') }}, <kbd>↓</kbd> {{ __('lower') }}</p>
     </section>
@@ -183,6 +202,7 @@
     </section>
 
     @include('game::_card')
+    @include('game::_line-up-sprite')
 </div>
 </div>
 @endsection

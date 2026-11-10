@@ -13,6 +13,7 @@ use Modules\Game\Entities\CaseRun;
 use Modules\Game\Entities\GameRun;
 use Modules\Game\Entities\GameWinner;
 use Modules\Game\Entities\GuessrRun;
+use Modules\Game\Entities\LineUpRun;
 use Modules\Game\Entities\LiveGame;
 use Modules\Game\Entities\SkylineRun;
 use Modules\Game\Support\DistrictGuessr;
@@ -32,7 +33,7 @@ class GameScoreController extends Controller
      * scored), and secondsToScore(), and for DistrictGuessr the level its games were played at, as each is ranked on
      * its own. A winner keeps the key of the board they were chosen from (GameWinner::Game).
      *
-     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun|SkylineRun|CaseRun>, difficulty?: string}>
+     * @var array<string, array{name: string, model: class-string<GameRun|GuessrRun|SkylineRun|CaseRun|LineUpRun>, difficulty?: string}>
      */
     public const Games = [
         'higher-or-lower' => ['name' => 'Higher or Lower', 'model' => GameRun::class],
@@ -40,6 +41,7 @@ class GameScoreController extends Controller
         'districtguessr' => ['name' => 'DistrictGuessr Hard', 'model' => GuessrRun::class, 'difficulty' => DistrictGuessr::Hard],
         'skyline' => ['name' => 'Skyline', 'model' => SkylineRun::class],
         'case-file' => ['name' => 'Case File', 'model' => CaseRun::class],
+        'line-up' => ['name' => 'Line-Up', 'model' => LineUpRun::class],
     ];
 
     /**
@@ -69,7 +71,7 @@ class GameScoreController extends Controller
             'to' => $period['to'],
             'filtered' => $period['from'] !== null || $period['to'] !== null,
             'periodText' => GameWinner::describePeriod($period['from'], $period['to']),
-            'players' => $best->map(fn (GameRun|GuessrRun|SkylineRun|CaseRun $run, int $index) => [
+            'players' => $best->map(fn (GameRun|GuessrRun|SkylineRun|CaseRun|LineUpRun $run, int $index) => [
                 'rank' => $index + 1,
                 'run' => $run,
                 'games' => (int) ($played[$run->PlayerKey] ?? 1),
@@ -86,6 +88,7 @@ class GameScoreController extends Controller
                 str_starts_with($game, LiveGames::DistrictGuessr) => LiveGames::DistrictGuessr,
                 $game === LiveGames::Skyline => LiveGames::Skyline,
                 $game === LiveGames::CaseFile => LiveGames::CaseFile,
+                $game === LiveGames::LineUp => LiveGames::LineUp,
                 default => LiveGames::HigherOrLower,
             },
             'liveDifficulty' => self::Games[$game]['difficulty'] ?? DistrictGuessr::Easy,
@@ -185,7 +188,7 @@ class GameScoreController extends Controller
      * The game's games started between the dates, in Malaysia time as the app keeps them, both days included.
      *
      * @param  array{from: ?string, to: ?string}  $period
-     * @return Builder<GameRun>|Builder<GuessrRun>|Builder<SkylineRun>|Builder<CaseRun>
+     * @return Builder<GameRun>|Builder<GuessrRun>|Builder<SkylineRun>|Builder<CaseRun>|Builder<LineUpRun>
      */
     private function games(string $game, array $period): Builder
     {

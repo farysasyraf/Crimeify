@@ -19,9 +19,12 @@
 <div class="game-page case-page">
     <div class="case-page-head">
         <h1 class="visually-hidden">Case File</h1>
-        <a class="btn btn-outline btn-sm" href="{{ route('public.game') }}">
-            <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
-        </a>
+        <div class="game-head-actions">
+            @include('game::_music', ['game' => 'case-file', 'small' => true])
+            <a class="btn btn-outline btn-sm" href="{{ route('public.game') }}">
+                <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
+            </a>
+        </div>
     </div>
 
     @if (! $ready)
@@ -38,5 +41,6 @@
             @include('game::_case-screen', ['mode' => 'solo', 'id' => 'case'])
         </div>
     @endif
+    @include('game::_music-credit', ['game' => 'case-file'])
 </div>
 @endsection

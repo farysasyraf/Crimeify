@@ -3,7 +3,9 @@
 // (guessr-map.js) or its state's towers (skyline-round.js) with the time left and how many have answered, then its answer
 // (how many said higher and lower; where the district is and everyone's pins; the real tower growing through
 // everyone's guesses, the 3 closest named; or the case's district, with how many picked each suspect and the quickest
-// who got it, its clues having opened one by one in its pixel screen, case-screen.js) and the top 5, and at the end the podium, in
+// who got it, its clues having opened one by one in its pixel screen, case-screen.js; or the line-up, line-up-room.js,
+// stepping into its right order, each on a riser to its count, with how many had each in its place) and the top 5,
+// and at the end the podium, in
 // DistrictGuessr its awards, and everyone. Start, Show the answer, Next round and End the game now ask the server to move it on. Rounds open on the
 // server's clock, worked out from each check, as on the players' phones. The screen stays on until the game's over
 // (awake.js).
@@ -45,6 +47,10 @@
     const caseOutlines = caseFile ? fetch(host.dataset.caseFile).then((response) => response.json()).catch(() => null) : null;
     let caseScreen = null;
     host.classList.toggle('is-case', caseFile);
+    // Line-Up's room, once made, and its states' outlines for the map in its corner.
+    const lineUp = host.dataset.lineUp !== undefined;
+    const lineUpOutlines = lineUp ? fetch(host.dataset.lineUp).then((response) => response.json()).catch(() => null) : null;
+    let lineUpRoom = null;
 
     const serverNow = () => Date.now() + offset;
 
@@ -187,6 +193,13 @@
             if (view.clues?.rap) {
                 caseScreen.look('rap');
             }
+        } else if (lineUp) {
+            lineUpRoom ??= LineUpRoom.create(slot('lineup').querySelector('[data-lu-room]'), { outlines: lineUpOutlines });
+            slot('lu-icon').textContent = view.lineup.icon;
+            slot('lu-type').textContent = view.lineup.type;
+            slot('lu-state').textContent = view.lineup.state;
+            slot('lu-year').textContent = view.lineup.year;
+            lineUpRoom.show(view.lineup);
         } else {
             dealCards();
         }
@@ -259,7 +272,7 @@
         host.classList.toggle('is-hurrying', left > 0 && left <= 3000);
         slot('note').textContent = standing()
             ? `${view.answered} of ${view.left} still in answered`
-            : `${view.answered} of ${view.players} ${pins ? 'pinned' : caseFile ? 'accused' : 'answered'}`;
+            : `${view.answered} of ${view.players} ${pins ? 'pinned' : caseFile ? 'accused' : lineUp ? 'lined up' : 'answered'}`;
         part('round').querySelector('[data-host-action="close"]').hidden = false;
         part('round').querySelector('[data-host-action="next"]').hidden = true;
     };
@@ -397,6 +410,18 @@
         caseScreen?.hud({ extra: '' });
     };
 
+    // Line-Up's answer: the suspects stepping into the right order, each rising to its count, with how many had each
+    // in its place, and how many had them all; the room beside the top 5.
+    const showLineUp = (state) => {
+        slot('note').textContent = state.answered === 0
+            ? 'No one lined them up.'
+            : state.perfect > 0
+                ? `${state.perfect} of ${state.answered} had the whole line-up right!`
+                : `No one had the whole line-up right. ${state.answered} lined them up.`;
+        slot('play').classList.toggle('is-split', state.leaderboard.length > 0);
+        lineUpRoom?.reveal({ crimes: state.crimes, truth: state.answer, placed: state.placed, players: state.answered });
+    };
+
     // The round's answer, once, and the top 5.
     const reveal = (state) => {
         deal();
@@ -421,6 +446,8 @@
             showHeights(state);
         } else if (caseFile) {
             showCase(state);
+        } else if (lineUp) {
+            showLineUp(state);
         } else {
             showCount(state);
         }

@@ -22,9 +22,12 @@
         <p class="muted">{{ __('Which police district had more crime? Guess whether the next count is higher or lower.') }}</p>
     </div>
     {{-- A live game, hosted on a big screen: its page asks for the code. --}}
-    <a class="btn btn-outline game-live-link" href="{{ route('public.game.live') }}">
-        <span class="material-icon" aria-hidden="true">groups</span>{{ __('Join a live game') }}
-    </a>
+    <div class="game-head-actions">
+        @include('game::_music', ['game' => 'higher-or-lower'])
+        <a class="btn btn-outline game-live-link" href="{{ route('public.game.live') }}">
+            <span class="material-icon" aria-hidden="true">groups</span>{{ __('Join a live game') }}
+        </a>
+    </div>
 </div>
 
 @if (! $ready)
@@ -98,5 +101,6 @@
         @include('game::_card')
     </div>
 @endif
+@include('game::_music-credit', ['game' => 'higher-or-lower'])
 </div>
 @endsection

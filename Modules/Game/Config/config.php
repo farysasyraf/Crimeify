@@ -66,9 +66,9 @@ return [
         // A right Higher or Lower answer's points. A DistrictGuessr pin's are its distance's (DistrictGuessr::points()).
         'points' => 1000,
         // The share of an answer's points lost by answering at the last moment rather than straight away, by game: half
-        // in Higher or Lower; a quarter in DistrictGuessr and Skyline, where how close the answer is counts most; none in
-        // Case File, where a pick's points are the clues open when it was made (CaseFile::worth()).
-        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25, 'skyline' => 0.25, 'case-file' => 0],
+        // in Higher or Lower; a quarter in DistrictGuessr, Skyline and Line-Up, where how close the answer is counts most;
+        // none in Case File, where a pick's points are the clues open when it was made (CaseFile::worth()).
+        'speed' => ['higher-or-lower' => 0.5, 'districtguessr' => 0.25, 'skyline' => 0.25, 'case-file' => 0, 'line-up' => 0.25],
         // Seconds an answer may take to arrive after the round closes.
         'grace' => 1,
         // Hours a game can be joined for after it's made.
@@ -133,6 +133,37 @@ return [
         'suspects' => 6,
         'every' => 6,
         'blur' => 0.18,
+    ],
+
+    // Line-Up: `suspects` police districts of one state in a line-up, to put in order of their count of one crime in
+    // one year, most first. Each scores `right` in its place and `near` one place off, so a round's most is 1,000. Each
+    // is counted from config('game.least') up, with at least `gap` times the next one's count, so the order can be told.
+    'line_up' => [
+        'rounds' => 10,
+        'seconds' => 30,
+        // Seconds more for an order to arrive, then it counts as none.
+        'grace' => 4,
+        // Seconds counting down before the first round.
+        'ready' => 3,
+        'suspects' => 5,
+        'right' => 200,
+        'near' => 100,
+        'gap' => 1.1,
+    ],
+
+    // Each game's music (_music.blade.php, music.js): its track, in public/modules/game/music (CREDITS.txt there), looped
+    // at `volume` from the first tap or key on its page, as browsers allow no sound before; credited on its page as its
+    // licence asks. Live games play the game's track on the big screen only, not on the phones.
+    'music' => [
+        'volume' => 0.35,
+        'licence' => ['name' => 'Creative Commons: By Attribution 4.0', 'url' => 'https://creativecommons.org/licenses/by/4.0/'],
+        'tracks' => [
+            'higher-or-lower' => ['file' => 'modules/game/music/higher-or-lower.mp3', 'title' => 'Hustle', 'artist' => 'Kevin MacLeod (incompetech.com)'],
+            'districtguessr' => ['file' => 'modules/game/music/districtguessr.mp3', 'title' => 'Pamgaea', 'artist' => 'Kevin MacLeod (incompetech.com)'],
+            'skyline' => ['file' => 'modules/game/music/skyline.mp3', 'title' => 'Ethernight Club', 'artist' => 'Kevin MacLeod (incompetech.com)'],
+            'case-file' => ['file' => 'modules/game/music/case-file.mp3', 'title' => '8bit Dungeon Level', 'artist' => 'Kevin MacLeod (incompetech.com)'],
+            'line-up' => ['file' => 'modules/game/music/line-up.mp3', 'title' => 'Hard Boiled', 'artist' => 'Kevin MacLeod (incompetech.com)'],
+        ],
     ],
 
     // The longest name a player can give.

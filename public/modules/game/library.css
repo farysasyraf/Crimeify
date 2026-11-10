@@ -32,6 +32,13 @@
         radial-gradient(40% 50% at 86% 80%, rgba(64, 128, 86, .2), transparent 62%),
         var(--doodles) 0 0 / 420px, #0c0d10;
 }
+.library-art-line-up {
+    background:
+        radial-gradient(45% 60% at 70% 40%, rgba(255, 249, 232, .1), transparent 62%),
+        radial-gradient(35% 55% at 52% 55%, rgba(224, 86, 77, .14), transparent 62%),
+        radial-gradient(35% 55% at 92% 55%, rgba(77, 143, 224, .16), transparent 62%),
+        var(--doodles) 0 0 / 420px, #0c0d10;
+}
 .library-art-live {
     background: radial-gradient(60% 70% at 76% 40%, rgba(58, 170, 242, .24), transparent 62%), var(--doodles) 0 0 / 420px, #0c0d10;
 }
@@ -93,6 +100,9 @@
 /* Case File's office, in pixels kept square. */
 #game-case-file .library-title img { height: 120px; }
 #game-case-file .library-picture img { image-rendering: pixelated; border-radius: 6px; }
+/* Line-Up's room, its corners rounded. */
+#game-line-up .library-title img { height: 96px; }
+#game-line-up .library-picture img { border-radius: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 .library-heading { margin: 0 0 14px; font-size: 3rem; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
 .library-text { max-width: 520px; margin: 0 0 24px; color: #d3dae1; font-size: 1.05rem; }
 .library-actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -143,6 +153,7 @@
     #game-districtguessr .library-title img { height: 76px; }
     #game-skyline .library-title img { height: 60px; }
     #game-case-file .library-title img { height: 80px; }
+    #game-line-up .library-title img { height: 64px; }
     .library-heading { font-size: 2.2rem; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -27,9 +27,12 @@
         </h1>
         <p class="muted">{{ __("Where's the police district? Pin it on a map of Malaysia with only its states' outlines: the closer, the more points.") }}</p>
     </div>
-    <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
-        <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
-    </a>
+    <div class="game-head-actions">
+        @include('game::_music', ['game' => 'districtguessr'])
+        <a class="btn btn-outline game-live-link" href="{{ route('public.game') }}">
+            <span class="material-icon" aria-hidden="true">apps</span>{{ __('All games') }}
+        </a>
+    </div>
 </div>
 
 @if (! $ready)
@@ -131,5 +134,6 @@
         </section>
     </div>
 @endif
+@include('game::_music-credit', ['game' => 'districtguessr'])
 </div>
 @endsection

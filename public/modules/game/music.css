@@ -1,0 +1,11 @@
+/* A game's music switch, beside its page's All games (_music.blade.php), and its credit at the foot of the page
+   (_music-credit.blade.php). */
+.game-head-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.game-music .material-icon { transition: opacity .15s ease; }
+.game-music[aria-pressed="false"] { color: var(--muted); }
+.game-music[aria-pressed="false"] .material-icon { opacity: .7; }
+.game-music-credit { margin: 22px 0 0; color: var(--muted); font-size: .78rem; line-height: 1.5; text-align: center; }
+.game-music-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.page-head .game-head-actions { align-self: center; }
+/* On the big screen, over the top right of its head. */
+.live-host-music { display: flex; justify-content: flex-end; margin: 0 0 6px; }

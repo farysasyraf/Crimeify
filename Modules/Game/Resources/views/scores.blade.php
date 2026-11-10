@@ -33,7 +33,8 @@
         <p class="muted">
             Like a quiz night: put its big screen on a projector or share it in a meeting, and everyone joins with its
             code on their phone. Each round shows everyone the same two cards, the same district to pin on the map, the
-            same state's towers with one to raise, or the same case to solve, and the sooner the answer, the more points. Its leaderboard shows at the end. In Higher or Lower's Last One
+            same state's towers with one to raise, the same case to solve, or the same line-up to put in order, and the
+            sooner the answer, the more points. Its leaderboard shows at the end. In Higher or Lower's Last One
             Standing, a wrong answer puts a player out, and the last one in wins; its rounds are the most it can last.
         </p>
     </div>

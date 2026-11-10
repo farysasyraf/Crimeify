@@ -1,8 +1,9 @@
 // Skyline (SkylineController): starts a game with the name given, then after a short countdown shows a state's police
 // districts as 3D towers (skyline-round.js, skyline-scene.js), one a glass outline to raise with the slider to the
 // height thought right; Confirm, or Enter, sends it, and the server says what it was and its points, as the real tower
-// grows inside the glass. Next round asks for the next; after the last, every round's points. When the time runs out,
-// the guess counts as it is, or none if it was never moved. The name is remembered in the browser.
+// grows inside the glass. Next round asks for the next; after the last, the inspection report, with every round's
+// towers and points. When the time runs out, the guess counts as it is, or none if it was never moved. The name is
+// remembered in the browser. The cover, the countdown and the report are an architect's blueprint (skyline-sheet.css).
 (() => {
     const game = document.querySelector('[data-skyline]');
 
@@ -276,25 +277,51 @@
         }
     };
 
-    // The end: the score out of the most there is, and every round's: the district, its state, the guess and the
-    // count, and its points.
+    const element = (tag, className, text) => {
+        const made = document.createElement(tag);
+        made.className = className;
+        if (text !== undefined) {
+            made.textContent = text;
+        }
+        return made;
+    };
+
+    // The end, the inspection report: who built it, the score out of the most there is, and every round's: its number,
+    // the district and its state, its tower as guessed (none for no guess) beside the real one, the taller of them
+    // full height, the guess and the count in words, and its points, coloured by how close it was.
     const over = () => {
         show('over');
+        slot('architect').textContent = form.elements.name.value.trim();
         slot('final').textContent = number.format(score);
         slot('out-of').textContent = t('out of :most', { most: number.format(rounds * points) });
-        slot('rounds').replaceChildren(...summary.map((row) => {
-            const item = document.createElement('li');
+        part('over').style.setProperty('--rows', summary.length);
+        slot('rounds').replaceChildren(...summary.map((row, index) => {
+            const off = row.guess === null ? null : Math.abs(row.guess - row.crimes) / Math.max(row.crimes, 1) * 100;
+            const how = off !== null && off <= perfect ? 'right' : row.points >= 500 ? 'right' : row.points > 0 ? 'near' : 'wrong';
+            const item = element('li', `sky-round is-${how}`);
+            item.style.setProperty('--n', index);
+
+            const place = element('span', 'sky-round-place');
+            place.append(element('strong', '', row.district), element('span', '', row.state));
+
+            const tallest = Math.max(row.crimes, row.guess ?? 0, 1);
+            const towers = element('span', 'sky-round-towers');
+            towers.setAttribute('aria-hidden', 'true');
+            for (const [kind, value] of [['guess', row.guess], ['real', row.crimes]]) {
+                if (value !== null) {
+                    const bar = element('span', `sky-bar is-${kind}`);
+                    bar.style.setProperty('--h', String(value / tallest));
+                    bar.style.setProperty('--n', index);
+                    towers.append(bar);
+                }
+            }
+
             const guessed = row.guess === null
                 ? t('No guess · it was :count', { count: number.format(row.crimes) })
                 : t(':guess guessed · it was :count', { guess: number.format(row.guess), count: number.format(row.crimes) });
 
-            for (const [kind, text] of [['name', row.district], ['place', row.state], ['km', guessed], ['points', number.format(row.points)]]) {
-                const cell = document.createElement('span');
-                cell.className = `guessr-round-${kind}`;
-                cell.textContent = text;
-                item.append(cell);
-            }
-
+            item.append(element('span', 'sky-round-number', index + 1), place, towers, element('span', 'sky-round-figures', guessed),
+                element('span', 'sky-round-points', number.format(row.points)));
             return item;
         }));
         document.getElementById('skyline-over-heading').focus({ preventScroll: true });

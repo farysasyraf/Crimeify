@@ -5,6 +5,7 @@ use Modules\Game\Http\Controllers\CaseFileController;
 use Modules\Game\Http\Controllers\DistrictGuessrController;
 use Modules\Game\Http\Controllers\GameController;
 use Modules\Game\Http\Controllers\LibraryController;
+use Modules\Game\Http\Controllers\LineUpController;
 use Modules\Game\Http\Controllers\LivePlayController;
 use Modules\Game\Http\Controllers\SkylineController;
 
@@ -25,6 +26,7 @@ Route::middleware('public-locale')->group(function () {
         Route::get('/public/game/districtguessr', [DistrictGuessrController::class, 'page'])->name('public.game.districtguessr');
         Route::get('/public/game/skyline', [SkylineController::class, 'page'])->name('public.game.skyline');
         Route::get('/public/game/case-file', [CaseFileController::class, 'page'])->name('public.game.case-file');
+        Route::get('/public/game/line-up', [LineUpController::class, 'page'])->name('public.game.line-up');
         Route::get('/public/game/live', [LivePlayController::class, 'page'])->name('public.game.live');
     });
 
@@ -48,5 +50,10 @@ Route::middleware('public-locale')->group(function () {
         Route::post('/public/game/case-file/clue', [CaseFileController::class, 'clue'])->name('public.game.case-file.clue');
         Route::post('/public/game/case-file/accuse', [CaseFileController::class, 'accuse'])->name('public.game.case-file.accuse');
         Route::post('/public/game/case-file/next', [CaseFileController::class, 'next'])->name('public.game.case-file.next');
+
+        // Line-Up's start, orders and next rounds.
+        Route::post('/public/game/line-up/start', [LineUpController::class, 'start'])->name('public.game.line-up.start');
+        Route::post('/public/game/line-up/order', [LineUpController::class, 'order'])->name('public.game.line-up.order');
+        Route::post('/public/game/line-up/next', [LineUpController::class, 'next'])->name('public.game.line-up.next');
     });
 });

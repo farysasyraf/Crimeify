@@ -25,6 +25,7 @@ class Library
         $guessr = config('game.districtguessr');
         $skyline = config('game.skyline');
         $cases = config('game.case_file');
+        $lineUp = config('game.line_up');
 
         return [
             [
@@ -101,6 +102,24 @@ class Library
                     ['icon' => 'folder_open', 'title' => __(':cases cases', ['cases' => $cases['cases']]), 'text' => __('Each a police district, with its rap sheet open and :seconds seconds to crack it.', ['seconds' => $cases['seconds']])],
                     ['icon' => 'search', 'title' => __('Fewer clues, more points'), 'text' => __('Up to :points points a case: each clue you open takes some off.', ['points' => number_format($cases['points'])])],
                     ['icon' => 'person_search', 'title' => __('Six suspects'), 'text' => __('Districts near each other, so it\'s the clues that tell them apart.')],
+                ],
+            ],
+            [
+                'key' => 'line-up',
+                // The game's name, the same in Bahasa Melayu.
+                'name' => 'Line-Up',
+                'tile' => ['image' => 'modules/game/tile-line-up.svg'],
+                'title' => ['image' => 'modules/game/title-line-up.svg', 'width' => 2413, 'height' => 680],
+                'picture' => ['image' => 'modules/game/picture-line-up.svg', 'width' => 960, 'height' => 560],
+                'about' => __('Five police districts in a line-up. Put them in order of their crime, from most to least.'),
+                'actions' => [
+                    ['label' => __('Play'), 'url' => route('public.game.line-up'), 'icon' => 'play_arrow'],
+                    ['label' => __('Join a live game'), 'url' => route('public.game.live'), 'icon' => 'groups'],
+                ],
+                'cards' => [
+                    ['icon' => 'groups', 'title' => __(':rounds rounds', ['rounds' => $lineUp['rounds']]), 'text' => __('Each five districts of one state, one crime and one year, and :seconds seconds to line them up.', ['seconds' => $lineUp['seconds']])],
+                    ['icon' => 'swap_horiz', 'title' => __('Tap two to swap'), 'text' => __('Or drag them along the line. The map shows where each one is.')],
+                    ['icon' => 'leaderboard', 'title' => __('Close counts'), 'text' => __(':right points for each in its place, :near if it\'s one place off: up to :most a round.', ['right' => $lineUp['right'], 'near' => $lineUp['near'], 'most' => number_format(LineUp::most())])],
                 ],
             ],
             [

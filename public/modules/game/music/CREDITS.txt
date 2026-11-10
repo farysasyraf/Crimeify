@@ -1,0 +1,20 @@
+The games' music, each by Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0
+(https://creativecommons.org/licenses/by/4.0/). Each game's page credits its track. Downloaded from incompetech.com
+on 2026-11-10 and made smaller for the web (96 kbps, a short fade at each end so its loop comes round softly); the
+music itself is as Kevin MacLeod made it.
+
+higher-or-lower.mp3  "Hustle" Kevin MacLeod (incompetech.com)
+                     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hustle.mp3 (ISRC USUAN1100793)
+districtguessr.mp3   "Pamgaea" Kevin MacLeod (incompetech.com)
+                     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pamgaea.mp3 (ISRC USUAN1300036)
+skyline.mp3          "Ethernight Club" Kevin MacLeod (incompetech.com)
+                     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ethernight%20Club.mp3 (ISRC USUAN2100002)
+case-file.mp3        "8bit Dungeon Level" Kevin MacLeod (incompetech.com)
+                     https://incompetech.com/music/royalty-free/mp3-royaltyfree/8bit%20Dungeon%20Level.mp3 (ISRC USUAN1200066)
+line-up.mp3          "Hard Boiled" Kevin MacLeod (incompetech.com)
+                     https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hard%20Boiled.mp3 (ISRC USUAN1700076)
+
+Each credit, as incompetech asks for it:
+"<Title>" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0
+https://creativecommons.org/licenses/by/4.0/
