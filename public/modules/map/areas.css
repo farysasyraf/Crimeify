@@ -123,11 +123,122 @@
 .area-mix-mark { position: absolute; top: -3px; bottom: -3px; left: calc(var(--share) * 1%); width: 2px; margin-left: -1px; border-radius: 1px; background: var(--area-text); }
 .area-mix-value { color: var(--area-soft); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .area-mix-value strong { color: var(--area-text); }
-/* Side by side: the type's name, then a thin bar for each area with its share. */
-.area-mix-group { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; row-gap: 4px; }
-.area-mix-label { grid-row: span var(--bars); }
-.area-mix-group .area-mix-track { height: 8px; }
-.area-mix-line { display: contents; }
+/* Side by side, a dot plot: the type's name, a dot for each area on one scale (--scale, the axis's end) joined by a
+   line from the lowest to the highest, and each area's share. The rows share the list's columns, and each row's
+   track is as tall as the row, so the axis's lines run down the chart unbroken. */
+.area-dots-legend { margin: -4px 0 10px; }
+.area-legend-pick {
+    display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; margin: -3px -4px; border: 1px solid transparent;
+    border-radius: 999px; background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.area-legend-pick:hover { background: rgba(255, 255, 255, .06); color: var(--area-text); }
+.area-legend-pick[aria-pressed="true"] { border-color: rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .08); color: var(--area-text); }
+.area-legend-pick:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.area-swatch-dot { width: 10px; height: 10px; border-radius: 50%; }
+.area-dots { position: relative; display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto; column-gap: 16px; margin: 0; padding: 0; list-style: none; font-size: .875rem; }
+.area-dots-row, .area-dots-axis { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; }
+.area-dots-row[hidden] { display: none; }
+.area-dots-row { padding: 0 6px; margin: 0 -6px; border-radius: 8px; }
+.area-dots-row:hover { background: rgba(255, 255, 255, .035); }
+.area-dots-label { padding: 9px 0; overflow-wrap: anywhere; }
+.area-dots-axis { color: var(--area-soft); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.area-dots-ticks { position: relative; height: 22px; }
+.area-dots-ticks span { position: absolute; top: 0; left: calc(var(--at) / var(--scale) * 100%); transform: translateX(-50%); }
+.area-dots-ticks span:first-child { transform: none; }
+.area-dots-ticks span:last-child { transform: translateX(-100%); }
+/* The track: the axis's lines (a hairline every tick), a faint baseline, then the line between the dots, and the dots. */
+.area-dots-track {
+    position: relative; align-self: stretch; min-height: 34px;
+    background: linear-gradient(to right, var(--area-rule) 1px, transparent 1px) 0 0 / calc(var(--tick, 10) / var(--scale) * 100%) 100% repeat-x;
+}
+.area-dots-track::before { content: ""; position: absolute; inset: 50% 0 auto; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--area-track); }
+.area-dots-span {
+    position: absolute; top: 50%; height: 2px; margin-top: -1px; border-radius: 1px; background: rgba(255, 255, 255, .35);
+    left: calc(var(--from) / var(--scale) * 100%); width: calc((var(--to) - var(--from)) / var(--scale) * 100%);
+}
+.area-dot {
+    --size: calc(12px + var(--ring, 0) * 9px);
+    position: absolute; top: 50%; left: calc(var(--share) / var(--scale) * 100%); z-index: calc(3 - var(--ring, 0));
+    width: var(--size); height: var(--size); margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); border-radius: 50%;
+    background: var(--swatch); box-shadow: 0 0 0 2px var(--area-card); cursor: default;
+}
+/* A dot where another already is: a ring round it, so both show. */
+.area-dot.is-ring { background: none; box-shadow: inset 0 0 0 2.5px var(--swatch), 0 0 0 2px var(--area-card); }
+/* Easier to point at than to see. */
+.area-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+.area-dots-values { display: flex; justify-content: flex-end; gap: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.area-dots-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 5.6em; padding: 2px 6px; border-radius: 999px; color: var(--area-soft); }
+.area-dots-value::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--swatch); }
+/* The area that stands out, picked out in its colour. */
+.area-dots-value.is-out { background: color-mix(in srgb, var(--swatch) 24%, transparent); color: var(--area-text); font-weight: 700; }
+/* An area picked from the legend: its dots and shares, the others faded. */
+.area-dots[data-focus] .area-dot, .area-dots[data-focus] .area-dots-value { transition: opacity .2s ease; }
+.area-dots[data-focus="0"] :is(.area-dot, .area-dots-value):not([data-area="0"]),
+.area-dots[data-focus="1"] :is(.area-dot, .area-dots-value):not([data-area="1"]),
+.area-dots[data-focus="2"] :is(.area-dot, .area-dots-value):not([data-area="2"]) { opacity: .2; }
+.area-dots-more { margin-top: 10px; }
+.area-dots-more[hidden] { display: none; }
+/* Sliding to a year, and out from nothing as the card comes into view. */
+.area-dot { transition: left .5s cubic-bezier(.2, .7, .2, 1), width .2s ease, height .2s ease, margin .2s ease; }
+.area-dots-span { transition: left .5s cubic-bezier(.2, .7, .2, 1), width .5s cubic-bezier(.2, .7, .2, 1); }
+.area-motion .area-card:not(.is-in) .area-dot { left: 0; }
+.area-motion .area-card:not(.is-in) .area-dots-span { left: 0; width: 0; }
+.area-motion .area-card.is-in .area-dot, .area-motion .area-card.is-in .area-dots-span { transition-delay: calc(var(--area-delay, 0s) + .25s); }
+.area-motion .area-card.is-in.is-settled .area-dot, .area-motion .area-card.is-in.is-settled .area-dots-span { transition-delay: 0s; }
+[data-type-dots] { position: relative; }
+.area-dots-tip {
+    position: absolute; z-index: 5; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px;
+    background: #2b2e33; box-shadow: 0 6px 16px rgba(0, 0, 0, .35); font-size: .8125rem; white-space: nowrap;
+    transform: translate(-50%, -100%); pointer-events: none;
+}
+.area-dots-tip[hidden] { display: none; }
+.area-dots-tip span:last-child { color: var(--area-soft); }
+
+/* A profile's year slider, in its card's heading: any year, and the figures, the chart's band and the crimes by type
+   follow it (areas.js), the bars sliding to their new lengths. */
+.area-year-pick { display: flex; align-items: center; gap: 10px; min-width: min(100%, 300px); }
+.area-year-pick[hidden] { display: none; }
+.area-year-pick label { color: var(--area-soft); font-size: .8125rem; }
+.area-year-pick input { flex: 1; min-width: 120px; margin: 0; accent-color: var(--area-accent); cursor: pointer; }
+.area-year-pick input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+.area-year-pick output { min-width: 3em; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.area-mix-fill { transition: width .5s cubic-bezier(.2, .7, .2, 1); }
+.area-mix-mark { transition: left .5s cubic-bezier(.2, .7, .2, 1); }
+
+/* Each crime type as a button for its own trend, the one open in the bright blue; the trend under the list. */
+.area-mix-pick {
+    justify-self: start; padding: 2px 8px; margin: -2px -8px; border: 0; border-radius: 8px;
+    background: none; color: var(--area-text); font: inherit; text-align: left; cursor: pointer;
+}
+.area-mix-pick:hover { background: rgba(255, 255, 255, .06); }
+.area-mix-pick:focus-visible { outline: 3px solid var(--focus); outline-offset: 0; }
+.area-mix-row.is-picked .area-mix-pick { background: rgba(58, 170, 242, .16); color: var(--area-accent); font-weight: 600; }
+.area-type-trend { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--area-rule); }
+.area-type-trend[hidden] { display: none; }
+.area-type-trend .area-card-head { margin-bottom: 6px; }
+.area-type-trend h3 { margin: 0; font-size: .9375rem; }
+.area-type-close { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--area-soft); cursor: pointer; }
+.area-type-close:hover { background: rgba(255, 255, 255, .08); color: var(--area-text); }
+.area-type-close:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.area-type-close .material-icon { font-size: 20px; }
+.area-chart-small { height: 200px; }
+
+/* Picking areas on a map: the Map page's dark street map in a card, its pins numbered in their area's colour once
+   chosen (areas-map.js), with its credits small and dark. */
+.area-pick-map { position: relative; height: 380px; margin-top: 12px; border-radius: 14px; overflow: hidden; background: #0b0f14; }
+.area-map-pick .area-note:empty { display: none; }
+.area-pick-map .maplibregl-ctrl-group { border-radius: 10px; overflow: hidden; background: #2b2e33; }
+.area-pick-map .maplibregl-ctrl-group button + button { border-top: 1px solid rgba(255, 255, 255, .1); }
+.area-pick-map .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1) brightness(1.15); }
+.area-pick-map .maplibregl-ctrl-attrib { background: rgba(35, 37, 41, .88); color: var(--area-soft); }
+.area-pick-map .maplibregl-ctrl-attrib a { color: var(--accent-soft); }
+.area-pick-map .maplibregl-ctrl-attrib-button { filter: invert(1); }
+.area-map-tip .maplibregl-popup-content { padding: 4px 10px; border-radius: 8px; background: #2b2e33; color: var(--area-text, #eef2f6); font-weight: 600; box-shadow: 0 6px 16px rgba(0, 0, 0, .35); }
+.area-map-tip.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: #2b2e33; }
+.area-map-tip { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+    .area-mix-fill, .area-mix-mark, .area-dot, .area-dots-span { transition: none; }
+}
 
 /* "Living here": which administrative district it is, the table, then schools and amenities. */
 .area-living-intro { margin: -6px 0 12px; }
@@ -230,7 +341,12 @@
     .area-page { grid-template-columns: minmax(0, 1fr); }
     .area-mix { grid-template-columns: minmax(0, 1fr) auto; }
     .area-mix-row .area-mix-track { grid-column: 1 / -1; grid-row: 2; }
-    .area-mix-label { grid-column: 1 / -1; grid-row: auto; }
+    .area-dots { grid-template-columns: minmax(0, 1fr); }
+    .area-dots-row { padding-top: 8px; }
+    .area-dots-label { padding: 0; }
+    .area-dots-values { justify-content: flex-start; flex-wrap: wrap; margin-top: -2px; padding-bottom: 6px; }
+    .area-dots-value { min-width: 0; }
+    .area-dots-axis > span:empty { display: none; }
     .area-trend-row { grid-template-columns: minmax(0, 1fr) auto; }
     .area-trend-row .area-bar { grid-column: 1 / -1; grid-row: 2; }
     .area-table th, .area-table td { padding: 10px 4px; }

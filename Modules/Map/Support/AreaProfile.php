@@ -219,16 +219,33 @@ final class AreaProfile
      * The latest year's crimes by type, most first: each one's count and share of all the district's crime, and its
      * share across the area. Types none of either had are left out.
      *
-     * @return list<array{type: string, category: string, label: string, count: int, share: float, areaShare: float}>
+     * @return list<array{type: string, category: string, label: string, count: int, share: float, areaCount: int, areaShare: float}>
      */
     public function mix(): array
     {
         $year = $this->latestYear();
 
-        if ($year === null) {
-            return [];
-        }
+        return $year === null ? [] : $this->mixIn($year);
+    }
 
+    /**
+     * Every year's figures, oldest first, for the profile's year slider and each crime type's own trend (areas.js):
+     * its violent and property crime, and its crimes by type, as mix() gives the latest year's.
+     *
+     * @return list<array{year: int, assault: int, property: int, total: int, mix: list<array<string, mixed>>}>
+     */
+    public function eachYear(): array
+    {
+        return array_map(fn (array $year) => $year + ['mix' => $this->mixIn($year['year'])], $this->yearly());
+    }
+
+    /**
+     * A year's crimes by type, most first, as mix() describes.
+     *
+     * @return list<array{type: string, category: string, label: string, count: int, share: float, areaCount: int, areaShare: float}>
+     */
+    private function mixIn(int $year): array
+    {
         [$total, $areaTotal] = [$this->total($year), self::sumAll($this->areaCrimes[$year] ?? [])];
         $mix = [];
 
@@ -244,6 +261,7 @@ final class AreaProfile
                         'label' => __($label),
                         'count' => $count,
                         'share' => $total > 0 ? round($count / $total * 100, 1) : 0.0,
+                        'areaCount' => $areaCount,
                         'areaShare' => $areaTotal > 0 ? round($areaCount / $areaTotal * 100, 1) : 0.0,
                     ];
                 }

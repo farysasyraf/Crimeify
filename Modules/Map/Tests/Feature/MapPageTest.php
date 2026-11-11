@@ -60,46 +60,40 @@ class MapPageTest extends TestCase
         $this->get('/map')->assertRedirect('/login');
     }
 
-    public function test_the_street_map_comes_from_openstreetmap_until_a_tile_provider_is_set(): void
+    public function test_the_street_map_is_crimeifys_own_style_until_another_is_set(): void
     {
         $this->signIn();
 
-        $this->get('/map')
-            ->assertOk()
-            ->assertSee('data-tile-url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"', false)
-            ->assertSee('data-tile-attribution="&amp;copy; &lt;a href=&quot;https://www.openstreetmap.org/copyright&quot;&gt;OpenStreetMap&lt;/a&gt; contributors"', false)
-            ->assertSee('data-tile-max-zoom="18"', false);
+        $this->get('/map')->assertOk()->assertSee('data-style="'.versioned_asset('modules/map/style.json').'"', false);
 
-        config([
-            'map.tiles.url' => 'https://tiles.example.com/{z}/{x}/{y}.png?key=abc',
-            'map.tiles.attribution' => '&copy; Example Maps',
-            'map.tiles.max_zoom' => 19,
-        ]);
+        // Crimeify's style: OpenFreeMap's vector tiles of OpenStreetMap, which need no key, with their credits.
+        $style = json_decode(file_get_contents(public_path('modules/map/style.json')), true);
+        $this->assertSame([8, 'https://tiles.openfreemap.org/planet'], [$style['version'], $style['sources']['openmaptiles']['url']]);
+        $this->assertStringContainsString('OpenStreetMap', file_get_contents(public_path('modules/map/style-LICENSE.txt')));
 
-        // The address is written into the page as a data attribute, so & is escaped; the browser reads it back as &.
-        $this->get('/map')
-            ->assertOk()
-            ->assertSee('data-tile-url="https://tiles.example.com/{z}/{x}/{y}.png?key=abc"', false)
-            ->assertSee('data-tile-attribution="&amp;copy; Example Maps"', false)
-            ->assertSee('data-tile-max-zoom="19"', false)
-            ->assertDontSee('tile.openstreetmap.org');
+        // Another style, such as a tile provider's, by its address, written into the page as a data attribute.
+        config(['map.style' => 'https://tiles.example.com/style.json?key=abc&lang=ms']);
+        $this->get('/map')->assertOk()->assertSee('data-style="https://tiles.example.com/style.json?key=abc&amp;lang=ms"', false);
     }
 
-    public function test_the_map_page_shows_malaysias_states_on_a_leaflet_map(): void
+    public function test_the_map_page_shows_malaysias_states_on_a_maplibre_map(): void
     {
         $this->signIn();
 
         $page = $this->get('/map')->assertOk();
 
-        // Leaflet and the page's own files, served from this app so they work without the internet.
-        foreach (['vendor/leaflet/leaflet.css', 'modules/map/map.css'] as $stylesheet) {
+        // MapLibre GL JS and the page's own files, served from this app. map.js loads MapLibre as a module, and
+        // MapLibre its worker, from beside it.
+        foreach (['vendor/maplibre-gl/maplibre-gl.css', 'modules/map/map.css'] as $stylesheet) {
             $this->assertFileExists(public_path($stylesheet));
             $page->assertSee('<link rel="stylesheet" href="'.versioned_asset($stylesheet).'" />', false);
         }
-        foreach (['vendor/leaflet/leaflet.js', 'modules/map/map.js'] as $script) {
-            $this->assertFileExists(public_path($script));
-            $page->assertSee('<script src="'.versioned_asset($script).'" defer></script>', false);
-        }
+        $page->assertSee('<script src="'.versioned_asset('modules/map/map.js').'" defer></script>', false)
+            ->assertSee('data-maplibre="'.versioned_asset('vendor/maplibre-gl/maplibre-gl.mjs').'"', false)
+            ->assertDontSee('vendor/leaflet/', false);
+        $this->assertFileExists(public_path('vendor/maplibre-gl/maplibre-gl-worker.mjs'));
+        // Browsers run a module only when it's served as JavaScript.
+        $this->assertStringContainsString('AddType text/javascript .mjs', file_get_contents(public_path('.htaccess')));
 
         $page->assertSee('id="state-map" data-boundaries="'.versioned_asset('modules/map/malaysia-states.geojson').'"', false);
 
@@ -156,7 +150,7 @@ class MapPageTest extends TestCase
         }
 
         $this->assertFileExists(public_path('modules/map/malaysia-states-LICENSE.txt'));
-        $this->assertFileExists(public_path('vendor/leaflet/LICENSE.txt'));
+        $this->assertStringContainsString('BSD', file_get_contents(public_path('vendor/maplibre-gl/LICENSE.txt')));
     }
 
     public function test_the_routes_page_and_manage_menu_find_the_map_module(): void

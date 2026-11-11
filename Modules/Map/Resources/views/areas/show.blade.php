@@ -17,6 +17,10 @@
     // The chart's figures, for areas.js: property crime with violent crime on it, in --area-property's and --area-assault's colours.
     $chart = [
         'kind' => 'profile',
+        // Every year's figures and crimes by type, for the year slider and each type's trend, with the names they're for.
+        'eachYear' => $profile->eachYear(),
+        'district' => $district->Name,
+        'area' => $profile->area,
         'years' => array_column($profile->yearly(), 'year'),
         'series' => [
             ['label' => __('Property crime'), 'colour' => '#3987e5', 'counts' => array_column($profile->yearly(), 'property')],
@@ -98,17 +102,27 @@
     @if ($year)
         {{-- The year's crimes are in the headline; here, how they divide, and the change since the first year. --}}
         <section class="area-card area-wide" aria-labelledby="area-latest-heading">
-            <h2 id="area-latest-heading">{{ __('In :year', ['year' => $year]) }}</h2>
+            <header class="area-card-head">
+                <h2 id="area-latest-heading" data-year-heading>{{ __('In :year', ['year' => $year]) }}</h2>
+                {{-- Any year: these figures, the chart's year and the crimes by type follow it (areas.js). --}}
+                @if (count($profile->years()) > 1)
+                    <div class="area-year-pick" data-year-pick hidden>
+                        <label for="area-year">{{ __('Year') }}</label>
+                        <input type="range" id="area-year" min="0" max="{{ count($profile->years()) - 1 }}" value="{{ count($profile->years()) - 1 }}" step="1" aria-valuetext="{{ $year }}" />
+                        <output for="area-year" data-year-shown>{{ $year }}</output>
+                    </div>
+                @endif
+            </header>
             <dl class="area-stats area-stats-three">
                 @foreach (config('map.crime.categories') as $category => $label)
                     <div class="area-stat">
                         <dt>{{ __($label) }}</dt>
-                        <dd><strong>{{ $number($profile->total($year, $category)) }}</strong> <span class="area-sub">{{ __(':share of all', ['share' => \Modules\Map\Support\AreaProfile::percent($total > 0 ? $profile->total($year, $category) / $total * 100 : 0)]) }}</span></dd>
+                        <dd><strong data-figure="{{ $category }}">{{ $number($profile->total($year, $category)) }}</strong> <span class="area-sub" data-share="{{ $category }}">{{ __(':share of all', ['share' => \Modules\Map\Support\AreaProfile::percent($total > 0 ? $profile->total($year, $category) / $total * 100 : 0)]) }}</span></dd>
                     </div>
                 @endforeach
                 <div class="area-stat">
                     <dt>{{ __('Since :year', ['year' => $profile->firstYear()]) }}</dt>
-                    <dd>
+                    <dd data-since>
                         @if ($profile->longChange()['here'] !== null)
                             <strong>{{ $profile->longChange()['here'] < 0 ? '−' : '+' }}{{ \Modules\Map\Support\AreaProfile::size($profile->longChange()['here']) }}</strong>
                             <span class="area-sub">{{ __('from :count in :year', ['count' => $number($profile->total($profile->firstYear())), 'year' => $profile->firstYear()]) }}</span>
@@ -166,7 +180,7 @@
         @if ($mix !== [])
             <section @class(['area-card', 'area-wide' => $long['here'] === null]) aria-labelledby="area-mix-heading">
                 <header class="area-card-head">
-                    <h2 id="area-mix-heading">{{ __('Crimes by type in :year', ['year' => $year]) }}</h2>
+                    <h2 id="area-mix-heading" data-mix-heading>{{ __('Crimes by type in :year', ['year' => $year]) }}</h2>
                     <ul class="area-legend">
                         <li><span class="area-swatch" style="--swatch: var(--area-1)"></span>{{ $district->Name }}</li>
                         <li><span class="area-swatch area-swatch-mark"></span>{{ __('Across :area', ['area' => $profile->area]) }}</li>
@@ -174,19 +188,30 @@
                 </header>
                 <ul class="area-mix">
                     @foreach ($mix as $type)
-                        <li class="area-mix-row">
-                            <span>{{ $type['label'] }}</span>
+                        {{-- Each type opens its own trend (areas.js). --}}
+                        <li class="area-mix-row" data-type="{{ $type['type'] }}" data-category="{{ $type['category'] }}">
+                            <button type="button" class="area-mix-pick" aria-expanded="false" aria-controls="area-type-trend">{{ $type['label'] }}</button>
                             <span class="area-mix-track" aria-hidden="true">
                                 <span class="area-mix-fill" style="--share: {{ $type['share'] }}"></span>
                                 <span class="area-mix-mark" style="--share: {{ $type['areaShare'] }}"></span>
                             </span>
                             <span class="area-mix-value">
-                                <strong>{{ \Modules\Map\Support\AreaProfile::percent($type['share']) }}</strong> · {{ $profile->area }} {{ \Modules\Map\Support\AreaProfile::percent($type['areaShare']) }}
+                                <strong data-here>{{ \Modules\Map\Support\AreaProfile::percent($type['share']) }}</strong> · {{ $profile->area }} <span data-there>{{ \Modules\Map\Support\AreaProfile::percent($type['areaShare']) }}</span>
                             </span>
                         </li>
                     @endforeach
                 </ul>
-                <p class="area-note">{{ __("Each type's share of the area's violent and property crime. The line is its share across :area.", ['area' => $profile->area]) }}</p>
+                <p class="area-note">{{ __("Each type's share of the area's violent and property crime. The line is its share across :area.", ['area' => $profile->area]) }} <span data-type-hint hidden>{{ __('Choose a type for how it changed each year.') }}</span></p>
+
+                {{-- A type's crimes each year here, and how that compares with the area's change (areas.js). --}}
+                <div class="area-type-trend" id="area-type-trend" data-type-trend hidden>
+                    <header class="area-card-head">
+                        <h3 data-type-heading></h3>
+                        <button type="button" class="area-type-close" data-type-close aria-label="{{ __('Close') }}"><span class="material-icon" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="area-chart area-chart-small"><canvas id="area-type-chart" aria-hidden="true"></canvas></div>
+                    <p class="area-note" data-type-read aria-live="polite"></p>
+                </div>
             </section>
         @endif
 

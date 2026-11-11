@@ -97,7 +97,7 @@ az webapp config set -g $rg -n $app --generic-configurations "@health.json"
 
 ## 5. Settings
 
-Every line of [`.env.production.example`](.env.production.example) becomes an **Application setting**. In the portal: your web app → **Settings → Environment variables**. Fill in `APP_KEY` (make one with `php artisan key:generate --show` on your computer), `APP_URL` (`https://$app.azurewebsites.net` for now), the `DB_*` values from step 2, the mail settings and `MAP_TILE_URL`. Type values without the quotes that the example shows. Also add `WEBSITES_PORT` = `80`.
+Every line of [`.env.production.example`](.env.production.example) becomes an **Application setting**. In the portal: your web app → **Settings → Environment variables**. Fill in `APP_KEY` (make one with `php artisan key:generate --show` on your computer), `APP_URL` (`https://$app.azurewebsites.net` for now), the `DB_*` values from step 2 and the mail settings (the map's street map needs no setting: its tiles are OpenFreeMap's, free and without a key). Type values without the quotes that the example shows. Also add `WEBSITES_PORT` = `80`.
 
 Or from PowerShell, for example:
 
@@ -105,7 +105,7 @@ Or from PowerShell, for example:
 az webapp config appsettings set -g $rg -n $app --settings WEBSITES_PORT=80 APP_ENV=production APP_DEBUG=false APP_URL="https://$app.azurewebsites.net" TRUSTED_PROXIES="*" LOG_CHANNEL=stderr LOG_LEVEL=warning DB_CONNECTION=sqlsrv DB_HOST="$sqlServer.database.windows.net" DB_PORT=1433 DB_DATABASE=$dbName DB_USERNAME=$sqlAdmin DB_PASSWORD=$sqlPass DB_TRUST_SERVER_CERTIFICATE=false SESSION_DRIVER=database SESSION_ENCRYPT=true SESSION_SECURE_COOKIE=true CACHE_STORE=database APP_KEY="<the key>"
 ```
 
-(Settings with `<` or `&` in them, like `MAP_TILE_ATTRIBUTION`, are easier to enter in the portal.) Changing a setting restarts the app.
+(Settings with `<` or `&` in them are easier to enter in the portal.) Changing a setting restarts the app.
 
 **Email:** a public site shouldn't send from a personal Gmail (about 500 a day, and Google may block it). Use a sending service's SMTP details for `MAIL_*`, then check with `php artisan mail:test` (step 7).
 
@@ -288,7 +288,7 @@ docker run --rm -p 8080:80 -e APP_KEY="<a key>" -e APP_URL=http://localhost:8080
 
 ## Before opening it to the public
 
-- [ ] **Tile provider** set (`MAP_TILE_URL`), and its key limited to your site's address in the provider's dashboard.
+- [ ] **Street map** working: OpenFreeMap by default, or `MAP_STYLE_URL` set to a provider's style, with its key limited to your site's address in the provider's dashboard.
 - [ ] **Real email** sending (`MAIL_*`), tested with `mail:test`; a real address on the admin; demo user deleted.
 - [ ] **SQL firewall tightened:** replace the *AllowAzure* rule with the web app's own addresses (`az webapp show -g $rg -n $app --query possibleOutboundIpAddresses`), and delete *MyComputer* when you're done with step 7.
 - [ ] **A database user for the app** that can't drop the database, instead of the server admin.
@@ -317,4 +317,5 @@ docker run --rm -p 8080:80 -e APP_KEY="<a key>" -e APP_URL=http://localhost:8080
 | Links and files point at `http://` | `APP_URL` isn't `https://`. |
 | The build stops at `pecl install` | The SQL Server driver version isn't on PECL: build with `--build-arg SQLSRV_VERSION=<the newest at pecl.php.net/package/sqlsrv>`. |
 | The build stops at `msodbcsql18` | Microsoft's package source changed: check [Microsoft's install page](https://learn.microsoft.com/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server) for Debian 12. |
-| The map is grey, with no streets | `MAP_TILE_URL` is wrong, or the provider's key is limited to a different address. |
+| The map is dark, with no streets, and says the street map couldn't load | OpenFreeMap can't be reached, or `MAP_STYLE_URL` is wrong or its key is limited to a different address. |
+| The page says the browser can't draw the map | The browser has no WebGL, or it's turned off; MapLibre needs it. |

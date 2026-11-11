@@ -1,11 +1,15 @@
-// Map page: Malaysia's states and federal territories on a Leaflet map, from the boundaries file in
-// #state-map's data-boundaries. Pointing at a region shows its name; clicking it, or its button in the list,
-// selects it and shows its details. With data-crime, each police district also gets a pin whose popup gives its
-// crime figures for the year chosen in the panel, and the panel gives the country's or the chosen region's totals.
-// The regions are shaded by crime per 100,000 people that year, and the timeline over the bottom of the map plays the
-// years one after another. The street map underneath comes from OpenStreetMap, so it needs the internet; the regions,
-// pins and figures come from this app, so they show without it.
-(() => {
+// Map page: Malaysia's states and federal territories on a MapLibre GL JS map, from the boundaries file in
+// #state-map's data-boundaries, over a dark street map drawn from vector tiles (data-style). Pointing at a region shows
+// its name; clicking it, or its button in the list, selects it and shows its details. With data-crime, each police
+// district also gets a pin whose popup gives its crime figures for the year chosen in the panel, and the panel gives
+// the country's or the chosen region's totals. The regions are shaded by crime per 100,000 people that year, fading
+// from one year's shades to the next as the timeline over the bottom of the map plays them, and can stand up in 3D by
+// it. The pins can be bubbles instead, sized by a crime's count, growing and shrinking from year to year, and as the
+// year changes, rings ripple out from districts where it rose and in to those where it fell. The map opens on the globe and flies in to Malaysia, tilts and turns with two fingers or the right mouse button,
+// and shows buildings in 3D close up. MapLibre draws on the graphics card (WebGL); it's loaded as a module
+// (data-maplibre) once this script runs. The street map comes from OpenFreeMap, so it needs the internet; the regions,
+// pins and figures come from this app, so they show without it, on a plain dark map.
+(async () => {
     const container = document.getElementById('state-map');
     const status = document.querySelector('[data-map-status]');
 
@@ -19,7 +23,7 @@
         status.dataset.part = part;
         status.hidden = false;
 
-        // And as an error toast, where the page has them (toast.js, which runs after this file; not the public map).
+        // And as an error toast, where the page has them (toast.js; not the public map).
         if (window.toast) {
             window.toast('error', text);
         } else {
@@ -27,7 +31,10 @@
         }
     };
 
-    if (typeof L === 'undefined') {
+    let maplibregl;
+    try {
+        maplibregl = await import(container.dataset.maplibre);
+    } catch {
         showStatus(t("The map couldn't load. Reload the page to try again."));
         return;
     }
@@ -36,6 +43,7 @@
     const showAll = document.querySelector('[data-show-all]');
     const yearChoice = document.querySelector('[data-crime-year]');
     const choices = new Map([...document.querySelectorAll('[data-state]')].map((button) => [button.dataset.state, button]));
+    const motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // The search over the map works with this script, so it shows once the script runs (set up further down).
     const search = document.querySelector('[data-map-search]');
@@ -44,44 +52,42 @@
     }
 
     // The app's blues: regions lightly shaded in the soft blue, and the one selected filled with the bright blue the
-    // list and the menu mark the current choice with, outlined darker so it stands out on the street map.
-    // With crime per 100,000 people, each region is shaded by its rate instead, and the one selected is outlined.
-    const style = {
-        normal: { color: '#3d8fc9', weight: 1.5, fillColor: '#62a9dc', fillOpacity: 0.14, dashArray: null },
-        hover: { weight: 2.5, fillOpacity: 0.3 },
-        selected: { color: '#1b6fae', weight: 3, fillColor: '#3aaaf2', fillOpacity: 0.5, dashArray: null },
+    // list and the menu mark the current choice with, and outlined in it, glowing, so it stands out on the dark map.
+    // With crime per 100,000 people, each region is shaded by its rate instead.
+    const palette = {
+        normal: '#62a9dc',
+        selected: '#3aaaf2',
+        outline: '#3d8fc9',
         // A shade for each band of crime per 100,000 people, from pale yellow for the least to deep red for the most,
-        // toned down like the app's other colours, and half see-through, so the streets show under them.
+        // toned down like the app's other colours, and a little see-through, so the streets show under them.
         shades: ['#f3e3a3', '#efbf78', '#e4925a', '#cc6349', '#a63a4a'],
-        shaded: { color: '#5b4a44', weight: 1, fillOpacity: 0.62, dashArray: null },
-        // Outlined in the app's bright blue, which none of the shades are.
-        shadedSelected: { color: '#1b6fae', weight: 3.5 },
+        shadedOutline: 'rgba(14, 18, 24, 0.85)',
         // A region without a rate that year, like Labuan in a year by state, whose crimes are in Sabah's.
-        unshaded: { color: '#7d8794', weight: 1, fillColor: '#7d8794', fillOpacity: 0.06, dashArray: '4 4' },
+        unshaded: '#7d8794',
+        // The ripples: orange where crime rose, teal where it fell, checked to stay apart with colour blindness and
+        // on the dark map.
+        rose: '#e36b3c',
+        fell: '#2f9fb8',
+        // The police districts the map's AI points out (map-ask.js): ringed and numbered in violet, apart from the pins'
+        // blue, the shades' yellows and reds and the ripples' orange and teal, and bigger than a pin, so the shape
+        // says it too.
+        picked: '#b18cff',
+        pickedFill: '#7c4ddb',
     };
 
-    // Malaysia's two halves, Peninsular and Borneo, with room around them.
-    const malaysia = L.latLngBounds([0.8, 99.6], [7.4, 119.3]);
+    // Malaysia's two halves, Peninsular and Borneo, with room around them: [west, south], [east, north].
+    const malaysia = [[99.6, 0.8], [119.3, 7.4]];
 
-    const map = L.map(container, {
-        // Low enough for all of Malaysia to fit on a phone.
-        minZoom: 4,
-        // Whole zoom levels only: in between, the street map's tiles are stretched and show thin seams.
-        zoomSnap: 1,
-        // Near Malaysia, but with room enough to frame it beside the cards over the map.
-        maxBounds: malaysia.pad(1.5),
-        maxBoundsViscosity: 0.8,
-        // At the bottom right instead (below), clear of the cards over the map.
-        zoomControl: false,
-    });
-
-    // The street map's address, zoom limit and credit come from config('map.tiles') (MAP_TILE_URL in .env), so a
-    // public site can use a tile provider instead of OpenStreetMap's own server, which is for light use only.
-    L.tileLayer(container.dataset.tileUrl || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: Number(container.dataset.tileMaxZoom) || 18,
-        attribution: container.dataset.tileAttribution ?? '',
-    }).addTo(map);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    const element = (tag, text, className) => {
+        const node = document.createElement(tag);
+        if (text !== undefined) {
+            node.textContent = text;
+        }
+        if (className) {
+            node.className = className;
+        }
+        return node;
+    };
 
     // What the cards over the map cover, as padding to fit Malaysia, a region or a popup into the rest of it: the
     // search at the top and the column down the left (data-map-cover), each as far as it reaches in. Under the map, on
@@ -116,15 +122,106 @@
             clear.bottom = Math.max(clear.bottom, container.getBoundingClientRect().bottom - timeline.getBoundingClientRect().top + 16);
         }
 
-        return { paddingTopLeft: [clear.left, clear.top], paddingBottomRight: [clear.right, clear.bottom] };
+        return clear;
     };
+
+    // The buttons and credits in the map's own language: MapLibre's words for them, in the page's.
+    const locale = {
+        'NavigationControl.ZoomIn': t('Zoom in'),
+        'NavigationControl.ZoomOut': t('Zoom out'),
+        'NavigationControl.ResetBearing': t('Face north, flat'),
+        'GeolocateControl.FindMyLocation': t('Show where I am'),
+        'GeolocateControl.LocationNotAvailable': t("Your location isn't available just now. Try again in a moment."),
+        'Popup.Close': t('Close'),
+    };
+
+    // A shared link or the palette opening a district or station goes straight there; otherwise, where motion is
+    // welcome, the map starts on the globe, over Malaysia, and flies in once the states are drawn.
+    const opening = container.dataset.open ? JSON.parse(container.dataset.open) : null;
+    const flyIn = motion && !opening;
+
+    // The street map's style, or if it can't load, a plain dark map, so the states and pins still show.
+    let style;
+    try {
+        const response = await fetch(container.dataset.style);
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        style = await response.json();
+    } catch {
+        style = {
+            version: 8,
+            glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+            sources: {},
+            layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#121820' } }],
+        };
+        showStatus(t("The street map couldn't load, so the map shows the states without it."));
+    }
+
+    let map;
+    try {
+        map = new maplibregl.Map({
+            container,
+            style,
+            ...(flyIn ? { center: [109.5, 4], zoom: 1.6 } : { bounds: malaysia, fitBoundsOptions: { padding: uncovered() } }),
+            minZoom: 1,
+            maxZoom: 18,
+            maxPitch: 70,
+            attributionControl: false,
+            locale,
+        });
+    } catch {
+        // Without WebGL, as on some old browsers, or with it turned off.
+        showStatus(t("This browser can't draw the map: it needs WebGL, which is missing or turned off."));
+        return;
+    }
+
+    // Ready for the regions and pins once the street map's style is drawn.
+    const ready = new Promise((resolve) => map.once('load', resolve));
+
+    // The globe, as the map opens and when zoomed far out; flat again closer in.
+    map.on('style.load', () => {
+        try {
+            map.setProjection({ type: 'globe' });
+        } catch {
+            // An older browser keeps the flat map.
+        }
+    });
+
+    // The credits at the bottom right: the street map's, as its style gives them, and the figures' and the places'.
+    const credits = new Map();
+    const creditBox = element('div', undefined, 'maplibregl-ctrl map-credits');
+    const drawCredits = () => {
+        const fromStyle = Object.keys(map.getStyle()?.sources ?? {}).map((id) => map.getSource(id)?.attribution).filter(Boolean);
+        creditBox.innerHTML = [...new Set(['<a href="https://maplibre.org">MapLibre</a>', ...fromStyle, ...credits.values()])].join(' | ');
+        placeTimeline();
+    };
+    map.on('sourcedata', (event) => event.isSourceLoaded && event.sourceDataType === 'metadata' && drawCredits());
+
+    // A credit on the map, linked to its source where it has one, in place of the one before it; none without text.
+    const credit = (key, text, about) => {
+        if (!text) {
+            credits.delete(key);
+        } else {
+            const node = element(about ? 'a' : 'span', text);
+            if (about) {
+                node.href = about;
+            }
+            credits.set(key, node.outerHTML);
+        }
+        drawCredits();
+    };
+
+    // Bottom corners stack upwards, so the credits go first, under the buttons.
+    map.addControl({ onAdd: () => creditBox, onRemove: () => creditBox.remove() }, 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'bottom-right');
 
     // The timeline goes over the bottom of the map, right of the column of cards and above the map's credits, which can
     // take two lines. On a narrow screen, where the cards go under the map, it goes under the map too, before them, so it
     // doesn't hide most of a small map; enlarged, it's back over the map.
     const narrow = window.matchMedia('(max-width: 999.98px)');
 
-    const placeTimeline = () => {
+    function placeTimeline() {
         if (!timeline) {
             return;
         }
@@ -138,32 +235,42 @@
 
         timeline.classList.toggle('map-timeline-under', under);
         timeline.style.left = under ? '' : `${clearOfCards().left}px`;
-        timeline.style.bottom = under ? '' : `${(map.attributionControl?.getContainer().offsetHeight ?? 0) + 10}px`;
-    };
+        timeline.style.bottom = under ? '' : `${creditBox.offsetHeight + 10}px`;
+    }
     narrow.addEventListener('change', placeTimeline);
 
-    map.fitBounds(malaysia, uncovered());
-
-    // The sidebar narrowing, or the window resizing, changes the map's size; Leaflet has to be told.
+    // The sidebar narrowing, or the window resizing, changes the map's size; MapLibre has to be told.
     new ResizeObserver(() => {
-        map.invalidateSize();
+        map.resize();
         placeTimeline();
     }).observe(container);
 
-    const layers = new Map();
-    // The states' boundaries as loaded, for which state a point is in ("Near you", below).
+    // Each region's corners, for zooming to it, from the boundaries as loaded, and the boundaries, for which state a
+    // point is in ("Near you", below).
+    const regionBounds = new Map();
     let boundaryData = null;
     let selected = null;
+    let hovered = null;
 
     // One year's figures from MapController@crime, once they've loaded.
     let crime = null;
 
     // Every year's crime per 100,000 people (CrimeRates), which come with each year's figures; whether there are any,
-    // which needs the population figures; what the map is shaded by; and the year it's shaded for.
+    // which needs the population figures; what the map is shaded by; the year it's shaded for; and whether the regions
+    // stand up in 3D by it.
     let rates = null;
     let shading = false;
     let measure = 'all';
     let shownYear = null;
+    let raised = false;
+    // The crime the pins are sized by, "all", a category or a crime type; null for plain pins.
+    let sizing = null;
+    // The lists for what the map is shaded by and what the pins show, once built, to set them from the map's AI.
+    let measureChoice = null;
+    let pinsChoice = null;
+    // Once the first year's figures are shown, the map can be read and moved by the map's AI (crimeMap, below).
+    let markReady = () => {};
+    const figuresShown = new Promise((resolve) => { markReady = resolve; });
 
     const count = new Intl.NumberFormat('en-MY');
     const decimal = new Intl.NumberFormat('en-MY', { maximumFractionDigits: 1 });
@@ -182,8 +289,8 @@
     // The scale's limits (CrimeRates::limits) split the rates into bands, the same in every year, each with its shade;
     // with fewer than five bands, the shades are spread over them.
     const shadeAt = (band, limits) => {
-        const last = style.shades.length - 1;
-        return style.shades[limits.length ? Math.round((band * last) / limits.length) : Math.floor(last / 2)];
+        const last = palette.shades.length - 1;
+        return palette.shades[limits.length ? Math.round((band * last) / limits.length) : Math.floor(last / 2)];
     };
 
     const shadeOf = (rate) => {
@@ -191,31 +298,58 @@
         return shadeAt(limits.filter((limit) => rate >= limit).length, limits);
     };
 
-    // How a region is drawn: shaded by its rate, or without rates, in the app's blues; outlined when selected.
-    const look = (code, { hover = false } = {}) => {
-        if (!shading) {
-            return code === selected ? style.selected : { ...style.normal, ...(hover ? style.hover : {}) };
-        }
-
-        const rate = rateOf(code);
-        const base = rate === null ? style.unshaded : { ...style.shaded, fillColor: shadeOf(rate) };
-
-        return {
-            ...base,
-            ...(hover && code !== selected ? { weight: 2.5, fillOpacity: base.fillOpacity + 0.15 } : {}),
-            ...(code === selected ? style.shadedSelected : {}),
-        };
+    // How the regions are drawn, as MapLibre expressions by each region's code: its colour and how see-through it is,
+    // shaded by its rate, or without rates in the app's blues; lighter when pointed at. A change of colour fades.
+    const byRegion = (value, otherwise) => {
+        const pairs = [...choices.keys()].flatMap((code) => [code, value(code)]);
+        return pairs.length ? ['match', ['get', 'shapeISO'], ...pairs, otherwise] : otherwise;
     };
+    const pointedAt = ['boolean', ['feature-state', 'hover'], false];
 
-    const element = (tag, text, className) => {
-        const node = document.createElement(tag);
-        if (text !== undefined) {
-            node.textContent = text;
+    // A change animated over a time, eased, a frame at a time: MapLibre fades a paint property only when it's one
+    // value for every feature, not a region's own shade or a pin's own size, so those are moved along here. At once
+    // without motion, and a new change of the same thing takes over from where the last one got to.
+    const frames = new Map();
+    const animate = (name, milliseconds, step) => {
+        cancelAnimationFrame(frames.get(name));
+        if (!motion || !milliseconds) {
+            step(1);
+            return;
         }
-        if (className) {
-            node.className = className;
-        }
-        return node;
+        const start = performance.now();
+        // A frame's time can be a moment before the start, so never less than none of the way.
+        const tick = (now) => {
+            const progress = Math.min(1, Math.max(0, (now - start) / milliseconds));
+            step(1 - (1 - progress) ** 3);
+            if (progress < 1) {
+                frames.set(name, requestAnimationFrame(tick));
+            }
+        };
+        frames.set(name, requestAnimationFrame(tick));
+    };
+    const rgb = (hex) => [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
+    const between = (from, to, part) => from + (to - from) * part;
+
+    // Each region's colour and, in 3D, its height: its rate's shade, or without rates the app's blues; and its rate
+    // as a height, the highest of any year 120 km tall, so a height means the same in every year, as a shade does.
+    const regionTarget = (code) => {
+        const rate = shading ? rateOf(code) : null;
+        const colour = !shading ? (code === selected ? palette.selected : palette.normal) : rate === null ? palette.unshaded : shadeOf(rate);
+        const highest = Math.max(1, ...Object.values(rates?.years ?? {}).flatMap((year) => Object.values(year.regions).map((region) => region.rates[measure] ?? 0)));
+        return { colour: rgb(colour), height: ((rate ?? 0) / highest) * 120000 };
+    };
+    const regionNow = new Map();
+
+    // Fainter as the map zooms in to a town, so its streets and buildings show through.
+    const regionOpacity = () => {
+        const base = byRegion((code) => {
+            if (!shading) {
+                return code === selected ? 0.5 : 0.16;
+            }
+            return rateOf(code) === null ? 0.1 : 0.7;
+        }, 0.16);
+        const lit = ['case', pointedAt, ['min', ['+', base, 0.15], 0.92], base];
+        return ['interpolate', ['linear'], ['zoom'], 7, lit, 10, ['*', lit, 0.55], 13, ['*', lit, 0.25]];
     };
 
     // How a number compares with the year before, e.g. "Down 7% from 1,324 in 2022". Fewer crimes is the good news.
@@ -261,8 +395,6 @@
         return list;
     };
 
-    // A police district's popup: each category's total and how it compares with the year before, then the
-    // number of each crime type in it.
     // A police district's own public address, to send, under its name in its popup: WhatsApp and the like show it with an
     // image of the district's chart. None without one.
     const shareRow = (district) => {
@@ -311,6 +443,8 @@
         return share;
     };
 
+    // A police district's popup: each category's total and how it compares with the year before, then the
+    // number of each crime type in it.
     const popup = (district) => {
         const content = element('div', undefined, 'crime-popup');
         const region = choices.get(district.region)?.dataset.name ?? district.region;
@@ -385,7 +519,7 @@
 
         // What the figures cover: a region's police districts, or for a year by state, the state and the regions
         // counted in it.
-        const covers = () => {
+        const coverage = () => {
             if (!button) {
                 return t(crime.byState ? 'All states · :year' : 'All police districts · :year', { year: crime.year });
             }
@@ -396,7 +530,7 @@
             return [button.dataset.kind, tn(place.districts, ':count police district', ':count police districts'), crime.year].join(' · ');
         };
 
-        details.append(element('p', covers(), 'muted'), totals(place), ...[perHundredThousand(code)].filter(Boolean), element('p', hint, 'muted crime-hint'));
+        details.append(element('p', coverage(), 'muted'), totals(place), ...[perHundredThousand(code)].filter(Boolean), element('p', hint, 'muted crime-hint'));
     };
 
     // "4.11 million", or under a million, the number.
@@ -452,29 +586,62 @@
         details.style.minHeight = `${tallest.height}px`;
     };
 
+    // Moving the map: animated where motion is welcome, at once where it isn't.
+    const duration = (milliseconds) => (motion ? milliseconds : 0);
+
+    // A maxZoom given as undefined would stand in for MapLibre's own, so it's left out without one.
+    const frame = (bounds, maxZoom, milliseconds = 700) => map.fitBounds(bounds, {
+        padding: uncovered(), ...(maxZoom ? { maxZoom } : {}), duration: duration(milliseconds), essential: true,
+    });
+
+    // The regions' layers, once drawn: their colours, how see-through they are, how tall in 3D, and the one selected.
+    const regionsDrawn = () => Boolean(map.getLayer('region-fill'));
+
+    // Each region fades from its shade and height to the new ones.
+    const paintRegions = () => {
+        if (!regionsDrawn()) {
+            return;
+        }
+        map.setPaintProperty('region-fill', 'fill-opacity', regionOpacity());
+        map.setPaintProperty('region-line', 'line-color', shading ? palette.shadedOutline : palette.outline);
+        for (const id of ['region-selected', 'region-selected-glow']) {
+            map.setFilter(id, ['==', ['get', 'shapeISO'], selected ?? '']);
+        }
+
+        const targets = new Map([...regionBounds.keys()].map((code) => [code, regionTarget(code)]));
+        const starts = new Map([...targets].map(([code, target]) => [code, regionNow.get(code) ?? target]));
+        animate('regions', 700, (part) => {
+            for (const [code, target] of targets) {
+                const from = starts.get(code);
+                const now = { colour: from.colour.map((value, at) => between(value, target.colour[at], part)), height: between(from.height, target.height, part) };
+                regionNow.set(code, now);
+                map.setFeatureState({ source: 'regions', id: code }, { colour: `rgb(${now.colour.map(Math.round).join(',')})`, height: now.height });
+            }
+        });
+    };
+
     const select = (code, { zoom = false } = {}) => {
         const before = selected;
         selected = code;
 
         if (before) {
-            layers.get(before)?.setStyle(look(before));
             choices.get(before)?.setAttribute('aria-pressed', 'false');
         }
 
-        const layer = code ? layers.get(code) : null;
+        const known = code ? regionBounds.get(code) : null;
 
-        if (layer) {
-            layer.setStyle(look(code)).bringToFront();
+        if (known) {
             choices.get(code)?.setAttribute('aria-pressed', 'true');
             if (zoom) {
-                map.flyToBounds(layer.getBounds(), { ...uncovered(), maxZoom: 9, duration: 0.6 });
+                frame(known, 9);
             }
         } else if (zoom) {
-            map.flyToBounds(malaysia, { ...uncovered(), duration: 0.6 });
+            frame(malaysia);
         }
 
-        showAll.hidden = !layer;
-        describe(layer ? code : null);
+        paintRegions();
+        showAll.hidden = !known;
+        describe(known ? code : null);
     };
 
     // The enlarge button, over the zoom buttons: the map moves into a modal dialog that fills most of the window over
@@ -488,7 +655,10 @@
     // Holds the map's place on the page while it's enlarged, so the page behind doesn't jump.
     const placeholder = element('div', undefined, 'state-map');
 
-    let toggle;
+    const toggle = element('button');
+    toggle.type = 'button';
+    toggle.append(element('span', '', 'material-icon'));
+    toggle.firstChild.setAttribute('aria-hidden', 'true');
 
     const labelToggle = (enlarged) => {
         const text = t(enlarged ? 'Make the map smaller' : 'Enlarge the map');
@@ -496,6 +666,7 @@
         toggle.title = text;
         toggle.firstChild.textContent = enlarged ? 'close_fullscreen' : 'open_in_full';
     };
+    labelToggle(false);
 
     const putBack = () => {
         if (placeholder.isConnected) {
@@ -511,7 +682,8 @@
         dialog.showModal();
         labelToggle(true);
         toggle.focus();
-        map.invalidateSize();
+        map.resize();
+        placeTimeline();
     };
 
     dialog.addEventListener('close', () => {
@@ -521,23 +693,14 @@
         putBack();
         labelToggle(false);
         toggle.focus();
-        map.invalidateSize();
+        map.resize();
+        placeTimeline();
     });
 
-    // Added after the zoom buttons, so over them: Leaflet stacks a bottom corner's controls upwards.
-    const control = L.control({ position: 'bottomright' });
-    control.onAdd = () => {
-        const bar = L.DomUtil.create('div', 'leaflet-bar map-enlarge');
-        toggle = L.DomUtil.create('button', '', bar);
-        toggle.type = 'button';
-        toggle.append(element('span', '', 'material-icon'));
-        toggle.firstChild.setAttribute('aria-hidden', 'true');
-        labelToggle(false);
-        L.DomEvent.disableClickPropagation(bar);
-        L.DomEvent.on(toggle, 'click', () => (dialog.open ? dialog.close() : enlarge()));
-        return bar;
-    };
-    control.addTo(map);
+    toggle.addEventListener('click', () => (dialog.open ? dialog.close() : enlarge()));
+    const enlargeBar = element('div', undefined, 'maplibregl-ctrl maplibregl-ctrl-group map-enlarge');
+    enlargeBar.append(toggle);
+    map.addControl({ onAdd: () => enlargeBar, onRemove: () => enlargeBar.remove() }, 'bottom-right');
 
     // Only a click that starts and ends on the dimmed page counts, not a drag of the map let go outside it.
     let pressedOutside = false;
@@ -548,61 +711,210 @@
         }
     });
 
-    // Escape on the map closes an open popup first, as Leaflet does, and only then makes the map small.
-    let popupOpen = false;
-    let escapeClosesPopup = false;
-    map.on({ popupopen: () => { popupOpen = true; }, popupclose: () => { popupOpen = false; } });
-    dialog.addEventListener('keydown', (event) => {
-        escapeClosesPopup = event.key === 'Escape' && popupOpen && document.activeElement === container;
-    }, true);
+    // A police district's popup, while one is open, and its district; Escape closes it, and only then makes an
+    // enlarged map small again.
+    let pinPopup = null;
+    let open = null;
+
+    container.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && pinPopup) {
+            event.stopPropagation();
+            pinPopup.remove();
+        }
+    });
     dialog.addEventListener('cancel', (event) => {
-        if (escapeClosesPopup) {
+        if (pinPopup && container.contains(document.activeElement)) {
             event.preventDefault();
-            escapeClosesPopup = false;
+            pinPopup.remove();
         }
     });
 
-    fetch(container.dataset.boundaries)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        })
-        .then((boundaries) => {
-            boundaryData = boundaries;
-            L.geoJSON(boundaries, {
-                style: (feature) => look(feature.properties.shapeISO),
-                onEachFeature: (feature, layer) => {
-                    const code = feature.properties.shapeISO;
-                    const name = choices.get(code)?.dataset.name ?? feature.properties.shapeName;
+    // A popup that opened partly under the cards, or off the map, moved into the part they leave clear.
+    const keepInView = (shown) => {
+        const clear = uncovered();
+        const box = container.getBoundingClientRect();
+        const rect = shown.getBoundingClientRect();
+        const [left, right, top, bottom] = [box.left + clear.left, box.right - clear.right, box.top + clear.top, box.bottom - clear.bottom];
+        const dx = rect.left < left ? rect.left - left : rect.right > right ? Math.min(rect.right - right, rect.left - left) : 0;
+        const dy = rect.top < top ? rect.top - top : rect.bottom > bottom ? Math.min(rect.bottom - bottom, rect.top - top) : 0;
 
-                    layers.set(code, layer);
-                    // Its name, and with rates, its crime per 100,000 people in the year shown, as it is when pointed at.
-                    layer.bindTooltip(() => {
-                        const tip = element('span', undefined, 'region-tip');
-                        const rate = shading ? rateOf(code) : null;
-                        tip.append(element('strong', name));
-                        if (rate !== null) {
-                            tip.append(element('span', t(':rate per 100,000 people', { rate: perPeople(rate) })));
-                        }
-                        return tip;
-                    }, { sticky: true, direction: 'top', offset: [0, -8] });
-                    layer.on({
-                        mouseover: () => code !== selected && layer.setStyle(look(code, { hover: true })),
-                        mouseout: () => code !== selected && layer.setStyle(look(code)),
-                        click: () => select(code),
-                    });
+        if (dx || dy) {
+            map.panBy([dx, dy], { duration: duration(300) });
+        }
+    };
+
+    // A region's name, and with rates, its crime per 100,000 people in the year shown, as it is when pointed at; or a
+    // police district's name, over its pin.
+    const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: 'map-tip', offset: 14, maxWidth: '260px' });
+    // The pin it's over, if it's over one, so its figure can follow the year.
+    let tipPin = null;
+
+    const regionTip = (code) => {
+        const name = choices.get(code)?.dataset.name ?? code;
+        const content = element('span', undefined, 'region-tip');
+        const rate = shading ? rateOf(code) : null;
+        content.append(element('strong', name));
+        if (rate !== null) {
+            content.append(element('span', t(':rate per 100,000 people', { rate: perPeople(rate) })));
+        }
+        return content;
+    };
+
+    // A police district's name over its pin, and as a bubble, its count of the crime it's sized by.
+    const pinTip = (key) => {
+        const district = districtsByKey.get(key);
+        const content = element('span', undefined, 'region-tip');
+        content.append(element('strong', district?.name ?? ''));
+        if (district && bubbled()) {
+            content.append(element('span', `${count.format(countOf(district, sizing) ?? 0)} · ${crimeName(sizing)} · ${crime.year}`));
+        }
+        return content;
+    };
+
+    const point = (code) => {
+        if (hovered === code) {
+            return;
+        }
+        if (hovered) {
+            map.setFeatureState({ source: 'regions', id: hovered }, { hover: false });
+        }
+        hovered = code;
+        if (code) {
+            map.setFeatureState({ source: 'regions', id: code }, { hover: true });
+        }
+    };
+
+    const regionLayers = ['region-fill', 'region-3d'];
+    // The pins, or the bubbles, each with room round it to point at, however small.
+    const bubbled = () => Boolean(sizing) && districtsByKey.size > 0;
+    const pinTargets = () => (bubbled() ? ['bubble-hits'] : ['district-pins', 'district-clusters']).filter((id) => map.getLayer(id));
+
+    map.on('mousemove', (event) => {
+        if (!regionsDrawn()) {
+            return;
+        }
+        const pin = map.queryRenderedFeatures(event.point, { layers: pinTargets() })[0];
+        const region = pin ? null : map.queryRenderedFeatures(event.point, { layers: regionLayers.filter((id) => map.getLayoutProperty(id, 'visibility') !== 'none') })[0];
+        point(region?.properties.shapeISO ?? null);
+        map.getCanvas().style.cursor = pin || region ? 'pointer' : '';
+
+        tipPin = pin && !pin.properties.cluster ? pin.properties.key : null;
+        if (tipPin) {
+            tip.setLngLat(pin.geometry.coordinates).setDOMContent(pinTip(tipPin)).addTo(map);
+        } else if (region) {
+            tip.setLngLat(event.lngLat).setDOMContent(regionTip(region.properties.shapeISO)).addTo(map);
+        } else {
+            tip.remove();
+        }
+    });
+    map.getCanvas().addEventListener('mouseleave', () => {
+        point(null);
+        tip.remove();
+    });
+
+    map.on('click', (event) => {
+        if (!regionsDrawn()) {
+            return;
+        }
+        const pin = map.queryRenderedFeatures(event.point, { layers: pinTargets() })[0];
+        if (pin) {
+            return;
+        }
+        const region = map.queryRenderedFeatures(event.point, { layers: regionLayers.filter((id) => map.getLayoutProperty(id, 'visibility') !== 'none') })[0];
+        if (region) {
+            select(region.properties.shapeISO);
+        }
+    });
+
+    // Where the street map's labels begin, so the regions go under them and the names stay readable.
+    const labelsFrom = () => map.getStyle().layers.find((layer) => layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.id.startsWith('water'))?.id;
+
+    // The corners of a shape, [west, south], [east, north].
+    const cornersOf = (geometry) => {
+        let [west, south, east, north] = [Infinity, Infinity, -Infinity, -Infinity];
+        const walk = (coordinates) => {
+            if (typeof coordinates[0] === 'number') {
+                [west, south, east, north] = [Math.min(west, coordinates[0]), Math.min(south, coordinates[1]), Math.max(east, coordinates[0]), Math.max(north, coordinates[1])];
+            } else {
+                coordinates.forEach(walk);
+            }
+        };
+        walk(geometry.coordinates);
+        return [[west, south], [east, north]];
+    };
+
+    const boundariesLoaded = fetch(container.dataset.boundaries).then((response) => {
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        return response.json();
+    });
+
+    Promise.all([boundariesLoaded, ready]).then(([boundaries]) => {
+        boundaryData = boundaries;
+        for (const feature of boundaries.features) {
+            regionBounds.set(feature.properties.shapeISO, cornersOf(feature.geometry));
+        }
+
+        const under = labelsFrom();
+        // Each region's shade as paintRegions moves it along, in the soft blue until then.
+        const regionShade = ['to-color', ['coalesce', ['feature-state', 'colour'], palette.normal]];
+        map.addSource('regions', { type: 'geojson', data: boundaries, promoteId: 'shapeISO' });
+        map.addLayer({
+            id: 'region-fill', type: 'fill', source: 'regions',
+            paint: { 'fill-color': regionShade, 'fill-opacity': regionOpacity() },
+        }, under);
+        // In 3D: each region standing up by its rate, in its shade, rising and falling from year to year.
+        map.addLayer({
+            id: 'region-3d', type: 'fill-extrusion', source: 'regions', layout: { visibility: 'none' },
+            paint: {
+                'fill-extrusion-color': regionShade,
+                'fill-extrusion-height': ['coalesce', ['feature-state', 'height'], 0],
+                'fill-extrusion-opacity': 0.88,
+            },
+        }, under);
+        map.addLayer({
+            id: 'region-line', type: 'line', source: 'regions',
+            paint: { 'line-color': palette.outline, 'line-width': ['case', pointedAt, 2.5, 1.2] },
+        }, under);
+        // The one selected, outlined in the bright blue with a soft glow round it.
+        map.addLayer({
+            id: 'region-selected-glow', type: 'line', source: 'regions', filter: ['==', ['get', 'shapeISO'], ''],
+            paint: { 'line-color': palette.selected, 'line-width': 12, 'line-blur': 8, 'line-opacity': 0.45 },
+        });
+        map.addLayer({
+            id: 'region-selected', type: 'line', source: 'regions', filter: ['==', ['get', 'shapeISO'], ''],
+            paint: { 'line-color': palette.selected, 'line-width': 3 },
+        });
+
+        // Buildings stand up in 3D close in, where the street map has their heights.
+        if (map.getSource('openmaptiles')) {
+            map.addLayer({
+                id: 'buildings-3d', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building', minzoom: 14,
+                paint: {
+                    'fill-extrusion-color': '#1f2a36',
+                    'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_height'], 8]],
+                    'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                    'fill-extrusion-opacity': 0.85,
                 },
-                attribution: `${t('Boundaries')}: <a href="https://www.geoboundaries.org">geoBoundaries</a>`,
-            }).addTo(map);
+            }, under);
+        }
 
-            // A region chosen before its shape was here, as a shared link or the palette can, is chosen again with it.
-            if (selected) {
-                select(selected);
-            }
-        })
-        .catch(() => showStatus(t("The states' boundaries couldn't load. Reload the page to try again.")));
+        credit('boundaries', `${t('Boundaries')}: geoBoundaries`, 'https://www.geoboundaries.org');
+
+        // A region chosen before its shape was here, as a shared link or the palette can, is chosen again with it.
+        select(selected);
+    }).catch(() => showStatus(t("The states' boundaries couldn't load. Reload the page to try again.")));
+
+    // Once the regions and the first year's timeline are in, Malaysia framed clear of the cards, the timeline and the
+    // credits: flown in to from the globe, or straight away. Not when a region, district or station has been chosen.
+    let firstShown = () => {};
+    const timelineReady = new Promise((resolve) => { firstShown = resolve; });
+    Promise.all([boundariesLoaded.catch(() => null), ready, container.dataset.crime ? timelineReady : null]).then(() => {
+        if (!selected && !opening) {
+            frame(malaysia, undefined, flyIn ? 2600 : 0);
+        }
+    });
 
     for (const [code, button] of choices) {
         button.addEventListener('click', () => select(code === selected ? null : code, { zoom: true }));
@@ -610,25 +922,17 @@
 
     showAll.addEventListener('click', () => select(null, { zoom: true }));
 
-    // The police districts' pins once they load, by "region|name", and how to open one, which needs them (below).
-    const pinsByKey = new Map();
+    // The police districts' figures for the year shown, by "region|name", once they load, and how to open one.
+    const districtsByKey = new Map();
     let openPin = () => false;
-
-    // A pin's popup opens clear of the cards over the map, wherever they are by then.
-    const padded = (marker) => {
-        const clear = uncovered();
-        Object.assign(marker.getPopup().options, { autoPanPaddingTopLeft: clear.paddingTopLeft, autoPanPaddingBottomRight: clear.paddingBottomRight });
-        return marker;
-    };
 
     // The map to a police district's pin, clear of the cards, without opening it. False if there's no such pin.
     const goToPin = (key) => {
-        const marker = pinsByKey.get(key);
-        if (!marker) {
+        const district = districtsByKey.get(key);
+        if (!district) {
             return false;
         }
-        const at = marker.getLatLng();
-        map.flyToBounds(L.latLngBounds(at, at), { ...uncovered(), maxZoom: 11, duration: 0.6 });
+        map.easeTo({ center: [district.lng, district.lat], zoom: Math.max(map.getZoom(), 11), padding: uncovered(), duration: duration(700), essential: true });
         return true;
     };
 
@@ -705,11 +1009,10 @@
     const goToPlace = (place) => {
         placeMarker?.remove();
         // White with a dark ring, which shows on any shade, and named, unlike the blue dot of where the visitor is.
-        placeMarker = L.circleMarker([place.lat, place.lng], { radius: 9, color: '#16171a', weight: 3, fillColor: '#ffffff', fillOpacity: 1 })
-            .bindTooltip(place.name, { permanent: true, direction: 'top', offset: [0, -10] })
-            .addTo(map);
-        const at = L.latLng(place.lat, place.lng);
-        map.flyToBounds(L.latLngBounds(at, at), { ...uncovered(), maxZoom: 13, duration: 0.8 });
+        const mark = element('div', undefined, 'map-place');
+        mark.append(element('span', place.name, 'map-place-name'), element('span', undefined, 'map-place-dot'));
+        placeMarker = new maplibregl.Marker({ element: mark, anchor: 'bottom' }).setLngLat([place.lng, place.lat]).addTo(map);
+        map.easeTo({ center: [place.lng, place.lat], zoom: Math.max(map.getZoom(), 13), padding: uncovered(), duration: duration(800), essential: true });
         nearPlace?.(place);
     };
 
@@ -769,7 +1072,6 @@
         const placesFor = new Map();
         let placeTimer = null;
         let placeRequest = null;
-        let placesCredited = false;
 
         const askPlaces = (text) => {
             placeRequest?.abort();
@@ -786,11 +1088,8 @@
                     }
                     placesFor.set(text, answer);
                     // Photon's, credited on the map once its places are shown.
-                    if (!placesCredited && answer.places.length > 0) {
-                        const source = element('a', t('Search: Photon by komoot'));
-                        source.href = search.dataset.placesAbout;
-                        map.attributionControl.addAttribution(source.outerHTML);
-                        placesCredited = true;
+                    if (!credits.has('places') && answer.places.length > 0) {
+                        credit('places', t('Search: Photon by komoot'), search.dataset.placesAbout);
                     }
                     if (input.value.trim() === text && document.activeElement === input) {
                         suggest();
@@ -801,8 +1100,8 @@
         const suggest = () => {
             const text = input.value.trim();
             const asked = placesFor.get(text);
-            const places = (asked?.places ?? []).map((place) => ({ ...place, kind: 'place' }));
-            found = [...find(input.value), ...places];
+            const fromServer = (asked?.places ?? []).map((place) => ({ ...place, kind: 'place' }));
+            found = [...find(input.value), ...fromServer];
             list.replaceChildren(...found.map((place, index) => {
                 const option = element('li', undefined, place.kind === 'place' ? 'map-search-place' : undefined);
                 option.id = `map-search-option-${index}`;
@@ -878,9 +1177,9 @@
 
     // "Near you" (nearby.js): with the browser's location, from the button in its card or the one over the map, or a
     // place found with the search, the state it's in, chosen as from the list, and the three police districts nearest
-    // it, each with its stations, its profile and its pin. Leaflet.Locate shows where the visitor is and follows them
-    // as they move; the list is worked out again once they've moved a little. The location stays in the browser.
-    // Without a browser that can give one, the card is for places only.
+    // it, each with its stations, its profile and its pin. MapLibre's location button shows where the visitor is, with a
+    // circle for how accurate that is, and follows them as they move; the list is worked out again once they've moved a
+    // little. The location stays in the browser. Without a browser that can give one, the card is for places only.
     const near = document.querySelector('[data-near]');
     const nearby = window.CrimeifyNearby;
     const pinList = document.querySelector('[data-district-pins]');
@@ -976,86 +1275,50 @@
         };
 
         nearPlace = (place) => nearby.load(container.dataset.turf).then(
-            (turf) => list(turf, L.latLng(place.lat, place.lng), { place }),
+            (turf) => list(turf, { lat: place.lat, lng: place.lng }, { place }),
             () => say(t("Couldn't work out what's near you. Reload the page to try again.")),
         );
         near.hidden = false;
 
         // Where the visitor is, where the browser can give it.
-        if (!L.control.locate || !('geolocation' in navigator)) {
+        if (!('geolocation' in navigator)) {
             near.querySelector('[data-near-button]').hidden = true;
             near.querySelector('.near-privacy').hidden = true;
         } else {
-            // Following the app's look: blue for where they are, white round it.
-            const where = { color: '#3aaaf2', fillColor: '#3aaaf2', fillOpacity: 0.12, weight: 1.5 };
-            const dot = { color: '#ffffff', fillColor: '#3aaaf2', fillOpacity: 1, weight: 3, radius: 8 };
-
-            const locate = L.control.locate({
-                position: 'bottomright',
-                flyTo: true,
-                showCompass: false,
-                circleStyle: where,
-                followCircleStyle: where,
-                markerStyle: dot,
-                followMarkerStyle: dot,
-                locateOptions: { enableHighAccuracy: true, maxZoom: 12, watch: true, setView: false },
-                // The control's own icons are swapped for these, so the Material icon stays.
-                icon: 'locate-idle',
-                iconLoading: 'locate-waiting',
-                strings: {
-                    title: t('Show where I am'),
-                    metersUnit: t('metres'),
-                    feetUnit: t('feet'),
-                    popup: t('You are within {distance} {unit} of this point'),
-                    outsideMapBoundsMsg: '',
-                },
-                // A button like the enlarge one, with a Material icon.
-                createButtonCallback: (container, options) => {
-                    container.classList.add('map-locate');
-                    const button = L.DomUtil.create('button', '', container);
-                    button.type = 'button';
-                    button.title = options.strings.title;
-                    button.setAttribute('aria-label', options.strings.title);
-                    const icon = L.DomUtil.create('span', 'material-icon leaflet-locate-icon', button);
-                    icon.textContent = 'my_location';
-                    icon.setAttribute('aria-hidden', 'true');
-                    return { link: button, icon };
-                },
-                // In the card, rather than the control's alert boxes.
-                onLocationError: (error) => {
-                    locate.stop();
-                    say(nearby.problem(error));
-                },
-                onLocationOutsideMapBounds: (control) => {
-                    control.stop();
-                    say(t("You seem to be outside Malaysia, so there's nothing near you on this map."));
-                },
-            }).addTo(map);
-
-            map.on('locateactivate', () => {
-                if (listedAt === null) {
-                    say(t('Finding where you are…'), 'muted');
-                }
+            const locate = new maplibregl.GeolocateControl({
+                positionOptions: { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+                trackUserLocation: true,
+                showAccuracyCircle: true,
+                fitBoundsOptions: { maxZoom: 12, padding: uncovered() },
             });
-            map.on('locatedeactivate', () => { listedAt = null; });
+            map.addControl(locate, 'bottom-right');
 
-            map.on('locationfound', ({ latlng, accuracy }) => {
+            locate.on('trackuserlocationstart', () => {
+                listedAt = null;
+                say(t('Finding where you are…'), 'muted');
+            });
+
+            locate.on('geolocate', ({ coords }) => {
+                const latlng = { lat: coords.latitude, lng: coords.longitude };
                 nearby.load(container.dataset.turf).then((turf) => {
                     if (listedAt === null || turf.distance(turf.point([listedAt.lng, listedAt.lat]), turf.point([latlng.lng, latlng.lat])) > 0.2) {
-                        list(turf, latlng, { accuracy });
+                        list(turf, latlng, { accuracy: coords.accuracy });
                         listedAt = latlng;
                     }
                 }, () => say(t("Couldn't work out what's near you. Reload the page to try again.")));
             });
 
-            near.querySelector('[data-near-button]').addEventListener('click', () => locate.start());
+            // In the card, rather than the browser's alert boxes.
+            locate.on('error', (error) => say(nearby.problem(error)));
+            locate.on('outofmaxbounds', () => say(t("You seem to be outside Malaysia, so there's nothing near you on this map.")));
+
+            near.querySelector('[data-near-button]').addEventListener('click', () => locate.trigger());
         }
     }
 
     // A police district or station given in the address, from a shared link or the command palette: the district's pin
     // opened, or the station shown in "Find a police station" and the map at its district, once the pins are in
     // (show, below), or straight away without them.
-    const opening = container.dataset.open ? JSON.parse(container.dataset.open) : null;
     const openGiven = () => {
         if (opening?.kind === 'district') {
             go({ kind: 'district', region: opening.region, name: opening.name });
@@ -1068,63 +1331,374 @@
     };
 
     if (!container.dataset.crime) {
-        openGiven();
+        ready.then(openGiven);
         return;
     }
 
-    // Pins close together are grouped into a numbered circle until zoomed in: Kuala Lumpur's police districts are
-    // only a few kilometres apart. Without the cluster plugin every pin shows on its own.
-    const pins = L.markerClusterGroup
-        ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 45, spiderfyOnMaxZoom: true })
-        : L.layerGroup();
-    pins.addTo(map);
+    // The police districts' pins, as dots in the app's bright blue with a white ring and a soft glow, the open one
+    // ringed larger. Pins close together are grouped into a numbered circle until zoomed in: Kuala Lumpur's police
+    // districts are only a few kilometres apart. The groups are blue too: green, yellow and orange would read as how
+    // much crime there is, when they only say how many pins.
+    // A bubble's size as the map zooms: smaller far out, where districts crowd, and bigger close in.
+    const bySize = (radius) => ['interpolate', ['linear'], ['zoom'], 4, ['*', radius, 0.55], 6, radius, 9, ['*', radius, 1.7], 12, ['*', radius, 2.4]];
 
-    // A police district's pin opened, as the search does: zoomed in until it's out of its group, if it's in one.
-    openPin = (key) => {
-        const marker = pinsByKey.get(key);
-        if (!marker) {
-            return false;
+    const pinsReady = ready.then(() => {
+        map.addSource('districts', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 45, clusterMaxZoom: 10 });
+        map.addSource('open-pin', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+        const grouped = ['has', 'point_count'];
+        map.addLayer({
+            id: 'district-clusters', type: 'circle', source: 'districts', filter: grouped,
+            paint: {
+                'circle-color': palette.selected,
+                'circle-radius': ['step', ['get', 'point_count'], 15, 5, 19, 15, 24],
+                'circle-stroke-width': 6,
+                'circle-stroke-color': 'rgba(58, 170, 242, 0.3)',
+            },
+        });
+        map.addLayer({
+            id: 'district-cluster-count', type: 'symbol', source: 'districts', filter: grouped,
+            layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Bold'], 'text-size': 13, 'text-allow-overlap': true },
+            paint: { 'text-color': '#0b1a26' },
+        });
+        map.addLayer({
+            id: 'district-glow', type: 'circle', source: 'districts', filter: ['!', grouped],
+            paint: { 'circle-color': palette.selected, 'circle-radius': 13, 'circle-blur': 0.9, 'circle-opacity': 0.55 },
+        });
+        map.addLayer({
+            id: 'district-pins', type: 'circle', source: 'districts', filter: ['!', grouped],
+            paint: { 'circle-color': palette.selected, 'circle-radius': 6.5, 'circle-stroke-width': 2.5, 'circle-stroke-color': '#ffffff' },
+        });
+        map.addLayer({
+            id: 'district-open', type: 'circle', source: 'open-pin',
+            paint: { 'circle-color': 'rgba(0, 0, 0, 0)', 'circle-radius': 13, 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff' },
+        });
+
+        // The police districts the map's AI points out: a violet ring round each, and its number beside it.
+        map.addSource('ai-picks', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+            id: 'ai-pick-ring', type: 'circle', source: 'ai-picks',
+            paint: { 'circle-color': 'rgba(177, 140, 255, 0.16)', 'circle-radius': 17, 'circle-stroke-width': 3, 'circle-stroke-color': palette.picked },
+        });
+        map.addLayer({
+            id: 'ai-pick-number', type: 'symbol', source: 'ai-picks',
+            layout: { 'text-field': ['get', 'number'], 'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-offset': [1.6, -1.4], 'text-allow-overlap': true },
+            paint: { 'text-color': '#ffffff', 'text-halo-color': palette.pickedFill, 'text-halo-width': 4 },
+        });
+
+        // The bubbles: one for each police district, not grouped, sized by a crime's count, each round its own pin, the
+        // biggest underneath so the small ones stay in sight; and round each, an unseen circle to point at. In the
+        // app's bright blue, as the pins are: how big says how many.
+        map.addSource('bubbles', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, promoteId: 'key' });
+        const size = ['coalesce', ['feature-state', 'r'], 0];
+        map.addLayer({
+            id: 'bubbles', type: 'circle', source: 'bubbles',
+            layout: { visibility: 'none', 'circle-sort-key': ['-', 0, ['get', 'count']] },
+            paint: {
+                'circle-radius': bySize(size),
+                'circle-color': palette.selected,
+                'circle-opacity': 0.3,
+                'circle-stroke-color': '#9fd6fb',
+                'circle-stroke-width': 1.2,
+                'circle-stroke-opacity': 0.9,
+            },
+        });
+        map.addLayer({
+            id: 'bubble-hits', type: 'circle', source: 'bubbles', layout: { visibility: 'none' },
+            paint: { 'circle-radius': bySize(['max', size, 9]), 'circle-opacity': 0 },
+        });
+        map.on('click', 'bubble-hits', (event) => openPin(event.features[0].properties.key));
+
+        // The ripples, as the year changes: rings growing out from districts where the crime rose, in its orange, and
+        // shrinking in to those where it fell, in teal, each edged dark so it shows on any shade, and the change by it.
+        // Growing or shrinking, and + or −, say which as well as the colour, which not everyone can tell apart.
+        map.addSource('ripples', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        const way = (up, down) => ['match', ['get', 'way'], 'up', up, down];
+        map.addLayer({
+            id: 'ripple-casing', type: 'circle', source: 'ripples',
+            paint: { 'circle-radius': 0, 'circle-opacity': 0, 'circle-stroke-width': 5, 'circle-stroke-color': '#0b0f14', 'circle-stroke-opacity': 0 },
+        });
+        map.addLayer({
+            id: 'ripple', type: 'circle', source: 'ripples',
+            paint: { 'circle-radius': 0, 'circle-opacity': 0, 'circle-stroke-width': 2.5, 'circle-stroke-color': way(palette.rose, palette.fell), 'circle-stroke-opacity': 0 },
+        });
+        map.addLayer({
+            id: 'ripple-label', type: 'symbol', source: 'ripples',
+            layout: { 'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': 11, 'text-anchor': 'bottom', 'text-offset': [0, -1.3] },
+            paint: { 'text-color': way(palette.rose, palette.fell), 'text-halo-color': '#0b0f14', 'text-halo-width': 1.6, 'text-opacity': 0 },
+        });
+
+        // A group opens up to its pins.
+        map.on('click', 'district-clusters', async (event) => {
+            const group = event.features[0];
+            const zoom = await map.getSource('districts').getClusterExpansionZoom(group.properties.cluster_id);
+            map.easeTo({ center: group.geometry.coordinates, zoom, duration: duration(500) });
+        });
+        map.on('click', 'district-pins', (event) => openPin(event.features[0].properties.key));
+    });
+
+    // A district's count of a crime: "all", a category or a crime type; the year before's with before. Null without
+    // figures for that year.
+    const categoryOf = (type) => Object.entries(crime.types).find(([, types]) => type in types)?.[0];
+    const countOf = (district, key, before = false) => {
+        const totals = before ? district.previous : district.totals;
+        if (!totals) {
+            return null;
         }
-        const reveal = () => padded(marker).openPopup();
-        pins.zoomToShowLayer ? pins.zoomToShowLayer(marker, reveal) : reveal();
-        return true;
+        if (key === 'all') {
+            return Object.values(totals).reduce((sum, value) => sum + value, 0);
+        }
+        if (key in totals) {
+            return totals[key];
+        }
+        return (before ? district.previousTypes : district.types)?.[categoryOf(key)]?.[key] ?? 0;
+    };
+    const crimeName = (key) => (key === 'all' ? t('Violent and property crime') : crime.categories[key] ?? crime.types[categoryOf(key)]?.[key] ?? key);
+
+    // A bubble's radius at the country's zoom: its area is its count, the most any district had of that crime in a year
+    // 26 px across the radius.
+    const largest = 26;
+    const radiusOf = (crimes, most) => largest * Math.sqrt(Math.max(0, crimes) / Math.max(1, most));
+
+    // The bubbles: plain pins again, or each district's bubble growing or shrinking to its count this year.
+    const bubbleNow = new Map();
+    const sizeBubbles = () => {
+        if (!map.getLayer('bubbles')) {
+            return;
+        }
+        const on = bubbled();
+        for (const id of ['bubbles', 'bubble-hits']) {
+            map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+        }
+        for (const id of ['district-clusters', 'district-cluster-count', 'district-glow', 'district-pins']) {
+            map.setLayoutProperty(id, 'visibility', on ? 'none' : 'visible');
+        }
+        drawPinsKey();
+        if (!on) {
+            return;
+        }
+
+        map.getSource('bubbles').setData({
+            type: 'FeatureCollection',
+            features: [...districtsByKey].map(([key, district]) => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [district.lng, district.lat] },
+                properties: { key, name: district.name, count: countOf(district, sizing) ?? 0 },
+            })),
+        });
+
+        const most = crime.mostInADistrict?.[sizing] ?? 1;
+        const targets = new Map([...districtsByKey].map(([key, district]) => [key, radiusOf(countOf(district, sizing) ?? 0, most)]));
+        const starts = new Map([...targets.keys()].map((key) => [key, bubbleNow.get(key) ?? 0]));
+        animate('bubbles', 900, (part) => {
+            for (const [key, target] of targets) {
+                const radius = between(starts.get(key), target, part);
+                bubbleNow.set(key, radius);
+                map.setFeatureState({ source: 'bubbles', id: key }, { r: radius });
+            }
+        });
     };
 
-
-    let open = null;
-    // The credits on the map for the figures shown, and for the population they're divided by.
-    let credited = null;
-    let populationCredited = null;
-
-    // A credit on the map, linked to its source where it has one, in place of the one before; none without text.
-    const credit = (text, about, before) => {
-        let source = null;
-        if (text) {
-            const node = element(about ? 'a' : 'span', text);
-            if (about) {
-                node.href = about;
-            }
-            source = node.outerHTML;
+    // The ripples for the year shown: where the crime the pins show, or all of it, changed by at least 10% and at
+    // least 10 crimes from the year before, so a small district's few crimes don't set them off. Out and in, then
+    // gone, in a second and a bit; without motion, the rings and changes simply show for a moment.
+    const threshold = { percent: 10, crimes: 10 };
+    const ripple = () => {
+        if (!map.getSource('ripples') || crime.byState || crime.previousYear === null) {
+            return;
         }
-        if (source !== before) {
-            if (before) {
-                map.attributionControl.removeAttribution(before);
+
+        const key = sizing ?? 'all';
+        const features = [];
+        for (const district of districtsByKey.values()) {
+            const [now, before] = [countOf(district, key), countOf(district, key, true)];
+            if (now === null || before === null || before === 0) {
+                continue;
             }
-            if (source) {
-                map.attributionControl.addAttribution(source);
+            const change = ((now - before) / before) * 100;
+            if (Math.abs(change) >= threshold.percent && Math.abs(now - before) >= threshold.crimes) {
+                features.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [district.lng, district.lat] },
+                    properties: { way: change > 0 ? 'up' : 'down', label: `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change))}%` },
+                });
             }
         }
-        return source;
+        map.getSource('ripples').setData({ type: 'FeatureCollection', features });
+
+        const rings = (up, down, opacity, labels) => {
+            for (const id of ['ripple', 'ripple-casing']) {
+                map.setPaintProperty(id, 'circle-radius', ['match', ['get', 'way'], 'up', up, down]);
+                map.setPaintProperty(id, 'circle-stroke-opacity', opacity);
+            }
+            map.setPaintProperty('ripple-label', 'text-opacity', labels);
+        };
+
+        if (!motion) {
+            cancelAnimationFrame(frames.get('ripples'));
+            rings(14, 14, 0.9, 1);
+            clearTimeout(frames.get('ripples-off'));
+            frames.set('ripples-off', setTimeout(() => rings(0, 0, 0, 0), 1600));
+            return;
+        }
+
+        // Linear, so they ripple evenly: in fast, then fading out as they go.
+        cancelAnimationFrame(frames.get('ripples'));
+        const start = performance.now();
+        const tick = (now) => {
+            const part = Math.min(1, Math.max(0, (now - start) / 1300));
+            const fade = part < 0.15 ? part / 0.15 : (1 - part) / 0.85;
+            rings(4 + 20 * part, 24 - 20 * part, 0.9 * fade, part < 0.7 ? 1 : (1 - part) / 0.3);
+            if (part < 1) {
+                frames.set('ripples', requestAnimationFrame(tick));
+            }
+        };
+        frames.set('ripples', requestAnimationFrame(tick));
+    };
+
+    // "Pins show", under the year in the panel: plain pins, or bubbles of a crime, with its size key; and what the
+    // ripples mean.
+    let pinsBox = null;
+
+    const buildPinsBox = () => {
+        const field = yearChoice?.closest('.crime-year');
+        if (!field) {
+            return;
+        }
+
+        pinsBox = element('div', undefined, 'map-pins');
+        const label = element('label', t('Pins show'));
+        label.htmlFor = 'map-pins-choice';
+        const choice = element('select');
+        choice.id = 'map-pins-choice';
+        // A small list of the map's own, not a Select2 box.
+        choice.dataset.native = '';
+        const option = (value, text) => {
+            const item = element('option', text);
+            item.value = value;
+            return item;
+        };
+        choice.append(option('', t('Where each police district is')), option('all', t('Violent and property crime')));
+        for (const [category, label] of Object.entries(crime.categories)) {
+            const group = element('optgroup');
+            group.label = label;
+            group.append(option(category, t(':category, every type', { category: label })), ...Object.entries(crime.types[category] ?? {}).map(([type, name]) => option(type, name)));
+            choice.append(group);
+        }
+        choice.addEventListener('change', () => {
+            sizing = choice.value || null;
+            tip.remove();
+            sizeBubbles();
+        });
+        pinsChoice = choice;
+
+        const key = element('div', undefined, 'map-pins-key');
+        key.hidden = true;
+        const rings = element('p', undefined, 'map-pins-rings');
+        rings.append(
+            element('span', undefined, 'map-ring map-ring-up'), t('Up'), ' ',
+            element('span', undefined, 'map-ring map-ring-down'), t('Down'), ' ',
+            element('span', t('Rings as the year changes: :percent% or more, and :crimes crimes, on the year before.', threshold), 'map-pins-note'),
+        );
+
+        pinsBox.append(label, choice, key, rings);
+        field.after(pinsBox);
+    };
+
+    // The size key: three bubbles as big as on the map at this zoom, with their counts, none bigger than fits.
+    const zoomFactor = (zoom) => {
+        const stops = [[4, 0.55], [6, 1], [9, 1.7], [12, 2.4]];
+        const [low, high] = [stops.findLast(([at]) => at <= zoom) ?? stops[0], stops.find(([at]) => at >= zoom) ?? stops.at(-1)];
+        return low[0] === high[0] ? low[1] : between(low[1], high[1], (zoom - low[0]) / (high[0] - low[0]));
+    };
+    const round = (value) => {
+        const place = 10 ** Math.floor(Math.log10(value));
+        return Math.round(value / place) * place;
+    };
+
+    function drawPinsKey() {
+        const key = pinsBox?.querySelector('.map-pins-key');
+        if (!key) {
+            return;
+        }
+        key.hidden = !bubbled();
+        if (key.hidden) {
+            return;
+        }
+
+        const most = crime.mostInADistrict?.[sizing] ?? 0;
+        const factor = zoomFactor(map.getZoom());
+        // The largest count shown: the most there is, or less, so its bubble is no more than 64 px across.
+        const top = Math.min(most, most * (32 / (largest * factor)) ** 2);
+        const counts = [...new Set([top, top / 4, top / 16].filter((value) => value >= 1).map(round))];
+
+        const sizes = element('div', undefined, 'map-pins-sizes');
+        sizes.setAttribute('aria-hidden', 'true');
+        sizes.append(...counts.map((value) => {
+            const item = element('span', undefined, 'map-pins-size');
+            const dot = element('span', undefined, 'map-pins-dot');
+            const across = 2 * radiusOf(value, most) * factor;
+            dot.style.width = `${across}px`;
+            dot.style.height = `${across}px`;
+            item.append(dot, element('span', count.format(value)));
+            return item;
+        }));
+        key.replaceChildren(
+            sizes,
+            element('p', t(':crime in :year, by police district. Each bubble’s area is its count, not per person.', { crime: crimeName(sizing), year: crime.year }), 'map-pins-note'),
+        );
+    }
+    map.on('zoomend', () => sizing && drawPinsKey());
+
+    const markOpen = (at) => {
+        map.getSource('open-pin')?.setData({ type: 'FeatureCollection', features: at ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: at }, properties: {} }] : [] });
+    };
+
+    // A police district's pin opened, as the search does: the map moved to it first if it's out of view or in a group.
+    openPin = (key) => {
+        const district = districtsByKey.get(key);
+        if (!district) {
+            return false;
+        }
+
+        const at = [district.lng, district.lat];
+        const show = () => {
+            pinPopup?.remove();
+            const shown = new maplibregl.Popup({ maxWidth: '300px', className: 'crime-popup-shell', offset: 14, focusAfterOpen: true })
+                .setLngLat(at)
+                .setDOMContent(popup(district))
+                .addTo(map);
+            pinPopup = shown;
+            open = key;
+            markOpen(at);
+            shown.on('close', () => {
+                if (pinPopup === shown) {
+                    pinPopup = null;
+                    open = null;
+                    markOpen(null);
+                }
+            });
+            requestAnimationFrame(() => keepInView(shown.getElement()));
+        };
+
+        if (map.getZoom() > 10 && map.getBounds().contains(at)) {
+            show();
+        } else {
+            map.once('moveend', show);
+            map.easeTo({ center: at, zoom: Math.max(map.getZoom(), 11), padding: uncovered(), duration: duration(700), essential: true });
+        }
+        return true;
     };
 
     // The timeline over the bottom of the map, as in a video player: ▶ plays the years from the first, one every second
     // and a half, and the slider goes to any of them, as the year list in the panel does. Beside it, the legend: what
-    // the map is shaded by, and where each shade begins. It's built with the first figures, which give the years.
+    // the map is shaded by, where each shade begins, and 3D. It's built with the first figures, which give the years.
     let years = [];
     let slider = null;
     let yearLabel = null;
     let playButton = null;
     let legend = null;
+    let raiseButton = null;
     let playing = false;
     let nextStep = null;
     const pace = 1500;
@@ -1177,14 +1751,31 @@
 
     // Every region in the shade of its rate in the year shown, an open tooltip with it, and the legend.
     const paint = () => {
-        for (const [code, layer] of layers) {
-            layer.setStyle(look(code));
-            if (layer.isTooltipOpen()) {
-                layer.getTooltip().update();
-            }
+        paintRegions();
+        if (tip.isOpen() && tipPin) {
+            districtsByKey.has(tipPin) ? tip.setDOMContent(pinTip(tipPin)) : tip.remove();
+        } else if (tip.isOpen() && hovered) {
+            tip.setDOMContent(regionTip(hovered));
         }
-        layers.get(selected)?.bringToFront();
         drawLegend();
+    };
+
+    // 3D: the regions stand up by their rate, and the map tilts to show all of Malaysia, clear of the cards; flat
+    // again, it faces north where it is.
+    const raise = (on) => {
+        raised = on;
+        raiseButton.setAttribute('aria-pressed', String(on));
+        if (!regionsDrawn()) {
+            return;
+        }
+        map.setLayoutProperty('region-3d', 'visibility', on ? 'visible' : 'none');
+        map.setLayoutProperty('region-fill', 'visibility', on ? 'none' : 'visible');
+
+        const whole = on ? map.cameraForBounds(malaysia, { padding: uncovered() }) : null;
+        map.easeTo({
+            ...(whole ? { center: whole.center, zoom: whole.zoom } : {}),
+            pitch: on ? 50 : 0, bearing: on ? -12 : 0, duration: duration(1000), essential: true,
+        });
     };
 
     const buildTimeline = () => {
@@ -1226,12 +1817,13 @@
         player.append(playButton, yearLabel, track);
 
         legend = element('div', undefined, 'map-legend');
-        const heading = element('label', undefined, 'map-legend-heading');
+        const heading = element('div', undefined, 'map-legend-heading');
+        const label = element('label');
         const choice = element('select');
         // A small list of the map's own, not a Select2 box.
         choice.dataset.native = '';
-        for (const [value, label] of Object.entries(rates.measures)) {
-            const option = element('option', label);
+        for (const [value, text] of Object.entries(rates.measures)) {
+            const option = element('option', text);
             option.value = value;
             choice.append(option);
         }
@@ -1241,7 +1833,18 @@
             paint();
             describe(selected);
         });
-        heading.append(element('span', t('Shade the map by'), 'visually-hidden'), choice, element('span', t('per 100,000 people')));
+        measureChoice = choice;
+        label.append(element('span', t('Shade the map by'), 'visually-hidden'), choice, element('span', t('per 100,000 people')));
+
+        // 3D, with what its height means, as its colour does.
+        raiseButton = element('button', undefined, 'map-raise');
+        raiseButton.type = 'button';
+        raiseButton.setAttribute('aria-pressed', 'false');
+        raiseButton.title = t('Stand each state up by its crime per 100,000 people: taller is more.');
+        raiseButton.append(element('span', 'view_in_ar', 'material-icon'), '3D');
+        raiseButton.firstChild.setAttribute('aria-hidden', 'true');
+        raiseButton.addEventListener('click', () => raise(!raised));
+        heading.append(label, raiseButton);
 
         const scale = element('div', undefined, 'map-legend-scale');
         const limits = element('div', undefined, 'map-legend-limits');
@@ -1252,9 +1855,6 @@
         legend.append(heading, scale, limits, element('p', '', 'visually-hidden map-legend-read'), none);
 
         timeline.append(player, legend);
-        // Dragging the slider mustn't drag the map, nor scrolling over it zoom it.
-        L.DomEvent.disableClickPropagation(timeline);
-        L.DomEvent.disableScrollPropagation(timeline);
         container.append(timeline);
         labelPlay();
         placeTimeline();
@@ -1290,6 +1890,8 @@
         return loaded.get(key);
     };
 
+    let shownBefore = null;
+
     const show = (figures) => {
         // A popup open when the year changes opens again with the new year's figures.
         const reopen = open;
@@ -1298,8 +1900,7 @@
         shading = Boolean(rates) && Object.values(rates.years).some((year) => Object.keys(year.regions).length > 0);
         years = figures.years;
         shownYear = figures.year;
-        pins.clearLayers();
-        pinsByKey.clear();
+        districtsByKey.clear();
 
         if (status.dataset.part === 'crime') {
             status.hidden = true;
@@ -1309,68 +1910,66 @@
         if (first) {
             buildTimeline();
         }
+        if (!pinsBox) {
+            buildPinsBox();
+        }
+        // Another year than the last shown, rather than the first or the same again.
+        const changed = shownBefore !== null && shownBefore !== figures.year;
+        shownBefore = figures.year;
 
-        const markers = figures.districts.map((district) => {
-            const key = `${district.region}|${district.name}`;
-            const marker = L.marker([district.lat, district.lng], { title: district.name, alt: t(':name police district', { name: district.name }) });
-
-            // Before Leaflet opens the popup, clicked or with Enter, so it opens clear of the cards over the map.
-            marker.on('click keypress', () => padded(marker));
-            marker.bindPopup(() => popup(district), {
-                maxWidth: 300,
-                minWidth: 240,
-                className: 'crime-popup-shell',
-            });
-            marker.on({
-                popupopen: () => { open = key; },
-                popupclose: () => { if (open === key) open = null; },
-            });
-            marker.key = key;
-            pinsByKey.set(key, marker);
-            return marker;
+        for (const district of figures.districts) {
+            districtsByKey.set(`${district.region}|${district.name}`, district);
+        }
+        map.getSource('districts').setData({
+            type: 'FeatureCollection',
+            features: figures.districts.map((district) => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [district.lng, district.lat] },
+                properties: { key: `${district.region}|${district.name}`, name: district.name },
+            })),
         });
 
-        if (pins.addLayers) {
-            pins.addLayers(markers);
-        } else {
-            markers.forEach((marker) => pins.addLayer(marker));
-        }
-
+        pinPopup?.remove();
         if (reopen) {
             openPin(reopen);
         }
 
+        sizeBubbles();
+        if (changed) {
+            ripple();
+        }
+
         // The figures' source: data.gov.my's, linked, or for a year by state, the police's crime index. And with rates,
         // DOSM's, for the population.
-        credited = credit(figures.credit, figures.about, credited);
-        populationCredited = credit(shading ? rates.credit : null, rates?.about, populationCredited);
+        credit('figures', figures.credit, figures.about);
+        credit('population', shading ? rates.credit : null, rates?.about);
 
         syncTimeline();
         paint();
         placeTimeline();
         describe(selected);
 
-        // Malaysia framed again clear of the new timeline and credits, unless a region has been chosen meanwhile; then
-        // the district or station the address gives.
+        // The district or station the address gives, once its pins are here.
         if (first) {
-            if (!selected) {
-                map.fitBounds(malaysia, uncovered());
-            }
             openGiven();
         }
+        firstShown();
+        markReady();
     };
 
-    // A year's figures, shown once they're in, unless another year has been asked for meanwhile.
+    // A year's figures, shown once they're in and the map's ready for them, unless another year has been asked for
+    // meanwhile.
     const load = (year) => {
         const ticket = ++latest;
 
-        return fetchYear(year)
-            .then((figures) => {
+        return Promise.all([fetchYear(year), pinsReady])
+            .then(([figures]) => {
                 if (ticket === latest) {
                     show(figures);
                 }
             })
             .catch(() => {
+                firstShown();
                 if (ticket === latest) {
                     stop();
                     showStatus(t("The crime figures couldn't load. Choose the year again, or reload the page."), 'crime');
@@ -1379,7 +1978,7 @@
     };
 
     // A year chosen on the timeline or in the year list: the other one moves to it, the regions take its shades straight
-    // away, and its pins and the panel follow once its figures are in.
+    // away, fading into them, and its pins and the panel follow once its figures are in.
     const choose = (year, { fromList = false } = {}) => {
         shownYear = year;
 
@@ -1446,5 +2045,66 @@
         stop();
         choose(Number(yearChoice.value), { fromList: true });
     });
+
+    // For the map's AI (map-ask.js): the view shown, as MapView has it, and a view to go to, each part as its own
+    // control would set it, leaving out any part not given (null). Police districts given are ringed and numbered,
+    // and the map goes to them: into the first's popup if it's one, or framing them all.
+    window.crimeMap = {
+        ready: figuresShown,
+        now: () => ({ year: shownYear, region: selected ?? 'Malaysia', shade: measure, pins: sizing ?? '', raised }),
+        go: async ({ view = {}, districts = [], play: playIt = false }) => {
+            await figuresShown;
+            stop();
+
+            if (view.shade && rates?.measures?.[view.shade] && view.shade !== measure) {
+                measure = view.shade;
+                if (measureChoice) {
+                    measureChoice.value = measure;
+                }
+            }
+            if (view.pins !== null && view.pins !== undefined && (view.pins || null) !== sizing) {
+                sizing = view.pins || null;
+                if (pinsChoice) {
+                    pinsChoice.value = view.pins;
+                }
+                tip.remove();
+            }
+            if (view.year && years.includes(view.year) && view.year !== shownYear) {
+                await choose(view.year);
+            } else {
+                paint();
+                sizeBubbles();
+                describe(selected);
+            }
+
+            const picks = districts.map((key) => districtsByKey.get(key)).filter(Boolean);
+            if (typeof view.raised === 'boolean' && view.raised !== raised && raiseButton) {
+                raise(view.raised);
+            }
+            if (view.region) {
+                select(view.region === 'Malaysia' ? null : view.region, { zoom: picks.length === 0 });
+            }
+
+            map.getSource('ai-picks')?.setData({
+                type: 'FeatureCollection',
+                features: picks.map((district, at) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [district.lng, district.lat] }, properties: { number: String(at + 1) } })),
+            });
+            if (picks.length === 1) {
+                openPin(`${picks[0].region}|${picks[0].name}`);
+            } else if (picks.length > 1) {
+                const lngs = picks.map((district) => district.lng);
+                const lats = picks.map((district) => district.lat);
+                frame([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], 10, 900);
+            }
+
+            if (playIt && years.length > 1) {
+                play();
+            }
+        },
+        // The ringed police districts gone, as the map's AI's answer is closed.
+        clearPicks: () => map.getSource('ai-picks')?.setData({ type: 'FeatureCollection', features: [] }),
+    };
+    document.dispatchEvent(new Event('crime-map'));
+
     load(yearChoice?.value);
 })();

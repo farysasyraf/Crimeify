@@ -35,6 +35,9 @@ class AreaController extends Controller
             'language' => $this->language(),
             'pins' => $this->pins(),
             'turf' => versioned_asset('vendor/turf/turf.min.js'),
+            // For picking areas on a map (areas-map.js): MapLibre GL JS and the Map page's street map.
+            'maplibre' => versioned_asset('vendor/maplibre-gl/maplibre-gl.mjs'),
+            'style' => preg_match('#^https?://#', config('map.style')) ? config('map.style') : versioned_asset(config('map.style')),
         ]);
     }
 

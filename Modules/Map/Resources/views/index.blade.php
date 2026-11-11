@@ -27,10 +27,7 @@
 @section('main-class', 'main-full')
 
 @push('head')
-    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet/leaflet.css') }}" />
-    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.css') }}" />
-    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-markercluster/MarkerCluster.Default.css') }}" />
-    <link rel="stylesheet" href="{{ versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/maplibre-gl/maplibre-gl.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/map/map.css') }}" />
 @endpush
 
@@ -72,6 +69,37 @@
     {{-- Down the left: the year and the chosen region's figures, the regions, and "Find a police station". Before the
          map, so the keyboard reaches them before its many pins. --}}
     <div class="map-side" data-map-cover="left">
+        {{-- The map's AI (map-ask.js, AskTheMap, ExplainView), for everyone: "Ask the map" turns a request in the
+             visitor's own words into a view the map goes to; "What am I looking at?" describes the view shown. Written
+             from the app's own figures, and checked against them. Shown once the map is ready. --}}
+        @if ($ai)
+            <section class="card map-ai" aria-labelledby="map-ai-heading" data-map-ai data-explain="{{ $ai['explain'] }}" data-ask="{{ $ai['ask'] }}" data-token="{{ csrf_token() }}" hidden>
+                <h2 id="map-ai-heading"><span class="material-icon" aria-hidden="true">auto_awesome</span>{{ __('Ask the map') }}</h2>
+                <form class="map-ai-ask" data-map-ai-form>
+                    <label for="map-ai-question" class="visually-hidden">{{ __('What should the map show?') }}</label>
+                    <input type="text" id="map-ai-question" name="question" minlength="3" maxlength="300" required autocomplete="off"
+                        placeholder="{{ __('Like “break-ins in Selangor in 2019, in 3D”') }}" />
+                    <button type="submit" class="btn btn-sm btn-primary">{{ __('Show me') }}</button>
+                </form>
+                <div class="map-ai-ideas" role="group" aria-label="{{ __('Ideas to try') }}">
+                    @foreach ([__('Where did break-ins fall most?'), __('Motorcycle theft in Johor'), __('Play violent crime in 3D')] as $idea)
+                        <button type="button" class="map-ai-idea" data-map-ai-idea>{{ $idea }}</button>
+                    @endforeach
+                </div>
+                <button type="button" class="btn btn-sm map-ai-explain" data-map-ai-explain>
+                    <span class="material-icon" aria-hidden="true">lightbulb</span>{{ __('What am I looking at?') }}
+                </button>
+                <div class="map-ai-answer" data-map-ai-answer aria-live="polite" hidden>
+                    <p class="map-ai-for" data-map-ai-for></p>
+                    <p class="map-ai-text" data-map-ai-text></p>
+                    <div class="map-ai-actions">
+                        <p class="map-ai-note">{{ __('Written by AI from :app’s figures, and checked against them.', ['app' => config('app.name')]) }}</p>
+                        <button type="button" class="btn btn-sm map-ai-close" data-map-ai-close>{{ __('Close') }}</button>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         <section class="card state-panel" aria-labelledby="state-panel-heading">
             @if (! $crimeUrl)
                 <p class="crime-note">
@@ -179,7 +207,7 @@
     </div>
 
     <div class="state-map" id="state-map" data-boundaries="{{ $boundaries }}"
-        data-tile-url="{{ config('map.tiles.url') }}" data-tile-attribution="{{ config('map.tiles.attribution') }}" data-tile-max-zoom="{{ config('map.tiles.max_zoom') }}"
+        data-maplibre="{{ $maplibre }}" data-style="{{ $style }}"
         @if ($crimeUrl && $years) data-crime="{{ $crimeUrl }}" @endif
         data-turf="{{ $turf }}"
         {{-- A police district or station to open, from a shared link or the command palette. --}}
@@ -190,10 +218,10 @@
     <p class="state-map-note" data-map-status hidden></p>
 </div>
 
-<script src="{{ versioned_asset('vendor/leaflet/leaflet.js') }}" defer></script>
-<script src="{{ versioned_asset('vendor/leaflet-markercluster/leaflet.markercluster.js') }}" defer></script>
-<script src="{{ versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/nearby.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/map.js') }}" defer></script>
+@if ($ai)
+    <script src="{{ versioned_asset('modules/map/map-ask.js') }}" defer></script>
+@endif
 <script src="{{ versioned_asset('modules/map/station-finder.js') }}" defer></script>
 @endsection

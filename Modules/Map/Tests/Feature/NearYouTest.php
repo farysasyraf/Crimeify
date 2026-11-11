@@ -44,10 +44,9 @@ class NearYouTest extends TestCase
             ->assertSee("Your location stays in your browser: it isn't sent to ".config('app.name').' or kept.')
             // Turf loads only when it's first needed, from this app.
             ->assertSee('data-turf="'.versioned_asset('vendor/turf/turf.min.js').'"', false)
-            ->assertSee('<link rel="stylesheet" href="'.versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.css').'" />', false)
+            // MapLibre's own location button, so no plugin for it.
+            ->assertDontSee('leaflet-locatecontrol', false)
             ->assertSeeInOrder([
-                '<script src="'.versioned_asset('vendor/leaflet/leaflet.js').'" defer></script>',
-                '<script src="'.versioned_asset('vendor/leaflet-locatecontrol/L.Control.Locate.min.js').'" defer></script>',
                 '<script src="'.versioned_asset('modules/map/nearby.js').'" defer></script>',
                 '<script src="'.versioned_asset('modules/map/map.js').'" defer></script>',
             ], false)
@@ -88,13 +87,9 @@ class NearYouTest extends TestCase
         $this->get('/public/map')->assertOk()->assertDontSee('data-near', false);
     }
 
-    public function test_leaflet_locate_and_turf_are_served_from_this_app_with_their_licences(): void
+    public function test_turf_is_served_from_this_app_with_its_licence(): void
     {
-        foreach (['vendor/leaflet-locatecontrol/L.Control.Locate.min.js', 'vendor/leaflet-locatecontrol/L.Control.Locate.min.css', 'vendor/turf/turf.min.js'] as $file) {
-            $this->assertFileExists(public_path($file));
-        }
-
-        $this->assertStringContainsString('MIT License', file_get_contents(public_path('vendor/leaflet-locatecontrol/LICENSE.md')));
+        $this->assertFileExists(public_path('vendor/turf/turf.min.js'));
         $this->assertStringContainsString('MIT License', file_get_contents(public_path('vendor/turf/LICENSE.txt')));
     }
 }

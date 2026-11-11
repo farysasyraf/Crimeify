@@ -7,6 +7,7 @@ use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
 use Modules\Map\Support\AreaProfile;
 use Modules\Map\Support\DistrictPreview;
+use Modules\Map\Support\TypeComparison;
 use Tests\TestCase;
 
 class AreaProfileTest extends TestCase
@@ -138,6 +139,17 @@ class AreaProfileTest extends TestCase
         $chart = json_decode($data[1], true);
         $this->assertSame(['profile', [2022, 2023], [80, 75], [20, 15]], [$chart['kind'], $chart['years'], $chart['series'][0]['counts'], $chart['series'][1]['counts']]);
         $page->assertSee('<tr><th scope="row">2023</th><td>15</td><td>75</td><td>90</td></tr>', false);
+
+        // Each year's figures and crimes by type, for the year slider and a type's own trend, with its state's counts.
+        $this->assertSame([2022, 2023], array_column($chart['eachYear'], 'year'));
+        $this->assertSame([100, 90], array_column($chart['eachYear'], 'total'));
+        $this->assertSame(['Batu Pahat', 'Johor'], [$chart['district'], $chart['area']]);
+        $breakIns = array_column($chart['eachYear'][0]['mix'], null, 'type')['break_in'];
+        $this->assertSame([30, 30, 50], [$breakIns['count'], $breakIns['share'], $breakIns['areaCount']]);
+        $page->assertSee('<input type="range" id="area-year" min="0" max="1" value="1" step="1" aria-valuetext="2023" />', false)
+            ->assertSee('<li class="area-mix-row" data-type="break_in" data-category="property">', false)
+            ->assertSee('<button type="button" class="area-mix-pick" aria-expanded="false" aria-controls="area-type-trend">Break-in</button>', false)
+            ->assertSee('<div class="area-type-trend" id="area-type-trend" data-type-trend hidden>', false);
     }
 
     public function test_two_or_three_areas_side_by_side(): void
@@ -165,12 +177,49 @@ class AreaProfileTest extends TestCase
         $this->get('/public/areas/compare?areas[][]=x')->assertRedirect('/public/areas');
     }
 
+    public function test_crimes_by_type_side_by_side_as_a_dot_plot_for_each_year(): void
+    {
+        $types = TypeComparison::of([$this->profile('johor', 'batu-pahat'), $this->profile('johor', 'muar')], [2022, 2023]);
+
+        // One scale for every year: Muar's motorcycle theft, 75% of its crime, up to the next 10%.
+        $this->assertSame(80, $types->scale());
+        $this->assertSame([0, 20, 40, 60, 80], $types->ticks());
+
+        // Most first; an area at least 5 points above the other stands out; Muar had no murder, so its dot is all but
+        // on Batu Pahat's, and is a ring round it; one small type alone isn't folded away.
+        $rows = $types->rows(2023);
+        $this->assertSame(['theft_vehicle_motorcycle', 'break_in', 'causing_injury', 'murder'], array_column($rows, 'type'));
+        $this->assertSame([1, 0, null, null], array_column($rows, 'standOut'));
+        $this->assertSame([[33.3, 75.0], [1, 0]], [$rows[0]['shares'], $rows[3]['counts']]);
+        $this->assertSame([[0, 0], [0, 1]], [$rows[0]['rings'], $rows[3]['rings']]);
+        $this->assertSame([false, false, false, false], array_column($rows, 'folded'));
+        $this->assertSame([2022, 2023], array_column($types->forScript(), 'year'));
+        $this->assertArrayNotHasKey('label', $types->forScript()[0]['rows'][0]);
+
+        $page = $this->get('/public/areas/compare?areas[]=johor/batu-pahat&areas[]=johor/muar')->assertOk()
+            ->assertSee('Crimes by type in 2023')
+            ->assertSee('<input type="range" id="area-dots-year" min="0" max="1" value="1" step="1" aria-valuetext="2023" />', false)
+            ->assertSee('style="--scale: 80; --tick: 20" data-dots', false)
+            ->assertSeeInOrder(['data-type="theft_vehicle_motorcycle"', 'data-type="break_in"', 'data-type="causing_injury"', 'data-type="murder"'], false)
+            ->assertSee('<button type="button" class="area-legend-pick" data-area="1" aria-pressed="false">', false)
+            ->assertSee('<script src="'.versioned_asset('modules/map/areas-types.js').'" defer></script>', false);
+
+        // Muar's motorcycle theft picked out, and every share there for screen readers.
+        $this->assertMatchesRegularExpression('~data-type="theft_vehicle_motorcycle".*?class="area-dots-value is-out" data-area="1"[^>]*><span class="visually-hidden">Muar:</span> <span data-value>75%</span>~s', $page->getContent());
+        preg_match('~<script type="application/json" id="area-types-data">(.*?)</script>~s', $page->getContent(), $data);
+        $this->assertSame(['Batu Pahat', 'Muar'], json_decode($data[1], true)['names']);
+    }
+
     public function test_the_page_to_choose_lists_every_police_district_by_state(): void
     {
         $this->get('/public/areas')->assertOk()
             ->assertSee('Check an area')
             ->assertSeeInOrder(['<optgroup label="Johor">', '<option value="johor/batu-pahat" >Batu Pahat</option>'], false)
-            ->assertSee('<a href="'.url('/public/areas/labuan/wp-labuan').'">W.P. Labuan</a>', false);
+            ->assertSee('<a href="'.url('/public/areas/labuan/wp-labuan').'">W.P. Labuan</a>', false)
+            // Or on the map, every police district's pin: MapLibre and the street map, loaded as it's scrolled to.
+            ->assertSee('data-pick-map data-maplibre="'.versioned_asset('vendor/maplibre-gl/maplibre-gl.mjs').'" data-style="'.versioned_asset('modules/map/style.json').'" hidden', false)
+            ->assertSee('Or pick them on the map')
+            ->assertSee('<script src="'.versioned_asset('modules/map/areas-map.js').'" defer></script>', false);
 
         // From a profile's "Compare with other areas", that one is already chosen; one there isn't, isn't.
         $this->get('/public/areas?with=johor/batu-pahat')->assertSee('<option value="johor/batu-pahat" selected>', false);

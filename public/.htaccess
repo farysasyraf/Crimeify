@@ -1,3 +1,8 @@
+# The map's MapLibre GL JS comes as JavaScript modules (.mjs), which browsers only run when they're served as JavaScript.
+<IfModule mod_mime.c>
+    AddType text/javascript .mjs
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

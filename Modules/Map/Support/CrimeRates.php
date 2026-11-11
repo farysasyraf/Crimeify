@@ -95,11 +95,12 @@ final class CrimeRates
 
     /**
      * Each region's and the country's ("Malaysia") crimes of each category, by year, counted as the map counts them.
+     * Ask Crimeify's figures for a state are these too (AskCrimeifyTools).
      *
      * @param  list<int>  $stateYears  the years with figures by state only
      * @return array<int, array<string, array<string, int>>>
      */
-    private static function crimes(array $stateYears): array
+    public static function crimes(array $stateYears): array
     {
         $categories = array_keys(config('map.crime.categories'));
 

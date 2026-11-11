@@ -6,14 +6,10 @@ return [
     // The boundaries of Malaysia's states and federal territories, in public/ (see malaysia-states-LICENSE.txt).
     'boundaries' => 'modules/map/malaysia-states.geojson',
 
-    // The street map under the regions (Leaflet's tile layer, map.js). OpenStreetMap's own server is for light use
-    // only, so a public site should set MAP_TILE_URL to a tile provider's address, with {z}/{x}/{y} in it, and
-    // MAP_TILE_ATTRIBUTION to the credit that provider asks for (it may hold a link; it is shown as written).
-    'tiles' => [
-        'url' => env('MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
-        'attribution' => env('MAP_TILE_ATTRIBUTION', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'),
-        'max_zoom' => (int) env('MAP_TILE_MAX_ZOOM', 18),
-    ],
+    // The street map under the regions, drawn by MapLibre GL JS (map.js) from a style: Crimeify's own, dark like the
+    // app, in public/ (see style-LICENSE.txt), on OpenFreeMap's free vector tiles of OpenStreetMap, which need no key.
+    // MAP_STYLE_URL gives another style's address instead, such as a tile provider's; its credits come with it.
+    'style' => env('MAP_STYLE_URL', 'modules/map/style.json'),
 
     // Each region by its ISO 3166-2 code, which the boundaries file names it by (shapeISO), with its official name.
     'states' => [
@@ -142,6 +138,33 @@ return [
             'Terengganu|Hulu' => 'Hulu Terengganu',
         ],
         'about' => 'https://open.dosm.gov.my/data-catalogue/hies_district',
+    ],
+
+    // Ask Crimeify, in the command palette for logged-in users: a question about the crime figures, answered by Claude
+    // from this app's figures, which it looks up with AskCrimeifyTools (AskCrimeify). Off without ANTHROPIC_API_KEY.
+    // Every answer costs money, so each is kept `cache_minutes`, and each user may ask `per_minute` and `per_day`
+    // questions. `rounds` is how many times Claude may look something up before it must answer. Effort is how hard it
+    // thinks: low is quick and cheap, and enough for looking figures up; medium or high for harder questions.
+    'ask' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ASK_CRIMEIFY_MODEL', 'claude-opus-5-5'),
+        'effort' => env('ASK_CRIMEIFY_EFFORT', 'low'),
+        'rounds' => 6,
+        'per_minute' => 6,
+        'per_day' => 60,
+        'cache_minutes' => 60,
+        // The map's AI (AskTheMap, ExplainView) asks with the same key, model and effort, for everyone on the public
+        // map. "Ask the map" counts towards a logged-in user's `per_minute` and `per_day`; a visitor who isn't logged
+        // in may ask `guest_per_minute` and `guest_per_day`, by IP address, and all of them together `guests_per_day`,
+        // so what the public can spend in a day has a ceiling. "What am I looking at?": each view's description is kept
+        // `explain_hours`, or until the figures change, so a view is paid for once, and each visitor may ask
+        // `explain_per_minute` and `explain_per_day`, by IP address.
+        'guest_per_minute' => 3,
+        'guest_per_day' => 20,
+        'guests_per_day' => 300,
+        'explain_hours' => 24,
+        'explain_per_minute' => 10,
+        'explain_per_day' => 200,
     ],
 
     // The police stations "php artisan map:import-stations" starts dbo.PoliceStations with, in this module (see

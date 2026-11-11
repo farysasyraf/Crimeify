@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Map\Http\Controllers\AreaController;
+use Modules\Map\Http\Controllers\AskController;
+use Modules\Map\Http\Controllers\MapAskController;
 use Modules\Map\Http\Controllers\MapController;
 use Modules\Map\Http\Controllers\PlaceController;
 
@@ -40,3 +42,13 @@ Route::middleware(['throttle:120,1', 'public-locale'])->group(function () {
         ->where(['region' => '[a-z0-9-]+', 'district' => '[a-z0-9-]+'])
         ->name('public.areas.show');
 });
+
+// Ask Crimeify, in the command palette: a question about the crime figures, answered by Claude from them (AskCrimeify).
+// For anyone logged in, as the palette is, so it's always here rather than on the Routes page; a few questions a minute
+// and a day each, as every answer costs money.
+Route::middleware(['auth', 'throttle:ask-crimeify'])->post('/palette/ask', AskController::class)->name('palette.ask');
+
+// The map's AI (map-ask.js), for everyone, in the page's language: "Ask the map" within Ask Crimeify's limits, which
+// are fewer for visitors who aren't logged in, and "What am I looking at?" within its own.
+Route::middleware(['throttle:ask-crimeify', 'public-locale'])->post('/public/map/ask', [MapAskController::class, 'ask'])->name('public.map.ask');
+Route::middleware(['throttle:map-explain', 'public-locale'])->get('/public/map/explain', [MapAskController::class, 'explain'])->name('public.map.explain');

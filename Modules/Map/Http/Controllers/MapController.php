@@ -15,6 +15,7 @@ use Modules\Map\Entities\CrimeStat;
 use Modules\Map\Entities\PoliceDistrict;
 use Modules\Map\Entities\PoliceStation;
 use Modules\Map\Entities\Population;
+use Modules\Map\Support\AskCrimeify;
 use Modules\Map\Support\CrimeRates;
 use Modules\Map\Support\DistrictPreview;
 use Modules\Map\Support\StateCrime;
@@ -90,6 +91,9 @@ class MapController extends Controller
             'states' => $regions->where('territory', false)->values(),
             'territories' => $regions->where('territory', true)->values(),
             'boundaries' => versioned_asset(config('map.boundaries')),
+            // MapLibre GL JS, which map.js loads as a module, and the street map's style: this app's, or another's address.
+            'maplibre' => versioned_asset('vendor/maplibre-gl/maplibre-gl.mjs'),
+            'style' => preg_match('#^https?://#', config('map.style')) ? config('map.style') : versioned_asset(config('map.style')),
             'years' => $years,
             // The latest year with police district pins, as the dashboard opens at, which a district or station to open
             // needs too.
@@ -101,6 +105,11 @@ class MapController extends Controller
             // Every police district's pin, whatever the year, for "Near you" (nearby.js): which are nearest the visitor.
             'pins' => $this->pins(),
             'turf' => versioned_asset('vendor/turf/turf.min.js'),
+            // The map's AI (map-ask.js), for everyone, with a key to ask Claude with.
+            'ai' => AskCrimeify::configured() && $years !== [] ? [
+                'explain' => route('public.map.explain', $this->language()),
+                'ask' => route('public.map.ask', $this->language()),
+            ] : null,
             // The pins' figures come from MapController@crime: in the app, as "map/crime" added on the Routes page;
             // on the public map, from its own address in Routes/web.php.
             // On the public map, in the page's language, even where cookies aren't kept.
@@ -192,6 +201,10 @@ class MapController extends Controller
                     ? $this->totals($figures[$place][$previousYear])
                     : null,
                 'types' => $this->types($figures[$place][$year]),
+                // Each crime type the year before, for how one changed, as the map's ripples show it.
+                'previousTypes' => $previousYear !== null && isset($figures[$place][$previousYear])
+                    ? $this->types($figures[$place][$previousYear])
+                    : null,
                 // Its own public address, to share, in the app too: whoever it's sent to may not have a login.
                 'share' => route('public.map.district', $district->path() + $this->language()),
                 // Its profile, for someone deciding where to live or stay (AreaController).
@@ -232,8 +245,51 @@ class MapController extends Controller
             ] : null,
             'regions' => (object) collect($regions)->all(),
             'districts' => $districts,
+            'mostInADistrict' => $this->mostInADistrict(),
             'rates' => $this->rates(),
         ]);
+    }
+
+    /**
+     * The most crimes any police district had in a year, of every year with police district figures: of both
+     * categories together ("all"), of each category, and of each crime type. The map sizes its bubbles by these, so a
+     * size means the same number of crimes in every year.
+     *
+     * @return array<string, int>
+     */
+    private function mostInADistrict(): array
+    {
+        // Each district's total of each category each year: its "all" row, or its crime types added up, as the
+        // popups count them.
+        $categories = CrimeStat::query()
+            ->selectRaw("State, District, Year, Category, MAX(CASE WHEN Type = 'all' THEN Crimes END) AS AllCrimes, SUM(CASE WHEN Type <> 'all' THEN Crimes ELSE 0 END) AS TypeCrimes")
+            ->where('State', '<>', 'Malaysia')->where('District', '<>', 'All')
+            ->whereIn('Category', array_keys(config('map.crime.categories')))
+            ->groupBy('State', 'District', 'Year', 'Category')
+            ->toBase()
+            ->get();
+
+        $most = ['all' => 0];
+        $both = [];
+        foreach ($categories as $row) {
+            $count = (int) ($row->AllCrimes ?? $row->TypeCrimes);
+            $most[$row->Category] = max($most[$row->Category] ?? 0, $count);
+            $key = "{$row->State}|{$row->District}|{$row->Year}";
+            $both[$key] = ($both[$key] ?? 0) + $count;
+        }
+        $most['all'] = max([0, ...array_values($both)]);
+
+        $types = CrimeStat::query()
+            ->selectRaw('Type, MAX(Crimes) AS Most')
+            ->where('State', '<>', 'Malaysia')->where('District', '<>', 'All')->where('Type', '<>', 'all')
+            ->groupBy('Type')
+            ->toBase()
+            ->get();
+        foreach ($types as $row) {
+            $most[$row->Type] = (int) $row->Most;
+        }
+
+        return $most;
     }
 
     /**

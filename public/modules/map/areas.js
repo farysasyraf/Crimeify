@@ -79,18 +79,20 @@
         watch.observe(chart.canvas);
     };
 
-    // Where the pointer is, a hairline down the chart at the nearest year, in a faint band, behind the lines.
+    // Where the pointer is, a hairline down the chart at the nearest year, in a faint band, behind the lines; without
+    // the pointer, the year chosen on the profile's slider ($picked).
     const crosshair = {
         id: 'crosshair',
         beforeDatasetsDraw(chart) {
             const active = chart.tooltip?.getActiveElements() ?? [];
+            const at = active[0]?.element.x ?? chart.getDatasetMeta(0).data[chart.$picked ?? -1]?.x;
 
-            if (active.length === 0) {
+            if (at === undefined) {
                 return;
             }
 
             const { ctx, chartArea } = chart;
-            const x = Math.round(active[0].element.x);
+            const x = Math.round(at);
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, .04)';
             ctx.fillRect(x - 16, chartArea.top, 32, chartArea.bottom - chartArea.top);
@@ -99,6 +101,185 @@
             ctx.restore();
         },
     };
+
+    // A profile's year slider and crime types. The slider takes the tiles, the crimes by type and the chart's band to any
+    // year, the numbers counting and the bars sliding to it. A crime type, clicked, opens its own crimes each year, in
+    // its category's colour, with how its change compares with the area's.
+    function profileYears(yearsChart, wash) {
+        const each = figures.eachYear ?? [];
+        const percent = (share) => (share > 0 && share < 1 ? t('under 1%') : `${Math.round(share)}%`);
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // A figure counting from what it shows to what it should, a moment long.
+        const counting = new Map();
+        const countTo = (node, to) => {
+            const from = Number(node.textContent.replace(/[^\d]/g, '')) || 0;
+            cancelAnimationFrame(counting.get(node));
+            if (still || from === to) {
+                node.textContent = count.format(to);
+                return;
+            }
+            const start = performance.now();
+            const step = (now) => {
+                const part = Math.min(1, Math.max(0, (now - start) / 500));
+                node.textContent = count.format(Math.round(from + (to - from) * (1 - (1 - part) ** 3)));
+                if (part < 1) {
+                    counting.set(node, requestAnimationFrame(step));
+                }
+            };
+            counting.set(node, requestAnimationFrame(step));
+        };
+
+        const pick = document.querySelector('[data-year-pick]');
+        const slider = pick?.querySelector('input');
+        const rows = [...document.querySelectorAll('.area-mix-row[data-type]')];
+
+        const showYear = (index) => {
+            const year = each[index];
+            if (!year) {
+                return;
+            }
+
+            yearsChart.$picked = index === each.length - 1 ? undefined : index;
+            yearsChart.draw();
+            document.querySelector('[data-year-heading]').textContent = t('In :year', { year: year.year });
+            pick.querySelector('[data-year-shown]').textContent = year.year;
+            slider.setAttribute('aria-valuetext', String(year.year));
+
+            for (const category of ['assault', 'property']) {
+                const figure = document.querySelector(`[data-figure="${category}"]`);
+                if (figure) {
+                    countTo(figure, year[category]);
+                    document.querySelector(`[data-share="${category}"]`).textContent = t(':share of all', { share: percent(year.total > 0 ? (year[category] / year.total) * 100 : 0) });
+                }
+            }
+
+            // The change since the first year, to this one: none to show for the first year itself.
+            const since = document.querySelector('[data-since] strong');
+            if (since && each[0].total > 0) {
+                const change = ((year.total - each[0].total) / each[0].total) * 100;
+                const size = Math.abs(change) < 0.5 && change !== 0 ? t('under 1%') : `${Math.round(Math.abs(change))}%`;
+                since.textContent = index === 0 ? '–' : `${change < 0 ? '−' : '+'}${size}`;
+            }
+
+            const heading = document.querySelector('[data-mix-heading]');
+            if (heading) {
+                heading.textContent = t('Crimes by type in :year', { year: year.year });
+            }
+            const byType = new Map(year.mix.map((type) => [type.type, type]));
+            for (const row of rows) {
+                const type = byType.get(row.dataset.type) ?? { share: 0, areaShare: 0 };
+                row.querySelector('.area-mix-fill').style.setProperty('--share', type.share);
+                row.querySelector('.area-mix-mark').style.setProperty('--share', type.areaShare);
+                row.querySelector('[data-here]').textContent = percent(type.share);
+                row.querySelector('[data-there]').textContent = percent(type.areaShare);
+            }
+
+            // Most first in that year, as the page lists them for the latest, each row gliding to its new place.
+            const order = [...rows].sort((a, b) => (byType.get(b.dataset.type)?.count ?? 0) - (byType.get(a.dataset.type)?.count ?? 0)
+                || a.querySelector('.area-mix-pick').textContent.trim().localeCompare(b.querySelector('.area-mix-pick').textContent.trim()));
+            const list = rows[0]?.parentElement;
+            if (!list || order.every((row, at) => list.children[at] === row)) {
+                return;
+            }
+            const was = new Map(rows.map((row) => [row, row.getBoundingClientRect().top]));
+            list.append(...order);
+            if (!still) {
+                for (const row of rows) {
+                    const by = was.get(row) - row.getBoundingClientRect().top;
+                    if (by !== 0) {
+                        row.animate([{ transform: `translateY(${by}px)` }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+                    }
+                }
+            }
+        };
+
+        if (pick && slider && each.length > 1) {
+            pick.hidden = false;
+            slider.addEventListener('input', () => showYear(Number(slider.value)));
+        }
+
+        // A crime type's own trend.
+        const trend = document.querySelector('[data-type-trend]');
+        if (!trend || rows.length === 0) {
+            return;
+        }
+        document.querySelector('[data-type-hint]').hidden = false;
+        let typeChart = null;
+        let openRow = null;
+
+        const close = () => {
+            trend.hidden = true;
+            openRow?.classList.remove('is-picked');
+            openRow?.querySelector('.area-mix-pick').setAttribute('aria-expanded', 'false');
+            openRow = null;
+        };
+
+        // "fell 40%", "rose 12%" or "stayed the same", as the profile's sentences say it.
+        const moved = (from, to) => {
+            const change = ((to - from) / from) * 100;
+            const size = Math.abs(change) < 0.5 && change !== 0 ? t('under 1%') : `${Math.round(Math.abs(change))}%`;
+            return change === 0 ? t('stayed the same') : t(change < 0 ? 'fell :size' : 'rose :size', { size });
+        };
+
+        const open = (row) => {
+            if (openRow === row) {
+                close();
+                return;
+            }
+            close();
+            openRow = row;
+            row.classList.add('is-picked');
+            row.querySelector('.area-mix-pick').setAttribute('aria-expanded', 'true');
+
+            const type = row.dataset.type;
+            const label = row.querySelector('.area-mix-pick').textContent.trim();
+            const here = each.map((year) => year.mix.find((item) => item.type === type)?.count ?? 0);
+            const there = each.map((year) => year.mix.find((item) => item.type === type)?.areaCount ?? 0);
+            const colour = row.dataset.category === 'assault' ? '#e66767' : '#3987e5';
+            const [first, last] = [each[0].year, each.at(-1).year];
+
+            trend.querySelector('[data-type-heading]').textContent = t(':type each year in :district', { type: label, district: figures.district });
+            trend.querySelector('[data-type-read]').textContent = here[0] > 0 && there[0] > 0
+                ? t('From :from to :to, :type here :here, from :start to :end. Across :area it :there.', {
+                    from: first, to: last, type: label.toLocaleLowerCase(), here: moved(here[0], here.at(-1)),
+                    start: count.format(here[0]), end: count.format(here.at(-1)), area: figures.area, there: moved(there[0], there.at(-1)),
+                })
+                : t(':count in :to, from none in :from.', { count: count.format(here.at(-1)), to: last, from: first });
+            trend.hidden = false;
+
+            typeChart?.destroy();
+            typeChart = new Chart(document.getElementById('area-type-chart'), {
+                type: 'line',
+                data: {
+                    labels: figures.years,
+                    datasets: [{
+                        label, data: here, borderColor: colour, backgroundColor: wash(colour), fill: 'origin', borderWidth: 2,
+                        cubicInterpolationMode: 'monotone', pointRadius: 3, pointHoverRadius: 5, pointBackgroundColor: colour,
+                        pointBorderColor: colours.card, pointBorderWidth: 2, clip: 8,
+                    }],
+                },
+                options: {
+                    animation: still ? false : { duration: 600 },
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 8, right: 8 } },
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, border: { display: false }, ticks: { precision: 0, maxTicksLimit: 5 } },
+                    },
+                    plugins: { tooltip: { callbacks: { label: (item) => ` ${label}: ${count.format(item.parsed.y)}` } } },
+                },
+                plugins: [crosshair],
+            });
+            trend.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'nearest' });
+        };
+
+        for (const row of rows) {
+            row.querySelector('.area-mix-pick').addEventListener('click', () => open(row));
+        }
+        trend.querySelector('[data-type-close]').addEventListener('click', close);
+    }
 
     if (figures.kind === 'profile') {
         // A line for each, never curving past a year's figure, over a wash of its colour that fades to nothing, with
@@ -115,7 +296,7 @@
             return fill;
         };
 
-        drawIn(new Chart(document.getElementById('area-years-chart'), {
+        const yearsChart = new Chart(document.getElementById('area-years-chart'), {
             type: 'line',
             data: {
                 labels: figures.years,
@@ -158,7 +339,9 @@
                 },
             },
             plugins: [crosshair, reveal],
-        }));
+        });
+        drawIn(yearsChart);
+        profileYears(yearsChart, wash);
         return;
     }
 
@@ -234,7 +417,7 @@
     // Room at the right for the names at the lines' ends.
     const longest = Math.max(...lines.map((line) => line.label.length));
 
-    drawIn(new Chart(document.getElementById('area-index-chart'), {
+    const indexChart = new Chart(document.getElementById('area-index-chart'), {
         type: 'line',
         data: { labels: figures.years, datasets: lines },
         options: {
@@ -258,5 +441,12 @@
             },
         },
         plugins: [crosshair, endLabels, reveal],
-    }));
+    });
+    drawIn(indexChart);
+
+    // The year chosen on the crimes by type's slider (areas-types.js), marked here too; the latest, unmarked.
+    document.addEventListener('area:year', (event) => {
+        indexChart.$picked = event.detail.index === figures.years.length - 1 ? undefined : event.detail.index;
+        indexChart.draw();
+    });
 })();

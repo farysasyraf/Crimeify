@@ -6,6 +6,7 @@
 @section('description', __('See how crime has changed in a police district, which crimes are most common there, and how it compares with other areas.'))
 
 @push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('vendor/maplibre-gl/maplibre-gl.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('modules/map/areas.css') }}" />
 @endpush
 
@@ -25,6 +26,18 @@
             <h2 id="area-choose-heading">{{ __('Choose a police district, or up to three to compare') }}</h2>
             @include('map::areas._picker')
         </section>
+
+        {{-- The same, on a map (areas-map.js): each police district's pin, clicked into the next empty list above, in
+             that area's colour, or clicked again to take it out. Shown once the script runs; the map loads as it's
+             scrolled to, as MapLibre is large. --}}
+        @if ($pins !== [])
+            <section class="area-card area-wide area-map-pick" aria-labelledby="area-map-heading" data-pick-map data-maplibre="{{ $maplibre }}" data-style="{{ $style }}" hidden>
+                <h2 id="area-map-heading">{{ __('Or pick them on the map') }}</h2>
+                <p class="area-sub">{{ __('Click a police district’s pin to add it to the lists above, up to three, and click it again to take it out. Numbered circles open up to their pins.') }}</p>
+                <div class="area-pick-map" data-pick-canvas aria-label="{{ __('Map of police districts to choose from') }}"></div>
+                <p class="area-note" data-pick-say aria-live="polite"></p>
+            </section>
+        @endif
 
         {{-- "Near you" (areas-near.js, nearby.js): the police districts nearest the visitor, from their browser's location,
              which stays in their browser. Shown once the script finds the browser can give one. --}}
@@ -73,5 +86,6 @@
     <script src="{{ versioned_asset('modules/map/areas-motion.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/map/nearby.js') }}" defer></script>
     <script src="{{ versioned_asset('modules/map/areas-near.js') }}" defer></script>
+    <script src="{{ versioned_asset('modules/map/areas-map.js') }}" defer></script>
 @endif
 @endsection

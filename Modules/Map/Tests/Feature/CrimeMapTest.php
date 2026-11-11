@@ -212,6 +212,17 @@ class CrimeMapTest extends TestCase
                     'theft_vehicle_lorry' => 0, 'theft_other' => 15,
                 ],
             ],
+            // Each type the year before, for the map's ripples.
+            'previousTypes' => [
+                'assault' => [
+                    'murder' => 1, 'rape' => 0, 'causing_injury' => 9, 'robbery_gang_armed' => 0,
+                    'robbery_gang_unarmed' => 0, 'robbery_solo_armed' => 0, 'robbery_solo_unarmed' => 0,
+                ],
+                'property' => [
+                    'break_in' => 50, 'theft_vehicle_motorcycle' => 0, 'theft_vehicle_motorcar' => 0,
+                    'theft_vehicle_lorry' => 0, 'theft_other' => 0,
+                ],
+            ],
             // Its public address, to share, though this map is the app's.
             'share' => url('/public/map/johor/batu-pahat'),
             'profile' => url('/public/areas/johor/batu-pahat'),
@@ -219,7 +230,15 @@ class CrimeMapTest extends TestCase
 
         // Iskandar Puteri's year before is Nusajaya's; Kluang has no year before to compare with.
         $response->assertJsonPath('districts.1.previous', ['assault' => 5, 'property' => 8])
-            ->assertJsonPath('districts.2.previous', null);
+            ->assertJsonPath('districts.2.previous', null)
+            ->assertJsonPath('districts.2.previousTypes', null);
+
+        // The most any police district had in a year, of every year, which the map sizes its bubbles by: Batu Pahat's
+        // 60 in 2022 of both categories, its 12 violent crimes in 2023, and so on. Not a state's or Malaysia's.
+        $this->assertEquals(
+            ['all' => 60, 'assault' => 12, 'property' => 50, 'murder' => 2, 'causing_injury' => 10, 'break_in' => 50, 'theft_other' => 15],
+            $response->json('mostInADistrict'),
+        );
 
         // Each region adds up its districts, so Labuan counts on its own rather than in Sabah. Johor has no
         // year before as a whole, since Kluang has none.
@@ -277,17 +296,9 @@ class CrimeMapTest extends TestCase
 
         $page = $this->get('/map')->assertOk();
 
-        // The cluster plugin, served from this app like Leaflet.
-        foreach (['vendor/leaflet-markercluster/MarkerCluster.css', 'vendor/leaflet-markercluster/MarkerCluster.Default.css'] as $stylesheet) {
-            $this->assertFileExists(public_path($stylesheet));
-            $page->assertSee('<link rel="stylesheet" href="'.versioned_asset($stylesheet).'" />', false);
-        }
-        $this->assertFileExists(public_path('vendor/leaflet-markercluster/LICENSE.txt'));
-        $page->assertSeeInOrder([
-            '<script src="'.versioned_asset('vendor/leaflet/leaflet.js').'" defer></script>',
-            '<script src="'.versioned_asset('vendor/leaflet-markercluster/leaflet.markercluster.js').'" defer></script>',
-            '<script src="'.versioned_asset('modules/map/map.js').'" defer></script>',
-        ], false);
+        // MapLibre groups the pins itself, so there's no plugin for it.
+        $page->assertDontSee('markercluster', false)
+            ->assertSee('<script src="'.versioned_asset('modules/map/map.js').'" defer></script>', false);
 
         // The map fetches the figures from the saved route; the latest year comes first and is chosen.
         $page->assertSee('data-crime="'.route('map/crime').'"', false)

@@ -1,0 +1,12 @@
+style.json: the street map under the Map page (map.js), for MapLibre GL JS
+
+Crimeify's own colours, dark and blue like the app, on the layers of OpenFreeMap's "dark" style, with place names in
+Latin script only and without the town dots its icons don't have. Made from https://tiles.openfreemap.org/styles/dark
+on 2026-11-11, recoloured layer by layer. To bring in a newer version, recolour its layers the same way.
+
+Tiles:     OpenFreeMap, https://openfreemap.org: free vector tiles of OpenStreetMap, without a key or a limit.
+           The map credits "OpenFreeMap © OpenMapTiles Data from OpenStreetMap", as the tiles give it.
+Data:      © OpenStreetMap contributors, Open Database License (ODbL), https://www.openstreetmap.org/copyright
+Style:     OpenFreeMap's styles are made from OpenMapTiles' styles: their code is BSD 3-Clause and their design
+           CC-BY 4.0, https://github.com/openmaptiles. Fonts (Noto Sans) and the remaining icons come from
+           OpenFreeMap's servers, as the style names them.

@@ -67,8 +67,9 @@
                 </button>
                 @auth
                     {{-- The command palette (palette.js): a search for a page, user, police district or station to go to,
-                         from this button or Ctrl+K anywhere in the app. Without JavaScript, there's the menu. --}}
-                    <button type="button" class="palette-open" data-palette="{{ route('palette') }}" aria-label="Search" aria-keyshortcuts="Control+K Meta+K" hidden>
+                         from this button or Ctrl+K anywhere in the app. Without JavaScript, there's the menu. With a key
+                         for Claude, it also asks Ask Crimeify a question about the crime figures (AskController). --}}
+                    <button type="button" class="palette-open" data-palette="{{ route('palette') }}"@if (Route::has('palette.ask') && filled(config('map.ask.key'))) data-ask="{{ route('palette.ask') }}" data-token="{{ csrf_token() }}"@endif aria-label="Search" aria-keyshortcuts="Control+K Meta+K" hidden>
                         <span class="material-icon" aria-hidden="true">search</span>
                         <span class="palette-open-text">Search</span>
                         <kbd aria-hidden="true">Ctrl K</kbd>

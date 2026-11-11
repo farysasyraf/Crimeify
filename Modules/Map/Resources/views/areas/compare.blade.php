@@ -136,31 +136,62 @@
             <script type="application/json" id="area-data">@json($chart)</script>
         @endif
 
-        @php($types = collect($profiles->map(fn ($profile) => $profile->mix())->all())->flatten(1)->groupBy('type')->sortByDesc(fn ($rows) => $rows->sum('share')))
-        <section class="area-card area-wide" aria-labelledby="area-mix-heading">
+        {{-- Crimes by type as a dot plot (TypeComparison): a row for each type, most first, with a dot for each area on
+             one scale and a line from the lowest to the highest, so a long line is a big difference. An area at least
+             5 points above the others has its share picked out, and types under 5% in every area fold away. The
+             legend picks out an area's dots; the slider takes it all to any year, the dots sliding and the rows
+             re-sorting (areas-types.js). Without the script, every row shows, for the latest year. --}}
+        @php($comparison = \Modules\Map\Support\TypeComparison::of($profiles->values()->all(), $years))
+        @php($rows = collect($comparison->rows($year))->keyBy('type'))
+        <section class="area-card area-wide" aria-labelledby="area-mix-heading" data-type-dots>
             <header class="area-card-head">
-                <h2 id="area-mix-heading">{{ __('Crimes by type in :year', ['year' => $year]) }}</h2>
-                <ul class="area-legend">
-                    @foreach ($profiles as $at => $profile)
-                        <li><span class="area-swatch" style="--swatch: {{ $colours[$at] }}"></span>{{ $profile->district->Name }}</li>
-                    @endforeach
-                </ul>
+                <h2 id="area-mix-heading" data-dots-heading>{{ __('Crimes by type in :year', ['year' => $year]) }}</h2>
+                @if (count($years) > 1)
+                    <div class="area-year-pick" data-year-pick hidden>
+                        <label for="area-dots-year">{{ __('Year') }}</label>
+                        <input type="range" id="area-dots-year" min="0" max="{{ count($years) - 1 }}" value="{{ count($years) - 1 }}" step="1" aria-valuetext="{{ $year }}" />
+                        <output for="area-dots-year" data-year-shown>{{ $year }}</output>
+                    </div>
+                @endif
             </header>
-            <ul class="area-mix">
-                @foreach ($types as $type => $rows)
-                    <li class="area-mix-group" style="--bars: {{ $profiles->count() }}">
-                        <span class="area-mix-label">{{ $rows->first()['label'] }}</span>
-                        @foreach ($profiles as $at => $profile)
-                            @php($share = collect($profile->mix())->firstWhere('type', $type)['share'] ?? 0)
-                            <span class="area-mix-line">
-                                <span class="area-mix-track" aria-hidden="true"><span class="area-mix-fill" style="--share: {{ $share }}; --swatch: {{ $colours[$at] }}"></span></span>
-                                <span class="area-mix-value"><span class="visually-hidden">{{ $profile->district->Name }}:</span> {{ $percent($share) }}</span>
-                            </span>
+            <ul class="area-legend area-dots-legend">
+                @foreach ($profiles as $at => $profile)
+                    <li><button type="button" class="area-legend-pick" data-area="{{ $at }}" aria-pressed="false"><span class="area-swatch area-swatch-dot" style="--swatch: {{ $colours[$at] }}"></span>{{ $profile->district->Name }}</button></li>
+                @endforeach
+            </ul>
+            <ul class="area-dots" style="--scale: {{ $comparison->scale() }}; --tick: {{ $comparison->ticks()[1] }}" data-dots>
+                <li class="area-dots-axis" aria-hidden="true">
+                    <span></span>
+                    <span class="area-dots-ticks">
+                        @foreach ($comparison->ticks() as $tick)
+                            <span style="--at: {{ $tick }}">{{ $tick }}%</span>
                         @endforeach
+                    </span>
+                    <span></span>
+                </li>
+                @foreach ($comparison->types() as $type => $label)
+                    @php($row = $rows[$type] ?? null)
+                    @php($shares = $row['shares'] ?? array_fill(0, $profiles->count(), 0.0))
+                    <li class="area-dots-row" data-type="{{ $type }}" @if (! $row) hidden data-absent @elseif ($row['folded']) data-folded @endif>
+                        <span class="area-dots-label">{{ $label }}</span>
+                        <span class="area-dots-track" aria-hidden="true">
+                            <span class="area-dots-span" style="--from: {{ min($shares) }}; --to: {{ max($shares) }}"></span>
+                            @foreach ($profiles as $at => $profile)
+                                <span @class(['area-dot', 'is-ring' => ($row['rings'][$at] ?? 0) > 0]) data-area="{{ $at }}" style="--share: {{ $shares[$at] }}; --swatch: {{ $colours[$at] }}; --ring: {{ $row['rings'][$at] ?? 0 }}"></span>
+                            @endforeach
+                        </span>
+                        <span class="area-dots-values">
+                            @foreach ($profiles as $at => $profile)
+                                <span @class(['area-dots-value', 'is-out' => ($row['standOut'] ?? null) === $at]) data-area="{{ $at }}" style="--swatch: {{ $colours[$at] }}"><span class="visually-hidden">{{ $profile->district->Name }}:</span> <span data-value>{{ $percent($shares[$at]) }}</span></span>
+                            @endforeach
+                        </span>
                     </li>
                 @endforeach
             </ul>
-            <p class="area-note">{{ __("Each type's share of the area's violent and property crime.") }}</p>
+            <button type="button" class="btn btn-sm area-dots-more" data-dots-more aria-expanded="false" hidden></button>
+            <p class="area-note">{{ __("Each dot is a type's share of an area's violent and property crime, and the line joins the lowest and the highest. A share at least 5 points above the others is picked out.") }}</p>
+            <div class="area-dots-tip" data-dots-tip aria-hidden="true" hidden></div>
+            <script type="application/json" id="area-types-data">@json(['years' => $comparison->forScript(), 'names' => $names])</script>
         </section>
     @endif
 
@@ -174,4 +205,5 @@
 <script src="{{ versioned_asset('modules/map/areas-motion.js') }}" defer></script>
 <script src="{{ versioned_asset('vendor/chartjs/chart.umd.min.js') }}" defer></script>
 <script src="{{ versioned_asset('modules/map/areas.js') }}" defer></script>
+<script src="{{ versioned_asset('modules/map/areas-types.js') }}" defer></script>
 @endsection
