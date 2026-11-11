@@ -90,21 +90,15 @@
             <p class="game-countdown" data-skyline="countdown" aria-hidden="true"></p>
         </section>
 
-        {{-- A round: the time left, the towers and the guess; then how close it was, and its points. --}}
+        {{-- A round: the time left; then the game screen, with the district, the score, the towers and the guess, then how
+             close it was, and its points. --}}
         <section class="skyline-board" data-skyline-part="round" hidden>
             <div class="game-status">
                 <p class="game-score" data-skyline="round"></p>
                 <div class="game-timer" aria-hidden="true"><span class="game-timer-bar" data-skyline="bar"></span></div>
                 <p class="game-seconds"><span data-skyline="seconds"></span> s</p>
             </div>
-            <p class="skyline-total">{{ __('Score') }} <strong data-skyline="score">0</strong></p>
-            @include('game::_skyline-round', ['controls' => true, 'id' => 'skyline'])
-            <div class="skyline-after">
-                <p class="guessr-result" role="status" data-skyline="result"></p>
-                <button type="button" class="btn btn-primary game-play" data-skyline-action="next" hidden>
-                    <span class="material-icon" aria-hidden="true">skip_next</span><span data-skyline="next-label">{{ __('Next round') }}</span>
-                </button>
-            </div>
+            @include('game::_skyline-round', ['controls' => true, 'id' => 'skyline', 'score' => true, 'after' => true])
         </section>
 
         {{-- After a game, the inspection report, on the blueprint's paper: who built it, every round's tower as built (the

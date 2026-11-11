@@ -1,7 +1,8 @@
-{{-- A round of Skyline, for the solo game (skyline.js), the phones (live.js) and the big screen (live-host.js): the
-     district to guess, its crime, year and state; its state's towers in 3D (skyline-scene.js); with $controls, the slider
-     and box to guess with ($id names them), and Confirm; and every district's count as a list, open instead of the
-     towers where they can't be drawn. The scripts find its parts by data-sky. --}}
+{{-- A round of Skyline, for the solo game (skyline.js), the phones (live.js) and the big screen (live-host.js), all in
+     one game screen: along its top the district to guess, its crime, year and state, and with $score, the score; its
+     state's towers in 3D (skyline-scene.js); with $controls, the slider and box to guess with ($id names them), and
+     Confirm; with $after, how close the guess was and the next round; and every district's count as a list, open
+     instead of the towers where they can't be drawn. The scripts find its parts by data-sky. --}}
 <div class="skyline-round" data-sky-round>
     <div class="guessr-ask skyline-ask">
         <p class="guessr-prompt">{{ __('How tall is') }} <strong data-sky="district"></strong>?</p>
@@ -9,6 +10,9 @@
             <span class="material-icon" aria-hidden="true" data-sky="icon">local_police</span><span data-sky="type"></span> · <span data-sky="year"></span>
         </span>
         <span class="guessr-place"><span class="material-icon" aria-hidden="true">location_city</span><span data-sky="state"></span></span>
+        @if ($score ?? false)
+            <p class="skyline-total">{{ __('Score') }} <strong data-skyline="score">0</strong></p>
+        @endif
     </div>
 
     <div class="skyline-stage" data-sky="stage">
@@ -37,6 +41,15 @@
                     <span class="material-icon" aria-hidden="true">check</span>{{ __('Confirm') }}
                 </button>
             </div>
+        </div>
+    @endif
+
+    @if ($after ?? false)
+        <div class="skyline-after">
+            <p class="guessr-result" role="status" data-skyline="result"></p>
+            <button type="button" class="btn btn-primary game-play" data-skyline-action="next" hidden>
+                <span class="material-icon" aria-hidden="true">skip_next</span><span data-skyline="next-label">{{ __('Next round') }}</span>
+            </button>
         </div>
     @endif
 

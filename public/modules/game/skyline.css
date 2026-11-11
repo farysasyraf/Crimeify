@@ -1,17 +1,21 @@
 /* Skyline (skyline.js, live.js and live-host.js, with skyline-round.js and skyline-scene.js), on top of game.css's
-   panels, countdown and timer and districtguessr.css's prompt and results: the district to guess over its state's towers
-   in 3D, dark like DistrictGuessr's map whatever the theme, with their labels; the slider, box and Confirm under them;
-   and every district's count as a list. */
+   panels, countdown and timer and districtguessr.css's prompt and results, all in one dark game screen whatever the
+   theme: the district to guess and the score along its top; its state's towers in 3D, with their labels; the slider,
+   box and Confirm under them, then how the guess did and the next round; and every district's count as a list. */
 .game-title img.skyline-title { height: 76px; }
 
-.skyline-total { margin: -6px 0 10px; color: var(--muted); font-weight: 600; text-align: right; }
+/* The game screen: one dark frame, the district and the score along its top, the towers, then the guess, how it did
+   and every district's count along its foot, each a band. */
+.skyline-round {
+    overflow: hidden; border: 1px solid rgba(255, 255, 255, .08); border-radius: var(--radius); background: #0e1013;
+    box-shadow: var(--shadow);
+}
+.skyline-round .skyline-ask { margin: 0; padding: 12px 16px; background: #15181d; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.skyline-total { margin: 0 0 0 auto; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .skyline-total strong { margin-left: 6px; color: var(--text); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 
 /* The towers: a dark stage the canvas fills, its labels over it, and how to move it at its foot. */
-.skyline-stage {
-    position: relative; height: min(58vh, 540px); min-height: 300px; overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, .06); border-radius: var(--radius); background: #0e1013; box-shadow: var(--shadow);
-}
+.skyline-stage { position: relative; height: min(58vh, 540px); min-height: 300px; overflow: hidden; background: #0e1013; }
 .skyline-stage[hidden] { display: none; }
 .skyline-scene { position: absolute; inset: 0; }
 .skyline-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
@@ -35,13 +39,10 @@
     position: absolute; left: 12px; bottom: 10px; margin: 0; padding: 2px 10px; border-radius: 999px;
     background: rgba(14, 16, 19, .7); color: var(--muted); font-size: .75rem; pointer-events: none;
 }
-.skyline-flat { margin: 0 0 8px; color: var(--muted); }
+.skyline-flat { margin: 0; padding: 12px 16px; color: var(--muted); }
 
 /* The guess: what it is, large; the slider across; then − and +, the box, and Confirm. */
-.skyline-controls {
-    display: grid; gap: 10px; margin-top: 12px; padding: 14px 16px; border: 1px solid rgba(255, 255, 255, .06);
-    border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
-}
+.skyline-controls { display: grid; gap: 10px; padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, .06); background: #15181d; }
 .skyline-controls[hidden] { display: none; }
 .skyline-dial { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .skyline-dial label { color: var(--muted); font-weight: 600; }
@@ -54,13 +55,14 @@
 .skyline-confirm { margin-left: auto; }
 
 /* After a guess: how close it was, and Next round. */
-.skyline-after { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px 18px; margin-top: 12px; }
-.skyline-after .guessr-result { margin-right: auto; }
+.skyline-after { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px 18px; padding: 12px 16px; background: #15181d; }
+.skyline-after:not(:has(.guessr-result:not(:empty), .btn:not([hidden]))) { display: none; }
+.skyline-after .guessr-result { margin: 0 auto 0 0; }
 .skyline.is-hurrying .game-timer-bar { background: var(--game-hurry); }
 .skyline.is-hurrying .game-seconds { color: var(--game-hurry); }
 
 /* Every district's count, the one to guess marked. */
-.skyline-list { margin-top: 12px; }
+.skyline-list { padding: 10px 16px; border-top: 1px solid rgba(255, 255, 255, .06); background: #121418; }
 .skyline-list summary { color: var(--accent-soft); font-weight: 600; cursor: pointer; }
 .skyline-list ol {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2px 16px; margin: 8px 0 0; padding: 0;
@@ -77,7 +79,12 @@
 @media (max-width: 600px) {
     .game-title img.skyline-title { height: 52px; }
     .skyline-stage { height: 46vh; min-height: 260px; }
-    .skyline-total { margin-top: -10px; }
+    .skyline-round .skyline-ask { padding: 10px 12px; }
+    /* The score in the band's top corner, beside the district. */
+    .skyline-round .skyline-ask:has(.skyline-total) { position: relative; padding-right: 92px; }
+    .skyline-total { position: absolute; top: 10px; right: 12px; display: grid; justify-items: end; margin: 0; font-size: .8rem; line-height: 1.1; }
+    .skyline-total strong { margin: 0; font-size: 1.3rem; }
+    .skyline-controls, .skyline-after, .skyline-list { padding-left: 12px; padding-right: 12px; }
     .skyline-fine .skyline-number { flex: 1; width: auto; min-width: 0; }
     .skyline-confirm { width: 100%; margin-left: 0; justify-content: center; }
     .skyline-after .btn { width: 100%; justify-content: center; }
